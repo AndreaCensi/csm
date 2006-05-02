@@ -1,12 +1,24 @@
 function [p, alpha] = countour_straight(params, tau)
 
-	points = params{1};
+points = params{1};
 	K = size(points,2);
 
 	if K < 2
 		error('2 points needed');
 	end 	
 	
+	
+	if tau>1
+		while tau>1
+			tau = tau -1;
+		end
+	end
+	
+	if tau<0
+		while tau<0
+			tau = tau +1;
+		end
+	end
 	
 	if tau==0
 		p = points(:,1);
@@ -17,6 +29,7 @@ function [p, alpha] = countour_straight(params, tau)
 		p = points(:,K);
 		return;
 	end
+
 	
 	index = ceil(tau * (K-1));
 	

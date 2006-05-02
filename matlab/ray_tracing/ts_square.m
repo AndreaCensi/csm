@@ -3,7 +3,7 @@ function ts = ts_square(L, pose, step)
 %   L: length of square side
 %   pose2 = pose (+) step
 
-	square = [-1 -1; 1 -1; 1 1; -1 1]' * L;
+	square = [-1 -1; 1 -1; 1 1; -1 1; -1 -1]' * L;
 
 	pose1 = pose;
 	pose2 = rtcat(pose1,step);
