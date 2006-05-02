@@ -1,11 +1,11 @@
-function ld = ray_tracing(pose, fov, nrays, countour, countour_params)
+function ld = ray_tracing(pose, fov, nrays, countour, countour_params, precision)
 
 	t = pose(1:2);
 	ld.nrays = nrays;
 	for i=1:nrays
 		ld.theta(i) = -fov/2 + fov * (i-1)/(nrays-1);
 		params = {t, pose(3)+ld.theta(i), countour, countour_params};
-		tau = rfBisection( 'eval_delta', params, 0,0.99,0.000001);
+		tau = rfBisection( 'eval_delta', params, 0,0.99,precision);
 		[point, alpha] = feval(countour, countour_params, tau);
 		ld.readings(i) = norm(point-t);
 		ld.true_alpha(i) = alpha-pose(3); % local coordinates
@@ -27,9 +27,10 @@ function delta = eval_delta(params, tau)
 	curve_params = params{4};
 	point = feval(curve, curve_params, tau);
 	phi = angle(point-t);
-	delta = phi-theta;
+	delta = normAngle(phi-theta);
 
-%	fprintf('tau = %f  point = %f %f\n', tau, point(1), point(2));
+	fprintf('tau = %f  point = %f %f theta=%f phi=%d delta=%f\n', ...
+		tau, point(1), point(2), theta, phi, delta);
 	
 function a = angle(v)
 	a = atan2(v(2),v(1));
