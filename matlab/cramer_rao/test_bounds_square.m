@@ -22,6 +22,7 @@ for j=1:size(y,2)
 end
 end
 
+%res.bounds = bounds;
 res.etmax = etmax;
 res.etmin = etmin;
 res.eth = eth;

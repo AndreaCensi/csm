@@ -44,7 +44,10 @@ function ld = ray_tracing(pose, fov, nrays, countour, countour_params, precision
 		ld.readings(i) = norm(point-t);
 		%fprintf('i=%d theta=%d° reading=%f\n', i, rad2deg(ld.theta(i)), ld.readings(i));
 		ld.true_alpha(i) = alpha-pose(3); % local coordinates
-		pause(0.02)
+		
+		if rand>0.95
+			pause(0.02)
+		end
 	end
 	
 	ld.odometry = pose;
