@@ -1,18 +1,21 @@
-function res = test_bounds_square(theta)
+function res = test_bounds_circle
 
+% grid
 side = 5;
 cell=0.1;
-x=-side*0.4:cell:side*0.4;
-y=-side*0.4:cell:side*0.4;
+x=-side*0.5:cell:side*0.5;
+y=-side*0.5:cell:side*0.5;
 
+%
+radius = 0.5 * side * sqrt(2) + 1;
 fov = pi;
 rays = 91;
 
 for i=1:size(x,2)
 for j=1:size(y,2)
 
-	pose = [x(i); y(j); theta]
-	ld = ld_square(side, pose, rays, fov);
+	pose = [x(i); y(j); 0];
+	ld = ld_circle(side, pose, rays, fov);
 	bounds = compute_bounds(ld);
 	
 	etmax(i,j) = max(sqrt(eig(bounds.C0(1:2,1:2))));
@@ -25,6 +28,7 @@ for j=1:size(y,2)
 	data{i,j}.bounds = bounds;
 	data{i,j}.ld = ld;
 end
+	fprintf('%d\n',i);
 end
 
 %res.bounds = bounds;

@@ -9,13 +9,17 @@ I0 = zeros(3,3);
 
 for i=1:ld.nrays
 	r = ld.readings(i);
-	alpha_i = ld.true_alpha(i);
+	alpha_i = ld.true_alpha_abs(i);
+	
 	phi_i   = ld.theta(i);
 	theta   = ld.odometry(3);
 	beta_i  = alpha_i - (theta+phi_i);
 	
+	% dr_dt = v(beta_i)' / cos(beta_i);
+	dr_dt = (v(theta+phi_i) + v(theta+phi_i+pi/2) * tan(beta_i))';
 	dr_dt = v(alpha_i)' / cos(beta_i);
-	dr_dtheta = r * cos(beta_i);
+	dr_dtheta = r * tan(beta_i);
+	
 	
 	I0(1:2,1:2) = I0(1:2,1:2) + (dr_dt' * dr_dt);
 	I0(1:2,3) = I0(1:2,3) + (dr_dt' * dr_dtheta);

@@ -43,7 +43,13 @@ function ld = ray_tracing(pose, fov, nrays, countour, countour_params, precision
 		[point, alpha] = feval(countour, countour_params, tau);
 		ld.readings(i) = norm(point-t);
 		%fprintf('i=%d theta=%d° reading=%f\n', i, rad2deg(ld.theta(i)), ld.readings(i));
+
+		if cos(alpha - (pose(3)+ld.theta(i)) ) > 0
+			alpha = alpha + pi;
+		end
+
 		ld.true_alpha(i) = alpha-pose(3); % local coordinates
+		ld.true_alpha_abs(i) = alpha; % local coordinates
 		
 		if rand>0.95
 			pause(0.02)
