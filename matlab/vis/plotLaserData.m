@@ -1,15 +1,28 @@
 function plotLaserData(ld, params)
-
+%  plotLaserData(ld, params)
+%		Draws on current figure
+%		
+%		params.plotNormals = false;	
+%		params.color = 'r.';
+%		params.rototranslated (= true); if true, the scan is drawn
+%			rototranslated at ld.estimate, else is drawn at 0;
+%		params.rototranstated_odometry = false;
+	
 	if(nargin==1)
 		params.plotNormals = false;	
 		params.color = 'r.';
 		params.rototranslated = true;
+		params.rototranslated_odometry = false;
 	end
 	
-	if(params.rototranslated)
-		reference = ld.estimate;	
+	if(params.rototranslated_odometry)
+		reference = ld.odometry;	
 	else
-		reference = [0 0 0]';
+		if(params.rototranslated)
+			reference = ld.estimate;	
+		else
+			reference = [0 0 0]';
+		end
 	end
 		
 	hold on

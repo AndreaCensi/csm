@@ -1,10 +1,9 @@
+function res = yasmine(params)
 % params.sigma
 % params.laser_sens     % sensor (indexed by i)
 % params.laser_ref      % map    (indexed by j)  laser_sens * (x,y,theta) = laser_ref 
-% params.maxAngularCorreectionDeg
-% params.maxLinearCorreection
-
-function res = yasmine(params)
+% params.maxAngularCorrectionDeg
+% params.maxLinearCorrection
 
 	% readings for which a valid alpha was computed
 	valid1 = find(params.laser_sens.alpha_valid);

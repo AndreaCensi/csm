@@ -23,9 +23,11 @@ function transf = MbICP(refScan, newScan, initQ, interactive)
   Max_Dist = 1;
   Min_error = 1e-4;
   
+  nrays = length(refScan)
+  %ang = (0:0.5:180)*pi/180;
+  ang = (1:nrays)*(pi/nrays);
+  ang = (1:nrays)*(pi/nrays)-pi/2;
   
-  ang = (0:0.5:180)*pi/180;
-
   if nargin < 3
     disp('Usgae: MbICP(refScan, newScan, initQ)');
     return
@@ -39,8 +41,8 @@ function transf = MbICP(refScan, newScan, initQ, interactive)
   py = refScan .* sin(ang);
 
   % Define array to hold Cartesian coordinates for transformed new scan
-  cx = zeros(1,361);
-  cy = zeros(1,361);
+  cx = zeros(1,nrays);
+  cy = zeros(1,nrays);
 
   % The transformation from the reference scan to the new scan
   q = initQ;
@@ -92,15 +94,17 @@ function transf = MbICP(refScan, newScan, initQ, interactive)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function err = checkArgs(refScan, newScan, initQ)
-  err = 0;
-  if length(refScan) < 361
-    disp('Need at least 361 ranges for ref scan');
+  
+	err = 0
+	
+	if length(refScan) < 10
+    disp('Need at least 10 ranges for ref scan');
     err = 1;
     return;
   end
 
-  if length(newScan) < 361
-    disp('Need at least 361 ranges for new scan');
+  if  not(length(newScan) == length(refScan)) 
+    disp('Need ref scan and new scan of same size');
     err = 1;
     return;
   end
