@@ -7,7 +7,7 @@ for i=1:n
 	% consider all points in a ball of radius maxDist 
 	imin=i; stop=0;
 	while stop == 0 & imin>1 
-		if vectorNorm2(ld.points(:,i)-ld.points(:,imin-1)) < maxDist
+		if norm(ld.points(:,i)-ld.points(:,imin-1)) < maxDist
 			imin = imin -1;
 		else
 			stop=1;
@@ -16,23 +16,24 @@ for i=1:n
 	
 	imax=i; stop=0;
 	while stop==0 & imax<n
-		if vectorNorm2(ld.points(:,i)-ld.points(:,imax+1)) < maxDist
+		if norm(ld.points(:,i)-ld.points(:,imax+1)) < maxDist
 			imax=imax+1;
 		else 
 			stop = 1;
 		end
 	end
 
-	n=imax-imin+1;
+	num=imax-imin+1;
 
-	if n>1 
+	if num>1 
 		%[theta; rho; error] 
 		[alpha,rho,error] = regression(ld.points(:,imin:imax));	
 	
-		ld.alpha(i) =  alpha;
+		ld.alpha(i) =  normalize(alpha);
 		ld.alpha_valid(i) = 1;
-		ld.alpha_error(i) = sqrt(error/n);
+		ld.alpha_error(i) = sqrt(error/num);
 	else
+		fprintf('ops! %d\n',i);
 		ld.alpha(i) = nan;
 		ld.alpha_valid(i) = 0;
 		ld.alpha_error(i) = nan;
@@ -40,3 +41,12 @@ for i=1:n
 	
 end
 
+function res = normalize(alpha)
+	while alpha > 2*pi
+		alpha = alpha - 2*pi;
+	end
+	while alpha < 0
+		alpha = alpha + 2*pi;
+	end
+	res = alpha;
+	

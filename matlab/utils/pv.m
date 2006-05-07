@@ -9,3 +9,7 @@ if size(v,1)==2
 s= sprintf('(%f,%f)', v(1), v(2));
 end
 
+if size(v,1)==1
+s= sprintf('(%f)', v(1));
+end
+

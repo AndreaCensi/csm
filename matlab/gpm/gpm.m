@@ -5,14 +5,25 @@ function res = gpm(params)
 % params.maxLinearCorrection
 % params.emXYsigma
 
+	% find a parameter of scale
+	n = params.laser_ref.nrays-1;
+	for i=1:n
+		dists(i) = norm( params.laser_ref.points(:,i)-params.laser_ref.points(:,i+1));
+	end
+	dists=sort(dists);
+	
+	params.scale = mean(dists(n/2:n-n/5))*2;
+	params.scale = max(dists(1:n-5))*2;
+	fprintf('scale: %f\n', params.scale);
+	
 	if not(isfield(params.laser_ref, 'alpha_valid'))
 		fprintf('Computing surface normals for ld1.\n');
-		params.laser_ref = computeSurfaceNormals_sound(params.laser_ref);
+		params.laser_ref = computeSurfaceNormals(params.laser_ref, params.scale);
 	end
 	
 	if not(isfield(params.laser_sens, 'alpha_valid'))
 		fprintf('Computing surface normals for ld2.\n');
-		params.laser_sens = computeSurfaceNormals_sound(params.laser_sens);
+		params.laser_sens = computeSurfaceNormals(params.laser_sens, params.scale);
 	end
 	
 	
@@ -94,33 +105,38 @@ function res = gpm(params)
 		samples(:,k) = [res.corr{k}.T; res.corr{k}.phi];
 	end
 	
-%	theta = hill_climbing(Phi, W, deg2rad(20), mean(Phi), 20);
-%	fprintf('Theta: %f\n', rad2deg(theta));
+	theta = hill_climbing(Phi, W, deg2rad(20), mean(Phi), 20);
+	fprintf('Theta: %f\n', rad2deg(theta));
 	
 	
 %	X = [0.3;0;deg2rad(15)];
 %	X = [0;0;theta];
-	X = mean(samples,2);	
+	X = mean(samples,2);
+	X(3) = theta;
 	for it=1:params.maxIterations
 		fprintf(strcat(' X: ',pv(X),'\n'))
-		Sigma = diag([0.5 0.5 deg2rad(40)].^2);% / ((1+it)/2);
-	
+		Sigma = diag([0.5 0.5 deg2rad(40)].^2);
+		
+		M1 = zeros(3,3); M2 = zeros(3,1); block=zeros(3,2); by=zeros(2,1);
 		% update weights
-		uW = zeros(N,1);
-		uW2 = zeros(2*N,1);
 		for k=1:N
 			myX = [res.corr{k}.T; res.corr{k}.phi];
 			weight = W(k,1) * mynormpdf( myX-X, [0;0;0], Sigma);
-			
-			uW(k,1)  = weight;
-			uW2((k-1)*2+1:(k-1)*2+2,1) = [weight;weight];
-		end;
+
+			va = vers(res.corr{k}.alpha);
+			block = [va' 0; 0 0 1];
+			by = [va' * res.corr{k}.T; res.corr{k}.phi];
+			M1 = M1 + block' * weight * block;
+			M2 = M2 + block' * weight * by;
+		end
+		Xhat = inv(M1) * M2;
 		
-		Ri2 = diag(uW2);
-		Xhat = inv(L2'*Ri2 * L2) * L2' * Ri2 * Y2;
-	%	fprintf(strcat(' Xhat: ',pv(X),'\n'))
-		X = Xhat;
-		%X(3) = theta;
+		delta = X-Xhat;
+		X = Xhat; X(3) = theta;
+		if norm(delta(1:2)) < 0.00001
+			break
+		end
+		
 		pause(0.1)
 	end
 
@@ -129,6 +145,9 @@ function res = gpm(params)
 	res.Phi = Phi;
 	res.W = W;
 	res.samples = samples;
+	res.laser_ref=params.laser_ref;
+	res.laser_sens=params.laser_sens;
+	
 	
 %res.weight = normalize01(res.weight) ; 
 
@@ -153,11 +172,11 @@ function res = hill_climbing(x, weight, sigma, x0, iterations)
 	for i=1:iterations
 		for j=1:size(x)
 			updated_weight(j) =  weight(j) * mynormpdf(x(j), x0, sigma^2);
-			updated_weight(j) =  weight(j) * exp( -abs(x(j)- x0)/ (sigma));
+			%updated_weight(j) =  weight(j) * exp( -abs(x(j)- x0)/ (sigma));
 			
 		end
 		x0 = sum(x .* updated_weight') / sum(updated_weight);
-		%fprintf(' - %f ', rad2deg(x0));
+		fprintf(' - %f \n', rad2deg(x0));
 	end
 	%fprintf('\n');
 	res = x0;
