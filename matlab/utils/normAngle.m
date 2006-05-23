@@ -1,11 +1,13 @@
 function res = normAngle(theta)
 
-while theta>pi
-    theta = theta - 2*pi;
-end
-
-while theta<-pi
-    theta = theta + 2*pi;
-end
-
+	for i=1:size(theta,2)
+		while theta(i)>pi
+			 theta(i) = theta(i) - 2*pi;
+		end
+		
+		while theta(i)<-pi
+			 theta(i) = theta(i) + 2*pi;
+		end
+	end
+	
 res = theta;

@@ -27,11 +27,18 @@ for i=1:n
 
 	if num>1 
 		%[theta; rho; error] 
-		[alpha,rho,error] = regression(ld.points(:,imin:imax));	
+		[alpha,rho,error] = regression(ld.points(:,imin:imax));
 	
 		ld.alpha(i) =  normalize(alpha);
 		ld.alpha_valid(i) = 1;
 		ld.alpha_error(i) = sqrt(error/num);
+		
+		if num==2
+			ld.alpha_error(i) = 0.1;
+		end
+		
+		%fprintf('n = %d alpha %3.3f rho %5.5f error %f\n', ...
+		%imax-imin+1, alpha,rho,ld.alpha_error(i)); 
 	else
 		fprintf('ops! %d\n',i);
 		ld.alpha(i) = nan;

@@ -30,6 +30,6 @@ function [theta, rho, sumOfSqError] = regression(points)
 	sumOfSqError = 0;
 	for i=1:n
 		% distance to line
-		dist = rho - cos(theta) * points(1,i) + sin(theta) * points(2,i);
+		dist = rho - (cos(theta) * points(1,i) + sin(theta) * points(2,i));
 		sumOfSqError = sumOfSqError + dist*dist; 
 	end
