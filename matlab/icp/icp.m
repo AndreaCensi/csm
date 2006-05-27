@@ -119,13 +119,10 @@ function res = icp_covariance(params, current_estimate, P, valids)
 	
 	
 function res = Rdot(theta)
-	res = R(theta+pi/2);
+	res = rot(theta+pi/2);
 
-function res = R(theta)
-	res = [cos(theta) -sin(theta); sin(theta) cos(theta)];
-	
 function res = Rddot(theta)
-	res = R(theta+pi); % XXX controlla meglio
+	res = rot(theta+pi); % XXX controlla meglio
 
 function next = next_estimate(params, current_estimate, P, valids)
 	if sum(valids) < 2
@@ -218,68 +215,6 @@ function [P,valid] = icp_get_correspondences(params,current_estimate)
 			
 	end % i in first scan 
 	
-function res = closest_point_on_segment(A,B,p)
-% closest_point_on_segment(A,B,p)
-%  find closest point to p on segment A-B
-	projection = projection_on_line_seg(A,B,p);
-	
-%	fprintf('Closest(%s,%s;%s)\n', pv(A), pv(B), pv(p));
-%	fprintf('  projection: \n', pv(projection));
-	
-%	fprintf('A: %s B: %s p: %s proj: %s\n',pv(A),pv(B),pv(p),pv(projection));
-
-	%res = projection;
-	%return;
-		
-	% check whether projection is inside the segment
-	if (projection-A)'*(projection-B)<0
-		res = projection;
-	else
-		if norm(p-A) < norm(p-B)
-			res = A;
-		else
-			res = B;
-		end
-	end
-		
-function res = projection_on_line_seg(A,B,p)
-% projection_on_line_seg(A,B,p)
-%  finds projection of p on line through A,B
-
-	% find polar representation
-	v_alpha = rot(pi/2) * (A-B) / norm(A-B);
-	alpha = atan2(v_alpha(2),v_alpha(1));
-	rho = v_alpha' * A; 
-	res = projection_on_line(alpha, rho, p);
-%	fprintf('alpha = %f  v_alpha = %s  rho = %f\n', alpha, pv(v_alpha), rho);
-
-function res = projection_on_line(alpha, rho, p)
-% projection_on_line(alpha, rho, p)
-%  finds projection of p on line whose polar representation is (alpha,rho)
-
-	res = vers(alpha) * rho + (p-(vers(alpha)'*p)*vers(alpha));
-	
-	% 0 == vers(alpha)' * res - rho
-
-function point = transform(point, dx)
-% rotate then translate point
-	point = dx(1:2,1) + rot(dx(3)) * point;
-
-function res = params_set_default(p, field, default_value)
-	% Checks whether the field is contained in p; if not, it adds the default_value.
-	if not(isfield(p, field))
-		p = setfield(p, field, default_value);
-		fprintf('Setting default for %s = ', field);
-		fprintf('%f ', default_value);
-		fprintf('\n');
-	end
-	res = p;
-
-function params_required(p, field)
-	if not(isfield(p, field))
-		error('icp:bad_paramater',sprintf('I need field %s.', field));
-	end
-
 function ld_plot(ld, params)
 %  plotLaserData(ld, params)
 %		Draws on current figure
