@@ -5,7 +5,7 @@
 
 \begin{document}
 \lstset{% general command to set parameter(s)
-	basicstyle=\small\ttfamily, % print whole listing small
+	basicstyle=\footnotesize\ttfamily, % print whole listing small
 	keywordstyle=\color{blue}\bfseries,
 	% underlined bold black keywords
 	identifierstyle=, % nothing happens
@@ -19,7 +19,7 @@
 	escapeend=\end{commentline},
 	showstringspaces=false} % no special string spaces
 
-\newenvironment{commentline}{\noindent\color{violet}\rmfamily}{}
+\newenvironment{commentline}{\begin{minipage}{\textwidth}\color{violet}\rmfamily}{\end{minipage}}
 
 \lstinputlisting[tabsize=4,language=matlab]{test_gpm.m}
 \end{document}

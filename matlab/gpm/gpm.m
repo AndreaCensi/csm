@@ -82,13 +82,13 @@ function res = gpm(params)
 			weight=sqrt(weight);
 	
 					
-			res.corr{k}.T = T;
-			res.corr{k}.phi = phi; 
+			C{k}.T = T;
+			C{k}.phi = phi; 
 			% Surface normal
-			res.corr{k}.alpha = alpha_j; 
-			res.corr{k}.weight = 1/weight;
-			res.corr{k}.i = i; 
-			res.corr{k}.j = j; 
+			C{k}.alpha = alpha_j; 
+			C{k}.weight = 1/weight;
+			C{k}.i = i; 
+			C{k}.j = j; 
 			
 			%% Keep track of how many generated particles per point
 			ngenerated(j) = ngenerated(j) + 1;
@@ -99,7 +99,7 @@ function res = gpm(params)
 	end
 	
 	%% Number of correspondences.
-	N = size(res.corr,2);
+	N = size(C,2);
 	fprintf('Number of corr.: %d\n', N);
 	
 	% build L matrix (Nx2) 
@@ -109,95 +109,100 @@ function res = gpm(params)
 	Phi = zeros(N,1);
 	samples = zeros(3,N);
 	for k=1:N
-		L(k,:) = vers(res.corr{k}.alpha)';
-		Y(k,1) = vers(res.corr{k}.alpha)' * res.corr{k}.T;
-		W(k,1) = res.corr{k}.weight;
-		Phi(k,1) = res.corr{k}.phi;
-		block = [vers(res.corr{k}.alpha)' 0; 0 0 1];
+		L(k,:) = vers(C{k}.alpha)';
+		Y(k,1) = vers(C{k}.alpha)' * C{k}.T;
+		W(k,1) = C{k}.weight;
+		Phi(k,1) = C{k}.phi;
+		block = [vers(C{k}.alpha)' 0; 0 0 1];
 		L2((k-1)*2+1:(k-1)*2+2,1:3) = block;
-		Y2((k-1)*2+1:(k-1)*2+2,1) = [Y(k,1); res.corr{k}.phi]; 
-		W2((k-1)*2+1:(k-1)*2+2,1) = [res.corr{k}.weight;res.corr{k}.weight];
+		Y2((k-1)*2+1:(k-1)*2+2,1) = [Y(k,1); C{k}.phi]; 
+		W2((k-1)*2+1:(k-1)*2+2,1) = [C{k}.weight;C{k}.weight];
 		
-		samples(:,k) = [res.corr{k}.T; res.corr{k}.phi];
+		samples(:,k) = [C{k}.T; C{k}.phi];
 	end
 	
 	theta = hill_climbing(Phi, W, deg2rad(20), mean(Phi), 20, deg2rad(0.001));
 	fprintf('Theta: %f\n', rad2deg(theta));
-		
-	X = mean(samples,2);
-	X(3) = theta;
-	for it=1:params.maxIterations
-		fprintf(strcat(' X: ',pv(X),'\n'))
-		Sigma = diag([0.5 0.5 deg2rad(40)].^2);
-		
-		M1 = zeros(3,3); M2 = zeros(3,1); block=zeros(3,2); by=zeros(2,1);
-		% update weights
-		for k=1:N
-			myX = [res.corr{k}.T; res.corr{k}.phi];
-			weight = W(k,1) * mynormpdf( myX-X, [0;0;0], Sigma);
+	
 
-			va = vers(res.corr{k}.alpha);
-			block = [va' 0; 0 0 1];
-			by = [va' * res.corr{k}.T; res.corr{k}.phi];
-			M1 = M1 + block' * weight * block;
-			M2 = M2 + block' * weight * by;
-		end
-		Xhat = inv(M1) * M2;
-		
-		delta = X-Xhat;
-		X = Xhat;% X(3) = theta;
-		if norm(delta(1:2)) < 0.00001
-			break
-		end
-		
-		pause(0.1)
-	end
-
-	% second alternative
 	Inf3 = zeros(3,3);
 	
 	for k=1:N
-		alpha        = res.corr{k}.alpha; %% $\alpha$
-		v_alpha      = vers(alpha);
-		v_dot_alpha  = vers(alpha + pi/2);
-		T            =  res.corr{k}.T;
-		R_phi        = rot(res.corr{k}.phi);
-		R_dot_phi    = rot(res.corr{k}.phi + pi/2);
-		i            = res.corr{k}.i;
-		j            = res.corr{k}.j;
-		v_j          = vers(params.laser_ref.theta(j));
-		v_i          = vers(params.laser_sens.theta(i)); % + X(3) XXX
-		cos_beta     = v_alpha' * v_i;
-		p_j          = params.laser_ref.points(:,j);
-		p_i          = params.laser_sens.points(:,i);
-		ngi          = ngeneratedb(res.corr{k}.i);
-		ngj          = ngenerated(res.corr{k}.j);
+		C{k}.v_alpha      = vers(C{k}.alpha);
+		C{k}.v_dot_alpha  = vers(C{k}.alpha + pi/2);
+		C{k}.R_phi        = rot(C{k}.phi);
+		C{k}.R_dot_phi    = rot(C{k}.phi + pi/2);
+		C{k}.v_j          = vers(params.laser_ref.theta(C{k}.j));
+		C{k}.v_i          = vers(params.laser_sens.theta(C{k}.i)); 
+		C{k}.cos_beta     = C{k}.v_alpha' * C{k}.v_i;
+		C{k}.p_j          = params.laser_ref.points(:,C{k}.j);
+		C{k}.p_i          = params.laser_sens.points(:,C{k}.i);
+		C{k}.ngi          = 1; %ngeneratedb(C{k}.i);
+		C{k}.ngj          = 1; %ngenerated(C{k}.j);
 		
 		sigma_alpha = deg2rad(6.4);
 		sigma = params.sigma;
-		noises = diag([ngi*sigma_alpha^2 ngj*sigma_alpha^2 ...
-		              ngi*sigma^2 ngj*sigma^2]);
+		noises = diag([C{k}.ngi*sigma_alpha^2 C{k}.ngj*sigma_alpha^2 ...
+		              C{k}.ngi*sigma^2 C{k}.ngj*sigma^2]);
 
-		n_alpha_i = v_alpha'*R_dot_phi*p_i;
-		n_alpha_j = v_dot_alpha'*(T)+ v_alpha'*R_dot_phi*p_i;
-
-		n_sigma_i =  v_alpha'* R_phi * v_i + cos_beta;
-		n_sigma_j =  - v_alpha'*  v_j;
+		n_alpha_i = -C{k}.v_alpha'*C{k}.R_dot_phi*C{k}.p_i;
+		n_alpha_j = C{k}.v_dot_alpha'*(C{k}.T)+ C{k}.v_alpha'*C{k}.R_dot_phi*C{k}.p_i;
+		n_sigma_i =  C{k}.v_alpha'* C{k}.R_phi * C{k}.v_i + C{k}.cos_beta;
+		n_sigma_j =  - C{k}.v_alpha'*  C{k}.v_j;
 		
-		L_k = [v_alpha' 0; 0 0 1];
-		M_k = [ n_alpha_i n_alpha_j n_sigma_i n_sigma_j; 1 1 0 0 ];
+		L_k = [C{k}.v_alpha' 0; 0 0 1];
+		Y_k = [C{k}.v_alpha'*C{k}.T; C{k}.phi];
+		M_k = [ n_alpha_i n_alpha_j n_sigma_i n_sigma_j; -1 1 0 0 ];
 		R_k =  M_k * noises * M_k';
-		I_k = L_k' * inv(R_k) * L_k; 
-		
-		Inf3 = Inf3 + I_k;
-		
+		C{k}.I = L_k' * inv(R_k) * L_k; 
+		C{k}.M = L_k' * inv(R_k) * Y_k;
+		Inf3 = Inf3 + C{k}.I;
 	end
 	
 	Inf3
 	Inf3(1:2,1:2)
 	Cov = inv(Inf3(1:2,1:2));
 	
-	res.X = X;
+	X = mean(samples,2);
+	X2 = mean(samples,2);
+	
+%	X(3) = theta;
+	for it=1:params.maxIterations
+		fprintf(strcat(' X : ',pv(X),'\n'))
+		fprintf(strcat(' X2: ',pv(X2),'\n'))
+		Sigma = diag([0.5 0.5 deg2rad(40)].^2);
+		
+		M1 = zeros(3,3); M2 = zeros(3,1); block=zeros(3,2); by=zeros(2,1);
+		T1 = zeros(3,3); T2 = zeros(3,1); 
+		% update weights
+		for k=1:N
+			myX = [C{k}.T; C{k}.phi];
+			weight = W(k,1) * mynormpdf( myX-X, [0;0;0], Sigma);
+			%we =  exp(-norm(myX-X2));
+			we = weight ;
+			va = vers(C{k}.alpha);
+			block = [va' 0; 0 0 1];
+			by = [va' * C{k}.T; C{k}.phi];
+			M1 = M1 + block' * weight * block;
+			M2 = M2 + block' * weight * by;
+			
+			T1 = T1 + C{k}.I * we;
+			T2 = T2 + C{k}.M * we;
+		end
+		Xhat = inv(M1) * M2;
+		Xhat2 = inv(T1) * T2;
+		
+		delta = X-Xhat;
+		delta = X2-Xhat2;
+		X = Xhat;% X(3) = theta;
+		X2 = Xhat2;
+		if norm(delta(1:2)) < 0.00001
+			break
+		end
+		pause(0.1)
+	end
+	
+	res.X = X2;
 	res.Phi = Phi;
 	res.W = W;
 	res.samples = samples;
@@ -206,6 +211,7 @@ function res = gpm(params)
 	res.Inf = Inf;
 	res.Cov = Cov;
 	res.Cov3 = inv(Inf3);
+	res.corr = C;
 	
 	
 function p = mynormpdf(x, mu, sigma);

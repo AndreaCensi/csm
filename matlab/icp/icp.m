@@ -24,8 +24,8 @@ function res = icp(params)
 	params = params_set_default(params, 'maxIterations',           40);
 	params = params_set_default(params, 'firstGuess',         [0;0;deg2rad(10)]);
 	params = params_set_default(params, 'interactive',  false);
-	params = params_set_default(params, 'epsilon_xy',  0.000001);
-	params = params_set_default(params, 'epsilon_theta',  0.0001);
+	params = params_set_default(params, 'epsilon_xy',  0.00001);
+	params = params_set_default(params, 'epsilon_theta',  0.0005);
 	
 
 	current_estimate = params.firstGuess;
@@ -106,7 +106,7 @@ function res = icp_covariance(params, current_estimate, P, valids)
 			
 		d2E_dx2 = d2E_dx2 + d2Ek_dx2;
 	
-		d2Ek_dxdzk = [ (R(theta) * v_i) v_j; ...
+		d2Ek_dxdzk = [ (rot(theta) * v_i) v_j; ...
 		 ((t-rho_j*v_j)'*Rdot(theta)*v_i) (-rho_j*v_j'*Rdot(theta)*v_i)];
 		 
 		centro = centro + d2Ek_dxdzk*d2Ek_dxdzk';
@@ -167,6 +167,10 @@ function [P,valid] = icp_get_correspondences(params,current_estimate)
 		delta = 20;
 		from = max(i-delta,1);
 		to = min(i+delta,params.laser_ref.nrays);
+		
+		from = 1;
+		to = params.laser_ref.nrays;
+		
 		for j=from:to
 			% Find compatible interval in the other scan. 
 			p_j = params.laser_ref.points(:,j);
@@ -215,58 +219,3 @@ function [P,valid] = icp_get_correspondences(params,current_estimate)
 			
 	end % i in first scan 
 	
-function ld_plot(ld, params)
-%  plotLaserData(ld, params)
-%		Draws on current figure
-%		
-%		params.plotNormals = false;	
-%		params.color = 'r.';
-%		params.rototranslated (= true); if true, the scan is drawn
-%			rototranslated at ld.estimate, else is drawn at 0;
-%		params.rototranstated_odometry = false;
-	
-	if(nargin==1)
-		params.auto = false;
-	end
-	
-	
-	params = params_set_default(params, 'plotNormals', false);
-	params = params_set_default(params, 'color',    'r.');
-	params = params_set_default(params, 'rototranslated',  true);	
-	params = params_set_default(params, 'rototranslated_odometry',  false);	
-	
-	if(params.rototranslated_odometry)
-		reference = ld.odometry;	
-	else
-		if(params.rototranslated)
-			reference = ld.estimate;	
-		else
-			reference = [0 0 0]';
-		end
-	end
-		
-	hold on
-	
-	plotVectors(reference, ld.points, params.color);
-	
-	if params.plotNormals 
-		% disegno normali
-		maxLength = 0.05;
-		
-		valids = find(ld.alpha_valid);
-		
-		valid_points = ld.points(:,valids);
-		valid_alpha  = ld.alpha(valids);
-		valid_errors = rad2deg(sqrt(ld.alpha_error(valids)));;
-		emin = min(valid_errors);
-		emax = max(valid_errors);
-		
-		for i=1:size(valids,2)
-			weight = 1 + valid_errors(i) * maxLength;
-			
-			v = [cos(valid_alpha(i)); sin(valid_alpha(i))] * weight;
-			from = valid_points(:,i);
-			to = from + v;
-			plotVectors( reference, [from to] , 'g-');
-		end
-	end

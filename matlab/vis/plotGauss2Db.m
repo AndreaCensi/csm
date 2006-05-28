@@ -1,5 +1,5 @@
 % Non disegna il punto
-function plotGauss2Db(mu,sigma,color)
+function res = plotGauss2Db(mu,sigma,color)
 
 if (size(mu,2) ~= 1)
     mu = mu';
@@ -17,9 +17,9 @@ if (size(sigma,1) ~= 2)
     error('la funzione plotGauss2D serve solo per plottare in 2 dimensioni');
 end
 
-ellipse(mu,sigma,color);
+res = ellipse(mu,sigma,color);
 
-function points = ellipse(mean,Sigma,color)
+function res = ellipse(mean,Sigma,color)
 	MahlDist = 6;
 	npoints = 100;
 	% Prende un cerchio e fa una trasformazione affine
@@ -27,4 +27,4 @@ function points = ellipse(mean,Sigma,color)
 	[V,D] = eig(Sigma);
 	points= repmat(mean,1,npoints+1) + ...
 		V * sqrt(D) * sqrt(MahlDist) * [cos(theta); sin(theta)];
-	plot(points(1,:),points(2,:),color);
+	res = plot(points(1,:),points(2,:),color);

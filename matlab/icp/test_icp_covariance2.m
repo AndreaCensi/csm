@@ -13,8 +13,9 @@ function test_icp_covariance1
 		fprintf('=== trial #%d ===\n', i);
 		paramsi = params;
 		paramsi.laser_sens = ld_add_noise(paramsi.laser_sens, sigma);
+		paramsi.laser_ref = ld_add_noise(paramsi.laser_ref, sigma);
 		res{i} = icp(paramsi);
 	end
 	
-	test_icp_covariance1_result = res;
-	save 'test_icp_covariance1_result.mat' test_icp_covariance1_result
+	test_icp_covariance2_result = res;
+	save 'test_icp_covariance2_result.mat' test_icp_covariance2_result
