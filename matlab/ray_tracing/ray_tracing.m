@@ -1,16 +1,23 @@
 function ld = ray_tracing(pose, fov, nrays, countour, countour_params, precision)
 
+	debug = true;
+	
 	t = pose(1:2);
 	ld.nrays = nrays;
 	for i=1:nrays
+		if(debug)
+			fprintf('@');
+		end
+		
 		theta = -fov/2 + fov * (i-1)/(nrays-1);
 		ld.theta(i) = theta;
 		params = {t, pose(3)+ld.theta(i), countour, countour_params};
-		
+			
 		% cerchiamo approssimativamente quello che gli si avvicina di più
 		% e sarà il nostro a di partenza
 		delta_a = 0.05;
 		test_a = 0.001:delta_a:0.99;
+		
 		for j =1:size(test_a,2)
 		    test_a_theta(j) = feval('eval_delta', params, test_a(j));
 		end
