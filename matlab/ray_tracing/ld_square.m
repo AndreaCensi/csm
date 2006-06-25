@@ -4,7 +4,7 @@ function ld = ld_square(L, pose, rays, fov)
 
 	square = [-1 -1; 1 -1; 1 1; -1 1; -1 -1]' * L;
 
-	ld = ray_tracing( pose, fov, rays, 'countour_straight', {square},0.001);
+	ld = ray_tracing( pose, fov, rays, 'countour_straight', {square},0.00001);
 	
 
 

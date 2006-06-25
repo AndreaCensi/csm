@@ -7,6 +7,9 @@ function ld = ray_tracing(pose, fov, nrays, countour, countour_params, precision
 	for i=1:nrays
 		if(debug)
 			fprintf('@');
+			if 0 == mod(i,32)
+				fprintf(' %d \n', i);
+			end
 		end
 		
 		theta = -fov/2 + fov * (i-1)/(nrays-1);
@@ -61,6 +64,9 @@ function ld = ray_tracing(pose, fov, nrays, countour, countour_params, precision
 		if rand>0.95
 			pause(0.02)
 		end
+	end
+	if debug
+		fprintf('\n');
 	end
 	
 	ld.odometry = pose;
