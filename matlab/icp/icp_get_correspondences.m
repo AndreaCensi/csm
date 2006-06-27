@@ -1,5 +1,5 @@
 
-function [P,valid] = icp_get_correspondences(params,current_estimate)
+function [P,valid,jindexes] = icp_get_correspondences(params,current_estimate)
 	debug = 0;
 	for i=1:params.laser_sens.nrays
 		p_i = params.laser_sens.points(:,i);
@@ -25,20 +25,25 @@ function [P,valid] = icp_get_correspondences(params,current_estimate)
 		if best_j == 0
 			P(:,i) = [nan;nan];
 			valid(i) = 0;
+			jindexes(i,:)=[nan;nan];
 		else
 			% find other point to interpolate
 			if best_j==1
-				other = best_j+1;
+				other_j = best_j + 1;
+				other = params.laser_ref.points(:,best_j+1);
 			elseif best_j == params.laser_ref.nrays
-				other = best_j-1;
+				other_j = best_j - 1;
+				other = params.laser_ref.points(:,best_j-1);
 			else
 				p_prev = params.laser_ref.points(:,best_j-1);
 				p_next = params.laser_ref.points(:,best_j+1);
 				dist_prev = norm( p_prev-p_i_w);
 				dist_next = norm( p_next-p_i_w);
 				if dist_prev < dist_next
+					other_j = best_j -1;
 					other = p_prev;
 				else
+					other_j = best_j +1;
 					other = p_next;
 				end
 			end
@@ -51,9 +56,11 @@ function [P,valid] = icp_get_correspondences(params,current_estimate)
 			if dist < params.maxCorrespondenceDist
 				P(:,i) = interpolate;
 				valid(i) = 1;
+				jindexes(i,:) = [best_j;other_j];
 			else
 				P(:,i) = [nan;nan];
 				valid(i) = 0;
+				jindexes(i,:) = [nan;nan];
 			end
 		end
 			

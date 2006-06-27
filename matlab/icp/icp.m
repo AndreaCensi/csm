@@ -27,6 +27,9 @@ function res = icp(params)
 	if params.interactive
 		f = figure; hold on
 	end
+
+	
+	estimated_cov = eye(3);	
 	
 	for n=1:params.maxIterations
 		estimates{n} = current_estimate;
@@ -40,8 +43,8 @@ function res = icp(params)
 			ld_plot(params.laser_sens,pl);
 		end
 
-		[P, valids] = icp_get_correspondences(params, current_estimate);
-	
+		[P, valids, jindexes] = icp_get_correspondences(params, current_estimate);
+		
 		fprintf('Valid corr.: %d\n', sum(valids));
 		next_estimate = next_estimate(params, current_estimate, P, valids);
 
@@ -53,25 +56,32 @@ function res = icp(params)
 		
 		if (norm(delta(1:2)) < params.epsilon_xy) & ...
 			(norm(delta(3))   < params.epsilon_theta) 
+	
+			
 			break;
 		end
-			
+	
+	
 		%	current_estimate = next_estimate(params, current_estimate1, P, valids) % dovrebbe essere 0
 		
 		if params.interactive
 			%pause
 		end
-		cova = icp_covariance(params, current_estimate, P, valids);
 		
 		pause(0.01)
 	end % iterations
+
+	if(params.do_covariance)		
+		estimated_cov = icp_covariance(params, current_estimate, P, valids, jindexes);
+	end
 	
 	fprintf('Converged at iteration %d.\n', n);
 
 	res = params;
 	res.X = current_estimate;
-	res.Cov = cova.Cov;
+	res.Cov = estimated_cov;
 	res.Inf = inv(res.Cov);
+	%res.estimated_cov = estimated_cov;
 	
 	res.iteration = n;
 	estimates{n+1} = current_estimate;

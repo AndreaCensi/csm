@@ -70,7 +70,7 @@ function f = draw_data_single(p)
 			l = legend(p.legend);
 			set(l, 'Orientation', 'vertical');
 			set(l, 'Location','NorthWest');
-			get(l)
+			%get(l)
 			my_fonts(l);
 		end
 		
@@ -98,8 +98,9 @@ function res = plot_cross(mean, color)
 		A = axis;
 		res(1) = plot([A(1) A(2)],[mean(2) mean(2)],color);
 		res(2) = plot([mean(1) mean(1)], [A(3) A(4)],color);
-		res
-		size(res)
+		%res
+		%size(res)
+
 function bold_lines(h)
 	for i=1:size(h,2)
 		set(h(i), 'LineWidth', 2);	
