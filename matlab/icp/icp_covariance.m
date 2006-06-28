@@ -10,7 +10,7 @@ function res = icp_covariance(params, current_estimate, P, valids,jindexes)
 	y=current_estimate(2);
 	theta=current_estimate(3);
 	
-	eps_xy = 0.0001;
+	eps_xy = 0.000001;
 	eps_t = deg2rad(0.01);
 	
 	center = zeros(3);
