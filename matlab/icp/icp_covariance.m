@@ -35,12 +35,12 @@ function res = icp_covariance(params, current_estimate, P, valids,jindexes)
 		v_j2 = p_j2 / norm(p_j2);
 		
 		E_k = @(rho_i_, rho_j1_, rho_j2_, x_, y_, theta_) ...
-			norm(...
+			20*norm(...
 				transform(v_i*rho_i_, [x_;y_;theta_])  ... 
 				- ...
 				closest_point_on_segment(v_j1*rho_j1_, v_j2*rho_j2_, ...
 					transform(v_i*rho_i_, [x_;y_;theta_])) ...
-			)^2;
+			)^(2);
 	
 		gradEk = @(rho_i_, rho_j1_, rho_j2_, x_, y_, theta_) ...
 			[ deriv(@(xx)E_k(rho_i_,rho_j1_,rho_j2_,xx,y_,theta_), x_, eps_xy); ...
@@ -83,12 +83,21 @@ function res = icp_covariance(params, current_estimate, P, valids,jindexes)
 	Gtot
 	G2tot
 	
-	sigma = 0.01;
+	sigma = params.sigma;
 	dgE_di
 	dgE_dj
 	dA_dz
 	
 	R = sigma^2 * eye(params.laser_ref.nrays+params.laser_sens.nrays);
 	
+	res.sm_cov_censi = dA_dz * R * dA_dz';
 	
-	res = dA_dz * R * dA_dz';
+	s2 = Etot / (k-3);
+	res.sm_cov_bengtsson = 2 * s2 * inv(G2tot);
+	
+	
+	dA_dz1 = inv(G2tot) * [dgE_di ];
+	R1 = sigma^2 * eye(params.laser_sens.nrays);
+	res.loc_cov_censi = dA_dz1 * R1 * dA_dz1';
+	
+	res

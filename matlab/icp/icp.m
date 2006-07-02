@@ -1,4 +1,4 @@
-% Requires: params_required, params_set_default, icp_get_orrespondences
+% Requires: params_required, params_set_default, icp_get_correspondences
 % Requires: ld_plot, icp_covariance, exact_minimization, transform
 
 function res = icp(params)
@@ -18,7 +18,8 @@ function res = icp(params)
 	params = params_set_default(params, 'firstGuess',         [0;0;0]);
 	params = params_set_default(params, 'interactive',  false);
 	params = params_set_default(params, 'epsilon_xy',  0.0001);
-	params = params_set_default(params, 'epsilon_theta',  0.000001);
+	params = params_set_default(params, 'epsilon_theta',  deg2rad(0.001));
+	params = params_set_default(params, 'sigma',  0.01);
 	
 
 	current_estimate = params.firstGuess;
@@ -70,19 +71,19 @@ function res = icp(params)
 		
 		pause(0.01)
 	end % iterations
-
-	if(params.do_covariance)		
-		estimated_cov = icp_covariance(params, current_estimate, P, valids, jindexes);
-	end
-	
-	fprintf('Converged at iteration %d.\n', n);
+fprintf('Converged at iteration %d.\n', n);
 
 	res = params;
-	res.X = current_estimate;
-	res.Cov = estimated_cov;
-	res.Inf = inv(res.Cov);
-	%res.estimated_cov = estimated_cov;
 	
+	if(params.do_covariance)		
+		estimated_cov = icp_covariance(params, current_estimate, P, valids, jindexes);	
+		res.sm_cov_bengtsson = estimated_cov.sm_cov_bengtsson;
+		res.loc_cov_censi = estimated_cov.loc_cov_censi;
+		res.sm_cov_censi = estimated_cov.sm_cov_censi;
+	end
+	
+	
+	res.X = current_estimate;
 	res.iteration = n;
 	estimates{n+1} = current_estimate;
 	res.estimates = estimates;
