@@ -1,5 +1,5 @@
 
-function ld_plot(ld, params)
+function res = ld_plot(ld, params)
 %  plotLaserData(ld, params)
 %		Draws on current figure
 %		
@@ -16,6 +16,7 @@ function ld_plot(ld, params)
 	
 	params = params_set_default(params, 'plotNormals', false);
 	params = params_set_default(params, 'color',    'r.');
+	
 	params = params_set_default(params, 'rototranslated',  true);	
 	params = params_set_default(params, 'rototranslated_odometry',  false);	
 	
@@ -23,6 +24,10 @@ function ld_plot(ld, params)
 	params = params_set_default(params, 'plot_true_alpha_length', 0.4);
 	params = params_set_default(params, 'plot_true_alpha_color', 'g-');
 	
+	params = params_set_default(params, 'plot_rays', false);
+	params = params_set_default(params, 'plot_rays_color', 'b-');
+	params = params_set_default(params, 'plot_rays_interval', 10);
+
 	if(params.rototranslated_odometry)
 		reference = ld.odometry;	
 	else
@@ -35,7 +40,13 @@ function ld_plot(ld, params)
 		
 	hold on
 	
-	plotVectors(reference, ld.points, params.color);
+	res.points = plotVectors(reference, ld.points, params.color);
+	
+	if params.plot_rays
+		for i=1:params.plot_rays_interval:ld.nrays
+			plotVectors(reference, [0 0; ld.points(:,i)']', params.plot_rays_color);
+		end
+	end
 	
 	if params.plotNormals 
 		% disegno normali

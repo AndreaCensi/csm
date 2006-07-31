@@ -4,7 +4,8 @@ function res = icp_covariance(params, current_estimate, P, valids,jindexes)
 	
 	Etot = 0;
 	Gtot = [0;0;0];
-	G2tot = eye(3);
+	G2tot = zeros(3,3);
+	MMtot = zeros(3,3);
 	
 	x=current_estimate(1);
 	y=current_estimate(2);
@@ -74,19 +75,25 @@ function res = icp_covariance(params, current_estimate, P, valids,jindexes)
 		dgE_dj(:,j1) = dgE_dj(:,j1) + dj1;
 		dgE_dj(:,j2) = dgE_dj(:,j2) + dj2;
 		
+		Mk = [eye(2) (rot(theta+pi/2)*p_i)] ;
+		MMtot = MMtot + Mk' * Mk;
+		
 		k=k+1;
 	end
 	
 	dA_dz = inv(G2tot) * [dgE_di dgE_dj];
 	
-	Etot
-	Gtot
-	G2tot
+	%Etot
+	%Gtot
+	%G2tot
+
 	
 	sigma = params.sigma;
-	dgE_di
-	dgE_dj
-	dA_dz
+	% dgE_di
+	% dgE_dj
+	% dA_dz
+	
+	fprintf('icp_covariance: Using sigma: %f', sigma);
 	
 	R = sigma^2 * eye(params.laser_ref.nrays+params.laser_sens.nrays);
 	
@@ -100,4 +107,11 @@ function res = icp_covariance(params, current_estimate, P, valids,jindexes)
 	R1 = sigma^2 * eye(params.laser_sens.nrays);
 	res.loc_cov_censi = dA_dz1 * R1 * dA_dz1';
 	
-	res
+	res.sm_cov_bengtsson_improved =  s2 * inv( MMtot );
+	
+	fprintf('ECCOLE: improved:');
+	res.sm_cov_bengtsson_improved 
+	fprintf('ECCOLE: original:')
+	res.sm_cov_bengtsson 
+	
+	%res

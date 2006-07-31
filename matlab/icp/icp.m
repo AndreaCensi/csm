@@ -1,5 +1,7 @@
+% Dependences of this script:
 % Requires: params_required, params_set_default, icp_get_correspondences
 % Requires: ld_plot, icp_covariance, exact_minimization, transform
+% Requires: icp_possible_interval
 
 function res = icp(params)
 % Note: it is assumed that params.laser_ref has a radial uniform scan 
@@ -20,6 +22,11 @@ function res = icp(params)
 	params = params_set_default(params, 'epsilon_xy',  0.0001);
 	params = params_set_default(params, 'epsilon_theta',  deg2rad(0.001));
 	params = params_set_default(params, 'sigma',  0.01);
+	params = params_set_default(params, 'do_covariance', false);
+
+	%% If true, consider as null correspondences with first or last point
+	%% in the reference scan.
+	params = params_set_default(params, 'dont_consider_extrema', false);
 	
 
 	current_estimate = params.firstGuess;
@@ -35,14 +42,6 @@ function res = icp(params)
 	for n=1:params.maxIterations
 		estimates{n} = current_estimate;
 	
-		if params.interactive
-			clf
-			pl.color = 'b.';
-			ld_plot(params.laser_ref,pl);
-			pl.color = 'r.';
-			params.laser_sens.estimate = current_estimate;
-			ld_plot(params.laser_sens,pl);
-		end
 
 		[P, valids, jindexes] = icp_get_correspondences(params, current_estimate);
 		
@@ -50,6 +49,26 @@ function res = icp(params)
 		next_estimate = next_estimate(params, current_estimate, P, valids);
 
 		delta = next_estimate-current_estimate;
+	
+		
+		%% If in interactive mode, show partial solution.
+		if params.interactive
+			clf
+			pl.color = 'b.';
+			ld_plot(params.laser_ref,pl);
+			pl.color = 'r.';
+			params.laser_sens.estimate = current_estimate;
+			ld_plot(params.laser_sens,pl);
+			axis('equal');
+		
+		
+			for i=find(valids)
+				fprintf('%d %s %d', i, P(i), jindexes(1));
+			end
+			
+			pause
+		end
+		
 		current_estimate = next_estimate;
 		
 		fprintf('Delta: %s\n', pv(delta));
@@ -57,16 +76,8 @@ function res = icp(params)
 		
 		if (norm(delta(1:2)) < params.epsilon_xy) & ...
 			(norm(delta(3))   < params.epsilon_theta) 
-	
 			
 			break;
-		end
-	
-	
-		%	current_estimate = next_estimate(params, current_estimate1, P, valids) % dovrebbe essere 0
-		
-		if params.interactive
-			%pause
 		end
 		
 		pause(0.01)

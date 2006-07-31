@@ -22,7 +22,9 @@ function [P,valid,jindexes] = icp_get_correspondences(params,current_estimate)
 			end
 		end
 
-		if best_j == 0
+		if (best_j == 0) || ...
+			(params.dont_consider_extrema && ...
+				((best_j==1) || (best_j==params.laser_ref.nrays)))
 			P(:,i) = [nan;nan];
 			valid(i) = 0;
 			jindexes(i,:)=[nan;nan];
