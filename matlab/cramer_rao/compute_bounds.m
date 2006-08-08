@@ -10,6 +10,10 @@ I0 = zeros(3,3);
 for i=1:ld.nrays
 	r = ld.readings(i);
 	alpha_i = ld.true_alpha_abs(i);
+
+	if isnan(alpha_i) | isnan(r) 
+		continue;
+	end
 	
 	phi_i   = ld.theta(i);
 	theta   = ld.odometry(3);

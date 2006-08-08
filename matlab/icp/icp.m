@@ -57,16 +57,18 @@ function res = icp(params)
 			pl.color = 'b.';
 			ld_plot(params.laser_ref,pl);
 			pl.color = 'r.';
-			params.laser_sens.estimate = current_estimate;
+			params.laser_sens.estimate = rtcat(params.laser_ref.estimate, current_estimate);
 			ld_plot(params.laser_sens,pl);
 			axis('equal');
 		
 		
 			for i=find(valids)
-				fprintf('%d %s %d', i, P(i), jindexes(1));
+	
+				plotVectors(params.laser_sens.estimate, [params.laser_sens.points(:,i) P(:,i)] , 'k');
+	
 			end
-			
-			pause
+		
+		%	pause
 		end
 		
 		current_estimate = next_estimate;

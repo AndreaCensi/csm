@@ -1,5 +1,5 @@
 
-function res = icp_covariance(params, current_estimate, P, valids,jindexes)
+function res = icp_covariance(params, current_estimate, P, valids, jindexes)
 	k=1; 
 	
 	Etot = 0;
@@ -11,6 +11,8 @@ function res = icp_covariance(params, current_estimate, P, valids,jindexes)
 	y=current_estimate(2);
 	theta=current_estimate(3);
 	
+	%% These are the interval to approximate the derivatives with 
+	%% the increments.
 	eps_xy = 0.000001;
 	eps_t = deg2rad(0.01);
 	
@@ -35,24 +37,37 @@ function res = icp_covariance(params, current_estimate, P, valids,jindexes)
 		v_j1 = p_j1 / norm(p_j1);
 		v_j2 = p_j2 / norm(p_j2);
 		
+		%% The following is ugly but conceptually simple:
+		%% we define an error function E_k and then we derive it numerically.
+		
+		%% Note that we use the Matlab lambda-notation 
+		%%    func = @(x) x^2
+		%% who would have thought that also Matlab can be Lispy? :-)
+		
+		%% The error function is the traditional point-to-segment distance (squared)
 		E_k = @(rho_i_, rho_j1_, rho_j2_, x_, y_, theta_) ...
-			20*norm(...
+			norm(...
 				transform(v_i*rho_i_, [x_;y_;theta_])  ... 
 				- ...
 				closest_point_on_segment(v_j1*rho_j1_, v_j2*rho_j2_, ...
 					transform(v_i*rho_i_, [x_;y_;theta_])) ...
 			)^(2);
+				%% first point p_i transformed by current estimate
+				%% and the closest point on the segment
 	
+		%% First derivative
 		gradEk = @(rho_i_, rho_j1_, rho_j2_, x_, y_, theta_) ...
 			[ deriv(@(xx)E_k(rho_i_,rho_j1_,rho_j2_,xx,y_,theta_), x_, eps_xy); ...
 			  deriv(@(yy)E_k(rho_i_,rho_j1_,rho_j2_,x_,yy,theta_), y_, eps_xy); ...
 			  deriv(@(tt)E_k(rho_i_,rho_j1_,rho_j2_,x_,y_,tt), theta_, eps_t)];
 			
+		%% Second derivative
 		d2Ek_dx2 = @(rho_i_, rho_j1_, rho_j2_, x_, y_, theta_) ...
 			[ deriv(@(xx)gradEk(rho_i_,rho_j1_,rho_j2_,xx,y_,theta_), x_, eps_xy) ...
 			  deriv(@(yy)gradEk(rho_i_,rho_j1_,rho_j2_,x_,yy,theta_), y_, eps_xy) ...
 			  deriv(@(tt)gradEk(rho_i_,rho_j1_,rho_j2_,x_,y_,tt), theta_, eps_t)];
 
+		%% The noise has three components: epsilon_i, epsilon_j1, epsilon_j2
 		d2Ek_dxdei = @(rho_i_, rho_j1_, rho_j2_, x_, y_, theta_) ...
 			deriv(@(ei)gradEk(ei,rho_j1_,rho_j2_,x_,y_,theta_), rho_i_, eps_xy);
 	
