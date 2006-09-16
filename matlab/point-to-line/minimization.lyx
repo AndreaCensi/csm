@@ -1,0 +1,200 @@
+#LyX 1.4.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 245
+\begin_document
+\begin_header
+\textclass article
+\begin_preamble
+\newcommand{\fq}{\mathbf{q}}
+\newcommand{\fp}{\mathbf{p}}
+\newcommand{\fa}{\varphi}
+\newcommand{\ft}{\mathbf{t}}
+\newcommand{\fc}{C}
+\newcommand{\fx}{\mathbf{x}}
+\newcommand{\vers}[1]{\methbf{v}(#1)}
+\end_preamble
+\language english
+\inputencoding auto
+\fontscheme default
+\graphics default
+\paperfontsize default
+\spacing single
+\papersize default
+\use_geometry false
+\use_amsmath 1
+\cite_engine basic
+\use_bibtopic false
+\paperorientation portrait
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\defskip medskip
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\end_header
+
+\begin_body
+
+\begin_layout Standard
+Consider the following minimization problem:
+\begin_inset Formula \[
+\min\sum_{k}|\fq_{k}-R_{\fa}\fp_{k}-\ft|_{\fc}\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Let 
+\begin_inset Formula $v(\theta):=[\cos\theta;\sin\theta]$
+\end_inset
+
+.
+ Rewrite as:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \[
+\min\sum_{k}|M_{k}\fx|_{\fc}=\min\sum_{k}\fx^{T}M_{k}^{T}\fc M_{k}\fx=\min\fx^{T}\left(\sum_{k}M_{k}^{T}\fc_{k}M_{k}\right)\fx\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Constraint is 
+\begin_inset Formula \[
+\fx^{T}W\fx=1\]
+
+\end_inset
+
+Solve using Lagrange's multipliers:
+\begin_inset Formula \[
+L(\fx)=\frac{1}{2}\fx^{T}M\fx+k^{T}\fx+\lambda(\fx^{T}W\fx-1)\]
+
+\end_inset
+
+
+\begin_inset Formula \[
+\frac{\partial L}{\partial\fx}=\fx^{T}M+k^{T}+2\lambda\fx^{T}W=0\]
+
+\end_inset
+
+
+\begin_inset Formula \[
+\fx=\left(M+2\lambda W\right)^{-T}k^{T}\]
+
+\end_inset
+
+putting this into the constraint:
+\begin_inset Formula \[
+k\left(M+2\lambda W\right)^{-1}W\left(M+2\lambda W\right)^{-T}k=1\]
+
+\end_inset
+
+This is a fourth order polynomial in 
+\begin_inset Formula $\lambda$
+\end_inset
+
+.
+ Partition the matrix 
+\begin_inset Formula $\left(M+2\lambda W\right)$
+\end_inset
+
+ into four sub-matrixes:
+\begin_inset Formula \[
+M=\left[\begin{array}{cc}
+A & B\\
+C & \left(D+2\lambda I\right)\end{array}\right]\]
+
+\end_inset
+
+because 
+\begin_inset Formula $W=\left[\begin{array}{cc}
+0 & 0\\
+0 & I\end{array}\right]$
+\end_inset
+
+, it is needed to compute only the last column of 
+\begin_inset Formula $M^{-1}$
+\end_inset
+
+ which is given by the matrix inversion lemma as:
+\begin_inset Formula \[
+\left[\begin{array}{cc}
+A & B\\
+C & \left(D+2\lambda I\right)\end{array}\right]^{-1}=\left[\begin{array}{cc}
+\ast & -A^{-1}BQ^{-1}\\
+\ast & Q^{-1}\end{array}\right]\]
+
+\end_inset
+
+With 
+\begin_inset Formula $Q=\left(D-CA^{-1}B+2\lambda I\right):=\left(S+2\lambda I\right)$
+\end_inset
+
+.
+ Also
+\begin_inset Formula \[
+\left(S+2\lambda I\right)^{-1}=\frac{S^{A}+2\lambda I}{p(\lambda)}\]
+
+\end_inset
+
+where 
+\begin_inset Formula $p(\lambda)=\det\left(S+2\lambda I\right)$
+\end_inset
+
+.
+ Partition 
+\begin_inset Formula $k$
+\end_inset
+
+ into 
+\begin_inset Formula $[k_{1};k_{2}]$
+\end_inset
+
+.
+ The constraint now appears as
+\begin_inset Formula \[
+\left[\begin{array}{c}
+k_{1}\\
+k_{2}\end{array}\right]^{T}\left[\begin{array}{cc}
+A^{-1}BQ^{-1}Q^{-T}B^{T}A^{-T} & -A^{-1}BQ^{-1}Q^{-T}\\
+\ast & Q^{-1}Q^{-T}\end{array}\right]\left[\begin{array}{c}
+k_{1}\\
+k_{2}\end{array}\right]=1\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Because 
+\begin_inset Formula $\left(S^{A}+2\lambda I\right)\left(S^{A}+2\lambda I\right)^{T}=S^{A^{T}}S^{A}+4\lambda^{2}I+4\lambda S^{A}$
+\end_inset
+
+
+\begin_inset Formula \begin{eqnarray*}
+\lambda^{2}\cdot4k^{T}\left[\begin{array}{cc}
+A^{-1}BB^{T}A^{-T} & -A^{-1}B\\
+\ast & I\end{array}\right]k & +\\
+\lambda\cdot4k^{T}\left[\begin{array}{cc}
+A^{-1}BS^{A}B^{T}A^{-T} & -A^{-1}BS^{A}\\
+\ast & S^{A}\end{array}\right]k & +\\
+k^{T}\left[\begin{array}{cc}
+A^{-1}BS^{A^{T}}S^{A}B^{T}A^{-T} & -A^{-1}BS^{A^{T}}S^{A}\\
+\ast & S^{A^{T}}S^{A}\end{array}\right]k & = & \left(p(\lambda)\right)^{2}\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
