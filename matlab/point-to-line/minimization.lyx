@@ -1,4 +1,4 @@
-#LyX 1.4.1 created this file. For more info see http://www.lyx.org/
+#LyX 1.4.2 created this file. For more info see http://www.lyx.org/
 \lyxformat 245
 \begin_document
 \begin_header
@@ -11,6 +11,8 @@
 \newcommand{\fc}{C}
 \newcommand{\fx}{\mathbf{x}}
 \newcommand{\vers}[1]{\methbf{v}(#1)}
+
+\newcommand{\rot}{\boldsymbol{R}}
 \end_preamble
 \language english
 \inputencoding auto
@@ -41,7 +43,44 @@
 \begin_layout Standard
 Consider the following minimization problem:
 \begin_inset Formula \[
-\min\sum_{k}|\fq_{k}-R_{\fa}\fp_{k}-\ft|_{\fc}\]
+\min\sum_{k}|R(\fa)\fp_{k}+\ft-\fq_{k}|_{\fc_{k}}\]
+
+\end_inset
+
+2Setting 
+\begin_inset Formula $P_{k}=\left[\begin{array}{cc}
+\fp_{k1} & -\fp_{k2}\\
+\fp_{k2} & \fp_{k1}\end{array}\right]=\left[\begin{array}{cc}
+\fp_{k} & \rot(\pi/2)\fp_{k}\end{array}\right]$
+\end_inset
+
+, 
+\begin_inset Formula $\fx=\left[\begin{array}{c}
+\ft\\
+\cos\fa\\
+\sin\fa\end{array}\right]$
+\end_inset
+
+, 
+\begin_inset Formula $M_{k}=\left[\begin{array}{cc}
+I_{2\times2} & P_{k}\end{array}\right]$
+\end_inset
+
+, 
+\begin_inset Formula $W=\left[\begin{array}{cc}
+0 & 0\\
+0 & I\end{array}\right]$
+\end_inset
+
+, this can be written as
+\begin_inset Formula \[
+\min J(\fx)=\sum_{k}|\left(M_{k}\fx-\fq_{k}\right)^{T}\fc_{k}\left(M_{k}\fx-\fq_{k}\right)\]
+
+\end_inset
+
+
+\begin_inset Formula \[
+\mbox{s.t.}\quad\fx^{T}W\fx=1\]
 
 \end_inset
 
@@ -49,45 +88,56 @@ Consider the following minimization problem:
 \end_layout
 
 \begin_layout Standard
-Let 
-\begin_inset Formula $v(\theta):=[\cos\theta;\sin\theta]$
+Now expand to obtain 
+\begin_inset Formula \[
+\sum_{k}\left(M_{k}\fx-\fq_{k}\right)^{T}\fc_{k}\left(M_{k}\fx-\fq_{k}\right)=\sum_{k}\left(\fx^{T}M_{k}^{T}\fc_{k}M_{k}\fx+\fq_{k}^{T}\fc_{k}\fq_{k}-2\fq_{k}^{T}\fc_{k}M_{k}\fx\right)\]
+
 \end_inset
 
-.
- Rewrite as:
+Therefore the new function to minimize is 
+\begin_inset Formula \[
+\min J'(\fx)=\fx^{T}\underset{M}{\underbrace{\left(\sum_{k}M_{k}^{T}\fc_{k}M_{k}\right)}}\fx+\underset{\boldsymbol{g}}{\underbrace{\left(\sum_{k}-2\fq_{k}^{T}\fc_{k}M_{k}\right)}}\fx\]
+
+\end_inset
+
+The new problem is 
+\begin_inset Formula \[
+\min J'(\fx)=\fx^{T}M\fx+\boldsymbol{g}^{T}\fx\]
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \[
-\min\sum_{k}|M_{k}\fx|_{\fc}=\min\sum_{k}\fx^{T}M_{k}^{T}\fc M_{k}\fx=\min\fx^{T}\left(\sum_{k}M_{k}^{T}\fc_{k}M_{k}\right)\fx\]
+\mbox{s.t.}\quad\fx^{T}W\fx=1\]
 
 \end_inset
 
 
 \end_layout
 
+\begin_layout Subsection
+Minimizing using Lagrange
+\end_layout
+
 \begin_layout Standard
-Constraint is 
-\begin_inset Formula \[
-\fx^{T}W\fx=1\]
-
-\end_inset
-
 Solve using Lagrange's multipliers:
 \begin_inset Formula \[
-L(\fx)=\frac{1}{2}\fx^{T}M\fx+k^{T}\fx+\lambda(\fx^{T}W\fx-1)\]
+L(\fx)=\fx^{T}M\fx+g^{T}\fx+\lambda(\fx^{T}W\fx-1)\]
 
 \end_inset
 
 
 \begin_inset Formula \[
-\frac{\partial L}{\partial\fx}=\fx^{T}M+k^{T}+2\lambda\fx^{T}W=0\]
+\frac{\partial L}{\partial\fx}=2\fx^{T}M+g^{T}+2\lambda\fx^{T}W=0\]
 
 \end_inset
 
 
 \begin_inset Formula \[
-\fx=\left(M+2\lambda W\right)^{-T}k^{T}\]
+\fx=\left(2M+2\lambda W\right)^{-T}k^{T}\]
 
 \end_inset
 
@@ -110,7 +160,7 @@ This is a fourth order polynomial in
 \begin_inset Formula \[
 M=\left[\begin{array}{cc}
 A & B\\
-C & \left(D+2\lambda I\right)\end{array}\right]\]
+B^{T} & D+2\lambda I\end{array}\right]\]
 
 \end_inset
 
@@ -121,53 +171,29 @@ because
 \end_inset
 
 , it is needed to compute only the last column of 
-\begin_inset Formula $M^{-1}$
+\begin_inset Formula $(M+2\lambda W)^{-1}$
 \end_inset
 
  which is given by the matrix inversion lemma as:
 \begin_inset Formula \[
 \left[\begin{array}{cc}
 A & B\\
-C & \left(D+2\lambda I\right)\end{array}\right]^{-1}=\left[\begin{array}{cc}
+B^{T} & \left(D+2\lambda I\right)\end{array}\right]^{-1}=\left[\begin{array}{cc}
 \ast & -A^{-1}BQ^{-1}\\
 \ast & Q^{-1}\end{array}\right]\]
 
 \end_inset
 
 With 
-\begin_inset Formula $Q=\left(D-CA^{-1}B+2\lambda I\right):=\left(S+2\lambda I\right)$
+\begin_inset Formula $Q=\left(D-B^{T}A^{-1}B+2\lambda I\right):=\left(S+2\lambda I\right)$
 \end_inset
 
 .
- Also
+ The constraint now appears as 
 \begin_inset Formula \[
-\left(S+2\lambda I\right)^{-1}=\frac{S^{A}+2\lambda I}{p(\lambda)}\]
-
-\end_inset
-
-where 
-\begin_inset Formula $p(\lambda)=\det\left(S+2\lambda I\right)$
-\end_inset
-
-.
- Partition 
-\begin_inset Formula $k$
-\end_inset
-
- into 
-\begin_inset Formula $[k_{1};k_{2}]$
-\end_inset
-
-.
- The constraint now appears as
-\begin_inset Formula \[
-\left[\begin{array}{c}
-k_{1}\\
-k_{2}\end{array}\right]^{T}\left[\begin{array}{cc}
+g^{T}\left[\begin{array}{cc}
 A^{-1}BQ^{-1}Q^{-T}B^{T}A^{-T} & -A^{-1}BQ^{-1}Q^{-T}\\
-\ast & Q^{-1}Q^{-T}\end{array}\right]\left[\begin{array}{c}
-k_{1}\\
-k_{2}\end{array}\right]=1\]
+\ast & Q^{-1}Q^{-T}\end{array}\right]g=1\]
 
 \end_inset
 
@@ -175,8 +201,29 @@ k_{2}\end{array}\right]=1\]
 \end_layout
 
 \begin_layout Standard
+Also
+\begin_inset Formula \[
+\left(S+2\lambda I\right)^{-1}=\frac{S^{A}+2\lambda I}{p(\lambda)}\]
+
+\end_inset
+
+where 
+\begin_inset Formula $S^{A}=inv(S)*det(S)$
+\end_inset
+
+ and 
+\begin_inset Formula $p(\lambda)=\det\left(S+2\lambda I\right)$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
 Because 
-\begin_inset Formula $\left(S^{A}+2\lambda I\right)\left(S^{A}+2\lambda I\right)^{T}=S^{A^{T}}S^{A}+4\lambda^{2}I+4\lambda S^{A}$
+\begin_inset Formula \[
+Q^{-1}Q^{-T}=\frac{\left(S^{A}+2\lambda I\right)\left(S^{A}+2\lambda I\right)^{T}}{p(\lambda)^{2}}=\frac{S^{A}S^{A^{T}}+4\lambda^{2}I+4\lambda S^{A}}{p(\lambda)^{2}}\]
+
 \end_inset
 
 
