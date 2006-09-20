@@ -95,7 +95,7 @@ function res = icp_covariance(params, current_estimate, P, valids, jindexes)
 		
 		k=k+1;
 	end
-	
+	                                                
 	dA_dz = inv(G2tot) * [dgE_di dgE_dj];
 	
 	%Etot
