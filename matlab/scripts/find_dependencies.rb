@@ -2,12 +2,25 @@
 
 require 'getoptlong'
 
+def help
+<<EOF
+
+	This script parses a Matlab script and finds its dependencies on
+	other scripts.
+
+EOF
+end
+
 class DB
+	# Files required (full path)
 	attr_accessor :required
+	# Functione whose file was not found
+	attr_accessor :notfound
 	
 	def initialize()
 		@name2file = Hash.new
 		@required = Array.new
+		@notfound = Array.new
 	end
 
 	def explore_directory(d)
@@ -16,19 +29,24 @@ class DB
 		Dir.glob('**/*.m').each do |x| 
 			name = File.basename(x,'.m');
 			@name2file[name]=File.join(d, x);
-		#	puts "Found function #{name} in file #{x}."
+#			puts "Found function '#{name}' in file #{x}."
 		end
 		Dir.chdir(pwd)
 	end
 	
 	def need_function(n)
-		return if @required.include?(@name2file[n])
-	
+		if @required.include?(@name2file[n])
+#			$stderr.puts "Dependency '#{n}' already got."
+			return
+		end
+		
 		if @name2file.has_key?(n) 
+#			$stderr.puts "Dependency '#{n}' Found!"
 			@required.push @name2file[n]
 			parse_file(@name2file[n]);
 		else
-			$stderr.puts "Dependency '#{n}' not found."
+			@notfound.push n if not @notfound.include? n
+#			$stderr.puts "Dependency '#{n}' not found."
 		end
 	end
 	
@@ -38,19 +56,54 @@ class DB
 	end
 	
 	def parse_io(io)
+		# variables used 
+		variables = Array.new
+		# functions defined in file
+		functions = Array.new
+		
+		# add built-ins
+		functions.push(*['find','if','eye','fprintf','sum','axis',
+			'norm','error','plot','pause','sprintf'])
+		
+		doRequires = true
 		io.each_line do |l|
+			if false
+			if l =~ /\s*function .*=\s*(\w+)/  ||
+			   l =~ /\s*function\s*(\w+)/
+				# puts "Defined function #{$1}"
+				functions.push $1
+			end
+			l.split(';').each do |statement|
+				if statement =~ %r|\s*(\w+)\s*=| ||
+				   statement =~ %r|(\w+)(\(.*\))*\s*=|
+					# puts "Is #{$1} a variable in this? #{statement}"
+					variables.push $1
+				end
+			end
+			
+			# TODO: ignore after comments
+			# TODO: parse strings (ex: fprintf('False(%s,%s;%s)'))
+			l.scan(/(\w+)\(/) { |a| f=a[0];
+				need_function(f) unless variables.include?(f) or
+					functions.include?(f)
+			}
+
 			if l =~ /^\s*%\s*Requires:\s*(.*)$/
 				$1.split(",").each do |x| 
 					need_function(x.strip) 
 				end
 			end
+			end
+			l.scan(/([A-Za-z_]\w*)/) { |a| f=a[0];
+				need_function(f)			
+			}
 		end
 	end
 end
 
 def print_usage(error)
 	puts "create_package [--directory <dir1>,<dir2>,...]*" 
-
+	puts help
 end
 
 def go
@@ -107,6 +160,9 @@ def go
 	db.required.each do|r|
 		puts r
 	end
+
+#	$stderr.puts "Found #{db.required.size} deps. Not found: " + 
+#		db.notfound.join(", ") + "."
 	
 end
 

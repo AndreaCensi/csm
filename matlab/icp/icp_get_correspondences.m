@@ -8,7 +8,7 @@ function [P,valid,jindexes] = icp_get_correspondences(params,current_estimate)
 		[from, to] = icp_possible_interval(p_i_w, params.laser_ref,...
 			params.maxAngularCorrectionDeg, params.maxLinearCorrection);
 		
-		% find best correspondence
+		%% Find best correspondence
 		best_j = 0; best_dist = 0;
 		for j=from:to
 			% Find compatible interval in the other scan. 
@@ -29,7 +29,7 @@ function [P,valid,jindexes] = icp_get_correspondences(params,current_estimate)
 			valid(i) = 0;
 			jindexes(i,:)=[nan;nan];
 		else
-			% find other point to interpolate
+			%% Find other point to interpolate
 			if best_j==1
 				other_j = best_j + 1;
 				other = params.laser_ref.points(:,best_j+1);
