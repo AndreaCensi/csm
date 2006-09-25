@@ -153,6 +153,7 @@ def go
 		db.parse_io($stdin);
 	else
 		files.each do |x|
+			db.required.push(Filename.expand(x))
 			db.parse_file(x)
 		end
 	end
