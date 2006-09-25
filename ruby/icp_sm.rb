@@ -17,7 +17,23 @@ puts "Start processing: #{log.size}"
 ld_ref = next_ld(log)
 until log.empty?
 	ld_new = next_ld(log)
+	min_step = 0.3
+	if (ld_new.odometry[0,1]-ld_ref.odometry[0,1]).nrm2 <= min_step
+		# todo: merge readings
+		puts "Skipping (same odometry)"
+		next
+	end
 
-	icp = ICP.new(ld_ref, ld_new);
+	icp = ICP.new
+
+	icp.params[:maxAngularCorrectionDeg]= 15
+	icp.params[:maxLinearCorrection]=  0.5
+
+	icp.params[:laser_ref] = ld_ref;
+	icp.params[:laser_sens] = ld_new;
+	icp.params[:firstGuess] = Pose.minus(ld_new.odometry, ld_ref.odometry)
+	
 	icp.scan_matching
+	
+	ld_ref = ld_new;
 end

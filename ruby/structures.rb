@@ -9,11 +9,26 @@ class Event
 	
 end
 
-class Pose 
-#	def initialize
-		#alloc(GSL::NAN,GSL::NAN,GSL::NAN)
-#	end
+module MathUtils
+	include Math
+	public
 	
+	## versor
+	def vers(a); GSL::Vector.alloc(cos(a), sin(a)); end
+
+	## 2x2 rotation matrix
+	def rot(a)
+		GSL::Matrix[[cos(a), -sin(a)], [sin(a), cos(a)]]
+	end
+	
+	def transform(point, x)
+		t = x[0,1]; theta = x[2];
+		rot(theta)*point + t
+	end
+end
+
+module Pose 
+
 	def Pose.parse_tokens(tokens)
 		v = GSL::Vector.alloc(GSL::NAN,GSL::NAN,GSL::NAN)
 		v[0] = tokens.shift.to_f
@@ -22,11 +37,15 @@ class Pose
 		v
 	end
 	
-	def oplus(v1,v2)
+	def minus(x2,x1)
 	
 	end
 	
-	def ominus(v)
+	def oplus(x1,x2)
+	
+	end
+	
+	def ominus(x)
 	
 	end
 	
@@ -39,10 +58,19 @@ class Pose
 	end
 end
 
-class LaserPoint
+class LaserPoint 
+	include MathUtils
+	
 	attr_accessor :reading
 	attr_accessor :intensity
 	attr_accessor :theta
+	attr_accessor :valid
+	
+	def valid?
+		@valid
+	end
+	
+	def cartesian; vers(theta)*reading; end
 end
 
 class LaserData < Event
@@ -58,18 +86,28 @@ class LaserData < Event
 	attr_accessor :max_theta
 	
 	public
+	
+	# Parses a CARMEN line
 	def LaserData.convert_line(l)
 		ld = LaserData.new
 		tokens = l.split
 		tokens.shift
 		ld.nrays = tokens.shift.to_i
 		
-		if ld.nrays <= 0 then raise "Bad no. of rays (#{ld.nrays}) in '#{l}'"  end
-		if tokens.size < ld.nrays+9 then raise "Line incomplete: '#{l}'" end
+		if ld.nrays <= 0
+			raise "Bad no. of rays (#{ld.nrays}) in '#{l}'"  end
+		if tokens.size < ld.nrays+9 
+			then raise "Line incomplete: '#{l}'" end
 		
+		ld.min_reading   = 0.1;
+		ld.max_reading   = 49;
+		ld.min_theta     = -PI/2;
+		ld.max_theta     =  PI/2;
+
 		ld.points = Array.new
 		ld.nrays.times do |a|
-			if tokens.empty? then raise "Could not read ray#{a} in '#{l}'" end
+			if tokens.empty? 
+				raise "Could not read ray#{a} in '#{l}'" end
 	
 			p = LaserPoint.new
 			p.theta = -PI/2 + a*PI/ld.nrays
@@ -79,14 +117,11 @@ class LaserData < Event
 			if (not p.reading) || (p.reading<0)
 				raise "Bad value (#{p.reading}) for ray#{a} in '#{l}'"
 			end
+			p.valid = (p.reading < ld.max_reading) && (p.reading > ld.min_reading)
 			
 			ld.points.push p
 		end
 		
-		ld.min_reading   = 0.1;
-		ld.max_reading   = 49;
-		ld.min_theta     = -PI/2;
-		ld.max_theta     =  PI/2;
 		ld.estimate      = Pose.parse_tokens(tokens);
 		ld.odometry      = Pose.parse_tokens(tokens);
 		ld.ipc_timestamp = tokens.shift
