@@ -2,6 +2,8 @@
 require 'logreader'
 require 'icp'
 
+include Pose
+
 log = LogReader.read_log($stdin)
 
 def next_ld(log)
@@ -17,8 +19,8 @@ puts "Start processing: #{log.size}"
 ld_ref = next_ld(log)
 until log.empty?
 	ld_new = next_ld(log)
-	min_step = 0.3
-	if (ld_new.odometry[0,1]-ld_ref.odometry[0,1]).nrm2 <= min_step
+	min_step = 0.1
+	if (ld_new.odometry[0,1]-ld_ref.odometry[0,1]).nrm2 <= min_step 
 		# todo: merge readings
 		puts "Skipping (same odometry)"
 		next
@@ -26,12 +28,12 @@ until log.empty?
 
 	icp = ICP.new
 
-	icp.params[:maxAngularCorrectionDeg]= 15
-	icp.params[:maxLinearCorrection]=  0.5
+	icp.params[:maxAngularCorrectionDeg]= 10
+	icp.params[:maxLinearCorrection]=  0.4
 
 	icp.params[:laser_ref] = ld_ref;
 	icp.params[:laser_sens] = ld_new;
-	icp.params[:firstGuess] = Pose.minus(ld_new.odometry, ld_ref.odometry)
+#	icp.params[:firstGuess] = Pose.minus(ld_new.odometry, ld_ref.odometry)
 	
 	icp.scan_matching
 	

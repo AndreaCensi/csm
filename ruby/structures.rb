@@ -17,8 +17,8 @@ module MathUtils
 	def vers(a); GSL::Vector.alloc(cos(a), sin(a)); end
 
 	## 2x2 rotation matrix
-	def rot(a)
-		GSL::Matrix[[cos(a), -sin(a)], [sin(a), cos(a)]]
+	def MathUtils.rot(a)
+		GSL::Matrix[[Math.cos(a), -Math.sin(a)], [Math.sin(a), Math.cos(a)]]
 	end
 	
 	def transform(point, x)
@@ -38,7 +38,7 @@ module Pose
 	end
 	
 	def minus(x2,x1)
-	
+		x2-x1
 	end
 	
 	def oplus(x1,x2)

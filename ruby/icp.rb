@@ -59,12 +59,13 @@ class ICP
 		for iteration in 1..params[:maxIterations]
 			puts "Iteration #{iteration}"
 		
-			find_correspondences(x_old);
+			find_correspondences(x_old)
 		
 			x_new = compute_next_estimate
 
-			delta = Pose.minus(x_new, x_old);
-	
+#			delta = Pose.minus(x_new, x_old);
+			delta = x_new - x_old
+			
 			puts "x_new = #{x_new}"
 			puts "delta = #{delta} eps = #{ params[:epsilon_xy] }"
 		
@@ -124,6 +125,28 @@ class ICP
 		laser_sens = params[:laser_sens];
 		ld = laser_sens
 		last_diff = 0
+		
+		dbg_num_a1 = 0
+		last_best = nil
+		if false
+		diffs = (1..laser_ref.nrays-1).map{ |j| (laser_ref.points[j].reading- 
+			laser_ref.points[j-1].reading).abs}
+		
+		diffs_big = diffs.map{|x| x>1 ? x : nil}
+		diffs_small = diffs.map{|x| x<1 ? x : nil}
+		
+		diffs_big_up = (0..laser_ref.nrays-2).map{ |j| 
+			diffs_big[j,j+30].compact.min
+		}
+		diffs_small_up = (0..laser_ref.nrays-2).map{ |j| 
+			diffs_small[j,j+30].compact.max
+		}
+		puts "diff_bi = #{diffs_big.join(',')}"
+		puts "diff_sm = #{diffs_small.join(',')}"
+		puts "diff_bi_up = #{diffs_big_up.join(',')}"
+		puts "diff_sm_up = #{diffs_small_up.join(',')}"
+		end
+
 		for i in 0..laser_sens.nrays-1
 			if not laser_sens.points[i].valid?
 				@correspondences[i] = nil
@@ -151,12 +174,7 @@ class ICP
 			
 			from = [ld.nrays-1, [(start_cell-range).floor,0].max ].min
 			to =  [0, [(start_cell+range).ceil,ld.nrays-1].min ].max
-#		from = 0; to = 300;
-			
-#			from, to, start_cell, range = 
-#			   ICP.possible_interval(p_i_w, laser_ref,
-#				params[:maxAngularCorrectionDeg], params[:maxLinearCorrection]);
-			
+		
 			## Find best correspondence
 			best_j = nil;
 			if false
@@ -182,25 +200,38 @@ class ICP
 				$stderr.write " -> #{best_j} (#{i-best_j})\n" if DESCRIBE
 			end
 			
-			
-			up = (start_cell+last_diff)-1; up_stopped = false;
-			down = (start_cell+last_diff); down_stopped = false;
-			now_up = false
+#			we_start_at = start_cell+last_diff;
+			we_start_at = last_best.nil? ? start_cell : last_best
+			up = we_start_at-1; up_stopped = false;
+			down = we_start_at; down_stopped = false;
+			last_dist_up = -1; # first is up
+			last_dist_down = 0;	
 			best = nil
 			best_dist = 1000
+			$stderr.write "[#{start_cell}]" if DESCRIBE
 
+		#	now_up = false
  			while (not up_stopped) or (not down_stopped)
-				now_up = now_up ? false : true 
+				dbg_num_a1 += 1
+				
+				if up_stopped then now_up = false else
+					if down_stopped then now_up = true else
+						
+						now_up = last_dist_up<last_dist_down
+#						now_up = now_up ? false : true
+					end
+				end
+					
 				if now_up 
 					next if up_stopped
 					up += 1
-					$stderr.write " #{up} " if DESCRIBE
+					$stderr.write " + #{up} " if DESCRIBE
 					if up > to then up_stopped = true; next end
 					if @p_j[up].nil? then next end
-					dist = (p_i_w - @p_j[up]).nrm2
-					if dist < best_dist
+					last_dist_up = (p_i_w - @p_j[up]).nrm2
+					if last_dist_up < best_dist
 						$stderr.write "*" if DESCRIBE
-						best = up; best_dist = dist;
+						best = up; best_dist = last_dist_up;
 					end
 					delta_theta = ([up-start_cell,0].max).abs * (PI/laser_ref.nrays)
 					min_dist_up = sin(delta_theta) * p_i_w_nrm2
@@ -212,13 +243,13 @@ class ICP
 				else
 					next if down_stopped
 					down -= 1
-					$stderr.write " #{down} " if DESCRIBE
+					$stderr.write " - #{down} " if DESCRIBE
 					if down < from then down_stopped = true; next end
 					if @p_j[down].nil? then next end
-					dist = (p_i_w - @p_j[down]).nrm2
-					if dist < best_dist
+					last_dist_down = (p_i_w - @p_j[down]).nrm2
+					if last_dist_down < best_dist
 						$stderr.write "*" if DESCRIBE
-						best = down; best_dist = dist;
+						best = down; best_dist = last_dist_down;
 					end
 					delta_theta = ([start_cell-down,0].max).abs*(PI/laser_ref.nrays)
 					min_dist_down = sin(delta_theta) * p_i_w_nrm2
@@ -229,12 +260,16 @@ class ICP
 					end
 				end
 			end
+			
 			last_diff = best - start_cell
-			puts "\n#{i} --> #{best}" if DESCRIBE
+			last_best = best;
+			
+			puts "\n#{i} --> #{best} " if DESCRIBE
 			
 			if (not best_j.nil?) and (best!=best_j)
 				puts "\n#{i} --> #{best_j} != #{best} (#{best_j_dist}, #{best_dist})" 
 			end
+			best_j = best
 			
 			## If no point is close enough, or closest point is one 
 			## of the extrema, then discard
@@ -263,6 +298,9 @@ class ICP
 		#	puts "i = #{i}, j1 = #{best_j}, j2 = #{other_j}"
 			
 		end # i in first scan 
+		puts "j: " + @correspondences.map { |c| c.nil? ? nil: c.j1 }.join(",")
+
+		puts "#{dbg_num_a1}"
 		
 	end
 	
