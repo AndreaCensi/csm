@@ -2,29 +2,37 @@
 require 'logreader'
 require 'icp'
 
-include Pose
+def scan_matching
+	include MathUtils
+	
+	log = LogReader.read_log($stdin)
 
-log = LogReader.read_log($stdin)
-
-def next_ld(log)
+	def next_ld(log)
 #	do
 #		e = log.shift
 #		if e.kind_of? LaserData then e
 #	until e.kind_of?(LaserData)
 	log.shift
-end
+	end
 
-puts "Start processing: #{log.size}"
+	puts "Start processing: #{log.size}"
 
-ld_ref = next_ld(log)
-until log.empty?
+	ld_ref = next_ld(log)
+	until log.empty?
 	ld_new = next_ld(log)
-	min_step = 0.1
+	min_step = 0.01
+
 	if (ld_new.odometry[0,1]-ld_ref.odometry[0,1]).nrm2 <= min_step 
 		# todo: merge readings
 		puts "Skipping (same odometry)"
 		next
 	end
+
+	puts "Ref: #{pv(ld_ref.odometry)}"
+	puts "New: #{pv(ld_new.odometry)}"
+	u =  pose_diff(ld_new.odometry, ld_ref.odometry)
+	puts "u: #{pv(u)}"
+
 
 	icp = ICP.new
 
@@ -33,9 +41,12 @@ until log.empty?
 
 	icp.params[:laser_ref] = ld_ref;
 	icp.params[:laser_sens] = ld_new;
-#	icp.params[:firstGuess] = Pose.minus(ld_new.odometry, ld_ref.odometry)
-	
+	icp.params[:firstGuess] = u
+
 	icp.scan_matching
-	
+
 	ld_ref = ld_new;
+	end
 end
+
+scan_matching

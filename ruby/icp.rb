@@ -1,10 +1,7 @@
 require 'gsl'
 require 'structures'
 
-module GSL
-	def deg2rad(d); d * Math::PI / 180; end
-	def rad2deg(d); d / Math::PI * 180; end
-end
+
 
 class ICP < Hash
 	include GSL
@@ -29,7 +26,7 @@ class ICP < Hash
 		param :firstGuess,         Vector.alloc(0,0,0)
 		param :interactive,  false
 		param :epsilon_xy,  0.001
-		param :epsilon_theta,  deg2rad(0.01)
+		param :epsilon_theta,   MathUtils.deg2rad(0.01)
 		param :sigma,           0.01
 		param :do_covariance,  false
 	end
@@ -56,18 +53,18 @@ class ICP
 		end
 		
 		x_old = params[:firstGuess]
+		puts "0 x_old = #{pv(x_old)}"
+		
 		for iteration in 1..params[:maxIterations]
-			puts "Iteration #{iteration}"
+#			puts "Iteration #{iteration}"
 		
 			find_correspondences(x_old)
 		
 			x_new = compute_next_estimate
 
-#			delta = Pose.minus(x_new, x_old);
-			delta = x_new - x_old
+			delta = pose_diff(x_new, x_old)
 			
-			puts "x_new = #{x_new}"
-			puts "delta = #{delta} eps = #{ params[:epsilon_xy] }"
+			puts "#{iteration} x_new = #{pv(x_new)} delta = #{pv(delta)}"
 		
 			if delta[0,1].nrm2 < params[:epsilon_xy] &&
 			   delta[2].abs < params[:epsilon_theta]
@@ -75,7 +72,7 @@ class ICP
 				break
 			end
 			
-			x_old = x_new;
+			x_old = x_new
 		end
 		
 	end
@@ -175,7 +172,7 @@ class ICP
 			from = [ld.nrays-1, [(start_cell-range).floor,0].max ].min
 			to =  [0, [(start_cell+range).ceil,ld.nrays-1].min ].max
 		
-			## Find best correspondence
+			## Find best correspondence with exact algorithm
 			best_j = nil;
 			if false
 				best_j_dist = 0;
@@ -197,11 +194,20 @@ class ICP
 						best_j = j; best_j_dist = dist;
 					end
 				end
-				$stderr.write " -> #{best_j} (#{i-best_j})\n" if DESCRIBE
+				
+				if best_j.nil?
+					$stderr.write " -> NO CORR. \n" if DESCRIBE
+				else	
+					$stderr.write " -> #{best_j} (#{i-best_j})\n" if DESCRIBE
+				end
 			end
 			
 #			we_start_at = start_cell+last_diff;
 			we_start_at = last_best.nil? ? start_cell : last_best
+			
+			we_start_at = [from, we_start_at].max
+			we_start_at = [to, we_start_at].min
+			
 			up = we_start_at-1; up_stopped = false;
 			down = we_start_at; down_stopped = false;
 			last_dist_up = -1; # first is up
@@ -267,7 +273,7 @@ class ICP
 			puts "\n#{i} --> #{best} " if DESCRIBE
 			
 			if (not best_j.nil?) and (best!=best_j)
-				puts "\n#{i} --> #{best_j} != #{best} (#{best_j_dist}, #{best_dist})" 
+				puts "\n#{i} --> bf #{best_j} (dist #{best_j_dist}) != #{best} (dist #{best_dist})" 
 			end
 			best_j = best
 			
@@ -298,14 +304,34 @@ class ICP
 		#	puts "i = #{i}, j1 = #{best_j}, j2 = #{other_j}"
 			
 		end # i in first scan 
-		puts "j: " + @correspondences.map { |c| c.nil? ? nil: c.j1 }.join(",")
+	#	puts "j: " + @correspondences.map { |c| c.nil? ? nil: c.j1 }.join(",")
 
-		puts "#{dbg_num_a1}"
+	#	puts "#{dbg_num_a1}"
 		
 	end
 	
+	require 'point2line'
+
 	def compute_next_estimate
-		Vector.alloc(0,0,0)
+		
+		laser_ref = params[:laser_ref];
+		laser_sens = params[:laser_sens];
+		
+		corrs = Array.new
+		for c in @correspondences; next if c.nil?
+			p_i  = laser_sens.points[c.i ].cartesian
+			p_j1 = laser_ref .points[c.j1].cartesian
+			p_j2 = laser_ref .points[c.j2].cartesian
+			
+			c2 = PointCorrespondence.new
+			c2.p = p_i
+#			c2.q = transform(p_i, Vector.alloc(0,0.1,deg2rad(2)))
+			c2.q = p_j1
+			v_alpha = rot(PI/2) * (p_j1-p_j2)
+			c2.C = v_alpha*v_alpha.trans
+			corrs.push c2
+		end
+		return general_minimization(corrs)
 	end
 	
 	
