@@ -89,6 +89,7 @@ module MathUtils
 			c.q =  rot(theta)* c.p+t + Vector.alloc(rand-0.5,rand-0.5)*noise;
 			alpha = alphas[i]
 			c.C = vers(alpha)*vers(alpha).trans
+#			c.C = Matrix.eye(2)
 			corr[i] = c
 		end
 		x = general_minimization(corr)

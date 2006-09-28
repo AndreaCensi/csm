@@ -1,0 +1,7 @@
+
+
+I vettori sono righe, usare col.
+
+Bug bug_gsl.rb
+
+Si conta da 0 e non da 1

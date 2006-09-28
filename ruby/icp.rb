@@ -55,16 +55,18 @@ class ICP
 		x_old = params[:firstGuess]
 		puts "0 x_old = #{pv(x_old)}"
 		
+		delta = Vector.alloc(0,0,0).col
 		for iteration in 1..params[:maxIterations]
 #			puts "Iteration #{iteration}"
 		
 			find_correspondences(x_old)
 		
-			x_new = compute_next_estimate
+			x_new = compute_next_estimate(x_old)
 
-			delta = pose_diff(x_new, x_old)
-			
-			puts "#{iteration} x_new = #{pv(x_new)} delta = #{pv(delta)}"
+			new_delta = pose_diff(x_new, x_old)
+			puts "#{iteration} x_new = #{pv(x_new)} delta = #{pv(new_delta)}"+
+				" neg #{new_delta.trans * delta>0} error #{@total_error} "
+			delta = new_delta
 		
 			if delta[0,1].nrm2 < params[:epsilon_xy] &&
 			   delta[2].abs < params[:epsilon_theta]
@@ -112,7 +114,10 @@ class ICP
 	end
 	
 	DESCRIBE = false
-	
+	VERIFY_EXACT = false
+	JUMP_TRICK = true
+	JUMP_TRICK_DELTA = 0
+		
 	def find_correspondences(x_old);
 		maxAngularCorrectionDeg = params[:maxAngularCorrectionDeg]
 		maxLinearCorrection=params[:maxLinearCorrection]
@@ -125,24 +130,49 @@ class ICP
 		
 		dbg_num_a1 = 0
 		last_best = nil
-		if false
-		diffs = (1..laser_ref.nrays-1).map{ |j| (laser_ref.points[j].reading- 
-			laser_ref.points[j-1].reading).abs}
+
 		
-		diffs_big = diffs.map{|x| x>1 ? x : nil}
-		diffs_small = diffs.map{|x| x<1 ? x : nil}
-		
-		diffs_big_up = (0..laser_ref.nrays-2).map{ |j| 
-			diffs_big[j,j+30].compact.min
-		}
-		diffs_small_up = (0..laser_ref.nrays-2).map{ |j| 
-			diffs_small[j,j+30].compact.max
-		}
-		puts "diff_bi = #{diffs_big.join(',')}"
-		puts "diff_sm = #{diffs_small.join(',')}"
-		puts "diff_bi_up = #{diffs_big_up.join(',')}"
-		puts "diff_sm_up = #{diffs_small_up.join(',')}"
+		if JUMP_TRICK
+			@up_bigger = Array.new
+			@up_smaller = Array.new
+			@down_bigger = Array.new
+			@down_smaller = Array.new
+			readings = (0..laser_ref.nrays-1).map{ |j| 
+				laser_ref.points[j].reading}
+			delta = 0;
+			readings.each_index{ |i|
+				j = i + 1;
+				while (not readings[j].nil?) and 
+					readings[j]<=readings[i]+JUMP_TRICK_DELTA
+					j += 1;
+				end
+				@up_bigger[i] = j-i;
+
+				j = i + 1;
+				while (not readings[j].nil?) and 
+					readings[j]+JUMP_TRICK_DELTA>=readings[i]
+					j += 1;
+				end
+				@up_smaller[i] = j-i;
+
+				j = i - 1;
+				while (not readings[j].nil?) and 
+					readings[j]+JUMP_TRICK_DELTA>=readings[i]
+					j -= 1;
+				end
+				@down_smaller[i] = j-i;
+				
+				j = i - 1;
+				while (not readings[j].nil?) and 
+					readings[j]<=readings[i]+JUMP_TRICK_DELTA
+					j -= 1;
+				end
+				@down_bigger[i] = j-i;
+				
+			}
 		end
+#		puts "Bigger:  #{@down_bigger. join(',')}"
+#		puts "Smaller: #{@down_smaller.join(',')}"
 
 		for i in 0..laser_sens.nrays-1
 			if not laser_sens.points[i].valid?
@@ -174,7 +204,7 @@ class ICP
 		
 			## Find best correspondence with exact algorithm
 			best_j = nil;
-			if false
+			if VERIFY_EXACT
 				best_j_dist = 0;
 				$stderr.write "#{i}: " if DESCRIBE
 				for j in from..to
@@ -208,30 +238,26 @@ class ICP
 			we_start_at = [from, we_start_at].max
 			we_start_at = [to, we_start_at].min
 			
-			up = we_start_at-1; up_stopped = false;
+			up =  we_start_at+1; up_stopped = false;
 			down = we_start_at; down_stopped = false;
 			last_dist_up = -1; # first is up
 			last_dist_down = 0;	
 			best = nil
 			best_dist = 1000
-			$stderr.write "[#{start_cell}]" if DESCRIBE
+			$stderr.write "[from #{from} d #{down} s #{start_cell} u #{up} to #{to}]" if DESCRIBE
 
 		#	now_up = false
  			while (not up_stopped) or (not down_stopped)
 				dbg_num_a1 += 1
 				
-				if up_stopped then now_up = false else
-					if down_stopped then now_up = true else
-						
-						now_up = last_dist_up<last_dist_down
+				now_up =   up_stopped ? false : 
+				         down_stopped ? true  : last_dist_up < last_dist_down
 #						now_up = now_up ? false : true
-					end
-				end
-					
+				
+				$stderr.write " |" if DESCRIBE
+				
 				if now_up 
-					next if up_stopped
-					up += 1
-					$stderr.write " + #{up} " if DESCRIBE
+					$stderr.write "up=#{up} " if DESCRIBE
 					if up > to then up_stopped = true; next end
 					if @p_j[up].nil? then next end
 					last_dist_up = (p_i_w - @p_j[up]).nrm2
@@ -242,14 +268,28 @@ class ICP
 					delta_theta = ([up-start_cell,0].max).abs * (PI/laser_ref.nrays)
 					min_dist_up = sin(delta_theta) * p_i_w_nrm2
 					if min_dist_up > best_dist then 
-						$stderr.write "stop up " if DESCRIBE
+						$stderr.write "stop" if DESCRIBE
 						up_stopped = true
 						next 
 					end
+					if JUMP_TRICK && (up>start_cell)
+						if @p_j[up].nrm2 < p_i_w_nrm2 && 
+							(not @up_bigger[up].nil?) then
+							$stderr.write " J+(#{@up_bigger[up]})" if DESCRIBE
+							up += @up_bigger[up]
+							next
+						end
+				
+						if @p_j[up].nrm2 > p_i_w_nrm2 && 
+							(not @up_smaller[up].nil?) then
+							$stderr.write " J-(#{@up_smaller[up]})" if DESCRIBE
+							up += @up_smaller[up]
+							next
+						end
+					end
+					up+= 1
 				else
-					next if down_stopped
-					down -= 1
-					$stderr.write " - #{down} " if DESCRIBE
+					$stderr.write "dn=#{down} " if DESCRIBE
 					if down < from then down_stopped = true; next end
 					if @p_j[down].nil? then next end
 					last_dist_down = (p_i_w - @p_j[down]).nrm2
@@ -260,10 +300,26 @@ class ICP
 					delta_theta = ([start_cell-down,0].max).abs*(PI/laser_ref.nrays)
 					min_dist_down = sin(delta_theta) * p_i_w_nrm2
 					if min_dist_down > best_dist then 
-						$stderr.write "stop down" if DESCRIBE
+						$stderr.write "stop" if DESCRIBE
 						down_stopped = true
 						next 
 					end
+					if JUMP_TRICK && (down<start_cell)
+						if @p_j[down].nrm2+JUMP_TRICK_DELTA < p_i_w_nrm2 &&
+							(not @down_bigger[down].nil?) then
+							$stderr.write " J+(#{@down_bigger[down]})" if DESCRIBE
+							down += @down_bigger[down]
+							next
+						end
+				
+						if @p_j[down].nrm2 > JUMP_TRICK_DELTA+p_i_w_nrm2 &&
+							(not @down_smaller[down].nil?) then
+							$stderr.write " J-(#{@down_smaller[down]})" if DESCRIBE
+							down += @down_smaller[down]
+							next
+						end
+					end
+					down-= 1
 				end
 			end
 			
@@ -273,7 +329,15 @@ class ICP
 			puts "\n#{i} --> #{best} " if DESCRIBE
 			
 			if (not best_j.nil?) and (best!=best_j)
-				puts "\n#{i} --> bf #{best_j} (dist #{best_j_dist}) != #{best} (dist #{best_dist})" 
+				puts "\n*******\n\n#{i} --> bf #{best_j} (dist #{best_j_dist}) != #{best} (dist #{best_dist})" 
+			
+				for j in ([best_j-15,0].max)..([best_j+15,laser_ref.nrays].min)
+					puts "ray #{j} reading #{@p_j[j].nil? ? 'nil' : @p_j[j].nrm2}"+
+					" upBig #{@up_bigger[j]} upS #{@up_smaller[j]} "+
+					" dnBig #{@down_bigger[j]} dnS #{@down_smaller[j]} "
+				end
+				puts "\n\n"
+				exit
 			end
 			best_j = best
 			
@@ -306,17 +370,20 @@ class ICP
 		end # i in first scan 
 	#	puts "j: " + @correspondences.map { |c| c.nil? ? nil: c.j1 }.join(",")
 
-	#	puts "#{dbg_num_a1}"
-		
+		puts "Total number: #{dbg_num_a1}"
+
 	end
 	
 	require 'point2line'
 
-	def compute_next_estimate
+	def compute_next_estimate(x_old)
 		
 		laser_ref = params[:laser_ref];
 		laser_sens = params[:laser_sens];
-		
+
+		## current distances
+		dists = Array.new
+		@total_error = 0
 		corrs = Array.new
 		for c in @correspondences; next if c.nil?
 			p_i  = laser_sens.points[c.i ].cartesian
@@ -325,12 +392,26 @@ class ICP
 			
 			c2 = PointCorrespondence.new
 			c2.p = p_i
-#			c2.q = transform(p_i, Vector.alloc(0,0.1,deg2rad(2)))
 			c2.q = p_j1
 			v_alpha = rot(PI/2) * (p_j1-p_j2)
+			v_alpha = v_alpha / v_alpha.nrm2
+#			puts "#{c.i} #{c.j1} #{c.j2} #{v_alpha}"
 			c2.C = v_alpha*v_alpha.trans
+			#			c2.C = c2.C  + 0.01 *Matrix.eye(2)
+#			c2.C =Matrix.eye(2)
 			corrs.push c2
+
+			dists[c.i] =
+				(transform(c2.p, x_old)-c2.q).trans * c2.C *
+				(transform(c2.p, x_old)-c2.q)
+			@total_error += dists[c.i]
+			#dists[c.i] = sqrt(dists[c.i])
 		end
+
+		#max = dists.compact.max
+	#	puts "Dists: #{dists.compact.map{|x| (x*1000).ceil}.join(',')}"
+	#	puts "Dists: #{dists.map{|x| x.nil? ?nil : x / max }.
+	#		map{|x| x.nil? ? nil : (x*1000).ceil/1000}.join(',')}"
 		return general_minimization(corrs)
 	end
 	

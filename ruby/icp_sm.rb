@@ -20,7 +20,7 @@ def scan_matching
 	ld_ref = next_ld(log)
 	until log.empty?
 	ld_new = next_ld(log)
-	min_step = 0.01
+	min_step = -0.2
 
 	if (ld_new.odometry[0,1]-ld_ref.odometry[0,1]).nrm2 <= min_step 
 		# todo: merge readings
@@ -37,11 +37,12 @@ def scan_matching
 	icp = ICP.new
 
 	icp.params[:maxAngularCorrectionDeg]= 10
-	icp.params[:maxLinearCorrection]=  0.4
+	icp.params[:maxLinearCorrection]=  0.2
 
 	icp.params[:laser_ref] = ld_ref;
 	icp.params[:laser_sens] = ld_new;
 	icp.params[:firstGuess] = u
+#	icp.params[:firstGuess] = GSL::Vector.alloc(-0.2,0.1,deg2rad(4)).col
 
 	icp.scan_matching
 
