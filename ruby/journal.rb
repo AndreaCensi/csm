@@ -32,7 +32,7 @@ module Journal
 	def journal_correspondences(corrs)
 		return if not @open
 		journal "correspondences " + 
-			corrs.map{ |c| c.nil? ? '-1' : c.i}.join(" ")
+			corrs.map{ |c| c.nil? ? '-1' : c.j1}.join(" ")
 	end
 	
 	def to_j(x)

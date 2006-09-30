@@ -90,7 +90,13 @@ class LaserPoint
 		@valid
 	end
 	
-	def cartesian; MathUtils.vers(theta)*reading; end
+	def v
+		MathUtils.vers(theta)
+	end
+	
+	def cartesian
+		MathUtils.vers(theta)*reading
+	end
 end
 
 class LaserData < Event

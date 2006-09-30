@@ -14,6 +14,7 @@ r = skip_to(cells, r,'laser')
 r = skip_to(cells, r,'laser')
 [r, laser_sens] = read_laser_data(cells, r);
 
+f =  figure; hold on; axis('equal')
 
 while true
 	r = skip_to(cells, r,'iteration');
@@ -37,22 +38,33 @@ while true
 
 	laser_ref.estimate = [0;0;0];
 	laser_sens.estimate = x_old;
-	
-	f = figure; hold on; axis('equal')
+
 	params.color = 'r.'
 	ld_plot(laser_ref, params);
 	params.color = 'g.'
 	ld_plot(laser_sens, params);
 	
+	for i=1:size(corr,2)
+		if isnan(corr(i))
+			continue
+		end
+		plot_line(transform(laser_sens.points(:,i),x_old), ...
+			laser_ref.points(:,corr(i)),'k-');
+	end
 
 	pause
-	
+	old_axis = axis
+	clf
+	axis(old_axis)
+		
 	r = skip_to(cells, r,'x_new');
 	x_new = cells_to_vector(cells, r, 2)
 
-
 	r = r + 1;
 end
+
+function plot_line(a,b,color)
+	plot([a(1) b(1)],[a(2) b(2)],color);
 
 function x = cells_to_vector(cells, r, cell)
 	for i=1:3
@@ -62,7 +74,7 @@ function x = cells_to_vector(cells, r, cell)
 % Finds next row in cells whose first cell is equal to "cellname"
 function r = skip_to(cells, r, cellname)
 	while  (r<=size(cells,1)) && (0==strcmp(cells{r,1}, cellname))
-		r = r +1
+		r = r +1;
 	end
 
 

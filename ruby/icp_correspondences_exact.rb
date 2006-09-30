@@ -60,6 +60,7 @@ class ICP
 				possible_interval(p_i_w, laser_sens, 
 					maxAngularCorrectionDeg, maxLinearCorrection)
 
+			from = 0; to = laser_ref.nrays
 			## Find best correspondence by considering all points in (from, to)
 			best_j = nil;
 			best_j_dist = 0;

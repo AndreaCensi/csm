@@ -40,14 +40,14 @@ def scan_matching(io)
 		icp = ICP.new
 		icp.journal_open("icp_sm.rb-sm#{count+=1}.txt")
 
-		icp.params[:maxAngularCorrectionDeg]= 10
+		icp.params[:maxAngularCorrectionDeg]= 30
 		icp.params[:maxLinearCorrection]=  0.2
 		icp.params[:laser_ref] = ld_ref;
 		icp.params[:laser_sens] = ld_new;
 		icp.params[:firstGuess] = u
 
-		icp.params[:laser_sens] = ld_ref;
-		icp.params[:firstGuess] = GSL::Vector.alloc(0.2,0.2,0)
+#		icp.params[:laser_sens] = ld_ref;
+#		icp.params[:firstGuess] = GSL::Vector.alloc(0.2,0.2,0)
 	
 		icp.scan_matching
 
