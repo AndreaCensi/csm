@@ -23,18 +23,3 @@ function laserData = convertLine(lineCells)
 		rho   = laserData.readings(i);
 		laserData.points(:,i) =  [cos(theta); sin(theta)] * rho;
 	end
-	
-%	laserData = computeSurfaceNormals(laserData, 0.3);
-
-	% compute normalized errors (0-1) for regression
-	%valids = find(laserData.alpha_valid);
-	%errors = laserData.alpha_error(valids);
-	%emin = min(errors);
-	%emax = max(errors);
-	
-	%laserData.alpha_weight = zeros(1, laserData.nrays)
-	%for i=valids
-	%	w = (1-(laserData.alpha_error(i)-emin)/(emax-emin));
-	%	laserData.alpha_weight(i) = w;
-	%end
-	
