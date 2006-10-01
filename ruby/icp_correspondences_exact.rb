@@ -46,6 +46,13 @@ class ICP
 		laser_ref = params[:laser_ref];
 		laser_sens = params[:laser_sens];
 
+		p_j = Array.new
+		for j in 0..params[:laser_ref].nrays-1
+			if params[:laser_ref].points[j].valid? 
+				p_j[j] = params[:laser_ref].points[j].cartesian
+			end
+		end
+		
 		for i in 0..laser_sens.nrays-1
 			if not laser_sens.points[i].valid?
 				correspondences[i] = nil
@@ -67,12 +74,12 @@ class ICP
 			$stderr.write "#{i}: " if DESCRIBE
 			for j in from..to
 				$stderr.write "#{j}" if DESCRIBE
-				if @p_j[j].nil?
+				if p_j[j].nil?
 					$stderr.write "N" if DESCRIBE
 					next
 				end
 				## Find compatible interval in the other scan. 
-				dist = (p_i_w - @p_j[j]).nrm2
+				dist = (p_i_w - p_j[j]).nrm2
 				if dist > maxDist
 					$stderr.write "M" if DESCRIBE
 					next

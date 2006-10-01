@@ -16,6 +16,14 @@ class LogReader
 		events
 	end
 	
+	def LogReader.shift_laser(io)
+		until io.eof?
+			e = convert_line(io.gets)
+			return e if e.kind_of? LaserData
+		end
+		nil
+	end
+	
 	def LogReader.convert_line(l)
 		type = l.split[0]
 		

@@ -19,14 +19,20 @@ module MathUtils
 	
 	## versor
 	def vers(a) 
-		#		GSL::Matrix[[Math.cos(a)], [Math.sin(a)]]
 		GSL::Vector.alloc(Math.cos(a), Math.sin(a)).col
 	end
 
 	def pv(x)
-		"[#{(x[0]*100000).round/100.0}mm,#{(x[1]*100000).round/100.0}mm,#{(rad2deg(x[2])*100).round/100}deg]"
+		"[#{(x[0]*100000).round/100.0}mm,#{(x[1]*100000).round/100.0}mm,"+
+		"#{(rad2deg(x[2])*1000).round/1000.0}deg]"
 	end
 
+	def pm(m)
+		std_x = (sqrt(m[0,0])*100000).round/100.0 # in mm
+		std_y = (sqrt(m[1,1])*100000).round/100.0 # in mm
+		std_th = (rad2deg(sqrt(m[2,2]))*100).round/100.0
+		"[+-#{2*std_x}mm,+-#{2*std_y}mm,+-#{2*std_th}]deg"
+	end
 	## 2x2 rotation matrix
 	def rot(a)
 		GSL::Matrix[[Math.cos(a), -Math.sin(a)], [Math.sin(a), Math.cos(a)]]

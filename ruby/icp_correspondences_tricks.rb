@@ -1,7 +1,7 @@
 
 class ICP
 	DESCRIBE = false
-	VERIFY_EXACT = true
+	VERIFY_EXACT = false
 	JUMP_TRICK = true
 	JUMP_TRICK_DELTA = 0
 
@@ -21,9 +21,14 @@ class ICP
 			exact = find_correspondences(x_old)
 		end
 
+		p_j = Array.new
+		for j in 0..params[:laser_ref].nrays-1
+			if params[:laser_ref].points[j].valid? 
+				p_j[j] = params[:laser_ref].points[j].cartesian
+			end
+		end
 
 		correspondences = Array.new
-
 	
 		up_bigger, up_smaller, down_bigger, down_smaller = 
 			create_jump_tables(laser_ref)
@@ -78,14 +83,14 @@ class ICP
 						js "down:stop" 
 						up_stopped = true; next 
 					end
-					if @p_j[up].nil? then 
+					if p_j[up].nil? then 
 						js "invalid" 
 						up+=1
 						next 
 					end
 			
 					dbg_num_a1 += 1
-					last_dist_up = (p_i_w - @p_j[up]).nrm2
+					last_dist_up = (p_i_w - p_j[up]).nrm2
 					
 					if (last_dist_up<maxDist) && (last_dist_up < best_dist)
 						js  "*" 
@@ -93,13 +98,13 @@ class ICP
 					end
 					
 					if JUMP_TRICK && (up>start_cell)
-						if @p_j[up].nrm2 < p_i_w_nrm2 && 
+						if p_j[up].nrm2 < p_i_w_nrm2 && 
 							(not up_bigger[up].nil?) then
 							js " J+(#{up_bigger[up]})" 
 							up += up_bigger[up]
 							next
 						else
-						if @p_j[up].nrm2 > p_i_w_nrm2 && 
+						if p_j[up].nrm2 > p_i_w_nrm2 && 
 							(not up_smaller[up].nil?) then
 							js  " J-(#{up_smaller[up]})"
 							up += up_smaller[up]
@@ -127,14 +132,14 @@ class ICP
 						down_stopped = true; 
 						next 
 					end
-					if @p_j[down].nil? then 
+					if p_j[down].nil? then 
 						js "invalid" 
 						down-=1; 
 						next 
 					end
 
 					dbg_num_a1 += 1
-					last_dist_down = (p_i_w - @p_j[down]).nrm2
+					last_dist_down = (p_i_w - p_j[down]).nrm2
 					if (last_dist_down<maxDist) && (last_dist_down < best_dist)
 						js "*"
 						best = down; 
@@ -150,12 +155,12 @@ class ICP
 					end
 					
 					if JUMP_TRICK && (down<start_cell)
-						if @p_j[down].nrm2+JUMP_TRICK_DELTA < p_i_w_nrm2 &&
+						if p_j[down].nrm2+JUMP_TRICK_DELTA < p_i_w_nrm2 &&
 							(not down_bigger[down].nil?) then
 							js " Jump+(#{down_bigger[down]})"
 							down += down_bigger[down]
 						else
-							if @p_j[down].nrm2 > JUMP_TRICK_DELTA+p_i_w_nrm2 &&
+							if p_j[down].nrm2 > JUMP_TRICK_DELTA+p_i_w_nrm2 &&
 								(not down_smaller[down].nil?) then
 								js " Jump-(#{down_smaller[down]})"
 								down += down_smaller[down]
@@ -236,7 +241,7 @@ class ICP
 					if his_dist < my_dist
 						$stderr.puts "Optimal is #{exact[i].j1} (dist= #{his_dist}), " +
 							", while I found #{correspondences[i].j1} (dist = #{my_dist})"
-						$stderr.puts "Search was: #{js}"
+						$stderr.puts "Search was: #{@js_string}"
 					end
 
 #					for j in ([best_j-15,0].max)..([best_j+15,laser_ref.nrays].min)
