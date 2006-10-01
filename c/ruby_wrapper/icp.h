@@ -4,41 +4,34 @@
 #include "laser_data.h"
 #include "math_utils.h"
 
-struct pose {
-	
-};
-
-struct pose_cov {
-	// XXX
-};
-
 struct icp_input {
 	struct laser_data laser_ref;
 	struct laser_data laser_sens;
 
-	// Where to start
-	struct pose      odometry;
-	struct pose_cov  odometry_cov;
+	/** Where to start */
+ 	double odometry[3]; 
+ 	double odometry_cov[3][3]; 
 
-	// parameters
 	double maxAngularCorrectionDeg;
 	double maxLinearCorrection;
 
-	// When to stop
+	/** When to stop */
 	int maxIterations;
 	double epsilon_xy;
 	double epsilon_theta;
 	
-	// dubious parameters
+	/** dubious parameters */
 	double maxCorrespondenceDist;
 };
 
 struct icp_output {
-	struct pose      x;
-	struct pose_cov  x_cov;
+	double x[3];
+	double x_cov[3][3];
 	double ** dx_dy1;
 	double ** dx_dy2;
 };
+
+void find_correspondences(struct icp_input*params, gsl_vector* x_old);
 
 void icp(struct icp_input*input, struct icp_output*output);
 

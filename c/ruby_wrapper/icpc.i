@@ -16,6 +16,7 @@ void icpc_odometry(double x, double y, double theta);
 void icpc_odometry_cov(double cov_x, double cov_y, double cov_theta);
 
 void icpc_go();
+void icpc_cleanup();
 
 
 struct icp_input {

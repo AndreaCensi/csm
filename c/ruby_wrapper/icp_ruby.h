@@ -1,7 +1,7 @@
 #ifndef H_ICP_RUBY
 #define H_ICP_RUBY
 
-#include "../icp.h"
+#include "icp.h"
 
 /** Interface for interfacing with Ruby: there are no pointers around. */
 

@@ -16,10 +16,10 @@ struct laser_data {
 	double *theta;
 	
 	
-	// Jump tables 
+	/* Jump tables */
 	int *up_bigger, *up_smaller, *down_bigger, *down_smaller;
 
-	// Cartesian points
+	/* Cartesian points */
 	gsl_vector**p;
 	
 	struct correspondence* corr;
@@ -33,9 +33,11 @@ void ld_free(LDP);
 void ld_compute_cartesian(LDP);
 void ld_create_jump_tables(LDP);
 int  ld_valid_ray(LDP, int i);
+
+int ld_valid_corr(LDP, int i);
 void ld_set_correspondence(LDP, int i, int j1, int j2);
 void ld_set_null_correspondence(LDP, int i);
-// -1 if not found
+/** -1 if not found */
 int ld_next_valid_up(LDP, int i);
 int ld_next_valid_down(LDP, int i);
 

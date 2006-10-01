@@ -9,8 +9,8 @@
 
 #include <stdio.h>
 
-#include "../icp.h"
-#include "../journal.h"
+#include "icp.h"
+#include "journal.h"
 
 struct icp_input  icpc_params;
 struct icp_output icpc_res;
@@ -25,7 +25,7 @@ struct laser_data * get_ld(int index) {
 
 void icpc_l_nrays(int laser, int nrays){
 	struct laser_data * ld = get_ld(laser);
-	laser_data_alloc(ld, nrays);	
+	ld_alloc(ld, nrays);	
 }
 
 void icpc_l_min_theta(int laser, double min_theta){
@@ -42,7 +42,9 @@ void icpc_l_ray(int laser, int ray, double theta, double reading){
 }
 
 void icpc_odometry(double x, double y, double theta){
-	
+	icpc_params.odometry[0]=x;
+	icpc_params.odometry[1]=y;
+	icpc_params.odometry[2]=theta;
 }
 
 void icpc_odometry_cov(double cov_x, double cov_y, double cov_theta){
@@ -55,7 +57,7 @@ void icpc_go() {
 }
 
 void icpc_cleanup() {
-	laser_data_free(&(icpc_params.laser_ref));
-	laser_data_free(&(icpc_params.laser_sens));
+	ld_free(&(icpc_params.laser_ref));
+	ld_free(&(icpc_params.laser_sens));
 }
 

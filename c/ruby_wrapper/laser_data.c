@@ -1,4 +1,7 @@
+#include <math.h>
 #include "laser_data.h"
+#include "math_utils.h"
+#include "journal.h"
 
 void ld_alloc(struct laser_data*ld, int nrays) {
 	ld->nrays = nrays;
@@ -35,6 +38,10 @@ int ld_valid_ray(struct laser_data* ld, int i) {
 	return (i>=0) && (i<ld->nrays) && (ld->readings[i] > 0);
 }
 
+int ld_valid_corr(LDP ld, int i) {
+	return ld->corr[i].valid;
+}
+
 void ld_set_null_correspondence(struct laser_data*ld, int i) {
 	ld->corr[i].valid = 0;
 }
@@ -53,6 +60,7 @@ void ld_compute_cartesian(LDP ld) {
 		}
 		gsl_vector_set(ld->p[i], 0, cos(ld->theta[i])*ld->readings[i]);
 		gsl_vector_set(ld->p[i], 1, sin(ld->theta[i])*ld->readings[i]);
+
 	}
 }
 
@@ -61,7 +69,7 @@ void ld_compute_cartesian(LDP ld) {
 int ld_next_valid(LDP ld, int i, int dir){
 	int j;
 	for(j=i+dir;(j<ld->nrays)&&(j>=0)&&!ld_valid_ray(ld,j);j+=dir);
-	return valid_ray(ld,j) ? j : -1;
+	return ld_valid_ray(ld,j) ? j : -1;
 }
 
 int ld_next_valid_up(LDP ld, int i){
@@ -72,24 +80,24 @@ int ld_next_valid_down(LDP ld, int i){
 	return ld_next_valid(ld, i, -1);
 }
 
-void create_jump_tables(struct laser_data* ld) {
+void ld_create_jump_tables(struct laser_data* ld) {
 	int i;
 	for(i=0;i<ld->nrays;i++) {
 		int j=i+1;
 
-		while(valid_ray(ld,j) && ld->readings[j]<=ld->readings[i]) j++;
+		while(ld_valid_ray(ld,j) && ld->readings[j]<=ld->readings[i]) j++;
 		ld->up_bigger[i] = j-i;
 
 		j = i+1;
-		while(valid_ray(ld,j) && ld->readings[j]>=ld->readings[i]) j++;
+		while(ld_valid_ray(ld,j) && ld->readings[j]>=ld->readings[i]) j++;
 		ld->up_smaller[i] = j-i;
 		
 		j = i-1;
-		while(valid_ray(ld,j) && ld->readings[j]>=ld->readings[i]) j--;
+		while(ld_valid_ray(ld,j) && ld->readings[j]>=ld->readings[i]) j--;
 		ld->down_smaller[i] = j-i;
 
 		j = i-1;
-		while(valid_ray(ld,j) && ld->readings[j]<=ld->readings[i]) j--;
+		while(ld_valid_ray(ld,j) && ld->readings[j]<=ld->readings[i]) j--;
 		ld->down_bigger[i] = j-i;
 	}
 	

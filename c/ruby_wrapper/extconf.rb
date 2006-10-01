@@ -29,18 +29,19 @@ def gsl_config()
 
 end
 
-$CPPFLAGS += " -Wno-long-double "
+$CPPFLAGS += " -Wno-long-double -Wall -W -Wmissing-prototypes -Wconversion "
+$CPPFLAGS += " -Wunreachable-code "
 gsl_config();
 srcs = %w(
 	icp_ruby icpc_wrap 
-	../icp ../icp_loop ../icp_correspondences_dumb
-	../journal ../laser_data ../math_utils )
+	icp icp_loop icp_correspondences_dumb
+	journal laser_data math_utils )
 
 
 $objs = srcs.collect{|i| i+".o"}
 
 create_makefile('icpc')
-
+if false
 File.open("Makefile","a") do |f|
 	f.puts <<-EOF
 # Copy other sources from other directory
@@ -49,4 +50,4 @@ File.open("Makefile","a") do |f|
 	
 EOF
 
-end
+end end

@@ -55,7 +55,8 @@ class ICPC
 		Icpc::icpc_params.epsilon_theta           = params[:epsilon_theta]
 		Icpc::icpc_params.maxCorrespondenceDist   = params[:maxCorrespondenceDist]
 		
-#		icpc_odometry(double x, double y, double theta);
+		u=params[:firstGuess];
+		icpc_odometry(u[0],u[1],u[2]);
 
 		icpc_go
 		
