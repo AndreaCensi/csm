@@ -1,14 +1,21 @@
 #include "icp.h"
+#include "journal.h"
 
-void icp(struct icp_input*input,struct icp_output*output) {
+
+void icp(struct icp_input*params, struct icp_output*res) {
+	journal_laser_data("laser_ref",  &(params->laser_ref));
+	journal_laser_data("laser_sens", &(params->laser_sens));
+	
+	create_jump_tables(&(params->laser_ref));
 	
 	struct pose x_old;
 	
-	x_old = input->odometry;
+	x_old = params->odometry;
 	int iteration;
-	for(iteration=0; iteration<input->maxIterations;iteration++) {
+	for(iteration=0; iteration<params->maxIterations;iteration++) {
 		
 		
 		
 	}
 }
+

@@ -1,16 +1,13 @@
 #ifndef H_ICP
 #define H_ICP
 
-struct laser_data {
-	int nrays;
-	double  min_theta;
-	double  max_theta;
-	double *readings;
-	double *theta;
-};
+#include "laser_data.h"
+#include "math_utils.h"
+
+
 
 struct pose {
-	double x; double y; double theta;
+	
 };
 
 struct pose_cov {
@@ -44,5 +41,8 @@ struct icp_output {
 	double ** dx_dy1;
 	double ** dx_dy2;
 };
+
+void icp(struct icp_input*input, struct icp_output*output);
+
 
 #endif

@@ -57,8 +57,9 @@ class ICPC
 		
 #		icpc_odometry(double x, double y, double theta);
 
-		icpc_go()
+		icpc_go
 		
+		icpc_cleanup
 	end
 	
 	
