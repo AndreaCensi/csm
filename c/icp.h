@@ -4,8 +4,6 @@
 #include "laser_data.h"
 #include "math_utils.h"
 
-
-
 struct pose {
 	
 };

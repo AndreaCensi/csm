@@ -1,6 +1,16 @@
+/*
+#include "../laser_data.c"
+#include "../icp.c"
+#include "../icp_loop.c"
+#include "../icp_correspondences_dumb.c"
+#include "../journal.c"
+#include "../math_utils.c"
+*/
+
 #include <stdio.h>
 
 #include "../icp.h"
+#include "../journal.h"
 
 struct icp_input  icpc_params;
 struct icp_output icpc_res;
@@ -47,5 +57,5 @@ void icpc_go() {
 void icpc_cleanup() {
 	laser_data_free(&(icpc_params.laser_ref));
 	laser_data_free(&(icpc_params.laser_sens));
-	
 }
+

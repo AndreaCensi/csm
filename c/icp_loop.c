@@ -1,6 +1,7 @@
+#include "laser_data.h"
+
 #include "icp.h"
 #include "journal.h"
-
 
 void icp(struct icp_input*params, struct icp_output*res) {
 	journal_laser_data("laser_ref",  &(params->laser_ref));

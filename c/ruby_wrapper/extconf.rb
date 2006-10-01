@@ -32,10 +32,21 @@ end
 $CPPFLAGS += " -Wno-long-double "
 gsl_config();
 srcs = %w(
-	icp_ruby icp_wrap 
+	icp_ruby icpc_wrap 
 	../icp ../icp_loop ../icp_correspondences_dumb
 	../journal ../laser_data ../math_utils )
+
 
 $objs = srcs.collect{|i| i+".o"}
 
 create_makefile('icpc')
+
+File.open("Makefile","a") do |f|
+	f.puts <<-EOF
+# Copy other sources from other directory
+%.o: ../%.o
+	cp $< $@
+	
+EOF
+
+end
