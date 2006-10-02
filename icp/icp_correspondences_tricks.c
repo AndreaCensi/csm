@@ -13,10 +13,10 @@ void find_correspondences_tricks(struct icp_input*params, gsl_vector* x_old) {
 	fprintf(jf(),"param maxLinearCorrection %f\n",params->maxLinearCorrection);
 	fprintf(jf(),"param maxAngularCorrectionDeg %f\n",params->maxAngularCorrectionDeg);
 	
-	int i;
 	gsl_vector * p_i_w = gsl_vector_alloc(3);
 
 	int last_best = -1;
+	int i;
 	for(i=0;i<laser_sens->nrays;i++) {
 		if(!ld_valid_ray(laser_sens,i)) {
 			ld_set_null_correspondence(laser_sens,i);
@@ -32,6 +32,8 @@ void find_correspondences_tricks(struct icp_input*params, gsl_vector* x_old) {
 		int from; int to; int start_cell;
 		possible_interval(p_i_w, laser_ref, params->maxAngularCorrectionDeg,
 			params->maxLinearCorrection, &from, &to, &start_cell);
+
+//		printf("> i=%d [from %d to %d]\n",	i,from,to);
 
 		int we_start_at = (last_best!=-1) ? start_cell : last_best;
 			 we_start_at = minmax(from, to, we_start_at);

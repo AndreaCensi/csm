@@ -2,7 +2,6 @@
 #define H_ICP
 
 #include "laser_data.h"
-#include "math_utils.h"
 
 struct icp_input {
 	struct laser_data laser_ref;
@@ -31,9 +30,8 @@ struct icp_output {
 	double ** dx_dy2;
 };
 
-void find_correspondences(struct icp_input*params, gsl_vector* x_old);
 
 void icp(struct icp_input*input, struct icp_output*output);
-
+void icp_journal_open(const char* file);
 
 #endif

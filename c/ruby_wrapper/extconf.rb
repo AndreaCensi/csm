@@ -33,16 +33,22 @@ if (not have_library('gpc')) or (not find_header('gpc.h'))
 	puts "Error: not having library 'gpc'"
 	exit
 else
-	$LOCAL_LIBS += '-lgpc'
+	$LOCAL_LIBS += ' -lgpc'
+end
+
+if (not have_library('icp')) #or (not find_header('icp.h','/usr/local/include'))
+	puts "Error: not having library 'icp'"
+	exit
+else
+	$LOCAL_LIBS += ' -licp'
 end
 
 $CPPFLAGS += " -Wno-long-double -Wall -W -Wmissing-prototypes -Wconversion "
 $CPPFLAGS += " -Wunreachable-code "
 gsl_config();
-srcs = %w(
-	icp_ruby icpc_wrap 
-	icp icp_loop icp_correspondences_dumb icp_correspondences_tricks
-	journal laser_data math_utils )
+srcs = %w(icp_ruby icpc_wrap) 
+#	icp icp_loop icp_correspondences_dumb icp_correspondences_tricks
+#	journal laser_data math_utils )
 
 
 $objs = srcs.collect{|i| i+".o"}

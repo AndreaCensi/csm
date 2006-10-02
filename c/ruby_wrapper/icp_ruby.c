@@ -2,13 +2,12 @@
 #include <stdio.h>
 #include "icp_ruby.h"
 #include "icp.h"
-#include "journal.h"
 
 struct icp_input  icpc_params;
 struct icp_output icpc_res;
 
 void icpc_init_journal(const char*journal_file){
-	journal_open(journal_file);
+	icp_journal_open(journal_file);
 }
 
 struct laser_data * get_ld(int index) {

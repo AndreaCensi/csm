@@ -1,5 +1,9 @@
+#include <math.h>
 #include <gsl/gsl_histogram.h>
+
 #include <gpc.h>
+
+#include "math_utils.h"
 #include "laser_data.h"
 #include "icp.h"
 #include "journal.h"
@@ -30,8 +34,8 @@ void icp(struct icp_input*params, struct icp_output*res) {
 		fprintf(jf(), "iteration %d\n", iteration);
 		journal_pose("x_old", x_old);
 		
-		find_correspondences(params, x_old);
-//		find_correspondences_tricks(params, x_old);
+//		find_correspondences(params, x_old);
+		find_correspondences_tricks(params, x_old);
 		compute_next_estimate(laser_ref, laser_sens, x_old, x_new);
 		journal_correspondences(laser_sens);
 		
@@ -90,7 +94,7 @@ void kill_outliers(int K, struct gpc_corr*c, const gsl_vector*x_old, int*valid) 
 	// now compute mean for elements in bin < b
 	for(k=0;k<K;k++) {
 		if(dist[k]>MAX_RANGE) continue;
-		unsigned int bin; gsl_histogram_find(hist, dist[k], &bin);
+		size_t bin; gsl_histogram_find(hist, dist[k], &bin);
 		if(bin <= max_bin) {
 			mean += dist[k];
 			mean_count++;
@@ -144,7 +148,9 @@ void compute_next_estimate(LDP laser_ref, LDP laser_sens, const gsl_vector*x_old
 	}
 
 	int valid[k];
-	kill_outliers(k, c, x_old, valid);
+	int kk; for(kk=0;kk<k;kk++) valid[kk]=1;
+	
+	//kill_outliers(k, c, x_old, valid);
 	
 	double x[3];
 	gpc_solve_valid(k, c, valid, x);

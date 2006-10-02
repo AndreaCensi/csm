@@ -1,6 +1,7 @@
 #include <gsl/gsl_vector.h>
 #include "icp.h"
 #include "journal.h"
+#include "math_utils.h"
 
 void find_correspondences(struct icp_input*params, gsl_vector* x_old) {
 	LDP laser_ref  = &(params->laser_ref);
@@ -10,9 +11,9 @@ void find_correspondences(struct icp_input*params, gsl_vector* x_old) {
 	fprintf(jf(),"param maxLinearCorrection %f\n",params->maxLinearCorrection);
 	fprintf(jf(),"param maxAngularCorrectionDeg %f\n",params->maxAngularCorrectionDeg);
 	
-	int i;
 	gsl_vector * p_i_w = gsl_vector_alloc(3);
 	
+	int i;
 	for(i=0;i<laser_sens->nrays;i++) {
 		if(!ld_valid_ray(laser_sens,i)) {
 			ld_set_null_correspondence(laser_sens,i);
@@ -28,7 +29,8 @@ void find_correspondences(struct icp_input*params, gsl_vector* x_old) {
 		possible_interval(p_i_w, laser_ref, params->maxAngularCorrectionDeg,
 			params->maxLinearCorrection, &from, &to, &start_cell);
 
-//		printf("i=%d [from %d to %d]\n",	i,from,to);
+//		printf("i=%d p_i_w = %f %f %f [from %d to %d]\n",
+//			i,gvg(p_i_w,0),gvg(p_i_w,1),gvg(p_i_w,2),from,to);
 		
 //		from = 0; to = laser_ref->nrays;
 		

@@ -15,7 +15,6 @@ struct laser_data {
 	double *readings;
 	double *theta;
 	
-	
 	/* Jump tables */
 	int *up_bigger, *up_smaller, *down_bigger, *down_smaller;
 
@@ -40,6 +39,5 @@ void ld_set_null_correspondence(LDP, int i);
 /** -1 if not found */
 int ld_next_valid_up(LDP, int i);
 int ld_next_valid_down(LDP, int i);
-
 
 #endif
