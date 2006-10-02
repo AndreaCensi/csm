@@ -16,33 +16,15 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include <math.h>
-#include <gsl/gsl_matrix.h>
-#include <gsl/gsl_blas.h>
-#include <gsl/gsl_linalg.h>
-#include <gsl/gsl_poly.h>
 
 #include "gpc.h"
+#include "gpc_utils.h"
 
-#define M(matrix, rows, col) gsl_matrix*matrix = gsl_matrix_alloc(rows,col)
-#define MF(matrix) gsl_matrix_free(matrix)
-#define gmg gsl_matrix_get
-#define gms gsl_matrix_set
+int gpc_solve(int K, const struct gpc_corr*c, double *x) {
+	return gpc_solve_valid(K,c,0,x);
+}
 
-void m_trans(const gsl_matrix*A, gsl_matrix*A_t);
-void m_mult(const gsl_matrix*A, const gsl_matrix*B, gsl_matrix*AB);
-void m_add(const gsl_matrix*A, const gsl_matrix*B, gsl_matrix*ApB);
-void m_add_to(const gsl_matrix*A, gsl_matrix*B);
-void m_scale(double m, gsl_matrix*A);
-double m_dot(const gsl_matrix*A,const gsl_matrix*B);
-// GSL is a pain to work with. The library DOES NOT HAVE a determinant() function
-// or an inv() function: you have to write your own routines.
-void m_inv(const gsl_matrix*A, gsl_matrix*invA);
-double m_det(const gsl_matrix*A);
-
-double poly_greatest_real_root(unsigned int n, double*);
-void m_display(const char*str, gsl_matrix*m);
-
-int gpc_solve(int K, const struct gpc_corr*c, double *x_out) {
+int gpc_solve_valid(int K, const struct gpc_corr*c, int*valid, double *x_out) {
 	M(bigM,    4,4); M(g,  4,1); M(bigM_k,2,4);
 	M(bigM_k_t,4,2); M(C_k,2,2); M(q_k,   2,1);
 	M(temp42,  4,2); M(temp44,4,4);	M(temp21, 2,1);
@@ -53,6 +35,8 @@ int gpc_solve(int K, const struct gpc_corr*c, double *x_out) {
 	gsl_matrix_set_zero(g);
 	int k;
 	for(k=0;k<K;k++) {
+		if(valid && !valid[k]) continue;
+		
 		gms(bigM_k,0,0,1.0); gms(bigM_k,0,1,0.0); gms(bigM_k,0,2, c[k].p[0]);
 		gms(bigM_k,0,3,-c[k].p[1]);
 		gms(bigM_k,1,0,0.0); gms(bigM_k,1,1,1.0); gms(bigM_k,1,2,c[k].p[1]);
@@ -200,85 +184,14 @@ int gpc_solve(int K, const struct gpc_corr*c, double *x_out) {
 }
 
 
-void m_trans(const gsl_matrix*A, gsl_matrix*A_t){
-	gsl_matrix_transpose_memcpy(A_t,A);
+double gpc_error(const struct gpc_corr*co, const double*x) {
+	double c = cos(x[2]);
+	double s = sin(x[2]);
+	double e[2];
+	e[0] = c*(co->p[0]) -s*(co->p[1]) + x[0] - co->q[0];
+	e[1] = s*(co->p[0]) +c*(co->p[1]) + x[1] - co->q[1];
+	return e[0]*e[0]*co->C[0][0]+2*e[0]*e[1]*co->C[0][1]+e[1]*e[1]*co->C[1][1];
 }
 
-void m_mult(const gsl_matrix*A, const gsl_matrix*B, gsl_matrix*AB){
-	gsl_blas_dgemm(CblasNoTrans,CblasNoTrans,1.0,A,B,0.0,AB);
-}
 
-void m_add_to(const gsl_matrix*A, gsl_matrix*B){
-	gsl_matrix_add(B, A);
-}
-
-void m_scale(double m, gsl_matrix*A){
-	gsl_matrix_scale(A,m);
-}
-
-void m_add (const gsl_matrix*A, const gsl_matrix*B, gsl_matrix*ApB){
-	gsl_matrix_memcpy(ApB,A);
-	gsl_matrix_add(ApB,B);	
-}
-
-void m_inv(const gsl_matrix*A, gsl_matrix*invA) {
-	unsigned int n = A->size1;
-	gsl_matrix * m = gsl_matrix_alloc(n,n);
-	gsl_matrix_memcpy(m,A);
-	gsl_permutation * perm = gsl_permutation_alloc (n);
-	// Make LU decomposition of matrix m
-	int s;
-	gsl_linalg_LU_decomp (m, perm, &s);
-	// Invert the matrix m
-	gsl_linalg_LU_invert (m, perm, invA);
-	gsl_permutation_free(perm);
-	gsl_matrix_free(m);
-}
-
-double m_det(const gsl_matrix*A) {
-	unsigned int n = A->size1;
-	gsl_matrix * m = gsl_matrix_alloc(n,n);
-	gsl_matrix_memcpy(m,A);
-	gsl_permutation * perm = gsl_permutation_alloc (n);
-	int sign;
-	gsl_linalg_LU_decomp (m, perm, &sign);
-	double det = gsl_linalg_LU_det(m, sign);
-	gsl_matrix_free(m);
-	return det;
-}
-
-double m_dot(const gsl_matrix*A,const gsl_matrix*B) {
-	double sum = 0;
-	unsigned int j;
-	for(j=0;j<A->size2;j++)
-		sum += gmg(A,0,j)*gmg(B,j,0);
-	return sum;
-}
-
-double poly_greatest_real_root(unsigned int n, double*a) {
-	double z[n*2];
-	gsl_poly_complex_workspace * w  = gsl_poly_complex_workspace_alloc(n);
-	gsl_poly_complex_solve (a, n, w, z);
-	gsl_poly_complex_workspace_free (w);
-	double lambda = 0;
-	unsigned int i;
-	for (i = 0; i < n; i++) {
-//		printf ("z%d = %+.18f %+.18f\n", i, z[2*i], z[2*i+1]);
-		// XXX ==0 is bad
-		if( (z[2*i+1]==0) && (z[2*i]>lambda))
-			lambda = z[2*i];
-	}
-	return lambda;
-}
-
-void m_display(const char*str, gsl_matrix*m) {
-	printf("%s= \n", str);
-	unsigned int i,j;
-	for(i=0;i<m->size1;i++) {
-		printf("   ");
-		for(j=0;j<m->size2;j++)
-			printf("%f ", gmg(m,i,j));
-		printf("\n");
-	}
-}
 

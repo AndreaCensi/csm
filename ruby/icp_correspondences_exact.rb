@@ -63,6 +63,8 @@ class ICP
 			p_i_w = transform(p_i, x_old);
 			p_i_w_nrm2 = p_i_w.nrm2
 
+		#	puts "p_i = #{p_i.trans}"
+			
 			from, to = 
 				possible_interval(p_i_w, laser_sens, 
 					maxAngularCorrectionDeg, maxLinearCorrection)
@@ -78,8 +80,10 @@ class ICP
 					$stderr.write "N" if DESCRIBE
 					next
 				end
+
 				## Find compatible interval in the other scan. 
 				dist = (p_i_w - p_j[j]).nrm2
+		#		puts "j = #{j} p_j = #{p_j[j].trans}  dist = #{dist}"
 				if dist > maxDist
 					$stderr.write "M" if DESCRIBE
 					next
@@ -94,6 +98,7 @@ class ICP
 				$stderr.write " -> NO CORR. \n" if DESCRIBE
 			else	
 				$stderr.write " -> #{best_j} (#{i-best_j})\n" if DESCRIBE
+#				puts " #{i} -> #{best_j} (#{best_j_dist}) p_j = #{p_j[best_j].trans} p_i_w = #{p_i_w.trans}" 
 			end
 
 			## If no point is close enough, or closest point is one 

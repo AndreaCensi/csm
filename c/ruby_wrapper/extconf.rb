@@ -29,12 +29,19 @@ def gsl_config()
 
 end
 
+if (not have_library('gpc')) or (not find_header('gpc.h'))
+	puts "Error: not having library 'gpc'"
+	exit
+else
+	$LOCAL_LIBS += '-lgpc'
+end
+
 $CPPFLAGS += " -Wno-long-double -Wall -W -Wmissing-prototypes -Wconversion "
 $CPPFLAGS += " -Wunreachable-code "
 gsl_config();
 srcs = %w(
 	icp_ruby icpc_wrap 
-	icp icp_loop icp_correspondences_dumb
+	icp icp_loop icp_correspondences_dumb icp_correspondences_tricks
 	journal laser_data math_utils )
 
 

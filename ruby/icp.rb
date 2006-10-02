@@ -129,9 +129,9 @@ class ICP
 	#		dists[c.i] = sqrt(dists[c.i])
 		end
 
-	kill_outliers(correspondences, corrs, dists)
-	journal_correspondences correspondences
-
+#	journal_correspondences("candidate", correspondences)
+#	kill_outliers(correspondences, corrs, dists)
+	journal_correspondences("correspondences", correspondences)
 	
 	#max = dists.compact.max
 	#	puts "Dists: #{dists.compact.map{|x| (x*1000).ceil}.join(',')}"

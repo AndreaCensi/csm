@@ -6,7 +6,7 @@
 
 void possible_interval(
 	gsl_vector*p_i_w, struct laser_data*laser_sens, 
-	double maxAngularCorrectionDeg, double maxLinearCorrection, int*from, int*to);
+	double maxAngularCorrectionDeg, double maxLinearCorrection, int*from, int*to, int*start_cell);
 
 void transform(const gsl_vector* point, const gsl_vector* x, gsl_vector*result);
 
@@ -17,8 +17,13 @@ double norm(const gsl_vector*);
 
 double deg2rad(double deg);
 double rad2deg(double rad);
-gsl_vector * vector_from_array(int n, double *x);
+gsl_vector * vector_from_array(unsigned int n, double *x);
 
+double minmax(int from,int to,int x);
+
+void oplus(const gsl_vector*x1,const gsl_vector*x2, gsl_vector*res);
+void ominus(const gsl_vector*x, gsl_vector*res);
+void pose_diff(const gsl_vector*pose2,const gsl_vector*pose1,gsl_vector*res);
 
 
 #define gvg gsl_vector_get

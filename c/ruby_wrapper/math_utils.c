@@ -4,7 +4,7 @@
 
 void possible_interval(
 	gsl_vector*p_i_w, LDP ld, 
-	double maxAngularCorrectionDeg, double maxLinearCorrection, int*from, int*to) 
+	double maxAngularCorrectionDeg, double maxLinearCorrection, int*from, int*to, int*start_cell) 
 {
 	double angleRes = (ld->max_theta-ld->min_theta)/ld->nrays;
 
@@ -18,11 +18,11 @@ void possible_interval(
 	// To be turned into an interval of cells
 	double start_theta = atan2(gvg(p_i_w,1),gvg(p_i_w,0));
 	
-	int start_cell  = (int)
+	*start_cell  = (int)
 		((start_theta - ld->min_theta) / (ld->max_theta-ld->min_theta) * ld->nrays);
 
-	*from = GSL_MIN(ld->nrays-1, GSL_MAX(start_cell-range,0));
-	*to =   GSL_MIN(ld->nrays-1, GSL_MAX(start_cell+range,0));
+	*from = minmax(0,ld->nrays-1, *start_cell-range);
+	*to =   minmax(0,ld->nrays-1, *start_cell+range);
 }
 
 
@@ -59,12 +59,39 @@ double rad2deg(double rad) {
 	return rad / M_PI * 180;	
 }
 
-gsl_vector * vector_from_array(int n, double *x) {
+gsl_vector * vector_from_array(unsigned int n, double *x) {
 	gsl_vector * v = gsl_vector_calloc(n);
-	int i;
+	unsigned int i;
 	for(i=0;i<n;i++)
 		gvs(v,i,x[i]);
 	
 	return v;
 }
 
+void oplus(const gsl_vector*x1,const gsl_vector*x2, gsl_vector*res) {
+	double c = cos(gvg(x1,2));
+	double s = sin(gvg(x1,2));
+	gvs(res,0,  gvg(x1,0)+c*gvg(x2,0)-s*gvg(x2,1));
+	gvs(res,1,  gvg(x1,1)+s*gvg(x2,0)+c*gvg(x2,1));
+	gvs(res,2,  gvg(x1,2)+gvg(x2,2));
+}
+
+void ominus(const gsl_vector*x, gsl_vector*res) {
+	double c = cos(gvg(x,2));
+	double s = sin(gvg(x,2));
+	gvs(res,0,  -c*gvg(x,0)-s*gvg(x,1));
+	gvs(res,1,   s*gvg(x,0)-c*gvg(x,1));
+	gvs(res,2,  -gvg(x,2));
+}
+
+void pose_diff(const gsl_vector*pose2,const gsl_vector*pose1,gsl_vector*res) {
+	gsl_vector* temp = gsl_vector_alloc(3);
+	ominus(pose1, temp);
+	oplus(temp, pose2, res);
+	gsl_vector_free(temp);
+}
+
+
+double minmax(int from,int to,int x){
+	return GSL_MAX(GSL_MIN(x,to),from);
+}

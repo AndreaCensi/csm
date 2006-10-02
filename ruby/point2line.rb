@@ -12,8 +12,8 @@ module MathUtils
 		attr_accessor :q
 		attr_accessor :C
 	end
-	DEBUG = true
 	
+	DEBUG = false
 
 	def general_minimization(corr)
 
@@ -27,6 +27,17 @@ module MathUtils
 			
 			bigM = bigM + 2*bigM_k.trans * c.C * bigM_k;
 			g = g - 2 * (c.q.trans.to_m(1,2) * c.C * bigM_k).trans;
+			if DEBUG
+				puts "M_k=\n#{bigM_k}\n"
+				puts "q_k=\n#{c.q}\n"
+				puts "C_k=\n#{c.C}\n"
+				puts "now M is \n#{bigM}\n"
+				puts "now g is \n#{g}\n"
+			end
+		end
+		
+		if DEBUG
+			puts "M=#{bigM}"
 		end
 		
 		# Partition M in 4 submatrixes:
@@ -38,18 +49,28 @@ module MathUtils
 		mS = mD - mB.trans * mA.inv * mB;
 		mSa = mS.inv * mS.det;
 
+		if DEBUG
+			puts "mA=#{mA}"
+			puts "mB=#{mB}"
+			puts "mD=#{mD}"
+			puts "mS=#{mS}"
+			puts "mSa=#{mSa}"
+		end
+
 		# split g in two
 		g1 = g.submatrix(0,0,2,1)
 		g2 = g.submatrix(2,0,2,1)
 
-		p2 = g1.trans*mA.inv*mB*4*mB.trans*mA.inv*g1 
-		     - 2*g1.trans*mA.inv*mB*4*g2 + g2.trans*4*g2
+		p2 = g1.trans*mA.inv*mB*4*mB.trans*mA.inv*g1 -
+		     2*g1.trans*mA.inv*mB*4*g2 + g2.trans*4*g2
 		p1 = g1.trans*mA.inv*mB*4*mSa*mB.trans*mA.inv*g1 -
 		     2*g1.trans*mA.inv*mB*4*mSa*g2 +g2.trans*4*mSa*g2
 		p0 = g1.trans*mA.inv*mB*mSa*mSa*mB.trans*mA.inv*g1 -
 		     2*g1.trans*mA.inv*mB*mSa*mSa*g2 + g2.trans*mSa*mSa*g2
 
+
 		p_lambda = Poly[mS[0,0]*mS[1,1]-mS[1,0]*mS[0,1],  2*mS[0,0]+2*mS[1,1],  4]
+
 
 		p7 = Poly.alloc(p0[0,0],p1[0,0],p2[0,0])
 		ptot = p7 - p_lambda * p_lambda
@@ -63,6 +84,16 @@ module MathUtils
 			lambda = [lambda, root.real].max
 		end
 
+		if DEBUG
+			puts "p = [#{p2} #{p1} #{p0}]"
+			puts "p_l = [#{p_lambda[2]} #{p_lambda[1]} #{p_lambda[0]}]"
+			q = p_lambda * p_lambda;
+			puts "p_l*p_l = #{q[4]}*x^4 +#{q[3]}*x^3 +#{q[2]}*x^2 +#{q[1]}*x +#{q[0]} "
+			puts "ptot = #{ptot}"
+			puts "roots = #{r[0]} #{r[1]} "
+			puts "lambda = #{lambda}"
+		end
+
 		mW = Matrix[[0,0,0,0],
 		           [0,0,0,0],
 		           [0,0,1,0],
@@ -74,7 +105,6 @@ module MathUtils
 	end
 
 	def test_gm2
-		
 		theta = deg2rad(4);
 		t = Vector.alloc(0.3,-0.2).col;
 		
@@ -94,10 +124,11 @@ module MathUtils
 		end
 		x = general_minimization(corr)
 
-			puts " t, theta= #{t}, #{theta}"
-			puts " x = #{x}"
-
+			puts " t, theta= #{t.trans}, #{rad2deg(theta)}"
+			puts " x = #{x[0]} #{x[1]}  #{rad2deg(x[2])}"
 	end
+	
+	
 	def MathUtils.test_gm
 
 		theta = rand*PI/10

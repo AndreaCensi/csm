@@ -1,14 +1,6 @@
-/*
-#include "../laser_data.c"
-#include "../icp.c"
-#include "../icp_loop.c"
-#include "../icp_correspondences_dumb.c"
-#include "../journal.c"
-#include "../math_utils.c"
-*/
 
 #include <stdio.h>
-
+#include "icp_ruby.h"
 #include "icp.h"
 #include "journal.h"
 

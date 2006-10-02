@@ -3,16 +3,21 @@ class ICP
 	DESCRIBE = false
 	VERIFY_EXACT = false
 	JUMP_TRICK = true
-	JUMP_TRICK_DELTA = 0
-
+	
 	# log search into journal
 	JOURNAL_SEARCH = false
 	
 	def find_correspondences_tricks(x_old)
+		
 		# Some parameters
 		maxAngularCorrectionDeg = params[:maxAngularCorrectionDeg]
 		maxLinearCorrection=params[:maxLinearCorrection]
 		maxDist = params[:maxCorrespondenceDist]	
+
+		journal "param maxCorrespondenceDist #{maxDist}"
+		journal "param maxAngularCorrectionDeg #{maxAngularCorrectionDeg}"
+		journal "param maxLinearCorrection #{maxLinearCorrection}"
+
 		laser_ref = params[:laser_ref];
 		laser_sens = params[:laser_sens];
 
@@ -30,6 +35,7 @@ class ICP
 
 		correspondences = Array.new
 	
+		# TODO: memorizza
 		up_bigger, up_smaller, down_bigger, down_smaller = 
 			create_jump_tables(laser_ref)
 			
@@ -155,12 +161,12 @@ class ICP
 					end
 					
 					if JUMP_TRICK && (down<start_cell)
-						if p_j[down].nrm2+JUMP_TRICK_DELTA < p_i_w_nrm2 &&
+						if p_j[down].nrm2 < p_i_w_nrm2 &&
 							(not down_bigger[down].nil?) then
 							js " Jump+(#{down_bigger[down]})"
 							down += down_bigger[down]
 						else
-							if p_j[down].nrm2 > JUMP_TRICK_DELTA+p_i_w_nrm2 &&
+							if p_j[down].nrm2 >  p_i_w_nrm2 &&
 								(not down_smaller[down].nil?) then
 								js " Jump-(#{down_smaller[down]})"
 								down += down_smaller[down]
@@ -266,32 +272,32 @@ class ICP
 		down_bigger = Array.new
 		down_smaller = Array.new
 		readings = (0..laser_ref.nrays-1).map{ |j| laser_ref.points[j].reading}
-		delta = 0;
+		
+		def valid_ray(j, laser_ref)
+			(j>=0) && (j<laser_ref.nrays) && (laser_ref.points[j].valid?)
+		end
+		
 		readings.each_index{ |i|
 			j = i + 1;
-			while (not readings[j].nil?) and 
-				readings[j]<=readings[i]+JUMP_TRICK_DELTA
+			while valid_ray(j, laser_ref) and readings[j]<=readings[i]
 				j += 1;
 			end
 			up_bigger[i] = j-i;
 
 			j = i + 1;
-			while (not readings[j].nil?) and 
-				readings[j]+JUMP_TRICK_DELTA>=readings[i]
+			while valid_ray(j, laser_ref) and readings[j]>=readings[i]
 				j += 1;
 			end
 			up_smaller[i] = j-i;
 
 			j = i - 1;
-			while (not readings[j].nil?) and 
-				readings[j]+JUMP_TRICK_DELTA>=readings[i]
+			while valid_ray(j, laser_ref) and readings[j]>=readings[i]
 				j -= 1;
 			end
 			down_smaller[i] = j-i;
 	
 			j = i - 1;
-			while (not readings[j].nil?) and 
-				readings[j]<=readings[i]+JUMP_TRICK_DELTA
+			while valid_ray(j, laser_ref) and readings[j]<=readings[i]
 				j -= 1;
 			end
 			down_bigger[i] = j-i;			
@@ -299,10 +305,10 @@ class ICP
 		
 		
 		if JOURNAL_SEARCH
-			journal "  down bigger:  #{down_bigger. join(',')}"
-			journal " down smaller: #{down_smaller.join(',')}"
-			journal "    up bigger:  #{  up_bigger .join(',')}"
-			journal "   up smaller: #{  up_smaller.join(',')}"
+			journal "down_bigger #{down_bigger. join(' ')}"
+			journal "down_smaller #{down_smaller.join(' ')}"
+			journal "up_bigger #{  up_bigger .join(' ')}"
+			journal "up_smaller #{  up_smaller.join(' ')}"
 		end
 	
 		return up_bigger, up_smaller, down_bigger, down_smaller

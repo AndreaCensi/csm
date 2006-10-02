@@ -46,7 +46,7 @@ int main() {
 	double x[3];
 	gpc_solve(5,c,x);
 
-	printf("x =  %f  %f  %f deg\n", x[0], x[1],x[2]*180/M_PI);
+	printf("estimated x =  %f  %f  %f deg\n", x[0], x[1],x[2]*180/M_PI);
 	return 0;
 }
 

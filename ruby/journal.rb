@@ -29,9 +29,9 @@ module Journal
 		#$stderr.puts "Opened journal #{fileName}."
 	end
 	
-	def journal_correspondences(corrs)
+	def journal_correspondences(s, corrs)
 		return if not @open
-		journal "correspondences " + 
+		journal "#{s} " + 
 			corrs.map{ |c| c.nil? ? '-1' : c.j1}.join(" ")
 	end
 	

@@ -1,7 +1,6 @@
 #ifndef H_ICP_RUBY
 #define H_ICP_RUBY
 
-#include "icp.h"
 
 /** Interface for interfacing with Ruby: there are no pointers around. */
 
@@ -18,6 +17,8 @@ void icpc_odometry_cov(double cov_x, double cov_y, double cov_theta);
 void icpc_go();
 
 void icpc_cleanup();
+
+#include "icp.h"
 
 extern struct icp_input icpc_params;
 extern struct icp_output icpc_res;
