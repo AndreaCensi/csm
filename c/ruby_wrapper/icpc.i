@@ -29,9 +29,11 @@ struct icp_input {
 };
 
 struct icp_output {
-
-
+	double x[3];
+	int iterations;
 };
+
+void icpc_get_x(double *OUTPUT,double*OUTPUT,double*OUTPUT);
 
 %inline {
 extern struct icp_input icpc_params;

@@ -53,16 +53,20 @@ function res = ld_plot(ld, params)
 		maxLength = 0.05;
 		
 		valids = find(ld.alpha_valid);
+        if not(isfield(ld,'alpha_error'))
+            ld.alpha_error = ones(1, ld.nrays);
+        end
 		
 		valid_points = ld.points(:,valids);
 		valid_alpha  = ld.alpha(valids);
 		valid_errors = rad2deg(sqrt(ld.alpha_error(valids)));;
-		emin = min(valid_errors);
-		emax = max(valid_errors);
+		emin = min(valid_errors)
+		emax = max(valid_errors)
 		
 		for i=1:size(valids,2)
-			weight = 1 + valid_errors(i) * maxLength;
-			
+			%weight = 1 + valid_errors(i) * maxLength;
+			weight = maxLength;
+            
 			v = [cos(valid_alpha(i)); sin(valid_alpha(i))] * weight;
 			from = valid_points(:,i);
 			to = from + v;

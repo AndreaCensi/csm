@@ -9,9 +9,9 @@ void find_correspondences_tricks(struct icp_input*params, gsl_vector* x_old) {
 	LDP laser_ref  = &(params->laser_ref);
 	LDP laser_sens = &(params->laser_sens);
 	double maxDist = params->maxCorrespondenceDist;
-	fprintf(jf(),"param maxCorrespondenceDist %f\n",params->maxCorrespondenceDist);
-	fprintf(jf(),"param maxLinearCorrection %f\n",params->maxLinearCorrection);
-	fprintf(jf(),"param maxAngularCorrectionDeg %f\n",params->maxAngularCorrectionDeg);
+	if(jf()) fprintf(jf(),"param maxCorrespondenceDist %f\n",params->maxCorrespondenceDist);
+	if(jf()) fprintf(jf(),"param maxLinearCorrection %f\n",params->maxLinearCorrection);
+	if(jf()) fprintf(jf(),"param maxAngularCorrectionDeg %f\n",params->maxAngularCorrectionDeg);
 	
 	gsl_vector * p_i_w = gsl_vector_alloc(3);
 

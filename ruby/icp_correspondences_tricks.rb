@@ -261,7 +261,7 @@ class ICP
 
 		end # i in first scan 
 
-		puts "Total number: #{dbg_num_a1}"
+	#	puts "Total number: #{dbg_num_a1}"
 		correspondences
 	end
 	

@@ -166,6 +166,16 @@ True if previous field is valid.
 \begin_layout Description
 
 \family typewriter
+ld.alpha_error(i)
+\end_layout
+
+\begin_layout Standard
+True if previous field is valid.
+\end_layout
+
+\begin_layout Description
+
+\family typewriter
 ld.estimate
 \end_layout
 

@@ -1,41 +1,6 @@
 
 class ICP
 	
-	# from, to = 
-	def possible_interval(point, ld, maxAngularCorrectionDeg, 
-		maxLinearCorrection)
-		
-		angleRes =  (ld.max_theta-ld.min_theta)/ld.nrays;
-
-		# Delta for the angle
-		delta = deg2rad(maxAngularCorrectionDeg).abs +
-		        Math.atan(maxLinearCorrection/point.nrm2).abs;
-
-		# Dimension of the cell range
-		range = (delta/angleRes).ceil;
-		
-		# To be turned into an interval of cells
-		start_theta = Math.atan2(point[1],point[0]);
-		
-		start_cell  = 
-			(start_theta - ld.min_theta) / (ld.max_theta-ld.min_theta) * ld.nrays;
-	
-		start_cell = start_cell.ceil
-		
-		# Pay attention to minimum and maximum
-		from = min(ld.nrays-1, max( (start_cell-range).floor,0));
-		to = max(0, min((start_cell+range).ceil,ld.nrays-1));
-	
-		if false
-			puts "start_theta=#{rad2deg(start_theta)}°, "+
-			     "range = #{range} cells,"+
-			     "start_cell=#{rad2deg(start_cell)},"+
-				  "fromto=#{from}->#{to}"
-		end
-		
-		return from, to, start_cell, range
-	end
-	
 	
 	
 	def find_correspondences(x_old)
@@ -69,7 +34,6 @@ class ICP
 				possible_interval(p_i_w, laser_sens, 
 					maxAngularCorrectionDeg, maxLinearCorrection)
 
-			from = 0; to = laser_ref.nrays
 			## Find best correspondence by considering all points in (from, to)
 			best_j = nil;
 			best_j_dist = 0;

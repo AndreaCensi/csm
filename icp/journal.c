@@ -2,15 +2,19 @@
 #include "journal.h"
 #include "math_utils.h"
 
-FILE*f; 
+FILE*f=0; 
 int journal_is_open=0;
 
 FILE * jf() { return f;}
 
 void journal_open(const char*file){
+	if(journal_is_open) {
+		fclose(f);
+	}
+	
 	f=fopen(file, "w");
 	// XXX
-	journal_is_open = 1;
+	journal_is_open = f != 0;
 }
 
 void write_array_d(int n, double*v) {
@@ -67,13 +71,3 @@ void journal_point(const char*str, gsl_vector*v) {
 	if(!journal_is_open) return;
 	fprintf(f, "%s %f %f\n", str, gvg(v,0), gvg(v,1) );
 }
-
-
-
-
-
-
-
-
-
-

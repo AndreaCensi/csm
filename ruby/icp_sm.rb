@@ -4,10 +4,9 @@ require 'logreader'
 require 'icp'
 require 'icpc_wrap'
 
-def scan_matching(io)
+def scan_matching(io, klass)
 	include MathUtils
 	
-
 	laser_ref = LogReader.shift_laser(io)
 	
 	count = 0
@@ -18,7 +17,6 @@ def scan_matching(io)
 		min_theta_step_deg = 5;
 
 		u =  pose_diff(laser_sens.odometry, laser_ref.odometry)
-		puts "u: #{pv(u)}"
 		
 		if (u[0,1]).nrm2 <= min_step && (u[2].abs <deg2rad(min_theta_step_deg))
 			
@@ -27,46 +25,39 @@ def scan_matching(io)
 			next
 		end
 
-		puts "Ref: #{pv(laser_ref.odometry)}"
-		puts "New: #{pv(laser_sens.odometry)}"
+#		puts "Ref: #{pv(laser_ref.odometry)}"
+#		puts "New: #{pv(laser_sens.odometry)}"
 
-
-		icp = ICP.new
+		count += 1
+		
+		sm = klass.new
 		# Write log of the icp operation
-		icp.journal_open("icp_sm.rb-sm#{count+=1}.txt")
+		sm.journal_open("icp_sm.rb-sm#{count}.txt")
+		sm.params = standard_parameters
+		sm.params[:maxAngularCorrectionDeg]= 60
+		sm.params[:maxLinearCorrection]=  2
+		sm.params[:laser_ref] = laser_ref;
+		sm.params[:laser_sens] = laser_sens;
+		sm.params[:maxIterations] = 20
 
-		icp.params[:maxAngularCorrectionDeg]= 10
-		icp.params[:maxLinearCorrection]=  2
-		icp.params[:laser_ref] = laser_ref;
-		icp.params[:laser_sens] = laser_sens;
-#		icp.params[:firstGuess] = u
-		icp.params[:maxIterations] = 20
-#		icp.params[:laser_sens] = laser_ref;
-#		icp.params[:firstGuess] = GSL::Vector.alloc(0.2,0.2,0)
-	
-#		icp.scan_matching
+		#		sm.params[:laser_sens] = laser_ref;
+		#		sm.params[:firstGuess] = GSL::Vector.alloc(0.2,0.2,deg2rad(30))
 
-		if true
-			require 'icpc_wrap'
-			
-			icpc = ICPC.new
-			# Write log of the icp operation
-			icpc.journal_open("icp_sm.rb-c#{count}.txt")
-
-			icpc.params = icp.params
-			
-			icpc.scan_matching
-		end
-
-
-
-
+		x = sm.scan_matching
+		
+		puts "u: #{pv(u)}"
+		puts "x: #{pv(x)}"
+		
 		laser_ref = laser_sens;
 	end
 end
 
+require 'icpc_wrap'
+require 'gpm'
+require 'gpm_then_icp'
+
 # Read from standard input if no arguments are passed
 io = ARGV.size>0 ? File.open(ARGV[0]) : $stdin 
 
-scan_matching(io)
+scan_matching(io, GPM_then_ICP)
 

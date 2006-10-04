@@ -18,6 +18,9 @@ void icpc_go();
 
 void icpc_cleanup();
 
+void icpc_get_x(double *x,double*y,double*theta);
+
+
 #include "icp.h"
 
 extern struct icp_input icpc_params;

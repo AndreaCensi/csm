@@ -17,6 +17,7 @@ PROJECT (icp C)
 
 ADD_LIBRARY(icp STATIC icp.c icp_correspondences_dumb.c 
 icp_correspondences_tricks.c icp_loop.c journal.c laser_data.c math_utils.c
+icp_outliers.c
 )
 
 TARGET_LINK_LIBRARIES(icp ${GSL_LIBRARIES})

@@ -26,6 +26,8 @@ struct icp_input {
 struct icp_output {
 	double x[3];
 	double x_cov[3][3];
+	int iterations;
+	
 	double ** dx_dy1;
 	double ** dx_dy2;
 };

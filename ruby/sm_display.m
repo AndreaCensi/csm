@@ -25,40 +25,47 @@ while true
 	r = skip_to(cells, r,'x_old');
 	x_old = cells_to_vector(cells, r, 2);
 
-	r = skip_to(cells, r,'correspondences');
-	for i=1:laser_sens.nrays
-		corr(i) = str2num(cells{r,1+i});
-		if corr(i) == -1
-			corr(i) = nan;
-		else 
-			% matlab counts from 1.. (yuk!)
-			corr(i) = corr(i) + 1;
-		end
-	end
+	[corr_exist, r] = exist_this_iteration(cells, r,'correspondences');
+    if corr_exist
+        for i=1:laser_sens.nrays
+            corr(i) = str2num(cells{r,1+i});
+            if corr(i) == -1
+                corr(i) = nan;
+            else 
+                % matlab counts from 1.. (yuk!)
+                corr(i) = corr(i) + 1;
+            end
+        end
+    end
 
 	laser_ref.estimate = [0;0;0];
 	laser_sens.estimate = x_old;
 
+	params.plotNormals = true
 	params.color = 'r.'
 	ld_plot(laser_ref, params);
+	
+	params.plotNormals = true
 	params.color = 'g.'
 	ld_plot(laser_sens, params);
 	
+    if corr_exist
 	for i=1:size(corr,2)
 		if isnan(corr(i))
 			continue
 		end
 		plot_line(transform(laser_sens.points(:,i),x_old), ...
 			laser_ref.points(:,corr(i)),'k-');
-	end
+    end
+    end
 
 	pause
 	old_axis = axis
 	clf
 	axis(old_axis)
 		
-	r = skip_to(cells, r,'x_new');
-	x_new = cells_to_vector(cells, r, 2)
+	%r = skip_to(cells, r,'x_new');
+	%x_new = cells_to_vector(cells, r, 2)
 
 	r = r + 1;
 end
@@ -75,8 +82,18 @@ function x = cells_to_vector(cells, r, cell)
 function r = skip_to(cells, r, cellname)
 	while  (r<=size(cells,1)) && (0==strcmp(cells{r,1}, cellname))
 		r = r +1;
-	end
+    end
 
+function [exist, r] = exist_this_iteration(cells, r, cellname);
+
+    next_iteration = skip_to(cells, r, 'iteration');
+    r = skip_to(cells, r, cellname)
+    if r < next_iteration
+        exist = true
+    else
+        exist = false
+    end
+        
 
 function [next_r, laser_data] = read_laser_data(cells, r)
 
@@ -99,6 +116,16 @@ function [next_r, laser_data] = read_laser_data(cells, r)
 			for i=1:ld.nrays
 				ld.readings(i) = str2double(cells{r,3+i});
 				ld.theta(i) = min_theta + (max_theta-min_theta)*i/ld.nrays;
+			end
+		end
+		if strcmp(cells{r, 3}, 'alpha_valid')
+			for i=1:ld.nrays
+				ld.alpha_valid(i) = str2num(cells{r,3+i});
+			end
+		end
+		if strcmp(cells{r, 3}, 'alpha')
+			for i=1:ld.nrays
+				ld.alpha(i) = str2double(cells{r,3+i});
 			end
 		end
 		r = r+1;

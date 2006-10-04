@@ -60,7 +60,16 @@ class ICPC
 
 		icpc_go
 		
+		res = Hash.new 
+#		puts "Class is #{Icpc::icpc_res.x.methods.join(', ')}"
+#		puts "Class is #{Icpc::icpc_res.x.to_a}"
+		x = Icpc::icpc_get_x();
+		res[:x] = Vector[x[0],x[1],x[2]]
+		res[:iterations] = Icpc::icpc_res.iterations;
+		
 		icpc_cleanup
+		
+		res
 	end
 	
 	

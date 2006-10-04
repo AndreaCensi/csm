@@ -52,3 +52,8 @@ void icpc_cleanup() {
 	ld_free(&(icpc_params.laser_sens));
 }
 
+void icpc_get_x(double *x,double*y,double*theta) {
+	*x = icpc_res.x[0];
+	*y = icpc_res.x[1];
+	*theta = icpc_res.x[2];
+}

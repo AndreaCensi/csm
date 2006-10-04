@@ -6,7 +6,6 @@ require 'icp_correspondences_tricks'
 require 'icp_covariance_numerical'
 require 'icp_covariance_exact'
 
-
 class ICP
 	include GSL
 	include MathUtils	
@@ -16,21 +15,9 @@ class ICP
 	attr_accessor :params
 	
 	def initialize
-		@params = Hash.new
-		standard_parameters
+		@params = standard_parameters
 	end
 
-	def standard_parameters
-		@params[:maxAngularCorrectionDeg]= 30
-		@params[:maxLinearCorrection]=    0.5
-		@params[:maxCorrespondenceDist]=   2
-		@params[:maxIterations]=           40
-		@params[:firstGuess]=         Vector.alloc(0,0,0)
-		@params[:epsilon_xy]=  0.001
-		@params[:epsilon_theta]=   MathUtils.deg2rad(0.01)
-		@params[:sigma]=           0.01
-	end
-	
 	
 	class Correspondence
 		attr_accessor :i
@@ -39,7 +26,7 @@ class ICP
 	end
 	
 	def scan_matching
-
+		
 		journal_laser 'laser_ref', params[:laser_ref]
 		journal_laser 'laser_sens', params[:laser_sens]
 		journal "odometry #{to_j(params[:firstGuess])}"
@@ -69,9 +56,9 @@ class ICP
 			new_delta = pose_diff(x_new, x_old)
 			journal     "delta #{to_j(new_delta)}"
 			
-			puts "#{iteration} x_new = #{pv(x_new)} delta = #{pv(new_delta)}"+
-				" neg #{new_delta.trans * delta>0} error #{@total_error} "
-			puts "    cov_x #{pm(cov_x)}"
+	#		puts "#{iteration} x_new = #{pv(x_new)} delta = #{pv(new_delta)}"+
+	#			" neg #{new_delta.trans * delta>0} error #{@total_error} "
+	#		puts "    cov_x #{pm(cov_x)}"
 			delta = new_delta
 		
 			if delta[0,1].nrm2 < params[:epsilon_xy] &&
@@ -83,6 +70,13 @@ class ICP
 			x_old = x_new
 		end
 		
+		res = Hash.new
+		res[:x] = x_new
+		res[:iterations] = iteration
+		res[:dx_dy1] = dx_dy1
+		res[:dx_dy2] = dx_dy2
+		
+		return res
 	end
 	
 	
@@ -142,6 +136,7 @@ class ICP
 #		cov = compute_covariance(laser_ref, laser_sens, correspondences, x_old)
 		dx_dy1, dx_dy2 = 
 			compute_covariance_exact(laser_ref, laser_sens, correspondences, x_old)
+		
 		
 		return x_new, dx_dy1, dx_dy2
 	end
