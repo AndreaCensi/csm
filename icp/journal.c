@@ -18,9 +18,12 @@ void journal_open(const char*file){
 }
 
 void write_array_d(int n, double*v) {
-	int i;
-	for(i=0;i<n;i++) 
+	int i; for(i=0;i<n;i++) 
 		fprintf(f, "%f ", v[i]);	
+}
+void write_array_i(int n, int*v) {
+	int i; for(i=0;i<n;i++) 
+		fprintf(f, "%d ", v[i]);	
 }
 
 void journal_write_array_d(const char*str, int n, double*v){
@@ -33,10 +36,7 @@ void journal_write_array_d(const char*str, int n, double*v){
 void journal_write_array_i(const char*str, int n, int*v){
 	if(!journal_is_open) return;
 	fprintf(f, "%s ", str);
-	int i;
-	for(i=0;i<n;i++) {
-		fprintf(f, "%d ", v[i]);
-	}
+	write_array_i(n,v);
 	fprintf(f,"\n");
 }
 
@@ -46,8 +46,17 @@ void journal_laser_data(const char*name, struct laser_data*ld) {
 	fprintf(f, "laser %s min_theta %f\n", name, ld->min_theta);
 	fprintf(f, "laser %s max_theta %f\n", name, ld->max_theta);
 	fprintf(f, "laser %s readings ", name);
-	write_array_d(ld->nrays, ld->readings);
-	fprintf(f, "\n");
+		write_array_d(ld->nrays, ld->readings);
+		fprintf(f, "\n");
+	fprintf(f, "laser %s alpha_valid ", name);
+		write_array_i(ld->nrays, ld->alpha_valid);
+		fprintf(f, "\n");
+	fprintf(f, "laser %s alpha ", name);
+		write_array_d(ld->nrays, ld->alpha);
+		fprintf(f, "\n");
+	fprintf(f, "laser %s cov_alpha ", name);
+		write_array_d(ld->nrays, ld->cov_alpha);
+		fprintf(f, "\n");
 }
 
 void journal_correspondences(LDP ld) {

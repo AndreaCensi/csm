@@ -15,6 +15,8 @@ void gsl_vector_set_nan(gsl_vector*v);
 double distance(gsl_vector* a,gsl_vector* b);
 double norm(const gsl_vector*);
 
+double angleDiff(double a, double b);
+double square(double x);
 double deg2rad(double deg);
 double rad2deg(double rad);
 gsl_vector * vector_from_array(unsigned int n, double *x);

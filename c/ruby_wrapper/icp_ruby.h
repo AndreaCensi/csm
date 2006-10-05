@@ -20,6 +20,7 @@ void icpc_cleanup();
 
 void icpc_get_x(double *x,double*y,double*theta);
 
+void gpmc_go();
 
 #include "icp.h"
 

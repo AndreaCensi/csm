@@ -47,6 +47,10 @@ void icpc_go() {
 	icp(&icpc_params, &icpc_res);
 }
 
+void gpmc_go() {
+	gpm(&icpc_params, &icpc_res);
+}
+
 void icpc_cleanup() {
 	ld_free(&(icpc_params.laser_ref));
 	ld_free(&(icpc_params.laser_sens));

@@ -18,6 +18,7 @@ void icpc_odometry_cov(double cov_x, double cov_y, double cov_theta);
 void icpc_go();
 void icpc_cleanup();
 
+void gpmc_go();
 
 struct icp_input {
 	double maxAngularCorrectionDeg;

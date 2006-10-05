@@ -12,6 +12,7 @@ void compute_next_estimate(LDP laser_ref, LDP laser_sens, const gsl_vector*x_old
 int termination_criterion(gsl_vector*delta, struct icp_input*params);
 
 void find_correspondences_tricks(struct icp_input*params, gsl_vector* x_old);
+void kill_outliers(int K, struct gpc_corr*c, const gsl_vector*x_old, int*valid);
 
 void icp(struct icp_input*params, struct icp_output*res) {
 	LDP laser_ref  = &(params->laser_ref);

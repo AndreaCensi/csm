@@ -7,6 +7,22 @@ void ld_alloc(struct laser_data*ld, int nrays) {
 	ld->nrays = nrays;
 	ld->readings     = (double*) malloc(sizeof(double)*nrays);
 	ld->theta        = (double*) malloc(sizeof(double)*nrays);
+	
+	ld->cluster = (int*) malloc(sizeof(int)   *nrays);
+	ld->alpha = (double*) malloc(sizeof(double)*nrays);
+	ld->cov_alpha = (double*) malloc(sizeof(double)*nrays);
+	ld->alpha_valid = (int*) malloc(sizeof(int)   *nrays);
+	
+	int i;
+	for(i=0;i<ld->nrays;i++) {
+		ld->theta[i] = GSL_NAN;
+		ld->readings[i] = GSL_NAN;
+		ld->cluster[i] = -1;
+		ld->alpha[i] = GSL_NAN;
+		ld->cov_alpha[i] = GSL_NAN;
+		ld->alpha_valid[i] = 0;
+	}
+	
 	ld->up_bigger    =    (int*) malloc(sizeof(int)   *nrays);
 	ld->up_smaller   =    (int*) malloc(sizeof(int)   *nrays);
 	ld->down_bigger  =    (int*) malloc(sizeof(int)   *nrays);
@@ -15,19 +31,27 @@ void ld_alloc(struct laser_data*ld, int nrays) {
 		(struct correspondence*) malloc(sizeof(struct correspondence)*nrays);
 	
 	ld->p = (gsl_vector**) malloc(sizeof(gsl_vector*) * nrays);
-	int i; 
-	for(i=0;i<nrays;i++) 
+
+	for(i=0;i<nrays;i++) {
 		ld->p[i] = gsl_vector_alloc(2);
+		gvs(ld->p[i], 0, GSL_NAN);
+		gvs(ld->p[i], 1, GSL_NAN);
+	}
 }
 
 void ld_free(struct laser_data*ld){	
 	free(ld->readings);
 	free(ld->theta);
+	free(ld->cluster);
+	free(ld->alpha);
+	free(ld->alpha_valid);
+	free(ld->cov_alpha);
 	free(ld->up_bigger);
 	free(ld->up_smaller);
 	free(ld->down_bigger);
 	free(ld->down_smaller);
 	free(ld->corr);
+	
 	int i;
 	for(i=0;i<ld->nrays;i++)
 		gsl_vector_free(ld->p[i]);

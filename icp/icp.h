@@ -33,7 +33,17 @@ struct icp_output {
 };
 
 
+
 void icp(struct icp_input*input, struct icp_output*output);
 void icp_journal_open(const char* file);
 
+void gpm(struct icp_input*input, struct icp_output*output);
+
 #endif
+
+
+
+
+
+
+

@@ -95,3 +95,15 @@ void pose_diff(const gsl_vector*pose2,const gsl_vector*pose1,gsl_vector*res) {
 double minmax(int from,int to,int x){
 	return GSL_MAX(GSL_MIN(x,to),from);
 }
+
+double square(double x) {
+	return x*x;
+}
+
+double angleDiff(double a, double b) {
+	double t = a - b;
+	while(t<-M_PI) t+= 2*M_PI;
+	while(t>M_PI)  t-= 2*M_PI;
+	return t;
+}
+

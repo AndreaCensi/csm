@@ -190,8 +190,8 @@ class GPM
 		#puts "l = \n#{l}"
 		#puts "r = \n#{r}"
 		
-		# x = (l^t l)^-1 l^t y
-		f1 = ((l.trans * l).inv * l.trans * y)[0,0]
+		# x = (l^t R^-1 l)^-1 l^t R^-1 y
+		f1 = ((l.trans * (r*r.trans).inv * l).inv * l.trans * (r*r.trans).inv * y)[0,0]
 		
 		#alpha = theta0 + PI/2 + Math.atan(rho0/f1)
 		alpha = theta0 + Math.atan(f1/rho0)

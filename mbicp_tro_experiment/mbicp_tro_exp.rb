@@ -17,7 +17,7 @@ def main(scans, klass)
 	repetitions_per_scan = 1;	
 	
 	# Use a known seed for repeatability of the experiments
-	Kernel.srand(42);
+	Kernel.srand(23);
 
 	f = File.open("results.txt",'w')
 	failed_codes = Array.new
@@ -96,7 +96,7 @@ require 'gpm'
 require 'gpm_then_icp'
 
 log = 'laserazosSM3.off'
-log = 'a.off'
+#log = 'a.off'
 scans = nil
 File.open(log) do |f| 
 	puts "no"; 

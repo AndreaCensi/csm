@@ -32,32 +32,35 @@ def scan_matching(io, klass)
 		
 		sm = klass.new
 		# Write log of the icp operation
-		sm.journal_open("icp_sm.rb-sm#{count}.txt")
+		sm.journal_open("icp_sm.#{sm.name}.#{count}.txt")
 		sm.params = standard_parameters
 		sm.params[:maxAngularCorrectionDeg]= 60
 		sm.params[:maxLinearCorrection]=  2
 		sm.params[:laser_ref] = laser_ref;
 		sm.params[:laser_sens] = laser_sens;
 		sm.params[:maxIterations] = 20
+		sm.params[:firstGuess] = u
 
 		#		sm.params[:laser_sens] = laser_ref;
 		#		sm.params[:firstGuess] = GSL::Vector.alloc(0.2,0.2,deg2rad(30))
 
-		x = sm.scan_matching
+		res = sm.scan_matching
 		
 		puts "u: #{pv(u)}"
-		puts "x: #{pv(x)}"
+		puts "x: #{pv(res[:x])}"
 		
 		laser_ref = laser_sens;
 	end
 end
 
 require 'icpc_wrap'
+require 'gpmc_wrap'
 require 'gpm'
 require 'gpm_then_icp'
 
 # Read from standard input if no arguments are passed
 io = ARGV.size>0 ? File.open(ARGV[0]) : $stdin 
 
-scan_matching(io, GPM_then_ICP)
+#scan_matching(io, GPM_then_ICP)
+scan_matching(io, GPMC)
 

@@ -29,7 +29,7 @@ void kill_outliers(int K, struct gpc_corr*c, const gsl_vector*x_old, int*valid) 
 		if(dist[k]>MAX_RANGE) continue;
 		gsl_histogram_increment(hist, dist[k]);
 	}
-	int half=0;
+	
 	double integral=0;
 	unsigned int b;
 	for(b=0;b<NBINS;b++){
@@ -37,7 +37,7 @@ void kill_outliers(int K, struct gpc_corr*c, const gsl_vector*x_old, int*valid) 
 		if(integral>PERC*K)
 			break;
 	}
-	int max_bin = b;
+	size_t max_bin = (size_t) b;
 	double mean=0; int mean_count=0;
 	// now compute mean for elements in bin < b
 	for(k=0;k<K;k++) {

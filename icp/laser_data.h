@@ -15,6 +15,12 @@ struct laser_data {
 	double *readings;
 	double *theta;
 	
+	int *cluster;
+	
+	double *alpha;
+	double *cov_alpha;
+	int *alpha_valid;
+	
 	/* Jump tables */
 	int *up_bigger, *up_smaller, *down_bigger, *down_smaller;
 
@@ -32,6 +38,9 @@ void ld_free(LDP);
 void ld_compute_cartesian(LDP);
 void ld_create_jump_tables(LDP);
 int  ld_valid_ray(LDP, int i);
+// -1 if not found
+int ld_next_valid(LDP ld, int i, int dir);
+
 
 int ld_valid_corr(LDP, int i);
 void ld_set_correspondence(LDP, int i, int j1, int j2);
@@ -39,5 +48,8 @@ void ld_set_null_correspondence(LDP, int i);
 /** -1 if not found */
 int ld_next_valid_up(LDP, int i);
 int ld_next_valid_down(LDP, int i);
+
+void ld_simple_clustering(LDP ld, double threshold);
+void ld_compute_orientation(LDP ld, int size_neighbourhood);
 
 #endif
