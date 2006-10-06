@@ -68,6 +68,13 @@ gsl_vector * vector_from_array(unsigned int n, double *x) {
 	return v;
 }
 
+void vector_to_array(const gsl_vector*v, double*x){
+	size_t i; 
+	for(i=0;i<v->size;i++)
+		x[i] = gvg(v,i);
+}
+
+
 void oplus(const gsl_vector*x1,const gsl_vector*x2, gsl_vector*res) {
 	double c = cos(gvg(x1,2));
 	double s = sin(gvg(x1,2));

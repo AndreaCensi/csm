@@ -60,8 +60,8 @@ function res = ld_plot(ld, params)
 		valid_points = ld.points(:,valids);
 		valid_alpha  = ld.alpha(valids);
 		valid_errors = rad2deg(sqrt(ld.alpha_error(valids)));;
-		emin = min(valid_errors)
-		emax = max(valid_errors)
+		emin = min(valid_errors);
+		emax = max(valid_errors);
 		
 		for i=1:size(valids,2)
 			%weight = 1 + valid_errors(i) * maxLength;

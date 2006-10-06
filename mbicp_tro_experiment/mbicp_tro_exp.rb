@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 
+require 'benchmark'
 require 'mbicp_tro_utils'
 
 
@@ -17,8 +18,10 @@ def main(scans, klass)
 	repetitions_per_scan = 1;	
 	
 	# Use a known seed for repeatability of the experiments
-	Kernel.srand(23);
-
+	rng = Rng.alloc(GSL::Rng::MT19937, 42)
+	sigma = 0.01;
+#	sigma = 0;
+	
 	f = File.open("results.txt",'w')
 	failed_codes = Array.new
 	max_displacement.each_index do |i|
@@ -29,7 +32,7 @@ def main(scans, klass)
 		failed = 0;
 		puts "Experiment #{i}"
 		scans.each_index do |s| repetitions_per_scan.times do |n|
-			disp = random_displacement(max_displacement[i]);
+			disp = random_displacement(max_displacement[i],rng);
 			
 			code = "#{i}-#{s}-#{n}"
 
@@ -51,13 +54,21 @@ def main(scans, klass)
 			sm.params[:maxAngularCorrectionDeg]= rad2deg(max_displacement[i][2])*1.3
 			sm.params[:maxLinearCorrection]=  max_displacement[i][0]*1.3;
 			sm.params[:laser_ref] =  scans[s]
-			sm.params[:laser_sens] =  scans[s].clone
+			sm.params[:laser_sens] =  scans[s].deep_copy
+			sm.params[:laser_sens].add_noise!(sigma, rng)
 			sm.params[:firstGuess] = disp
-			sm.params[:maxIterations] = 20
+			sm.params[:maxIterations] = 100
 			
 			#begin
+			res = nil
+			realtime = Benchmark.realtime do
 				res = sm.scan_matching
-				puts ">>> it = #{res[:iterations]} x = #{res[:x]}"
+			end
+			
+				puts ">>> #{sm.name} #{code} >>> x = #{pv(res[:x])} it = #{res[:iterations]} "+
+				"time =#{two_decimals(realtime)} "+
+					"error #{res[:error]}  disp #{pv(disp)}"
+				
 				x = res[:x];
 				e_xy = sqrt(x[0]*x[0]+x[1]*x[1]);
 				e_th = x[2].abs
@@ -83,27 +94,33 @@ def main(scans, klass)
 		f.puts " Iterations"
 		f.puts "------------------"
 		write_summary(f, hist_iterations);
-		f.puts " Bad codes: "
-		f.puts "  bin 4: #{codes[4].join(', ')} "
-		f.puts "  bin 3: #{codes[3].join(', ')} "
+		f.puts " Experiments with large errors: "
+		for i in 2..4
+			f.puts "  bin #{i}: #{codes[i].join(' ')} " 
+		end
+		f.flush
 	end
 		
 	f.puts "\n\nFailed experiments: #{failed_codes.join(', ')}"
 end
 
 require 'icpc_wrap'
+require 'gpmc_wrap'
 require 'gpm'
 require 'gpm_then_icp'
 
+
+
+scan_matcher = eval ARGV.shift
+
 log = 'laserazosSM3.off'
-#log = 'a.off'
 scans = nil
 File.open(log) do |f| 
-	puts "no"; 
 	scans = read_log(f) 
 end
 
-main(scans, GPM_then_ICP)
+main(scans, scan_matcher)
+#main(scans, GPM)
 
 
 

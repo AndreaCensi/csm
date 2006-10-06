@@ -21,12 +21,17 @@ struct icp_input {
 	
 	/** dubious parameters */
 	double maxCorrespondenceDist;
+	
+	int restart;
+	double restart_dt;
+	double restart_dtheta;
 };
 
 struct icp_output {
 	double x[3];
 	double x_cov[3][3];
 	int iterations;
+	double error;
 	
 	double ** dx_dy1;
 	double ** dx_dy2;

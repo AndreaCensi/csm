@@ -45,11 +45,11 @@ def read_log(io)
 	scans
 end
 
-def random_displacement(max_disp) 
+def random_displacement(max_disp,rng) 
 	disp = max_disp.clone;
-	disp[0] = disp[0] * 2.0*(rand-0.5)
-	disp[1] = disp[1] * 2.0*(rand-0.5)
-	disp[2] = disp[2] * 2.0*(rand-0.5)
+	disp[0] = disp[0] * 2.0*(rng.uniform-0.5)
+	disp[1] = disp[1] * 2.0*(rng.uniform-0.5)
+	disp[2] = disp[2] * 2.0*(rng.uniform-0.5)
 	disp
 end
 
@@ -76,6 +76,10 @@ end
 
 def write_summary(io, hist)
 	sum = hist.sum;
+	if sum == 0 
+		io.write("\t --- Empty bins? --- \n")
+		return
+	end
 	for b in (0..biggest_non_empty_bin(hist))
 		range = hist.get_range(b)
 		io.write pad("#{range[0]} <= x < #{range[1]}",20)

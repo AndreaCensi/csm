@@ -16,6 +16,7 @@ class LaserData < Event
 	attr_accessor :max_reading
 	attr_accessor :min_theta
 	attr_accessor :max_theta
+	
 end
 
 class LaserPoint 
@@ -49,12 +50,14 @@ def standard_parameters
 	p[:maxLinearCorrection]=    0.5
 	p[:maxCorrespondenceDist]=   2
 	p[:maxIterations]=           40
-#	p[:firstGuess]=         Vector.alloc(0,0,0)
 	p[:epsilon_xy]=  0.0001
 	p[:epsilon_theta]=   0.0001
 	p[:sigma]=           0.01
+	p[:restart]=         1
+	p[:restart_dt]=      0.01
+	p[:restart_dth]=     deg2rad(1.5)
 	p
 end
 
-
+require 'laserdata_ops'
 require 'laserdata_carmen'

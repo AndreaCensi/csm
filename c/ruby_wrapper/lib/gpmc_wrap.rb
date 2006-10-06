@@ -1,20 +1,10 @@
 require 'icpc'
 require 'structures'
 require 'journal'
-	
-# pass parameters 
-def params2method(params, ob)
-	params.each { |param, value|
-		method = "#{param}="
-		if ob.methods.include? method
-			ob.__send__(method, value) 
-		else
-			#puts "Structure does not have method #{method}"
-		end
-	}
-end
+		
+require 'icpc_wrap'
 
-class ICPC
+class GPMC
 	include MathUtils	
 	include Math
 	include Icpc
@@ -26,14 +16,17 @@ class ICPC
 	end
 	
 	def name 
-		"ICPC"
+		"GPMC"
 	end
 
+	
+	
 	def scan_matching
 		
 		# pass all parameters to extension library
 		laser_ref  = params[:laser_ref]
 		laser_sens = params[:laser_sens]
+		u=params[:firstGuess];
 		
 		icpc_l_nrays(0, laser_ref.nrays);
 		icpc_l_min_theta(0, laser_ref.min_theta);
@@ -49,13 +42,12 @@ class ICPC
 			icpc_l_ray(1, i, laser_sens.points[i].theta, laser_sens.points[i].reading)
 		end
 	
-		
-		params2method(params, Icpc::icpc_params)
-		
-		u=params[:firstGuess];
+		params2method(params, Icpc::icpc_params)	
+
+		puts "wrap: linear = #{params[:maxLinearCorrection]}"
 		icpc_odometry(u[0],u[1],u[2]);
 
-		icpc_go
+		gpmc_go
 		
 		res = Hash.new 
 #		puts "Class is #{Icpc::icpc_res.x.methods.join(', ')}"
@@ -67,6 +59,7 @@ class ICPC
 		
 		icpc_cleanup
 		
+		puts "gpm_res: #{res[:x]}"
 		res
 	end
 	

@@ -41,12 +41,12 @@ while true
 	laser_ref.estimate = [0;0;0];
 	laser_sens.estimate = x_old;
 
-	params.plotNormals = true
-	params.color = 'r.'
+	params.plotNormals = true;
+	params.color = 'r.';
 	ld_plot(laser_ref, params);
 	
-	params.plotNormals = true
-	params.color = 'g.'
+	params.plotNormals = true;
+	params.color = 'g.';
 	ld_plot(laser_sens, params);
 	
     if corr_exist
@@ -67,7 +67,6 @@ while true
 	%r = skip_to(cells, r,'x_new');
 	%x_new = cells_to_vector(cells, r, 2)
 
-	r = r + 1;
 end
 
 function plot_line(a,b,color)
@@ -85,13 +84,14 @@ function r = skip_to(cells, r, cellname)
     end
 
 function [exist, r] = exist_this_iteration(cells, r, cellname);
-
+	start =r;
     next_iteration = skip_to(cells, r, 'iteration');
     r = skip_to(cells, r, cellname)
     if r < next_iteration
-        exist = true
+        exist = true;
     else
-        exist = false
+			r = start;
+        exist = false;
     end
         
 
@@ -101,7 +101,7 @@ function [next_r, laser_data] = read_laser_data(cells, r)
 	ld = struct;
 	ld.estimate = [0;0;0]
 	ld.odometry = [0;0;0]
-	while strcmp(cells{r, 1},'laser') && strcmp(cells{r, 2},name)
+	while (r<=size(cells,1)) && strcmp(cells{r, 1},'laser') && strcmp(cells{r, 2},name)
 		fprintf('at %s %s %s\n',cells{r,1},cells{r,2},cells{r,3})
 		if strcmp(cells{r, 3}, 'min_theta')
 			min_theta = str2double(cells{r,4});

@@ -14,9 +14,13 @@ module MathUtils
 		GSL::Vector.alloc(Math.cos(a), Math.sin(a)).col
 	end
 
+	def two_decimals(x)
+		x.nan? ? GSL::NAN : (x*100).round/100.0;
+	end
+	
 	def pv(x)
-		"[#{(x[0]*100000).round/100.0}mm,#{(x[1]*100000).round/100.0}mm,"+
-		"#{(rad2deg(x[2])*1000).round/1000.0}deg]"
+		"[#{two_decimals(x[0]*1000) }mm,#{two_decimals(x[1]*1000)}mm,"+
+		"#{two_decimals(rad2deg(x[2]))}deg]"
 	end
 
 	def pm(m)

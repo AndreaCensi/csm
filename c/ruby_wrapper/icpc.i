@@ -27,11 +27,17 @@ struct icp_input {
 	double epsilon_xy;
 	double epsilon_theta;
 	double maxCorrespondenceDist;
+	
+	int restart;
+	double restart_dt;
+	double restart_dtheta;
+	
 };
 
 struct icp_output {
 	double x[3];
 	int iterations;
+	double error;
 };
 
 void icpc_get_x(double *OUTPUT,double*OUTPUT,double*OUTPUT);

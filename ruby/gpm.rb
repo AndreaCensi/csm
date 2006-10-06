@@ -194,7 +194,7 @@ class GPM
 		f1 = ((l.trans * (r*r.trans).inv * l).inv * l.trans * (r*r.trans).inv * y)[0,0]
 		
 		#alpha = theta0 + PI/2 + Math.atan(rho0/f1)
-		alpha = theta0 + Math.atan(f1/rho0)
+		alpha = theta0 - Math.atan(f1/rho0)
 		
 		cov_f1 = ((l.trans * l).inv)[0,0]
 		
@@ -203,6 +203,10 @@ class GPM
 		cov0_alpha = (dalpha_df1**2) * cov_f1 + (dalpha_drho**2)
 
 		#puts " cov_f1 = #{cov_f1} dalpha_df1 #{dalpha_df1**2} dalpha_drho #{dalpha_drho**2} "
+		if cos(alpha)*cos(theta0)+sin(alpha)*sin(theta0)>0
+			alpha = alpha + PI
+		end
+		
 		return alpha, cov_f1
 	end
 	
@@ -237,7 +241,7 @@ class GPM
 
 			p_i = laser_sens.points[i].cartesian
 
-			from, to = possible_interval(p_i, laser_sens, 
+			from, to = possible_interval(p_i, laser_ref, 
 				maxAngularCorrectionDeg, maxLinearCorrection)
 			
 			for j in from..to
@@ -275,7 +279,7 @@ class GPM
 
 			p_i = laser_sens.points[i].cartesian
 
-			from, to = possible_interval(p_i, laser_sens, 
+			from, to = possible_interval(p_i, laser_ref, 
 				maxAngularCorrectionDeg, maxLinearCorrection)
 			
 			for j in from..to

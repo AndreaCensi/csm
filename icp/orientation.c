@@ -92,8 +92,11 @@ void filter_orientation(double theta0, double rho0, size_t n,
 	gsl_matrix_free(l);
 	gsl_matrix_free(r);
 	
-	*alpha = theta0 + atan(f1/rho0);
+	*alpha = theta0 - atan(f1/rho0);
 
+	if(cos(*alpha)*cos(theta0)+sin(*alpha)*sin(theta0)>0) {
+		*alpha = *alpha + M_PI;
+	}
 	double dalpha_df1  = rho0 / (square(rho0) + square(f1));
 	double dalpha_drho = -f1 /  (square(rho0) + square(f1));
 	
