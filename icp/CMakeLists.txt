@@ -24,17 +24,17 @@ lib/gpc/gpc_utils.c
 
 TARGET_LINK_LIBRARIES(sm ${GSL_LIBRARIES})
 
-ADD_EXECUTABLE(test test.c)
-
-INSTALL(TARGETS icp ARCHIVE DESTINATION lib)
-
-INSTALL(FILES sm.h  DESTINATION include)
-INSTALL(FILES laser_data.h DESTINATION include)
 
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}  -Wall -W -Wconversion  -Wunreachable-code ")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Ilib/gpc")
 
 
+INSTALL(TARGETS sm ARCHIVE DESTINATION lib)
+INSTALL(FILES sm.h  DESTINATION include)
+
+
 #SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mcpu=powerpc -O3")
-#TARGET_LINK_LIBRARIES(gpc_test gpc ${GSL_LIBRARIES})
+
+ADD_EXECUTABLE(sm_test sm_test.c)
+TARGET_LINK_LIBRARIES(sm_test sm ${GSL_LIBRARIES})

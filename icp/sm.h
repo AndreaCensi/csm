@@ -1,7 +1,38 @@
 #ifndef H_ICP
 #define H_ICP
 
-#include "laser_data.h"
+#include <gsl/gsl_vector.h>
+
+struct correspondence {
+	int valid; 
+	int j1; int j2;
+};
+
+struct laser_data {
+	int nrays;
+	double  min_theta;
+	double  max_theta;
+	double *readings;
+	double *theta;
+
+	
+	int *cluster;
+	
+	double *alpha;
+	double *cov_alpha;
+	int *alpha_valid;
+	
+	/* Jump tables */
+	int *up_bigger, *up_smaller, *down_bigger, *down_smaller;
+
+	/* Cartesian points */
+	gsl_vector**p;
+	
+	struct correspondence* corr;
+};
+
+void ld_alloc(struct laser_data*, int nrays);
+void ld_free(struct laser_data*);
 
 struct sm_params {
 	struct laser_data laser_ref;
@@ -47,11 +78,10 @@ struct sm_result {
 };
 
 
-
 void icp(struct sm_params*input, struct sm_result*output);
-void icp_journal_open(const char* file);
-
 void gpm(struct sm_params*input, struct sm_result*output);
+
+void sm_journal_open(const char* file);
 
 #endif
 

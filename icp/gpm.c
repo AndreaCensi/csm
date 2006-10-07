@@ -1,5 +1,5 @@
 #include <gsl/gsl_histogram.h>
-#include "icp.h"
+#include "sm.h"
 #include "math_utils.h"
 #include "journal.h"
 #include "gsl_stack.h"

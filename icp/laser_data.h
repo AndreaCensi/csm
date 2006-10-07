@@ -1,9 +1,9 @@
 #ifndef H_LASER_DATA
 #define H_LASER_DATA
 
+#include "sm.h"
 
 #define LDP   struct laser_data*
-
 
 void ld_compute_cartesian(LDP);
 void ld_create_jump_tables(LDP);

@@ -1,5 +1,5 @@
 #include <gsl/gsl_vector.h>
-#include "icp.h"
+#include "sm.h"
 #include "journal.h"
 #include "math_utils.h"
 
