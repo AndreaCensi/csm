@@ -1,12 +1,9 @@
-#!/usr/bin/env ruby
-require 'gsl'
-require 'mathutils'
-require 'laserdata'
+require 'rsm_mathutils'
 
 
 module Pose 
 
-	def Pose.parse_tokens(tokens)
+	def parse_tokens(tokens)
 		v = GSL::Vector.alloc(GSL::NAN,GSL::NAN,GSL::NAN).col
 		v[0] = tokens.shift.to_f
 		v[1] = tokens.shift.to_f

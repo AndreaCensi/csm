@@ -50,14 +50,10 @@ def scan_matching(io, klass)
 	end
 end
 
-require 'icpc_wrap'
-require 'gpmc_wrap'
-require 'gpm'
-require 'gpm_then_icp'
+scan_matcher = eval ARGV.shift
 
 # Read from standard input if no arguments are passed
 io = ARGV.size>0 ? File.open(ARGV[0]) : $stdin 
 
-#scan_matching(io, GPM_then_ICP)
-scan_matching(io, GPMC)
+scan_matching(io, scan_matcher)
 

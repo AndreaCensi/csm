@@ -1,4 +1,4 @@
-require 'laserdata'
+require 'rms_laserdata'
 
 
 class LaserData

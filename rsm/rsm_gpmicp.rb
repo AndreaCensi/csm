@@ -1,4 +1,5 @@
-require 'icpc_wrap'
+require 'sm_icp'
+require 'sm_gpm'
 
 class GPM_then_ICP
 	attr_accessor :params

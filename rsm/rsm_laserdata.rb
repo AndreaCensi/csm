@@ -1,4 +1,4 @@
-require 'mathutils'
+require 'rsm_mathutils'
 
 class Event
 	attr_accessor :timestamp
@@ -68,5 +68,5 @@ def standard_parameters
 	p
 end
 
-require 'laserdata_ops'
-require 'laserdata_carmen'
+require 'rsm_laserdata_ops'
+require 'rsm_laserdata_carmen'

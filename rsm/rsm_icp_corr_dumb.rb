@@ -1,8 +1,6 @@
 
 class ICP
 	
-	
-	
 	def find_correspondences(x_old)
 		correspondences = Array.new
 		maxAngularCorrectionDeg = params[:maxAngularCorrectionDeg]

@@ -1,7 +1,5 @@
 #!/usr/bin/env ruby
-require 'logreader'
-
-require 'icpc_wrap'
+require 'rsm'
 
 class Matching 
 	attr_accessor :x
@@ -14,7 +12,7 @@ class Matching
 	attr_accessor :J2
 end
 
-def scan_matching(io)
+def scan_matching(io, scan_matcher)
 	include MathUtils
 	
 	laser_ref = LogReader.shift_laser(io)
@@ -46,7 +44,7 @@ def scan_matching(io)
 	#	puts "Ref: #{pv(laser_ref.odometry)}"
 	#	puts "New: #{pv(laser_sens.odometry)}"
 
-		icp = ICP.new
+		icp = scan_matcher.new
 		# Write log of the icp operation
 	#	icp.journal_open("icp_sm.rb-sm#{count}.txt")
 

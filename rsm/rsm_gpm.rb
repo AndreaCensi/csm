@@ -1,5 +1,4 @@
-require 'journal'
-require 'mathutils'
+require 'rsm'
 
 class GPM
 	include MathUtils
