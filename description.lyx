@@ -1,0 +1,167 @@
+#LyX 1.4.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 245
+\begin_document
+\begin_header
+\textclass article
+\language english
+\inputencoding auto
+\fontscheme default
+\graphics default
+\paperfontsize default
+\papersize default
+\use_geometry false
+\use_amsmath 1
+\cite_engine basic
+\use_bibtopic false
+\paperorientation portrait
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\defskip medskip
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\end_header
+
+\begin_body
+
+\begin_layout Section
+HSM
+\end_layout
+
+\begin_layout Standard
+Filtering orientation
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \[
+f'(\theta_{0})=\frac{f(\theta_{i})-f(\theta_{0})}{\theta_{i}-\theta_{0}}+f''(\xi)\frac{\left(\theta_{i}-\theta_{0}\right)^{2}}{2}\]
+
+\end_inset
+
+
+\begin_inset Formula \[
+f'(\theta_{0})=\frac{\rho_{i}-\rho_{0}}{\theta_{i}-\theta_{0}}+\left(\frac{1}{\theta_{i}-\theta_{0}}\right)\epsilon_{i}+\left(\frac{-1}{\theta_{i}-\theta_{0}}\right)\epsilon_{0}+\frac{\left(\theta_{i}-\theta_{0}\right)^{2}}{2}c_{i}\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \[
+Y=LX+R\epsilon\]
+
+\end_inset
+
+
+\begin_inset Formula \[
+Y=\left[\begin{array}{c}
+\frac{\rho_{1}-\rho_{0}}{\theta_{1}-\theta_{0}}\\
+\vdots\\
+\frac{\rho_{n}-\rho_{0}}{\theta_{n}-\theta_{0}}\end{array}\right]\quad\qquad L=\left[\begin{array}{c}
+1\\
+\vdots\\
+1\end{array}\right]\quad X=f'(\theta_{0})\qquad R\epsilon=\left[\begin{array}{cccc}
+\frac{-1}{\theta_{1}-\theta_{0}} & \frac{1}{\theta_{1}-\theta_{0}} & 0 & 0\\
+\vdots &  & \ddots\\
+\frac{-1}{\theta_{n}-\theta_{0}} & 0 & 0 & \frac{1}{\theta_{n}-\theta_{0}}\end{array}\right]\left[\begin{array}{c}
+\underbar{\epsilon_{0}}\\
+\epsilon_{1}\\
+\vdots\\
+\epsilon_{n}\end{array}\right]\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \[
+\alpha=\theta_{0}-\mbox{atan}\left(\frac{f'(\theta_{0})}{f(\theta_{0})}\right)\]
+
+\end_inset
+
+
+\begin_inset Formula \[
+\frac{\partial\alpha}{\partial f'}=\frac{1}{1+\left(f'/f\right)^{2}}\frac{1}{f}=\frac{f}{f^{2}+f'^{2}}\]
+
+\end_inset
+
+
+\begin_inset Formula \[
+\frac{\partial\alpha}{\partial f}=\frac{1}{1+\left(f'/f\right)^{2}}\frac{-f'}{f^{2}}=\frac{-f'}{f^{2}+f'^{2}}\]
+
+\end_inset
+
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+
+\backslash
+frac{f}{f^{2}+f'^{2}}
+\end_layout
+
+\begin_layout Section
+ICP
+\end_layout
+
+\begin_layout Subsection
+Tricks
+\end_layout
+
+\begin_layout Standard
+Tutti esatti
+\end_layout
+
+\begin_layout Subsubsection
+The from-to trick
+\end_layout
+
+\begin_layout Subsubsection
+Going up and going down
+\end_layout
+
+\begin_layout Subsubsection
+Start at last cell
+\end_layout
+
+\begin_layout Subsubsection
+Early stop
+\end_layout
+
+\begin_layout Subsubsection
+Use jumps
+\end_layout
+
+\begin_layout Subsection
+Code optimizations
+\end_layout
+
+\begin_layout Standard
+no sin() con tables o similari
+\end_layout
+
+\begin_layout Subsection
+Minimizzazione
+\end_layout
+
+\begin_layout Subsection
+Trimming
+\end_layout
+
+\begin_layout Section
+Evolution
+\end_layout
+
+\end_body
+\end_document
