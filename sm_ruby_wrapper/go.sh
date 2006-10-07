@@ -1,5 +1,5 @@
 swig -ruby sm.i
-ruby extconf.rb --with-opt-dir=../../deploy
+ruby extconf.rb --with-opt-dir=../deploy
 make clean
 make
 make install
