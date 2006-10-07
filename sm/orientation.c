@@ -30,7 +30,7 @@ void ld_compute_orientation(LDP ld, int size_neighbourhood, double sigma) {
 			continue;
 		}
 
-		printf("orientation for i=%d:\n",i);
+//		printf("orientation for i=%d:\n",i);
 		double thetas[num_neighbours];
 		double readings[num_neighbours];
 		size_t a=0; for(a=0;a<num_neighbours;a++){
@@ -46,8 +46,8 @@ void ld_compute_orientation(LDP ld, int size_neighbourhood, double sigma) {
 		ld->alpha[i] = alpha;
 		ld->cov_alpha[i] = cov0_alpha * square(sigma);
 		ld->alpha_valid[i] = 1;
-		printf("---------- i = %d alpha = %f sigma=%f cov_alpha = %f\n", i,
-			alpha, ld->cov_alpha[i]);
+//		printf("---------- i = %d alpha = %f sigma=%f cov_alpha = %f\n", i,
+//			alpha, ld->cov_alpha[i]);
 	}
 }
 
@@ -113,9 +113,9 @@ void filter_orientation(double theta0, double rho0, size_t n,
 	double dalpha_drho = -f1 /  (square(rho0) + square(f1));
 	
 	*cov0_alpha	= square(dalpha_df1) * cov_f1 + square(dalpha_drho);
-	printf("dalpha_df1 = %f dalpha_drho = %f\n",dalpha_df1,dalpha_drho);
-	printf("f1 = %f covf1 = %f alpha = %f cov_alpha = %f\n ",f1,cov_f1,*alpha,*cov0_alpha);
-	printf("sotto = %f\n ",(square(rho0) + square(f1)));
+//	printf("dalpha_df1 = %f dalpha_drho = %f\n",dalpha_df1,dalpha_drho);
+//	printf("f1 = %f covf1 = %f alpha = %f cov_alpha = %f\n ",f1,cov_f1,*alpha,*cov0_alpha);
+//	printf("sotto = %f\n ",(square(rho0) + square(f1)));
 	
 /*	printf("   f1 = %f cov =%f \n", f1,cov_f1);
 	printf("   f1/rho = %f \n", f1/rho0);

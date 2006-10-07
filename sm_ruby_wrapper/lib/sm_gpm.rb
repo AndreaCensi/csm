@@ -21,11 +21,11 @@ module Sm
 
 		def scan_matching
 		
-			put_params_in_c_structures(params)
+			Sm.put_params_in_c_structures(params)
 		
 			Sm::rb_sm_gpm()
 		
-			res = get_result_from_c_structures()
+			res = Sm.get_result_from_c_structures()
 		
 			Sm::rb_sm_cleanup()
 		
