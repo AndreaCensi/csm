@@ -11,15 +11,15 @@
 
 void compute_next_estimate(LDP laser_ref, LDP laser_sens, const gsl_vector*x_old, gsl_vector*x_new,
 	double *error);
-int termination_criterion(gsl_vector*delta, struct icp_input*params);
+int termination_criterion(gsl_vector*delta, struct sm_params*params);
 
-void find_correspondences_tricks(struct icp_input*params, gsl_vector* x_old);
+void find_correspondences_tricks(struct sm_params*params, gsl_vector* x_old);
 void kill_outliers(int K, struct gpc_corr*c, const gsl_vector*x_old, int*valid);
-void icp_loop(struct icp_input*params, const gsl_vector*start, gsl_vector*x_new, double*error, int*iterations);
-//void kill_outliers_trim(int K, struct gpc_corr*c, const gsl_vector*x_old, double perc, int*valid);
+void icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new, double*error, int*iterations);
+
 void kill_outliers_trim(LDP laser_ref, LDP laser_sens, const gsl_vector*x_old, double perc);
 
-void icp(struct icp_input*params, struct icp_output*res) {
+void icp(struct sm_params*params, struct sm_result*res) {
 	LDP laser_ref  = &(params->laser_ref);
 	LDP laser_sens = &(params->laser_sens);
 		
@@ -27,10 +27,14 @@ void icp(struct icp_input*params, struct icp_output*res) {
 	journal_laser_data("laser_sens", laser_sens);
 	
 	ld_create_jump_tables(laser_ref);
+		
 	ld_compute_cartesian(laser_ref);
+	ld_simple_clustering(laser_ref, params->clusteringThreshold);
+	ld_compute_orientation(laser_ref, params->orientationNeighbourhood);
+
 	ld_compute_cartesian(laser_sens);
-	ld_compute_orientation(laser_ref, 3);
-	ld_compute_orientation(laser_sens, 3);
+	ld_simple_clustering(laser_sens, params->clusteringThreshold);
+	ld_compute_orientation(laser_sens, params->orientationNeighbourhood);
 		
 	gsl_vector * x_new = gsl_vector_alloc(3);
 	gsl_vector * x_old = vector_from_array(3, params->odometry);
@@ -56,7 +60,7 @@ void icp(struct icp_input*params, struct icp_output*res) {
 
 		int a; for(a=0;a<2;a++){
 			printf("-- Restarting with perturbation #%d\n", a);
-			struct icp_input my_params = *params;
+			struct sm_params my_params = *params;
 			gsl_vector * start = gsl_vector_alloc(3);
 				gvs(start, 0, gvg(x_new,0)+perturb[a][0]);
 				gvs(start, 1, gvg(x_new,1)+perturb[a][1]);
@@ -103,7 +107,7 @@ int ld_num_valid_correspondences(LDP ld) {
 	return num;
 }
 
-void icp_loop(struct icp_input*params, const gsl_vector*start, gsl_vector*x_new, double*error, int*iterations) {
+void icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new, double*error, int*iterations) {
 	LDP laser_ref  = &(params->laser_ref);
 	LDP laser_sens = &(params->laser_sens);
 	
@@ -180,7 +184,7 @@ void icp_loop(struct icp_input*params, const gsl_vector*start, gsl_vector*x_new,
 	gsl_vector_free(delta_old);
 }
 
-int termination_criterion(gsl_vector*delta, struct icp_input*params){
+int termination_criterion(gsl_vector*delta, struct sm_params*params){
 	double a = sqrt(gvg(delta,0)* gvg(delta,0)+ gvg(delta,1)* gvg(delta,1));
 	double b = fabs(gvg(delta,2));
 	return (a<params->epsilon_xy) && (b<params->epsilon_theta);

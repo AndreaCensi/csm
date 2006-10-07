@@ -3,7 +3,7 @@
 
 #include "laser_data.h"
 
-struct icp_input {
+struct sm_params {
 	struct laser_data laser_ref;
 	struct laser_data laser_sens;
 
@@ -25,9 +25,18 @@ struct icp_input {
 	int restart;
 	double restart_dt;
 	double restart_dtheta;
+	
+	double clusteringThreshold;
+	int orientationNeighbourhood;
+	
+	int doAlphaTest;
+	double doAlphaTest_thresholdDeg;
+	
+	// Percentage of correspondences to consider
+	double outliers_maxPerc;
 };
 
-struct icp_output {
+struct sm_result {
 	double x[3];
 	double x_cov[3][3];
 	int iterations;
@@ -39,10 +48,10 @@ struct icp_output {
 
 
 
-void icp(struct icp_input*input, struct icp_output*output);
+void icp(struct sm_params*input, struct sm_result*output);
 void icp_journal_open(const char* file);
 
-void gpm(struct icp_input*input, struct icp_output*output);
+void gpm(struct sm_params*input, struct sm_result*output);
 
 #endif
 

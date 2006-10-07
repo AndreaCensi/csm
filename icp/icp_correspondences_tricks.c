@@ -5,7 +5,9 @@
 
 #define DEBUG_SEARCH(a) ;
 
-int compatible(struct icp_input*params, int i, int j) {
+int compatible(struct sm_params*params, int i, int j) {
+	if(!params->doAlphaTest) return 1;
+	
 	double theta0 = 0; // FIXME
 	if((params->laser_sens.alpha_valid[i]==0) ||
 		(params->laser_ref.alpha_valid[j]==0)) 
@@ -13,7 +15,7 @@ int compatible(struct icp_input*params, int i, int j) {
 		
 	double alpha_i = params->laser_sens.alpha[i];
 	double alpha_j = params->laser_ref.alpha[j];
-	double tolerance = deg2rad(20);
+	double tolerance = deg2rad(params->doAlphaTest_thresholdDeg);
 	
 	double theta = angleDiff(alpha_j, alpha_i);
 	if(fabs(angleDiff(theta,theta0))>tolerance+deg2rad(params->maxAngularCorrectionDeg)) {
@@ -23,7 +25,7 @@ int compatible(struct icp_input*params, int i, int j) {
 	}
 }
 
-void find_correspondences_tricks(struct icp_input*params, gsl_vector* x_old) {
+void find_correspondences_tricks(struct sm_params*params, gsl_vector* x_old) {
 	LDP laser_ref  = &(params->laser_ref);
 	LDP laser_sens = &(params->laser_sens);
 	double maxDist = params->maxCorrespondenceDist;
