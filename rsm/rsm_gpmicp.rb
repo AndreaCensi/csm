@@ -18,7 +18,7 @@ class GPM_then_ICP
 	end
 	
 	def scan_matching
-		gpm = GPMC.new
+		gpm = Sm::GPMC.new
 		gpm.params = params
 		if not @journal.nil?
 			gpm.journal_open(@journal+"_gpm")
@@ -27,7 +27,7 @@ class GPM_then_ICP
 		gpm_x = (gpm.scan_matching)[:x]
 			
 		puts "GPM_then_ICP: gpm res is #{pv(gpm_x)}"
-		icpc = ICPC.new
+		icpc = Sm::ICPC.new
 		icpc.params = params;
 		icpc.params[:firstGuess] = gpm_x
 
