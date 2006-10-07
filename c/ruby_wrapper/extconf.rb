@@ -34,21 +34,12 @@ def crash(str)
   exit 1
 end
 
-if (not find_header('gpc.h'))
-	crash("Could not find heade gpc.h .")
-end
 
-if (not have_library('gpc')) 
-	crash("Could not find library gpc.")
-end
-
-	$LOCAL_LIBS += ' -lgpc'
-
-if (not have_library('icp')) #or (not find_header('icp.h','/usr/local/include'))
+if (not have_library('sm')) #or (not find_header('icp.h','/usr/local/include'))
 	puts "Error: not having library 'icp'"
 	exit
 else
-	$LOCAL_LIBS += ' -licp'
+	$LOCAL_LIBS += ' -lsm'
 end
 
 $CPPFLAGS += " -Wall -W -Wmissing-prototypes -Wconversion "
