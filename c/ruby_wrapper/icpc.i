@@ -1,7 +1,7 @@
 %module icpc
 
 %header %{
-	#include "icp_ruby.h"
+	#include "rb_sm.h"
 %}
 
 
@@ -20,7 +20,7 @@ void icpc_cleanup();
 
 void gpmc_go();
 
-struct icp_input {
+struct sm_params {
 	double maxAngularCorrectionDeg;
 	double maxLinearCorrection;
 	int maxIterations;
@@ -34,7 +34,7 @@ struct icp_input {
 	
 };
 
-struct icp_output {
+struct sm_result {
 	double x[3];
 	int iterations;
 	double error;
@@ -43,6 +43,6 @@ struct icp_output {
 void icpc_get_x(double *OUTPUT,double*OUTPUT,double*OUTPUT);
 
 %inline {
-extern struct icp_input icpc_params;
-extern struct icp_output icpc_res;
+extern struct sm_params rb_sm_params;
+extern struct sm_result rb_sm_result;
 }
