@@ -28,7 +28,7 @@ ADD_EXECUTABLE(test test.c)
 
 INSTALL(TARGETS icp ARCHIVE DESTINATION lib)
 
-INSTALL(FILES icp.h        DESTINATION include)
+INSTALL(FILES sm.h  DESTINATION include)
 INSTALL(FILES laser_data.h DESTINATION include)
 
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}  -Wall -W -Wconversion  -Wunreachable-code ")
