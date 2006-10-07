@@ -1,6 +1,4 @@
-#!/usr/bin/env ruby
-
-require("structures")
+require 'rsm_laserdata'
 
 class LogReader
 	QUIET = true

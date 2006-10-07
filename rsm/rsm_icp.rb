@@ -1,10 +1,10 @@
-require 'gsl'
-require 'structures'
-require 'journal'
-require 'icp_correspondences_exact'
-require 'icp_correspondences_tricks'
-require 'icp_covariance_numerical'
-require 'icp_covariance_exact'
+
+require 'rsm'
+require 'rsm_icp_corr_dumb'
+require 'rsm_icp_corr_tricks'
+require 'rsm_icp_cov_numeric'
+require 'rsm_icp_cov_exact'
+require 'lib/gpc.rb'
 
 class ICP
 	include GSL
