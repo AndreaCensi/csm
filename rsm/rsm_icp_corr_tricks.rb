@@ -1,14 +1,13 @@
 
 class ICP
 	DESCRIBE = false
-	VERIFY_EXACT = false
+	VERIFY_EXACT = true
 	JUMP_TRICK = true
 	
 	# log search into journal
 	JOURNAL_SEARCH = false
 	
 	def find_correspondences_tricks(x_old)
-		
 		# Some parameters
 		maxAngularCorrectionDeg = params[:maxAngularCorrectionDeg]
 		maxLinearCorrection=params[:maxLinearCorrection]
@@ -21,33 +20,27 @@ class ICP
 		laser_ref = params[:laser_ref];
 		laser_sens = params[:laser_sens];
 
+		down_bigger  = laser_sens.down_bigger
+		up_bigger    = laser_sens.up_bigger
+		down_smaller = laser_sens.down_smaller
+		up_smaller   = laser_sens.up_smaller
+		
+		
 		# If true, we compare the result with the slow algorithm, for correctness
 		if VERIFY_EXACT
-			exact = find_correspondences(x_old)
+			find_correspondences(x_old)
+			exact = laser_sens.corr.clone
 		end
-
-		p_j = Array.new
-		for j in 0..params[:laser_ref].nrays-1
-			if params[:laser_ref].points[j].valid? 
-				p_j[j] = params[:laser_ref].points[j].cartesian
-			end
-		end
-
-		correspondences = Array.new
-	
-		# TODO: memorizza
-		up_bigger, up_smaller, down_bigger, down_smaller = 
-			create_jump_tables(laser_ref)
-			
+		
 		dbg_num_a1 = 0
 		last_best = nil
 		for i in 0..laser_sens.nrays-1
-			if not laser_sens.points[i].valid?
-				correspondences[i] = nil
+			if not laser_sens.valid? i 
+				laser_sens.set_null_corr(i)
 				next
 			end
 		
-			p_i = laser_sens.points[i].cartesian
+			p_i = laser_sens.p[i]
 			p_i_w = transform(p_i, x_old);
 			p_i_w_nrm2 = p_i_w.nrm2
 
@@ -83,36 +76,29 @@ class ICP
 			
 				js(" |")
 			
-				if now_up 
-					js "up=#{up} " 
-					if up > to then
-						js "down:stop" 
+				if now_up then                                            js "up=#{up} " 
+					if up > to then                                       js "down:stop" 
 						up_stopped = true; next 
 					end
-					if p_j[up].nil? then 
-						js "invalid" 
-						up+=1
-						next 
+					if laser_ref.p[up].nil? then                                  js "invalid" 
+						up+=1; next 
 					end
 			
 					dbg_num_a1 += 1
-					last_dist_up = (p_i_w - p_j[up]).nrm2
+					last_dist_up = (p_i_w - laser_ref.p[up]).nrm2
 					
-					if (last_dist_up<maxDist) && (last_dist_up < best_dist)
-						js  "*" 
+					if (last_dist_up<maxDist) && (last_dist_up < best_dist) then     js  "*" 
 						best = up; best_dist = last_dist_up;
 					end
 					
 					if JUMP_TRICK && (up>start_cell)
-						if p_j[up].nrm2 < p_i_w_nrm2 && 
-							(not up_bigger[up].nil?) then
-							js " J+(#{up_bigger[up]})" 
+						if laser_ref.readings[up] < p_i_w_nrm2 && 
+							(not up_bigger[up].nil?) then                  js " J+(#{up_bigger[up]})" 
 							up += up_bigger[up]
 							next
 						else
-						if p_j[up].nrm2 > p_i_w_nrm2 && 
-							(not up_smaller[up].nil?) then
-							js  " J-(#{up_smaller[up]})"
+						if laser_ref.readings[up] > p_i_w_nrm2 && 
+							(not up_smaller[up].nil?) then                 js  " J-(#{up_smaller[up]})"
 							up += up_smaller[up]
 							next
 						else
@@ -125,27 +111,25 @@ class ICP
 					
 					delta_theta = ([up-start_cell,0].max).abs * (PI/laser_ref.nrays)
 					min_dist_up = sin(delta_theta) * p_i_w_nrm2
-					if min_dist_up > best_dist then 
-						js  "up:early_stop"
+					if min_dist_up > best_dist then                       js  "up:early_stop"
 						up_stopped = true
 						next 
 					end
 					
-				else
-					js  "dn=#{down} " 
+				else                                                     js  "dn=#{down} " 
 					if down < from then
 						js "down:stop" 
 						down_stopped = true; 
 						next 
 					end
-					if p_j[down].nil? then 
+					if not laser_ref.valid? down then 
 						js "invalid" 
 						down-=1; 
 						next 
 					end
 
 					dbg_num_a1 += 1
-					last_dist_down = (p_i_w - p_j[down]).nrm2
+					last_dist_down = (p_i_w - laser_ref.p[down]).nrm2
 					if (last_dist_down<maxDist) && (last_dist_down < best_dist)
 						js "*"
 						best = down; 
@@ -161,12 +145,12 @@ class ICP
 					end
 					
 					if JUMP_TRICK && (down<start_cell)
-						if p_j[down].nrm2 < p_i_w_nrm2 &&
+						if laser_ref.readings[down] < p_i_w_nrm2 &&
 							(not down_bigger[down].nil?) then
 							js " Jump+(#{down_bigger[down]})"
 							down += down_bigger[down]
 						else
-							if p_j[down].nrm2 >  p_i_w_nrm2 &&
+							if laser_ref.readings[down] >  p_i_w_nrm2 &&
 								(not down_smaller[down].nil?) then
 								js " Jump-(#{down_smaller[down]})"
 								down += down_smaller[down]
@@ -195,35 +179,38 @@ class ICP
 			## If no point is close enough, or closest point is one 
 			## of the extrema, then discard
 			if [nil, 0, laser_ref.nrays-1].include? best
-				correspondences[i] = nil
+				laser_sens.set_null_corr(i)
 				next
 			else
 				## Find other point to interpolate. See if we are closed
 				## to prev or next
 		
 				# FIXME: here we assume that all points are valid
-				p_prev = laser_ref.points[best-1].cartesian;
-				p_next = laser_ref.points[best+1].cartesian;
-				dist_prev = (p_prev-p_i_w).nrm2;
-				dist_next = (p_next-p_i_w).nrm2;
-				other_j =
-					if dist_prev < dist_next then best-1 else best+1 end
-		
-				c = Correspondence.new
-				c.i = i;
-				c.j1 = best;
-				c.j2 = other_j;
-				correspondences[i] = c
+				j_up = laser_ref.next_valid_up(best)
+				j_down = laser_ref.next_valid_down(best)
+				if j_up.nil? and j_down.nil?
+					laser_sens.set_null_corr(i)
+				else
+					other_j =
+					if j_up.nil? or j_down.nil?
+						[j_up,j_down].compact[0]
+					else	
+						p_prev = laser_ref.p[j_up]
+						p_next = laser_ref.p[j_down]
+						dist_prev = (p_prev-p_i_w).nrm2;
+						dist_next = (p_next-p_i_w).nrm2;
+						if dist_prev < dist_next then j_down else j_up end
+					end
+					laser_sens.corr[i].valid = true
+					laser_sens.corr[i].j1 = best
+					laser_sens.corr[i].j2 = other_j
+				end
 			end
 
 			# This checks whether the solution is the same without tricks
 			if VERIFY_EXACT
-				error = false
-				if exact[i] == correspondences[i]
-					next
-				end
 				
-				if exact[i].nil? and (not correspondences[i].nil?)
+				if (not exact[i].valid) and (laser_sens.corr[i].valid)
 					$stderr.puts "He did not find a correspondence!"
 					puts "exact = " + (exact.map{|c| c.nil? ? 'NIL': c.j1 }.join(','))
 					
@@ -232,16 +219,16 @@ class ICP
 					exit
 				end
 				
-				if (not exact[i].nil?) and correspondences[i].nil?
+				if (exact[i].valid) and (not laser_sens.corr[i].valid)
 					$stderr.puts "I did not find a correspondence!"
 					exit
 				end
 				
-				if exact[i].j1 != correspondences[i].j1
+				if exact[i].j1 != laser_sens.corr[i].j1
 					
-					 my_corr = laser_ref.points[correspondences[i].j1].cartesian
+					 my_corr = laser_ref.p[j1]
 					 my_dist =  (my_corr - p_i_w).nrm2
-					his_corr = laser_ref.points[exact[i].j1].cartesian
+					his_corr = laser_ref.p[exact[i].j1]
 					his_dist = (his_corr - p_i_w).nrm2
 					
 					if his_dist < my_dist
@@ -262,56 +249,44 @@ class ICP
 		end # i in first scan 
 
 	#	puts "Total number: #{dbg_num_a1}"
-		correspondences
 	end
+end
 	
-	
-	def create_jump_tables(laser_ref)
-		up_bigger = Array.new
-		up_smaller = Array.new
-		down_bigger = Array.new
-		down_smaller = Array.new
-		readings = (0..laser_ref.nrays-1).map{ |j| laser_ref.points[j].reading}
+class LaserData	
+	def create_jump_tables
 		
-		def valid_ray(j, laser_ref)
-			(j>=0) && (j<laser_ref.nrays) && (laser_ref.points[j].valid?)
+		for i in 0..nrays-1
+			j = i + 1;
+			while (valid? j) and readings[j]<=readings[i]
+				j += 1;
+			end
+			@up_bigger[i] = j-i;
+
+			j = i + 1;
+			while (valid? j) and readings[j]>=readings[i]
+				j += 1;
+			end
+			@up_smaller[i] = j-i;
+
+			j = i - 1;
+			while (valid? j) and readings[j]>=readings[i]
+				j -= 1;
+			end
+			@down_smaller[i] = j-i;
+	
+			j = i - 1;
+			while (valid? j) and readings[j]<=readings[i]
+				j -= 1;
+			end
+			@down_bigger[i] = j-i;
 		end
-		
-		readings.each_index{ |i|
-			j = i + 1;
-			while valid_ray(j, laser_ref) and readings[j]<=readings[i]
-				j += 1;
-			end
-			up_bigger[i] = j-i;
-
-			j = i + 1;
-			while valid_ray(j, laser_ref) and readings[j]>=readings[i]
-				j += 1;
-			end
-			up_smaller[i] = j-i;
-
-			j = i - 1;
-			while valid_ray(j, laser_ref) and readings[j]>=readings[i]
-				j -= 1;
-			end
-			down_smaller[i] = j-i;
-	
-			j = i - 1;
-			while valid_ray(j, laser_ref) and readings[j]<=readings[i]
-				j -= 1;
-			end
-			down_bigger[i] = j-i;			
-		}
-		
-		
+	end	
+=begin
 		if JOURNAL_SEARCH
-			journal "down_bigger #{down_bigger. join(' ')}"
-			journal "down_smaller #{down_smaller.join(' ')}"
-			journal "up_bigger #{  up_bigger .join(' ')}"
-			journal "up_smaller #{  up_smaller.join(' ')}"
+			journal "down_bigger #{@down_bigger. join(' ')}"
+			journal "down_smaller #{@down_smaller.join(' ')}"
+			journal "up_bigger #{  @up_bigger .join(' ')}"
+			journal "up_smaller #{  @up_smaller.join(' ')}"
 		end
-	
-		return up_bigger, up_smaller, down_bigger, down_smaller
-	end
-	
+=end
 end

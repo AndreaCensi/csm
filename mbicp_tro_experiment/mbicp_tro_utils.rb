@@ -1,27 +1,23 @@
 
-require 'laserdata'
-require 'gsl'
+require 'rsm'
 
 include MathUtils
 include Math
 
 # Fill other fields with standard values
 def create_scan(rays, odometry)
-	ld = LaserData.new
-	ld.nrays = rays.size
+	ld = LaserData.new(rays.size)
 	ld.min_reading   = 0.1;
-	ld.max_reading   = 49;
+	ld.max_reading   = 8;
 	ld.min_theta     = -PI/2;
 	ld.max_theta     =  PI/2;
-	ld.points = Array.new
+	
 	rays.each_index do |i|
-		p = LaserPoint.new
-		p.theta = -PI/2 + i*PI/ld.nrays
-		p.intensity = 0; # NAN
-		p.reading = rays[i]<8 ? rays[i] : 0
-		p.valid = true
-		ld.points.push p
+		ld.theta[i]    = -PI/2 + i*PI/ld.nrays
+		ld.valid[i]    = rays[i]<ld.max_reading && rays[i] > 0
+		ld.readings[i] = ld.valid[i] ? rays[i] : GSL::NAN
 	end
+	
 	ld
 end
 
@@ -36,7 +32,7 @@ def read_log(io)
 		odometry = io.gets.split.map{|s| s.to_f}
 		scans.push create_scan(rays, odometry);
 	end
-	rescue
+	rescue 
 		puts "File truncated at line #{io.lineno}, "+
 		     " already read #{scans.size} scans; expected #{nscan}."
 	end

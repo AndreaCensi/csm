@@ -9,17 +9,12 @@ module Journal
 		journal "laser #{which} nrays #{ld.nrays}" 
 		journal "laser #{which} min_theta #{ld.min_theta}"
 		journal "laser #{which} max_theta #{ld.max_theta}"
-		journal "laser #{which} readings " +
-			ld.points.map{ |p| p.reading }.join(" ")
-		journal "laser #{which} cluster " +
-			ld.points.map{ |p| p.cluster }.join(" ")
-		journal "laser #{which} alpha_valid " +
-				ld.points.map{ |p| p.alpha_valid? ? 1 : 0  }.join(" ")
-		journal "laser #{which} alpha " +
-			ld.points.map{ |p| p.alpha_valid? ? p.alpha : "0"  }.join(" ")
-		journal "laser #{which} cov_alpha " +
-				ld.points.map{ |p| p.alpha_valid? ? rad2deg(sqrt(p.cov_alpha)) : "0"  }.join(" ")
-		
+		journal "laser #{which} valid " + ld.valid.map{|x| x ? 1 : 0}.join(" ")
+		journal "laser #{which} readings " + ld.readings.join(" ")
+		journal "laser #{which} cluster " + ld.cluster.join(" ")
+		journal "laser #{which} alpha_valid " + ld.alpha_valid.map{|x| x ? 1 : 0}.join(" ")
+		journal "laser #{which} alpha "       + ld.alpha.join(" ")
+		journal "laser #{which} cov_alpha "   + ld.cov_alpha.join(" ")
 	end 
 
 	def journal_comment(line)

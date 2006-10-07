@@ -9,7 +9,7 @@ void find_neighbours(LDP ld, int i, int max_num, int*indexes, size_t*num_found);
 void filter_orientation(double theta0, double rho0, size_t n,
  	const double*thetas, const double*rhos, double *alpha, double*cov0_alpha );
 
-void ld_compute_orientation(LDP ld, int size_neighbourhood) {
+void ld_compute_orientation(LDP ld, int size_neighbourhood, double sigma) {
 	int i;
 	for(i=0;i<ld->nrays;i++){
 		if(!ld_valid_ray(ld,i)) {
@@ -29,12 +29,14 @@ void ld_compute_orientation(LDP ld, int size_neighbourhood) {
 			ld->alpha_valid[i] = 0;
 			continue;
 		}
-		
+
+		printf("orientation for i=%d:\n",i);
 		double thetas[num_neighbours];
 		double readings[num_neighbours];
 		size_t a=0; for(a=0;a<num_neighbours;a++){
 			thetas[a] = ld->theta[neighbours[a]];
 			readings[a] = ld->readings[neighbours[a]];
+	//		printf(" j = %d theta = %f rho = %f\n",neighbours[a],thetas[a],readings[a]);
 		}
 		
 		double alpha=42, cov0_alpha=32;
@@ -42,18 +44,16 @@ void ld_compute_orientation(LDP ld, int size_neighbourhood) {
 			thetas,readings,&alpha,&cov0_alpha);
 			
 		ld->alpha[i] = alpha;
-		ld->cov_alpha[i] = cov0_alpha;
+		ld->cov_alpha[i] = cov0_alpha * square(sigma);
 		ld->alpha_valid[i] = 1;
+		printf("---------- i = %d alpha = %f sigma=%f cov_alpha = %f\n", i,
+			alpha, ld->cov_alpha[i]);
 	}
 }
 
 void filter_orientation(double theta0, double rho0, size_t n,
  	const double*thetas, const double*rhos, double *alpha, double*cov0_alpha ) {
 	
-	/*printf("theta0=%f rho0=%f\n",theta0,rho0);
-	size_t a; for(a=0;a<n;a++) {
-		printf("   theta=%f rho=%f\n",thetas[a],rhos[a]);		
-	}*/
 	
 	// y = l x + r epsilon
 	gsl_matrix * y = gsl_matrix_alloc(n,1);
@@ -68,10 +68,12 @@ void filter_orientation(double theta0, double rho0, size_t n,
 		gms(r,i,0,    -1/(thetas[i]-theta0) );
 		gms(r,i,i+1,   1/(thetas[i]-theta0) );
 	}
-
+	
+	int m;
 	gsls_set(r);
 	gsls_trans();
 	gsls_mult_left(r);
+	gsls_inv(); 
 	gsl_matrix *Rinv = gsls_copy();
 	
 	// cov(f1) = (l^t Rinv l)^-1 
@@ -87,6 +89,15 @@ void filter_orientation(double theta0, double rho0, size_t n,
 	gsls_mult(y);
 	double f1 = gsls_get_at(0,0);
 	
+/*	printf("l= ");
+	gsl_matrix_fprintf(stdout, l, "%f");
+	printf("\ny= ");
+	gsl_matrix_fprintf(stdout, y, "%f");
+	printf("\nr= ");
+	gsl_matrix_fprintf(stdout, r, "%f");
+	printf("\ninv(r*r)= ");
+	gsl_matrix_fprintf(stdout, Rinv, "%f");*/
+
 	gsl_matrix_free(Rinv);
 	gsl_matrix_free(y);
 	gsl_matrix_free(l);
@@ -97,10 +108,14 @@ void filter_orientation(double theta0, double rho0, size_t n,
 	if(cos(*alpha)*cos(theta0)+sin(*alpha)*sin(theta0)>0) {
 		*alpha = *alpha + M_PI;
 	}
+	
 	double dalpha_df1  = rho0 / (square(rho0) + square(f1));
 	double dalpha_drho = -f1 /  (square(rho0) + square(f1));
 	
 	*cov0_alpha	= square(dalpha_df1) * cov_f1 + square(dalpha_drho);
+	printf("dalpha_df1 = %f dalpha_drho = %f\n",dalpha_df1,dalpha_drho);
+	printf("f1 = %f covf1 = %f alpha = %f cov_alpha = %f\n ",f1,cov_f1,*alpha,*cov0_alpha);
+	printf("sotto = %f\n ",(square(rho0) + square(f1)));
 	
 /*	printf("   f1 = %f cov =%f \n", f1,cov_f1);
 	printf("   f1/rho = %f \n", f1/rho0);

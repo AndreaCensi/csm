@@ -45,8 +45,14 @@ void journal_laser_data(const char*name, struct laser_data*ld) {
 	fprintf(f, "laser %s nrays %d\n", name, ld->nrays);
 	fprintf(f, "laser %s min_theta %f\n", name, ld->min_theta);
 	fprintf(f, "laser %s max_theta %f\n", name, ld->max_theta);
+	fprintf(f, "laser %s valid ", name);
+		write_array_i(ld->nrays, ld->valid);
+		fprintf(f, "\n");
 	fprintf(f, "laser %s readings ", name);
 		write_array_d(ld->nrays, ld->readings);
+		fprintf(f, "\n");
+	fprintf(f, "laser %s cluster ", name);
+		write_array_i(ld->nrays, ld->cluster);
 		fprintf(f, "\n");
 	fprintf(f, "laser %s alpha_valid ", name);
 		write_array_i(ld->nrays, ld->alpha_valid);
@@ -57,6 +63,10 @@ void journal_laser_data(const char*name, struct laser_data*ld) {
 	fprintf(f, "laser %s cov_alpha ", name);
 		write_array_d(ld->nrays, ld->cov_alpha);
 		fprintf(f, "\n");
+	journal_write_array_i("down_bigger", ld->nrays, ld->down_bigger );
+	journal_write_array_i("down_smaller",ld->nrays, ld->down_smaller);
+	journal_write_array_i("up_bigger",   ld->nrays, ld->up_bigger );
+	journal_write_array_i("up_smaller",  ld->nrays, ld->up_smaller);	
 }
 
 void journal_correspondences(LDP ld) {

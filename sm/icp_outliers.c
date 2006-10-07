@@ -27,10 +27,10 @@ void kill_outliers_trim(struct sm_params*params, const gsl_vector*x_old, double 
 	gsl_vector_free(p_i_w);
 	
 	quicksort(dist2, 0, k-1);
-/*	printf("Ordered: ");
+	printf("Ordered: ");
 	for(i=0;i<k;i++)
 		printf("%f ", dist2[i]);
-	printf("\n");*/
+	printf("\n");
 		
 	//double error_limit = 2*dist2[(int)floor(k*0.8)];
 

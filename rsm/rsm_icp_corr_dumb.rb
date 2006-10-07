@@ -9,25 +9,17 @@ class ICP
 		laser_ref = params[:laser_ref];
 		laser_sens = params[:laser_sens];
 
-		p_j = Array.new
-		for j in 0..params[:laser_ref].nrays-1
-			if params[:laser_ref].points[j].valid? 
-				p_j[j] = params[:laser_ref].points[j].cartesian
-			end
-		end
-		
 		for i in 0..laser_sens.nrays-1
-			if not laser_sens.points[i].valid?
-				correspondences[i] = nil
+			if not laser_sens.valid? i 
+				laser_sens.set_null_corr(i)
 				next
 			end
 
-			p_i = laser_sens.points[i].cartesian
+			p_i = laser_sens.p[i]
 			p_i_w = transform(p_i, x_old);
 			p_i_w_nrm2 = p_i_w.nrm2
 
 		#	puts "p_i = #{p_i.trans}"
-			
 			from, to = 
 				possible_interval(p_i_w, laser_sens, 
 					maxAngularCorrectionDeg, maxLinearCorrection)
@@ -38,13 +30,13 @@ class ICP
 			$stderr.write "#{i}: " if DESCRIBE
 			for j in from..to
 				$stderr.write "#{j}" if DESCRIBE
-				if p_j[j].nil?
+				if not laser_ref.valid? j
 					$stderr.write "N" if DESCRIBE
 					next
 				end
 
 				## Find compatible interval in the other scan. 
-				dist = (p_i_w - p_j[j]).nrm2
+				dist = (p_i_w - laser_ref.p[j]).nrm2
 		#		puts "j = #{j} p_j = #{p_j[j].trans}  dist = #{dist}"
 				if dist > maxDist
 					$stderr.write "M" if DESCRIBE
@@ -63,32 +55,38 @@ class ICP
 #				puts " #{i} -> #{best_j} (#{best_j_dist}) p_j = #{p_j[best_j].trans} p_i_w = #{p_i_w.trans}" 
 			end
 
+			#
 			## If no point is close enough, or closest point is one 
 			## of the extrema, then discard
 			if [nil, 0, laser_ref.nrays-1].include? best_j
-				correspondences[i] = nil
+				laser_sens.set_null_corr(i)
 				next
+			else
+				## Find other point to interpolate. See if we are closed
+				## to prev or next
+		
+				# FIXME: here we assume that all points are valid
+				j_up = laser_ref.next_valid_up(best_j)
+				j_down = laser_ref.next_valid_down(best_j)
+				if j_up.nil? and j_down.nil?
+					laser_sens.set_null_corr(i)
+				else
+					other_j =
+					if j_up.nil? or j_down.nil?
+						[j_up,j_down].compact[0]
+					else	
+						p_prev = laser_ref.p[j_up]
+						p_next = laser_ref.p[j_down]
+						dist_prev = (p_prev-p_i_w).nrm2;
+						dist_next = (p_next-p_i_w).nrm2;
+						if dist_prev < dist_next then j_down else j_up end
+					end
+					laser_sens.corr[i].valid = true
+					laser_sens.corr[i].j1 = best_j
+					laser_sens.corr[i].j2 = other_j
+				end
 			end
-
-			## Find other point to interpolate. See if we are closed
-			## to prev or next
-
-			# FIXME: here we assume that all points are valid
-			p_prev = laser_ref.points[best_j-1].cartesian;
-			p_next = laser_ref.points[best_j+1].cartesian;
-			dist_prev = (p_prev-p_i_w).nrm2;
-			dist_next = (p_next-p_i_w).nrm2;
-			other_j =
-				if dist_prev < dist_next then best_j-1 else best_j+1 end
-
-			c = Correspondence.new
-			c.i = i;
-			c.j1 = best_j;
-			c.j2 = other_j;
-			correspondences[i] = c
 		end # i in first scan 
-
-		correspondences
 	end
 
 	

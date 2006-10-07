@@ -40,6 +40,19 @@
 
 \begin_body
 
+\begin_layout Title
+Title
+\end_layout
+
+\begin_layout Abstract
+This paper shows the derivation of a closed-form solution to a generalized
+ point correspondences problem.
+\end_layout
+
+\begin_layout Section
+Introduction
+\end_layout
+
 \begin_layout Standard
 Consider the following minimization problem:
 \begin_inset Formula \[

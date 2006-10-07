@@ -31,7 +31,7 @@ module GPC
 	
 	DEBUG = false
 
-	def gpc(corr)
+	def GPC.gpc(corr)
 
 		# First we put the problem in a quadratic+constraint form.
 		bigM = Matrix.alloc(4, 4).set_zero

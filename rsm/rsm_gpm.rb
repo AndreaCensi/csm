@@ -1,4 +1,6 @@
 require 'rsm'
+require 'rsm_clustering'
+require 'rsm_orientation'
 
 class GPM
 	include MathUtils
@@ -13,11 +15,13 @@ class GPM
 		laser_sens = params[:laser_sens]
 		u = params[:firstGuess]
 		
-		
-		clustering(laser_ref)
-		compute_orientation(laser_ref)
-		clustering(laser_sens)
-		compute_orientation(laser_sens)
+		laser_ref.compute_cartesian
+		laser_ref.simple_clustering(params[:clusteringThreshold])
+		laser_ref.compute_orientation(params[:orientationNeighbourhood],params[:sigma])
+
+		laser_sens.compute_cartesian		
+		laser_sens.simple_clustering(params[:clusteringThreshold])
+		laser_sens.compute_orientation(params[:orientationNeighbourhood],params[:sigma])
 
 		journal_laser 'laser_ref', laser_ref
 		journal_laser 'laser_sens',laser_sens
@@ -91,123 +95,6 @@ class GPM
 		x_old
 	end
 	
-	def clustering(ld)
-		sigma = 0.01;
-		count = 0;
-		last_reading = nil;
-		ld.points.each_index do |i|;
-			if not ld.points[i].valid?
-				ld.points[i].cluster = -1
-				next
-			end
-			if last_reading.nil?
-				ld.points[i].cluster = count;
-			else
-				reading = ld.points[i].reading
-				if(last_reading-reading).abs > 5*sigma
-					count += 1
-					ld.points[i].cluster = count;
-				else
-					ld.points[i].cluster = count;
-				end
-			end
-			last_reading = ld.points[i].reading
-		end
-	end
-
-	# uses params[:gpm_neighbours]?
-	def find_neighbours(ld, i)
-		num = 3;
-		up = i; 
-		while (up+1 <= i+3) and (up+1<ld.nrays) and (ld.points[up+1].valid?) and 
-				(ld.points[up+1].cluster == ld.points[i].cluster)
-			up+=1; 
-		end
-		down = i; 
-		while (down >= i-3) and (down-1>=0) and (ld.points[down-1].valid?) and 
-				(ld.points[down-1].cluster == ld.points[i].cluster)
-			down-=1;
-		end
-		(down..(i-1)).to_a + ((i+1)..up).to_a
-	end
-		
-	# Computes alpha for each point
-	def compute_orientation(ld)
-		ld.points.each_index do |i|; 
-			if not ld.points[i].valid?
-				ld.points[i].alpha = nil
-				ld.points[i].alpha_valid = false
-				next
-			end
-			
-			# list of index
-			neighbours = find_neighbours(ld, i)
-			
-#			puts "i = #{i} neigbours = #{neighbours.join(', ')}"
-
-			if neighbours.size == 0
-				ld.points[i].alpha = nil
-				ld.points[i].alpha_valid = false
-				next
-			end
-			
-
-			thetas = neighbours.map{|j| ld.points[j].theta}
-			readings = neighbours.map{|j| ld.points[j].reading}
-			theta   = ld.points[i].theta
-			reading = ld.points[i].reading
-			alpha, cov0_alpha = filter_orientation(theta,reading,thetas,readings,1);
-			cov0_alpha *= params[:sigma]*params[:sigma]
-		#	puts "cov = #{rad2deg(sqrt(cov0_alpha))} deg"
-			ld.points[i].alpha = alpha
-			ld.points[i].cov_alpha = cov0_alpha 
-			ld.points[i].alpha_valid = alpha.nan? ? false : true
-			if alpha.nan?
-				puts "We have a problem.."
-			end
-		end
-	end
-	
-	def filter_orientation(theta0, rho0, thetas, rhos, curv)
-		n = thetas.size
-		# y = l x + r epsilon
-		y = Matrix.alloc(n, 1)
-		l = Matrix.alloc(n, 1)
-		r = Matrix.alloc(n, n+1)
-		
-		r.set_all(0.0)
-		l.set_all(1.0);
-		
-		for i in 0..n-1
-		#	puts "theta0 = #{theta0}  thetas[i] = #{thetas[i]}"
-			y[i,0]   = (rhos[i]-rho0)/(thetas[i]-theta0)
-			r[i,0]   = -1/(thetas[i]-theta0);
-			r[i,i+1] =  1/(thetas[i]-theta0);
-		end
-		
-		#puts "y = \n#{y}"
-		#puts "l = \n#{l}"
-		#puts "r = \n#{r}"
-		
-		# x = (l^t R^-1 l)^-1 l^t R^-1 y
-		f1 = ((l.trans * (r*r.trans).inv * l).inv * l.trans * (r*r.trans).inv * y)[0,0]
-		
-		#alpha = theta0 + PI/2 + Math.atan(rho0/f1)
-		alpha = theta0 - Math.atan(f1/rho0)
-		
-		cov_f1 = ((l.trans * l).inv)[0,0]
-		
-		dalpha_df1  = rho0 / (rho0**2 + f1**2)
-		dalpha_drho = -f1 / (rho0**2 + f1**2)
-		cov0_alpha = (dalpha_df1**2) * cov_f1 + (dalpha_drho**2)
-
-		#puts " cov_f1 = #{cov_f1} dalpha_df1 #{dalpha_df1**2} dalpha_drho #{dalpha_drho**2} "
-		if cos(alpha)*cos(theta0)+sin(alpha)*sin(theta0)>0
-			alpha = alpha + PI
-		end
-		
-		return alpha, cov_f1
-	end
 	
 	
 	
@@ -218,46 +105,42 @@ class GPM
 		attr_accessor :weight
 	end
 	
-	def angleDiff(a,b)
-		d = a - b
-		
-		while d < -PI; d+=2*PI; end
-		while d >  PI; d-=2*PI; end
-		d
-	end
 	
 	def ght(x0,maxLinearCorrection,maxAngularCorrectionDeg)
 		puts "ght: x0=#{x0}, limits: #{maxLinearCorrection}, #{maxAngularCorrectionDeg}°"
 		laser_ref = params[:laser_ref];
 		laser_sens = params[:laser_sens];
-
-		p_j = laser_ref.points.map{ |p| p.valid? ? p.cartesian : nil}
 		
 		t0 = Vector[x0[0],x0[1]]
 		matches = Array.new
 		for i in 0..laser_sens.nrays-1
-			next if not laser_sens.points[i].alpha_valid?
+			next if not laser_sens.alpha_valid? i
 
-			p_i = laser_sens.points[i].cartesian
+			p_i = laser_sens.p[i]
+			alpha_i = laser_sens.alpha[i]
 
 			from, to = possible_interval(p_i, laser_ref, 
 				maxAngularCorrectionDeg, maxLinearCorrection)
 			
 			for j in from..to
-				next if not laser_ref.points[j].alpha_valid?
+				next if not laser_ref.alpha_valid? j
 				
-				theta = angleDiff(laser_ref.points[j].alpha, laser_sens.points[i].alpha)
+				p_j = laser_ref.p[j]
+				alpha_j = laser_ref.alpha[j]
+
+				theta = angleDiff(alpha_j, alpha_i)
 				
 				next if (theta-x0[2]).abs > deg2rad(maxAngularCorrectionDeg)
-								
-				t = p_j[j] - rot(theta) * p_i;
+				
+				t = p_j - rot(theta) * p_i;
 				
 				next if (t-t0).nrm2 > maxLinearCorrection
 				
 				m = Match.new
-				m.t = t; m.theta=theta;
-				m.alpha = laser_ref.points[j].alpha
-				w = laser_ref.points[j].cov_alpha + laser_sens.points[i].cov_alpha
+				m.t = t; 
+				m.theta=theta;
+				m.alpha = alpha_j
+				w = laser_ref.cov_alpha[j] + laser_sens.cov_alpha[i]
 				m.weight = 1/w
 				matches.push m
 			end 
@@ -271,31 +154,27 @@ class GPM
 		laser_ref = params[:laser_ref];
 		laser_sens = params[:laser_sens];
 
-		p_j = laser_ref.points.map{ |p| p.valid? ? p.cartesian : nil}
 		t0 = Vector[x0[0],x0[1]]
 		for i in 0..laser_sens.nrays-1
-			next if not laser_sens.points[i].alpha_valid?
+			next if not laser_sens.alpha_valid? i
 
-			p_i = laser_sens.points[i].cartesian
+			p_i = laser_sens.p[i]
+			alpha_i = laser_sens.alpha[i]
 
 			from, to = possible_interval(p_i, laser_ref, 
 				maxAngularCorrectionDeg, maxLinearCorrection)
 			
 			for j in from..to
-				next if not laser_ref.points[j].alpha_valid?
+				next if not laser_ref.alpha_valid? j
 				
-				theta = angleDiff(laser_ref.points[j].alpha, laser_sens.points[i].alpha )
-				
-				if theta.nan?
-					puts "BUGGG"
-					puts "j = #{j} alpha_j = #{laser_ref.points[j].alpha}"
-					puts "i = #{i} alpha_i = #{laser_sens.points[i].alpha}"
-					next
-				end
+				p_j = laser_ref.p[j]
+				alpha_j = laser_ref.alpha[j]
 
+				theta = angleDiff(alpha_j, alpha_i)
+				
 				next if (theta-x0[2]).abs > deg2rad(maxAngularCorrectionDeg)			
 								
-				t = p_j[j] - rot(theta) * p_i;
+				t = p_j - rot(theta) * p_i;
 				
 				next if (t-t0).nrm2 > maxLinearCorrection
 				

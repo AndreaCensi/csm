@@ -1,9 +1,7 @@
 require 'sm'		
 require 'sm_icp'
 
-
-require 'structures'
-require 'journal'
+require 'rsm'
 
 module Sm
 	

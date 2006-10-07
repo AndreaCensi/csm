@@ -1,5 +1,5 @@
 #include <stdio.h>
-
+#include <gsl/gsl_nan.h>
 #include "rb_sm.h"
 #include <sm.h>
 
@@ -27,9 +27,17 @@ void rb_sm_l_max_theta(int laser, double max_theta){
 	get_ld(laser)->max_theta = max_theta;	
 }
 
-void rb_sm_l_ray(int laser, int ray, double theta, double reading){
-	get_ld(laser)->readings[ray] = reading;
-	get_ld(laser)->   theta[ray] = theta;
+void rb_sm_l_ray(int laser, int ray, int valid, double theta, double reading){
+	struct laser_data * ld = get_ld(laser);
+	if(valid) {
+		ld->valid[ray] = 1;
+		ld->readings[ray] = reading;
+		ld->   theta[ray] = theta;
+	} else {
+		ld->valid[ray] = 0;
+		ld->readings[ray] = GSL_NAN;
+		ld->   theta[ray] = theta;
+	}
 }
 
 void rb_sm_odometry(double x, double y, double theta){

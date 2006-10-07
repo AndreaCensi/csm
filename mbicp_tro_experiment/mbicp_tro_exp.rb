@@ -115,7 +115,6 @@ File.open(log) do |f|
 end
 
 main(scans, scan_matcher)
-#main(scans, GPM)
 
 
 

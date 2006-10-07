@@ -12,9 +12,11 @@ struct laser_data {
 	int nrays;
 	double  min_theta;
 	double  max_theta;
-	double *readings;
+	
 	double *theta;
-
+	
+	int*valid;
+	double *readings;
 	
 	int *cluster;
 	
@@ -52,6 +54,8 @@ struct sm_params {
 	
 	/** dubious parameters */
 	double maxCorrespondenceDist;
+	
+	double sigma;
 	
 	int restart;
 	double restart_dt;

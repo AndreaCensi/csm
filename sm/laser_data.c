@@ -5,6 +5,7 @@
 
 void ld_alloc(struct laser_data*ld, int nrays) {
 	ld->nrays = nrays;
+	ld->valid = (int*) malloc(sizeof(int)*nrays);
 	ld->readings     = (double*) malloc(sizeof(double)*nrays);
 	ld->theta        = (double*) malloc(sizeof(double)*nrays);
 	
@@ -15,6 +16,7 @@ void ld_alloc(struct laser_data*ld, int nrays) {
 	
 	int i;
 	for(i=0;i<ld->nrays;i++) {
+		ld->valid[i] = 0;
 		ld->theta[i] = GSL_NAN;
 		ld->readings[i] = GSL_NAN;
 		ld->cluster[i] = -1;
@@ -40,6 +42,7 @@ void ld_alloc(struct laser_data*ld, int nrays) {
 }
 
 void ld_free(struct laser_data*ld){	
+	free(ld->valid);
 	free(ld->readings);
 	free(ld->theta);
 	free(ld->cluster);
@@ -59,7 +62,7 @@ void ld_free(struct laser_data*ld){
 }
 
 int ld_valid_ray(struct laser_data* ld, int i) {
-	return (i>=0) && (i<ld->nrays) && (ld->readings[i] > 0);
+	return (i>=0) && (i<ld->nrays) && (ld->valid[i]);
 }
 
 int ld_valid_corr(LDP ld, int i) {
@@ -125,10 +128,6 @@ void ld_create_jump_tables(struct laser_data* ld) {
 		ld->down_bigger[i] = j-i;
 	}
 	
-	journal_write_array_i("down_bigger", ld->nrays, ld->down_bigger );
-	journal_write_array_i("down_smaller",ld->nrays, ld->down_smaller);
-	journal_write_array_i("up_bigger",   ld->nrays, ld->up_bigger );
-	journal_write_array_i("up_smaller",  ld->nrays, ld->up_smaller);	
 }
 
 

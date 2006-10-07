@@ -1,6 +1,5 @@
 require 'sm'
-require 'structures'
-require 'journal'
+require 'rsm'
 
 module Sm
 	
@@ -25,15 +24,17 @@ def Sm.put_params_in_c_structures(params)
 	Sm::rb_sm_l_nrays(0, laser_ref.nrays);
 	Sm::rb_sm_l_min_theta(0, laser_ref.min_theta);
 	Sm::rb_sm_l_max_theta(0, laser_ref.max_theta);
-	laser_ref.points.each_index do |j|
-		Sm::rb_sm_l_ray(0, j, laser_ref.points[j].theta, laser_ref.points[j].reading)
+	for j in 0..laser_ref.nrays-1
+		Sm::rb_sm_l_ray(0, j, laser_ref.valid[j] ? 1 : 0, 
+			laser_ref.theta[j], laser_ref.readings[j])
 	end
 
 	Sm::rb_sm_l_nrays(1, laser_sens.nrays);
 	Sm::rb_sm_l_min_theta(1, laser_sens.min_theta);
 	Sm::rb_sm_l_max_theta(1, laser_sens.max_theta);
-	laser_sens.points.each_index do |i|
-		Sm::rb_sm_l_ray(1, i, laser_sens.points[i].theta, laser_sens.points[i].reading)
+	for i in 0..laser_sens.nrays-1
+		Sm::rb_sm_l_ray(1, i, laser_sens.valid[i] ? 1 : 0  , 
+			laser_sens.theta[i], laser_sens.readings[i])
 	end
 	u=params[:firstGuess];
 	rb_sm_odometry(u[0],u[1],u[2]);

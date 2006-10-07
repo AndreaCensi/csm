@@ -22,19 +22,19 @@ void kill_outliers_trim(struct sm_params*params, const gsl_vector*x_old, double 
 void sm_icp(struct sm_params*params, struct sm_result*res) {
 	LDP laser_ref  = &(params->laser_ref);
 	LDP laser_sens = &(params->laser_sens);
-		
-	journal_laser_data("laser_ref",  laser_ref );
-	journal_laser_data("laser_sens", laser_sens);
-	
+			
 	ld_create_jump_tables(laser_ref);
 		
 	ld_compute_cartesian(laser_ref);
 	ld_simple_clustering(laser_ref, params->clusteringThreshold);
-	ld_compute_orientation(laser_ref, params->orientationNeighbourhood);
+	ld_compute_orientation(laser_ref, params->orientationNeighbourhood, params->sigma);
 
 	ld_compute_cartesian(laser_sens);
 	ld_simple_clustering(laser_sens, params->clusteringThreshold);
-	ld_compute_orientation(laser_sens, params->orientationNeighbourhood);
+	ld_compute_orientation(laser_sens, params->orientationNeighbourhood, params->sigma);
+
+	journal_laser_data("laser_ref",  laser_ref );
+	journal_laser_data("laser_sens", laser_sens);
 		
 	gsl_vector * x_new = gsl_vector_alloc(3);
 	gsl_vector * x_old = vector_from_array(3, params->odometry);
@@ -129,11 +129,17 @@ void icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 		
 //		find_correspondences(params, x_old);
 		find_correspondences_tricks(params, x_old);
-		kill_outliers_trim(params, x_old, 0.9);
-		
 		int num_corr = ld_num_valid_correspondences(laser_sens);
 		if(num_corr <0.2 * laser_sens->nrays){
-			printf("Failed: only %d correspondences.\n",num_corr);
+			printf("Failed: before trimming, only %d correspondences.\n",num_corr);
+			break;
+		}
+
+		kill_outliers_trim(params, x_old, 0.9);
+		
+		int num_corr_after = ld_num_valid_correspondences(laser_sens);
+		if(num_corr_after <0.2 * laser_sens->nrays){
+			printf("Failed: after trimming, only %d correspondences.\n",num_corr_after);
 			break;
 		}
 		journal_correspondences(laser_sens);

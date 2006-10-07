@@ -75,6 +75,15 @@ module MathUtils
 		]
 	end
 	
+	
+	def angleDiff(a,b)
+		d = a - b
+		
+		while d < -PI; d+=2*PI; end
+		while d >  PI; d-=2*PI; end
+		d
+	end
+	
 	# from, to, start_cell, range = 
 	def possible_interval(point, ld, maxAngularCorrectionDeg, 
 		maxLinearCorrection)

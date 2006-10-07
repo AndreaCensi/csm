@@ -12,7 +12,7 @@ void ld_simple_clustering(LDP ld, double threshold) {
 	for(i=0;i<ld->nrays;i++) {
 		// Skip if not valid
 		if(!ld_valid_ray(ld,i)) {
-			ld->cluster[i] = -1;
+			ld->cluster[i] = -2;
 			continue;
 		}
 		// If this is the first valid point, assign cluster #0
@@ -24,7 +24,6 @@ void ld_simple_clustering(LDP ld, double threshold) {
 			cluster++;
 				
 		ld->cluster[i] = cluster;
-		
 		last_reading = ld->readings[i];
 	}
 }

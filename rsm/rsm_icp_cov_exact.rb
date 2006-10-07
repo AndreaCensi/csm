@@ -1,7 +1,7 @@
 class ICP
-	def compute_covariance_exact(laser_ref, laser_sens, correspondences, x)
-		y1 = Vector.alloc(laser_ref.points.map{|p| p.reading}).col
-		y2 = Vector.alloc(laser_sens.points.map{|p| p.reading}).col
+	def compute_covariance_exact(laser_ref, laser_sens, x)
+		y1 = Vector.alloc(laser_ref.readings).col
+		y2 = Vector.alloc(laser_sens.readings).col
 
 		d2J_dxdy2 = Matrix.alloc(3, laser_sens.nrays)
 		d2J_dxdy1 = Matrix.alloc(3, laser_ref.nrays)
@@ -14,11 +14,15 @@ class ICP
 		d2J_dt_dtheta = Vector.alloc(0,0).col
 		d2J_dtheta2   = 0
 		
-		for c in correspondences.compact
-			p_k  = laser_sens.points[c.i ].cartesian
-			q_k  = laser_ref .points[c.j1].cartesian
+		for i in 0..laser_sens.nrays-1
+			next if not laser_sens.corr[i].valid
+			j1 = laser_sens.corr[i].j1
+			j2 = laser_sens.corr[i].j2
+			
+			p_k  = laser_sens.p[i ]
+			q_k  = laser_ref .p[j1]
 
-			other  = laser_ref .points[c.j2].cartesian
+			other  = laser_ref.p[j2]
 			v_alpha = rot(PI/2) * (q_k-other)
 			v_alpha = v_alpha / v_alpha.nrm2
 			m = v_alpha*v_alpha.trans
@@ -34,28 +38,28 @@ class ICP
 			
 				
 			# for measurement rho_i  in the second scan
-			v_i = laser_sens.points[c.i].v
+			v_i = laser_sens.v(i)
 			d2Jk_dtdrho_i = 2 * (rot(theta)*v_i).trans * m
 			d2Jk_dtheta_drho_i = 2*(rot(theta)*p_k+t-q_k).trans*m*rot(theta+PI/2)*v_i +
 				2 *(rot(theta)*v_i).trans*m*rot(theta+PI/2)*p_k
 			
-			d2J_dxdy2.col(c.i)[0] += d2Jk_dtdrho_i[0]
-			d2J_dxdy2.col(c.i)[1] += d2Jk_dtdrho_i[1]
-			d2J_dxdy2.col(c.i)[2] += d2Jk_dtheta_drho_i
+			d2J_dxdy2.col(i)[0] += d2Jk_dtdrho_i[0]
+			d2J_dxdy2.col(i)[1] += d2Jk_dtdrho_i[1]
+			d2J_dxdy2.col(i)[2] += d2Jk_dtheta_drho_i
 		
 			# for measurements rho_j1, rho_j2 in the first scan
-			dC_drho_j1, dC_drho_j2 = dC_drho_j12(laser_ref, laser_sens, c)
+			dC_drho_j1, dC_drho_j2 = dC_drho_j12(laser_ref, laser_sens, j1, j2)
 			
-			v_j1 = laser_ref.points[c.j1].v
-			v_j2 = laser_ref.points[c.j2].v
+			v_j1 = laser_ref.v(j1)
+			v_j2 = laser_ref.v(j2)
 			
 			d2Jk_dtheta_drho_j1 = 2 * ( -v_j1.trans*m+(rot(theta)*p_k+t-q_k).trans*dC_drho_j1)*
 				rot(theta+PI/2)*p_k
 			d2Jk_dt_drho_j1 = 2 * (-v_j1.trans*m+(rot(theta)*p_k+t-q_k).trans*dC_drho_j1)
 			
-			d2J_dxdy1.col(c.j1)[0] += d2Jk_dt_drho_j1[0]
-			d2J_dxdy1.col(c.j1)[1] += d2Jk_dt_drho_j1[1]
-			d2J_dxdy1.col(c.j1)[2] += d2Jk_dtheta_drho_j1
+			d2J_dxdy1.col(j1)[0] += d2Jk_dt_drho_j1[0]
+			d2J_dxdy1.col(j1)[1] += d2Jk_dt_drho_j1[1]
+			d2J_dxdy1.col(j1)[2] += d2Jk_dtheta_drho_j1
 			
 			# for measurement rho_j2
 			d2Jk_dtheta_drho_j2 = 2*(rot(theta)*p_k+t-q_k).trans * dC_drho_j2 *
@@ -63,9 +67,9 @@ class ICP
 				
 			d2Jk_dt_drho_j2 = 2*(rot(theta)*p_k+t-q_k).trans * dC_drho_j2 
 			
-			d2J_dxdy1.col(c.j2)[0] += d2Jk_dt_drho_j2[0]
-			d2J_dxdy1.col(c.j2)[1] += d2Jk_dt_drho_j2[1]
-			d2J_dxdy1.col(c.j2)[2] += d2Jk_dtheta_drho_j2
+			d2J_dxdy1.col(j2)[0] += d2Jk_dt_drho_j2[0]
+			d2J_dxdy1.col(j2)[1] += d2Jk_dt_drho_j2[1]
+			d2J_dxdy1.col(j2)[2] += d2Jk_dtheta_drho_j2
 			
 		end
 		# put the pieces together
@@ -93,12 +97,12 @@ class ICP
 		m
 	end
 	
-	def dC_drho_j12(laser_ref, laser_sens, c)
+	def dC_drho_j12(laser_ref, laser_sens, j1, j2)
 		
-		rho_j1 = laser_ref.points[c.j1].reading
-		  v_j1 = laser_ref.points[c.j1].v
-		rho_j2 = laser_ref.points[c.j2].reading
-		  v_j2 = laser_ref.points[c.j2].v
+		rho_j1 = laser_ref.readings[j1]
+		  v_j1 = laser_ref.v(j1)
+		rho_j2 = laser_ref.readings[j2]
+		  v_j2 = laser_ref.v(j2)
 	
 		eps = 0.001;
 		
