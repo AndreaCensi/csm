@@ -50,6 +50,7 @@ end
 
 
 def two_decimals(x)
+	x.nan? ? x :
 	(x*100).round/100.0;
 end
 
