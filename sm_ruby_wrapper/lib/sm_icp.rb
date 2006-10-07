@@ -9,9 +9,9 @@ def Sm.params2method(params, ob)
 		method = "#{param}="
 		if ob.methods.include? method
 			ob.__send__(method, value)
-			puts "Setting #{method} #{value}" 
+	#		puts "Setting #{method} #{value}" 
 		else
-			puts "Structure does not have method #{method}"
+	#		puts "Structure does not have method #{method}"
 		end
 	}
 end

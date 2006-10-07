@@ -7,20 +7,20 @@ require 'mbicp_tro_utils'
 def main(scans, klass)		
 	
 	max_displacement = [
-		Vector[0.05, 0.05, deg2rad( 2.0)].col,
-		Vector[0.10, 0.10, deg2rad( 4.0)].col,
-		Vector[0.15, 0.15, deg2rad( 8.6)].col,
+#		Vector[0.05, 0.05, deg2rad( 2.0)].col,
+#		Vector[0.10, 0.10, deg2rad( 4.0)].col,
+#		Vector[0.15, 0.15, deg2rad( 8.6)].col,
 #		Vector[0.20, 0.20, deg2rad(17.2)].col,
 #		Vector[0.20, 0.20, deg2rad(34.3)].col,
-#		Vector[0.20, 0.20, deg2rad(45.0)].col
+		Vector[0.20, 0.20, deg2rad(45.0)].col
 ];
 	
 	repetitions_per_scan = 1;	
 	
 	# Use a known seed for repeatability of the experiments
-	rng = Rng.alloc(GSL::Rng::MT19937, 42)
+	rng = Rng.alloc(GSL::Rng::MT19937, 24)
 	sigma = 0.01;
-	sigma = 0;
+#	sigma = 0;
 	
 	f = File.open("results.txt",'w')
 	failed_codes = Array.new
