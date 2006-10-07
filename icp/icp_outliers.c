@@ -145,3 +145,6 @@ void kill_outliers_trim(LDP laser_ref, LDP laser_sens, const gsl_vector*x_old, d
 	
 	gsl_vector_free(p_i_w);
 }
+
+
+

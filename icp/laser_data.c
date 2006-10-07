@@ -130,3 +130,6 @@ void ld_create_jump_tables(struct laser_data* ld) {
 	journal_write_array_i("up_bigger",   ld->nrays, ld->up_bigger );
 	journal_write_array_i("up_smaller",  ld->nrays, ld->up_smaller);	
 }
+
+
+

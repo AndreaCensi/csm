@@ -28,3 +28,4 @@ void ld_simple_clustering(LDP ld, double threshold) {
 		last_reading = ld->readings[i];
 	}
 }
+

@@ -43,3 +43,4 @@ int gpc_solve_valid(int K, const struct gpc_corr*, int*valid, double *x);
 double gpc_error(const struct gpc_corr*co, const double*x);
 
 #endif
+

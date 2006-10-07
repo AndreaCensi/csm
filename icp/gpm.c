@@ -80,7 +80,6 @@ void gpm(struct icp_input*params, struct icp_output*res) {
 	
 	
 	
-	int iteration;
 	
 	gsl_vector * x_old = gsl_vector_alloc(3);
 	gsl_vector * delta = gsl_vector_alloc(3);
@@ -140,7 +139,7 @@ void ght_find_theta_range(LDP laser_ref, LDP laser_sens,
 			count ++;
 		}
 	}
-	printf(__FUNCTION__": correspondences = %d\n",count);
+	printf(" correspondences = %d\n",count);
 }
 
 void ght_one_shot(LDP laser_ref, LDP laser_sens,
@@ -200,20 +199,20 @@ void ght_one_shot(LDP laser_ref, LDP laser_sens,
 	}
 	
 	gsl_matrix * gL = gsl_matrix_alloc(3,3);
-	int j; for(i=0;i<3;i++) for(j=0;j<3;j++) gms(gL,i,j,L[i][j]);
+	size_t a,b; for(a=0;a<3;a++) for(b=0;b<3;b++) gms(gL,a,b,L[a][b]);
 	gsl_matrix * gz = gsl_matrix_alloc(3,1);
-	for(i=0;i<3;i++) gms(gz,i,0,z[i]);
+	for(a=0;a<3;a++) gms(gz,a,0,z[a]);
 	
 	gsls_set(gL);
 	gsls_inv();
 	gsls_mult(gz);
 	
-	for(i=0;i<3;i++) 
-		gvs(x, i, gsls_get_at(i,0));
+	for(a=0;a<3;a++) 
+		gvs(x, a, gsls_get_at(a,0));
 	
 	gsl_matrix_free(gL);
 	gsl_matrix_free(gz);
 	
-	printf(__FUNCTION__ ": found %d correspondences\n",count);
+	printf(" found %d correspondences\n",count);
 }
 

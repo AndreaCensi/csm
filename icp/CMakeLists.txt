@@ -31,7 +31,8 @@ INSTALL(TARGETS icp ARCHIVE DESTINATION lib)
 INSTALL(FILES icp.h        DESTINATION include)
 INSTALL(FILES laser_data.h DESTINATION include)
 
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-long-double -Wall -W -Wmissing-prototypes -Wconversion  -Wunreachable-code ")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}  -Wall -W -Wmissing-prototypes -Wconversion  -Wunreachable-code ")
 
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -I../deploy/include")
 #SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mcpu=powerpc -O3")

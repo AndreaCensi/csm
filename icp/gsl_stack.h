@@ -12,3 +12,4 @@ gsl_matrix* gsls_copy();
 void gsls_inv(); 
 
 double gsls_get_at(size_t  i, size_t  j);
+

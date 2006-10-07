@@ -150,3 +150,6 @@ void find_correspondences_tricks(struct icp_input*params, gsl_vector* x_old) {
 	}
 	
 }
+
+
+

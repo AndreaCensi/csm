@@ -18,3 +18,4 @@ void journal_point(const char*, gsl_vector*v);
 FILE *jf();
 
 #endif
+

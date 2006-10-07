@@ -53,3 +53,4 @@ void ld_simple_clustering(LDP ld, double threshold);
 void ld_compute_orientation(LDP ld, int size_neighbourhood);
 
 #endif
+

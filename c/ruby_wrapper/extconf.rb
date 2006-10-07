@@ -29,12 +29,20 @@ def gsl_config()
 
 end
 
-if (not have_library('gpc')) or (not find_header('gpc.h'))
-	puts "Error: not having library 'gpc'"
-	exit
-else
-	$LOCAL_LIBS += ' -lgpc'
+def crash(str)
+  print " extconf failure: #{str}\n"
+  exit 1
 end
+
+if (not find_header('gpc.h'))
+	crash("Could not find heade gpc.h .")
+end
+
+if (not have_library('gpc')) 
+	crash("Could not find library gpc.")
+end
+
+	$LOCAL_LIBS += ' -lgpc'
 
 if (not have_library('icp')) #or (not find_header('icp.h','/usr/local/include'))
 	puts "Error: not having library 'icp'"
@@ -43,7 +51,7 @@ else
 	$LOCAL_LIBS += ' -licp'
 end
 
-$CPPFLAGS += " -Wno-long-double -Wall -W -Wmissing-prototypes -Wconversion "
+$CPPFLAGS += " -Wall -W -Wmissing-prototypes -Wconversion "
 $CPPFLAGS += " -Wunreachable-code "
 gsl_config();
 srcs = %w(icp_ruby icpc_wrap) 

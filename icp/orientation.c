@@ -128,4 +128,5 @@ void find_neighbours(LDP ld, int i, int max_num, int*indexes, size_t*num_found) 
 		indexes[(*num_found)++] = down;
 	}
 }
-	
+
+

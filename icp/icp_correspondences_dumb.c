@@ -93,3 +93,4 @@ void find_correspondences(struct icp_input*params, gsl_vector* x_old) {
 	}
 	
 }
+

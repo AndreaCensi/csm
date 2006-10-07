@@ -80,3 +80,5 @@ void journal_point(const char*str, gsl_vector*v) {
 	if(!journal_is_open) return;
 	fprintf(f, "%s %f %f\n", str, gvg(v,0), gvg(v,1) );
 }
+
+

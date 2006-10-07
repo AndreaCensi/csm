@@ -33,3 +33,4 @@ void pose_diff(const gsl_vector*pose2,const gsl_vector*pose1,gsl_vector*res);
 #define gvs gsl_vector_set
 
 #endif
+

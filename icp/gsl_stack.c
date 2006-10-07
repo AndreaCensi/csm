@@ -103,3 +103,4 @@ double m_det2(const gsl_matrix*A) {
 	gsl_matrix_free(m);
 	return det;
 }
+
