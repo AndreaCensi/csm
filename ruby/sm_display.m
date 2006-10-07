@@ -49,7 +49,7 @@ while true
 	params.color = 'g.';
 	ld_plot(laser_sens, params);
 	
-    if corr_exist
+   if corr_exist
 	for i=1:size(corr,2)
 		if isnan(corr(i))
 			continue

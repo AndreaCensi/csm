@@ -15,12 +15,12 @@ def main(scans, klass)
 		Vector[0.20, 0.20, deg2rad(45.0)].col
 ];
 	
-	repetitions_per_scan = 1;	
+	repetitions_per_scan = 5;	
 	
 	# Use a known seed for repeatability of the experiments
 	rng = Rng.alloc(GSL::Rng::MT19937, 42)
 	sigma = 0.01;
-#	sigma = 0;
+	#sigma = 0;
 	
 	f = File.open("results.txt",'w')
 	failed_codes = Array.new
@@ -65,9 +65,6 @@ def main(scans, klass)
 				res = sm.scan_matching
 			end
 			
-				puts ">>> #{sm.name} #{code} >>> x = #{pv(res[:x])} it = #{res[:iterations]} "+
-				"time =#{two_decimals(realtime)} "+
-					"error #{res[:error]}  disp #{pv(disp)}"
 				
 				x = res[:x];
 				e_xy = sqrt(x[0]*x[0]+x[1]*x[1]);
@@ -78,6 +75,10 @@ def main(scans, klass)
 				
 				bin = hist.find(e_max);
 				codes[bin].push code
+
+				puts ">>> #{sm.name} #{code} #{bin} >>> x = #{pv(res[:x])} it = #{res[:iterations]} "+
+				"time =#{two_decimals(realtime)} "+
+					"error #{res[:error]}  disp #{pv(disp)}"
 			#rescue
 			#	puts "Failed #{code}"
 			#	failed_codes.push code

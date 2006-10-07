@@ -16,7 +16,8 @@ int termination_criterion(gsl_vector*delta, struct icp_input*params);
 void find_correspondences_tricks(struct icp_input*params, gsl_vector* x_old);
 void kill_outliers(int K, struct gpc_corr*c, const gsl_vector*x_old, int*valid);
 void icp_loop(struct icp_input*params, const gsl_vector*start, gsl_vector*x_new, double*error, int*iterations);
-void kill_outliers_trim(int K, struct gpc_corr*c, const gsl_vector*x_old, double perc, int*valid);
+//void kill_outliers_trim(int K, struct gpc_corr*c, const gsl_vector*x_old, double perc, int*valid);
+void kill_outliers_trim(LDP laser_ref, LDP laser_sens, const gsl_vector*x_old, double perc);
 
 void icp(struct icp_input*params, struct icp_output*res) {
 	LDP laser_ref  = &(params->laser_ref);
@@ -28,6 +29,8 @@ void icp(struct icp_input*params, struct icp_output*res) {
 	ld_create_jump_tables(laser_ref);
 	ld_compute_cartesian(laser_ref);
 	ld_compute_cartesian(laser_sens);
+	ld_compute_orientation(laser_ref, 3);
+	ld_compute_orientation(laser_sens, 3);
 		
 	gsl_vector * x_new = gsl_vector_alloc(3);
 	gsl_vector * x_old = vector_from_array(3, params->odometry);
@@ -44,13 +47,14 @@ void icp(struct icp_input*params, struct icp_output*res) {
 		double dt  = params->restart_dt;
 		double dth = params->restart_dtheta;
 		
-		double perturb[6][3] = {
-			{dt,0,0}, {-dt,0,0},
-			{0,dt,0}, {0,-dt,0},
+		
+		double perturb[2][3] = {
+//			{dt,0,0}, {-dt,0,0},
+//			{0,dt,0}, {0,-dt,0},
 			{0,0,dth}, {0,0,-dth}
 		};
 
-		int a; for(a=0;a<6;a++){
+		int a; for(a=0;a<2;a++){
 			printf("-- Restarting with perturbation #%d\n", a);
 			struct icp_input my_params = *params;
 			gsl_vector * start = gsl_vector_alloc(3);
@@ -77,17 +81,26 @@ void icp(struct icp_input*params, struct icp_output*res) {
 }
 
 unsigned int ld_corr_hash(LDP ld){
-   unsigned int hash = 0;
-   unsigned int i    = 0;
+	unsigned int hash = 0;
+	unsigned int i    = 0;
 
-   for(i = 0; i < ld->nrays; i++)
-   {
+	for(i = 0; i < ld->nrays; i++) {
 		int str = ld->corr[i].valid ? ld->corr[i].j1 : -1;
-      hash ^= ((i & 1) == 0) ? (  (hash <<  7) ^ (str) ^ (hash >> 3)) :
-                               (~((hash << 11) ^ (str) ^ (hash >> 5)));
-   }
+		hash ^= ((i & 1) == 0) ? (  (hash <<  7) ^ (str) ^ (hash >> 3)) :
+		                         (~((hash << 11) ^ (str) ^ (hash >> 5)));
+	}
 
-   return (hash & 0x7FFFFFFF);
+	return (hash & 0x7FFFFFFF);
+}
+
+int ld_num_valid_correspondences(LDP ld) {
+	int i; 
+	int num = 0;
+	for(i=0;i<ld->nrays;i++) {
+		if(ld->corr[i].valid)
+			num++;
+	}
+	return num;
 }
 
 void icp_loop(struct icp_input*params, const gsl_vector*start, gsl_vector*x_new, double*error, int*iterations) {
@@ -112,8 +125,15 @@ void icp_loop(struct icp_input*params, const gsl_vector*start, gsl_vector*x_new,
 		
 //		find_correspondences(params, x_old);
 		find_correspondences_tricks(params, x_old);
-		compute_next_estimate(laser_ref, laser_sens, x_old, x_new, error);
+		kill_outliers_trim(laser_ref, laser_sens, x_old, 0.9);
+		
+		int num_corr = ld_num_valid_correspondences(laser_sens);
+		if(num_corr <0.2 * laser_sens->nrays){
+			printf("Failed: only %d correspondences.\n",num_corr);
+			break;
+		}
 		journal_correspondences(laser_sens);
+		compute_next_estimate(laser_ref, laser_sens, x_old, x_new, error);
 		
 		pose_diff(x_new, x_old, delta);
 		
@@ -204,7 +224,7 @@ void compute_next_estimate(LDP laser_ref, LDP laser_sens, const gsl_vector*x_old
 	int kk; for(kk=0;kk<k;kk++) valid[kk]=1;
 	
 	//kill_outliers(k, c, x_old, valid);
-	kill_outliers_trim(k,c,x_old,0.9,valid);
+///	kill_outliers_trim(k,c,x_old,0.9,valid);
 	
 	journal_write_array_i("valid", k, valid);
 	

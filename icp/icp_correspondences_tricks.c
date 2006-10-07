@@ -5,6 +5,24 @@
 
 #define DEBUG_SEARCH(a) ;
 
+int compatible(struct icp_input*params, int i, int j) {
+	double theta0 = 0; // FIXME
+	if((params->laser_sens.alpha_valid[i]==0) ||
+		(params->laser_ref.alpha_valid[j]==0)) 
+		return 1;
+		
+	double alpha_i = params->laser_sens.alpha[i];
+	double alpha_j = params->laser_ref.alpha[j];
+	double tolerance = deg2rad(20);
+	
+	double theta = angleDiff(alpha_j, alpha_i);
+	if(fabs(angleDiff(theta,theta0))>tolerance+deg2rad(params->maxAngularCorrectionDeg)) {
+		return 0;
+	} else {
+		return 1;
+	}
+}
+
 void find_correspondences_tricks(struct icp_input*params, gsl_vector* x_old) {
 	LDP laser_ref  = &(params->laser_ref);
 	LDP laser_sens = &(params->laser_sens);
@@ -62,7 +80,9 @@ void find_correspondences_tricks(struct icp_input*params, gsl_vector* x_old) {
 				++dbg_number_points;
 				last_dist_up = distance(p_i_w, laser_ref->p[up]);
 				if( (last_dist_up<maxDist) && ((j1==-1)||(last_dist_up < best_dist))) {
-					j1 = up; best_dist = last_dist_up;
+					if(compatible(params, i, up)) {
+						j1 = up; best_dist = last_dist_up;
+					}
 				}
 				double delta_theta = GSL_MAX(up-start_cell,0) * (M_PI/laser_ref->nrays);
 				double min_dist_up = sin(delta_theta) * p_i_w_nrm2;
@@ -82,7 +102,9 @@ void find_correspondences_tricks(struct icp_input*params, gsl_vector* x_old) {
 				++dbg_number_points;
 				last_dist_down = distance(p_i_w, laser_ref->p[down]);
 				if( (last_dist_down<maxDist) && ((j1==-1)||(last_dist_down < best_dist))) {
-					j1 = down; best_dist = last_dist_down;
+					if(compatible(params, i, down)) {
+						j1 = down; best_dist = last_dist_down;
+					}
 				}
 
 				double delta_theta = GSL_MAX(start_cell-down,0) * (M_PI/laser_ref->nrays);
