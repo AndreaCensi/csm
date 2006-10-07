@@ -1,0 +1,2 @@
+icp_input -> sm_input
+icp_output -> sm_output
