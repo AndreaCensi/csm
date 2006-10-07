@@ -45,14 +45,11 @@ end
 $CPPFLAGS += " -Wall -W -Wmissing-prototypes -Wconversion "
 $CPPFLAGS += " -Wunreachable-code "
 gsl_config();
-srcs = %w(icp_ruby icpc_wrap) 
-#	icp icp_loop icp_correspondences_dumb icp_correspondences_tricks
-#	journal laser_data math_utils )
 
-
+srcs = %w(rb_sm sm_wrap) 
 $objs = srcs.collect{|i| i+".o"}
 
-create_makefile('icpc')
+create_makefile('sm')
 if false
 File.open("Makefile","a") do |f|
 	f.puts <<-EOF

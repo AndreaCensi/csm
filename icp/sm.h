@@ -78,8 +78,8 @@ struct sm_result {
 };
 
 
-void icp(struct sm_params*input, struct sm_result*output);
-void gpm(struct sm_params*input, struct sm_result*output);
+void sm_icp(struct sm_params*input, struct sm_result*output);
+void sm_gpm(struct sm_params*input, struct sm_result*output);
 
 void sm_journal_open(const char* file);
 

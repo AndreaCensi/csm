@@ -17,9 +17,9 @@ void find_correspondences_tricks(struct sm_params*params, gsl_vector* x_old);
 void kill_outliers(int K, struct gpc_corr*c, const gsl_vector*x_old, int*valid);
 void icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new, double*error, int*iterations);
 
-void kill_outliers_trim(LDP laser_ref, LDP laser_sens, const gsl_vector*x_old, double perc);
+void kill_outliers_trim(struct sm_params*params, const gsl_vector*x_old, double perc);
 
-void icp(struct sm_params*params, struct sm_result*res) {
+void sm_icp(struct sm_params*params, struct sm_result*res) {
 	LDP laser_ref  = &(params->laser_ref);
 	LDP laser_sens = &(params->laser_sens);
 		
@@ -50,7 +50,7 @@ void icp(struct sm_params*params, struct sm_result*res) {
 	if(params->restart) {
 		double dt  = params->restart_dt;
 		double dth = params->restart_dtheta;
-		
+		printf("icp_loop: dt = %f dtheta= %f deg\n",dt,rad2deg(dth));
 		
 		double perturb[2][3] = {
 //			{dt,0,0}, {-dt,0,0},
@@ -129,7 +129,7 @@ void icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 		
 //		find_correspondences(params, x_old);
 		find_correspondences_tricks(params, x_old);
-		kill_outliers_trim(laser_ref, laser_sens, x_old, 0.9);
+		kill_outliers_trim(params, x_old, 0.9);
 		
 		int num_corr = ld_num_valid_correspondences(laser_sens);
 		if(num_corr <0.2 * laser_sens->nrays){

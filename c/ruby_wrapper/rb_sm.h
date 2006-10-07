@@ -4,27 +4,27 @@
 
 /** Interface for interfacing with Ruby: there are no pointers around. */
 
-void icpc_init_journal(const char*journal_file);
+void rb_sm_init_journal(const char*journal_file);
 
-void icpc_l_nrays(int laser, int nrays);
-void icpc_l_min_theta(int laser, double min_theta);
-void icpc_l_max_theta(int laser, double max_theta);
-void icpc_l_ray(int laser, int ray, double theta, double reading);
+void rb_sm_l_nrays(int laser, int nrays);
+void rb_sm_l_min_theta(int laser, double min_theta);
+void rb_sm_l_max_theta(int laser, double max_theta);
+void rb_sm_l_ray(int laser, int ray, double theta, double reading);
 
-void icpc_odometry(double x, double y, double theta);
-void icpc_odometry_cov(double cov_x, double cov_y, double cov_theta);
+void rb_sm_odometry(double x, double y, double theta);
+void rb_sm_odometry_cov(double cov_x, double cov_y, double cov_theta);
 
-void icpc_go();
+void rb_sm_icp();
+void rb_sm_gpm();
 
-void icpc_cleanup();
+void rb_sm_cleanup();
 
-void icpc_get_x(double *x,double*y,double*theta);
+void rb_sm_get_x(double *x,double*y,double*theta);
 
-void gpmc_go();
 
-#include "icp.h"
+#include <sm.h>
 
-extern struct icp_input icpc_params;
-extern struct icp_output icpc_res;
+extern struct sm_params rb_sm_params;
+extern struct sm_result rb_sm_result;
 
 #endif

@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 require 'logreader'
 
-require 'icp'
 require 'icpc_wrap'
 
 class Matching 

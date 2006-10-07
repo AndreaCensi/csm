@@ -1,20 +1,23 @@
 require 'sm'
 require 'structures'
 require 'journal'
+
+module Sm
 	
 # pass parameters 
-def params2method(params, ob)
+def Sm.params2method(params, ob)
 	params.each { |param, value|
 		method = "#{param}="
 		if ob.methods.include? method
-			ob.__send__(method, value) 
+			ob.__send__(method, value)
+			puts "Setting #{method} #{value}" 
 		else
-			#puts "Structure does not have method #{method}"
+			puts "Structure does not have method #{method}"
 		end
 	}
 end
 
-def put_params_in_c_structures(params)
+def Sm.put_params_in_c_structures(params)
 # pass all parameters to extension library
 	laser_ref  = params[:laser_ref]
 	laser_sens = params[:laser_sens]
@@ -35,48 +38,48 @@ def put_params_in_c_structures(params)
 	u=params[:firstGuess];
 	rb_sm_odometry(u[0],u[1],u[2]);
 
-	params2method(params, Sm::rb_sm_params)
+	Sm.params2method(params, Sm::rb_sm_params)
 end
 
-def get_result_from_c_structures()
+def Sm.get_result_from_c_structures()
 	res = Hash.new 
 	x = rb_sm_get_x();
 	res[:x] = Vector[x[0],x[1],x[2]]
 	res[:iterations] = Sm::rb_sm_result.iterations;
 	res[:error] = Sm::rb_sm_result.error
+	res
 end
 
-class ICPC
-	include MathUtils	
-	include Math
-	include Sm
-	
-	attr_accessor :params
-	
-	def initialize
-		@params = standard_parameters
-	end
-	
-	def name 
-		"ICPC"
-	end
+	class ICPC
+		include MathUtils	
+		include Math
 
-	def scan_matching
-		
+		attr_accessor :params
 	
-		put_params_in_c_structures(params)
+		def initialize
+			@params = standard_parameters
+		end
 	
-		rb_sm_icp()
+		def name 
+			"ICPC"
+		end
 
-		res = get_result_from_c_structures()
+		def scan_matching
+			Sm.put_params_in_c_structures(params)
+	
+			Sm::rb_sm_icp()
+
+			res = Sm.get_result_from_c_structures()
 			
-		rb_sm_cleanup
+			Sm::rb_sm_cleanup
 		
-		res
-	end
+			res
+		end
 	
 	
-	def journal_open(filename)
-		rb_sm_init_journal(filename)
+		def journal_open(filename)
+			Sm::rb_sm_init_journal(filename)
+		end
 	end
+
 end

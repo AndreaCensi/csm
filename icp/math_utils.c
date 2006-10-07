@@ -60,7 +60,7 @@ double rad2deg(double rad) {
 }
 
 gsl_vector * vector_from_array(unsigned int n, double *x) {
-	gsl_vector * v = gsl_vector_calloc(n);
+	gsl_vector * v = gsl_vector_alloc(n);
 	unsigned int i;
 	for(i=0;i<n;i++)
 		gvs(v,i,x[i]);

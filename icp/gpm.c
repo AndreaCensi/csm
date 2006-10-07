@@ -12,7 +12,7 @@ void ght_one_shot(LDP laser_ref, LDP laser_sens,
 		const gsl_vector*x0, double maxLinearCorrection,
 		double maxAngularCorrectionDeg, gsl_vector*x) ;
 	
-void gpm(struct sm_params*params, struct sm_result*res) {
+void sm_gpm(struct sm_params*params, struct sm_result*res) {
 	LDP laser_ref  = &(params->laser_ref);
 	LDP laser_sens = &(params->laser_sens);
 		

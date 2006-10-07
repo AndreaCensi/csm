@@ -1,63 +1,63 @@
-
 #include <stdio.h>
-#include "icp_ruby.h"
-#include "icp.h"
 
-struct icp_input  icpc_params;
-struct icp_output icpc_res;
+#include "rb_sm.h"
+#include <sm.h>
 
-void icpc_init_journal(const char*journal_file){
-	icp_journal_open(journal_file);
+struct sm_params rb_sm_params; 
+struct sm_result rb_sm_result;
+
+void rb_sm_init_journal(const char*journal_file){
+	sm_journal_open(journal_file);
 }
 
 struct laser_data * get_ld(int index) {
-	return index==0 ? &(icpc_params.laser_ref) : &(icpc_params.laser_sens); 
+	return index==0 ? &(rb_sm_params.laser_ref) : &(rb_sm_params.laser_sens); 
 }
 
-void icpc_l_nrays(int laser, int nrays){
+void rb_sm_l_nrays(int laser, int nrays){
 	struct laser_data * ld = get_ld(laser);
 	ld_alloc(ld, nrays);	
 }
 
-void icpc_l_min_theta(int laser, double min_theta){
+void rb_sm_l_min_theta(int laser, double min_theta){
 	get_ld(laser)->min_theta = min_theta;
 }
 
-void icpc_l_max_theta(int laser, double max_theta){
+void rb_sm_l_max_theta(int laser, double max_theta){
 	get_ld(laser)->max_theta = max_theta;	
 }
 
-void icpc_l_ray(int laser, int ray, double theta, double reading){
+void rb_sm_l_ray(int laser, int ray, double theta, double reading){
 	get_ld(laser)->readings[ray] = reading;
 	get_ld(laser)->   theta[ray] = theta;
 }
 
-void icpc_odometry(double x, double y, double theta){
-	icpc_params.odometry[0]=x;
-	icpc_params.odometry[1]=y;
-	icpc_params.odometry[2]=theta;
+void rb_sm_odometry(double x, double y, double theta){
+	rb_sm_params.odometry[0]=x;
+	rb_sm_params.odometry[1]=y;
+	rb_sm_params.odometry[2]=theta;
 }
 
-void icpc_odometry_cov(double cov_x, double cov_y, double cov_theta){
+void rb_sm_odometry_cov(double cov_x, double cov_y, double cov_theta){
 	
 	
 }
 
-void icpc_go() {
-	icp(&icpc_params, &icpc_res);
+void rb_sm_icp() {
+	sm_icp(&rb_sm_params, &rb_sm_result);
 }
 
-void gpmc_go() {
-	gpm(&icpc_params, &icpc_res);
+void rb_sm_gpm() {
+	sm_gpm(&rb_sm_params, &rb_sm_result);
 }
 
-void icpc_cleanup() {
-	ld_free(&(icpc_params.laser_ref));
-	ld_free(&(icpc_params.laser_sens));
+void rb_sm_cleanup() {
+	ld_free(&(rb_sm_params.laser_ref));
+	ld_free(&(rb_sm_params.laser_sens));
 }
 
-void icpc_get_x(double *x,double*y,double*theta) {
-	*x = icpc_res.x[0];
-	*y = icpc_res.x[1];
-	*theta = icpc_res.x[2];
+void rb_sm_get_x(double *x,double*y,double*theta) {
+	*x = rb_sm_result.x[0];
+	*y = rb_sm_result.x[1];
+	*theta = rb_sm_result.x[2];
 }

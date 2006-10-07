@@ -1,8 +1,6 @@
 
 require 'laserdata'
 require 'gsl'
-require 'icp'
-require 'icpc_wrap'
 
 include MathUtils
 include Math

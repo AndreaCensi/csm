@@ -29,14 +29,15 @@ void kill_outliers_trim(struct sm_params*params, const gsl_vector*x_old, double 
 	quicksort(dist2, 0, k-1);
 /*	printf("Ordered: ");
 	for(i=0;i<k;i++)
-		printf("%f ", dist[i]);
+		printf("%f ", dist2[i]);
 	printf("\n");*/
-	
+		
 	//double error_limit = 2*dist2[(int)floor(k*0.8)];
+
 	
-	double error_limit = dist2[(int)floor(k*params->outliers_maxPerc)];
+	double error_limit = dist2[(int)floor(k*(params->outliers_maxPerc))];
 	
-	printf("icp_outliers: error_limit: %f \n",error_limit);
+	printf("icp_outliers: maxPerc %f error_limit: %f \n",params->outliers_maxPerc,error_limit);
 	
 	int nvalid = 0;
 	for(i=0;i<laser_sens->nrays;i++) {

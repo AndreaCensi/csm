@@ -1,24 +1,9 @@
-%module icpc
+%module sm
 
 %header %{
 	#include "rb_sm.h"
 %}
 
-
-void icpc_init_journal(const char*journal_file);
-
-void icpc_l_nrays(int laser, int nrays);
-void icpc_l_min_theta(int laser, double);
-void icpc_l_max_theta(int laser, double);
-void icpc_l_ray(int laser, int ray, double theta, double reading);
-
-void icpc_odometry(double x, double y, double theta);
-void icpc_odometry_cov(double cov_x, double cov_y, double cov_theta);
-
-void icpc_go();
-void icpc_cleanup();
-
-void gpmc_go();
 
 struct sm_params {
 	double maxAngularCorrectionDeg;
@@ -32,6 +17,14 @@ struct sm_params {
 	double restart_dt;
 	double restart_dtheta;
 	
+	double clusteringThreshold;
+	int orientationNeighbourhood;
+	
+	int doAlphaTest;
+	double doAlphaTest_thresholdDeg;
+	
+	double outliers_maxPerc;
+	
 };
 
 struct sm_result {
@@ -40,7 +33,24 @@ struct sm_result {
 	double error;
 };
 
-void icpc_get_x(double *OUTPUT,double*OUTPUT,double*OUTPUT);
+
+void rb_sm_init_journal(const char*journal_file);
+
+void rb_sm_l_nrays(int laser, int nrays);
+void rb_sm_l_min_theta(int laser, double);
+void rb_sm_l_max_theta(int laser, double);
+void rb_sm_l_ray(int laser, int ray, double theta, double reading);
+
+void rb_sm_odometry(double x, double y, double theta);
+void rb_sm_odometry_cov(double cov_x, double cov_y, double cov_theta);
+
+void rb_sm_icp();
+void rb_sm_gpm();
+
+void rb_sm_cleanup();
+
+
+void rb_sm_get_x(double *OUTPUT,double*OUTPUT,double*OUTPUT);
 
 %inline {
 extern struct sm_params rb_sm_params;

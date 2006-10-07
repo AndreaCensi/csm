@@ -55,7 +55,16 @@ def standard_parameters
 	p[:sigma]=           0.01
 	p[:restart]=         1
 	p[:restart_dt]=      0.01
-	p[:restart_dth]=     deg2rad(1.5)
+	p[:restart_dtheta]=     deg2rad(1.5)
+	
+	p[:clusteringThreshold] = 0.05
+	p[:orientationNeighbourhood] = 3
+	
+	p[:doAlphaTest] = 1
+	p[:doAlphaTest_thresholdDeg]=20
+	
+	p[:outliers_maxPerc] = 0.9;
+	
 	p
 end
 
