@@ -1,4 +1,4 @@
-#!/usr/bin/env ruby -I ../rsm
+#!/usr/bin/env ruby -I../rsm
 
 
 require 'sm_icp'
