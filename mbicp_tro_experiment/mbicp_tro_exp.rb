@@ -15,7 +15,7 @@ def main(scans, klass)
 		Vector[0.20, 0.20, deg2rad(45.0)].col
 ];
 	
-	repetitions_per_scan = 2;	
+	repetitions_per_scan = 5;	
 	
 	# Use a known seed for repeatability of the experiments
 	rng = Rng.alloc(GSL::Rng::MT19937, 24)
