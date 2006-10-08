@@ -5,10 +5,11 @@ total_error = data(:,2)';
 nvalid = data(:,3)';
 mean_error = data(:,4)';
 iterations = data(:,5)';
+realtime = data(:,6)';
 
 
 figure
-n = 3;
+n = 4;
 
 	subplot(n,1,1); 
 	title('Total error and mean error (normalized)');
@@ -28,3 +29,7 @@ n = 3;
 	subplot(n,1,3);
 	title('Iterations');
 	plot(iterations);
+	
+	subplot(n,1,4);
+	title('Time (s)');
+	plot(realtime);

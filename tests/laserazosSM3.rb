@@ -25,7 +25,6 @@ scan_list = (447..450).to_a
 scan_list = []
 
 
-
 results = scan_matching(scan_matcher,scan_list,input,output,params)
 
 if scan_list.empty?
@@ -36,7 +35,7 @@ if scan_list.empty?
 		iterations = res[:iterations]
 		error = res[:error]
 		nvalid = res[:nvalid]
-	
-		f.puts "#{i} #{error} #{nvalid} #{error/nvalid} #{iterations} "
+		time = res[:time]
+		f.puts "#{i} #{error} #{nvalid} #{error/nvalid} #{iterations} #{time}"
 	end
 end

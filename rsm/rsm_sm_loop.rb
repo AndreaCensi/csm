@@ -1,5 +1,5 @@
 require 'logreader'
-
+require 'benchmark'
 
 def scan_matching(klass,scan_list,input,output,params)
 	include MathUtils
@@ -50,15 +50,19 @@ def scan_matching(klass,scan_list,input,output,params)
 
 		#		sm.params[:laser_sens] = laser_ref;
 		#		sm.params[:firstGuess] = GSL::Vector.alloc(0.2,0.2,deg2rad(30))
-
-		res = sm.scan_matching
+		
+		res = nil
+		realtime = Benchmark.realtime do
+			res = sm.scan_matching
+		end
+		res[:time] = realtime
 		results.push res
 		
 		x = res[:x]
 		error = res[:error]
 		iterations = res[:iterations]
 		
-		puts "rsm_sm.rb: #{count} error = #{error} it = #{iterations} x = #{pv(x)} u = #{pv(u)}"
+		puts "rsm_sm.rb: #{count} time=#{realtime} error = #{error} it = #{iterations} x = #{pv(x)} u = #{pv(u)}"
 		
 		laser_sens.estimate = oplus(laser_ref.estimate,x)
 		output.puts laser_sens.to_carmen
