@@ -27,13 +27,16 @@ void sm_icp(struct sm_params*params, struct sm_result*res) {
 	ld_create_jump_tables(laser_ref);
 		
 	ld_compute_cartesian(laser_ref);
-	ld_simple_clustering(laser_ref, params->clusteringThreshold);
-	ld_compute_orientation(laser_ref, params->orientationNeighbourhood, params->sigma);
 
 	ld_compute_cartesian(laser_sens);
-	ld_simple_clustering(laser_sens, params->clusteringThreshold);
-	ld_compute_orientation(laser_sens, params->orientationNeighbourhood, params->sigma);
 
+	if(params->doAlphaTest) {
+		ld_simple_clustering(laser_ref, params->clusteringThreshold);
+		ld_compute_orientation(laser_ref, params->orientationNeighbourhood, params->sigma);
+		ld_simple_clustering(laser_sens, params->clusteringThreshold);
+		ld_compute_orientation(laser_sens, params->orientationNeighbourhood, params->sigma);
+	}
+	
 	journal_laser_data("laser_ref",  laser_ref );
 	journal_laser_data("laser_sens", laser_sens);
 		
