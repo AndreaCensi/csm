@@ -15,7 +15,7 @@ def main(scans, klass)
 		Vector[0.20, 0.20, deg2rad(45.0)].col
 ];
 	
-	repetitions_per_scan = 5;	
+	repetitions_per_scan = 20;	
 	
 	# Use a known seed for repeatability of the experiments
 	rng = Rng.alloc(GSL::Rng::MT19937, 24)
@@ -32,7 +32,7 @@ def main(scans, klass)
 		failed = 0;
 		puts "Experiment #{i}"
 		scans.each_index do |s| 
-			next if s < 400
+#			next if s < 400
 			
 		repetitions_per_scan.times do |n|
 			disp = random_displacement(max_displacement[i],rng);

@@ -13,11 +13,16 @@ def create_scan(rays, odometry)
 	ld.max_theta     =  PI/2;
 	
 	rays.each_index do |i|
-		ld.theta[i]    = -PI/2 + i*PI/ld.nrays
+		ld.theta[i]    = -PI/2 + i*PI/(ld.nrays-1)
 		ld.valid[i]    = rays[i]<ld.max_reading && rays[i] > 0
 		ld.readings[i] = ld.valid[i] ? rays[i] : GSL::NAN
 	end
 	
+	ld.odometry = Vector[odometry[0],odometry[1],odometry[2]].col
+	ld.estimate = ld.odometry
+	ld.ipc_timestamp = 0
+	ld.timestamp     = 0
+	ld.hostname      = 'laserazosSM3'
 	ld
 end
 
