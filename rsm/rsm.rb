@@ -1,4 +1,4 @@
-require 'gsl'
+#require 'gsl'
 
 require 'rsm_journal'
 require 'rsm_mathutils'

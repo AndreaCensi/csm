@@ -14,6 +14,7 @@ struct sm_params {
 	double maxCorrespondenceDist;
 	
 	int restart;
+	double restart_threshold_mean_error;
 	double restart_dt;
 	double restart_dtheta;
 	
@@ -27,12 +28,14 @@ struct sm_params {
 	
 	double outliers_maxPerc;
 	
+	int doVisibilityTest;
 };
 
 struct sm_result {
 	double x[3];
 	int iterations;
 	double error;
+	int nvalid;
 };
 
 

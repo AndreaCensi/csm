@@ -38,3 +38,6 @@ INSTALL(FILES sm.h  DESTINATION include)
 
 ADD_EXECUTABLE(sm_test sm_test.c)
 TARGET_LINK_LIBRARIES(sm_test sm ${GSL_LIBRARIES})
+
+ADD_EXECUTABLE(test_math_utils test_math_utils.c)
+TARGET_LINK_LIBRARIES(test_math_utils sm ${GSL_LIBRARIES})

@@ -5,14 +5,14 @@
 #include "laser_data.h"
 
 void possible_interval(
-	gsl_vector*p_i_w, struct laser_data*laser_sens, 
+	const gsl_vector*p_i_w, struct laser_data*laser_sens, 
 	double maxAngularCorrectionDeg, double maxLinearCorrection, int*from, int*to, int*start_cell);
 
 void transform(const gsl_vector* point, const gsl_vector* x, gsl_vector*result);
 
 void gsl_vector_set_nan(gsl_vector*v);
 
-double distance(gsl_vector* a,gsl_vector* b);
+double distance(const gsl_vector* a,const gsl_vector* b);
 double norm(const gsl_vector*);
 
 double angleDiff(double a, double b);
@@ -28,6 +28,16 @@ void oplus(const gsl_vector*x1,const gsl_vector*x2, gsl_vector*res);
 void ominus(const gsl_vector*x, gsl_vector*res);
 void pose_diff(const gsl_vector*pose2,const gsl_vector*pose1,gsl_vector*res);
 
+/// Projects x on the LINE going through a and b
+void projection_on_line(const gsl_vector*a,const gsl_vector*b,const gsl_vector*x,
+	gsl_vector * proj);
+	
+/// Projects x on the SEGMENT a-b
+void projection_on_segment(const gsl_vector*a,const gsl_vector*b,const gsl_vector*x,
+	gsl_vector*proj);
+
+/// Distance of x from its projection on segment a-b
+double dist_to_segment(const gsl_vector*a,const gsl_vector*b,const gsl_vector*x);
 
 #define gvg gsl_vector_get
 #define gvs gsl_vector_set

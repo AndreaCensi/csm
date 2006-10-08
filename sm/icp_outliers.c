@@ -6,7 +6,33 @@
 
 void quicksort(double *array, int begin, int end);
 
-void kill_outliers_trim(struct sm_params*params, const gsl_vector*x_old, double perc) {
+// expects cartesian valid
+void visibilityTest(LDP laser_ref, const gsl_vector*u) {
+
+	double theta_from_u[laser_ref->nrays];
+	
+	int j;
+	for(j=0;j<laser_ref->nrays;j++) {
+		if(!ld_valid_ray(laser_ref,j)) continue;
+		theta_from_u[j] = 
+			atan2(gvg(u,1)-gvg(laser_ref->p[j],1),gvg(u,0)-gvg(laser_ref->p[j],0));
+	}
+	
+	printf("visibility: Found outliers: ");
+	int invalid = 0;
+	for(j=1;j<laser_ref->nrays;j++) {
+		if(!ld_valid_ray(laser_ref,j)||!ld_valid_ray(laser_ref,j-1)) continue;
+		if(theta_from_u[j]<theta_from_u[j-1]) {
+			laser_ref->valid[j] = 0;
+			invalid ++;
+			printf("%d ",j);
+		}
+	}
+	printf("\n");
+}
+
+void kill_outliers_trim(struct sm_params*params, const gsl_vector*x_old, 
+	double*total_error) {
 	LDP laser_ref  = &(params->laser_ref);
 	LDP laser_sens = &(params->laser_sens);
 	
@@ -20,7 +46,9 @@ void kill_outliers_trim(struct sm_params*params, const gsl_vector*x_old, double 
 		if(!laser_sens->corr[i].valid) continue;
 		transform(laser_sens->p[i], x_old, p_i_w);
 		int j1 = laser_sens->corr[i].j1;
-		dist[i] = distance(p_i_w, laser_ref->p[j1]);
+		int j2 = laser_sens->corr[i].j2;
+//		dist[i] = distance(p_i_w, laser_ref->p[j1]);
+		dist[i] = dist_to_segment(laser_ref->p[j1],laser_ref->p[j2],p_i_w);
 		dist2[k] = dist[i];
 		k++;	
 	}
@@ -31,14 +59,16 @@ void kill_outliers_trim(struct sm_params*params, const gsl_vector*x_old, double 
 	for(i=0;i<k;i++)
 		printf("%f ", dist2[i]);
 	printf("\n");*/
-		
+	
+	double error_limit1 = dist2[(int)floor(k*(params->outliers_maxPerc))];
+	double error_limit2 = 2*dist2[(int)floor(k*0.7)];
 	//double error_limit = 2*dist2[(int)floor(k*0.8)];
-
 	
-	double error_limit = dist2[(int)floor(k*(params->outliers_maxPerc))];
+	double error_limit = GSL_MIN(error_limit1,error_limit2);
+	printf("icp_outliers: maxPerc %f error_limit: fix %f adaptive %f \n",
+		params->outliers_maxPerc,error_limit1,error_limit2);
 	
-//	printf("icp_outliers: maxPerc %f error_limit: %f \n",params->outliers_maxPerc,error_limit);
-	
+	*total_error = 0;
 	int nvalid = 0;
 	for(i=0;i<laser_sens->nrays;i++) {
 		if(!laser_sens->corr[i].valid) continue;
@@ -48,11 +78,14 @@ void kill_outliers_trim(struct sm_params*params, const gsl_vector*x_old, double 
 			laser_sens->corr[i].j1 = -1;
 			laser_sens->corr[i].j2 = -1;
 		}
-		else
+		else {
 			nvalid++;
+			*total_error += dist[i];
+		}
 	}
 	
-	printf("\ticp_outliers: valid %d/%d (limit: %f)\n",nvalid,k,error_limit);	
+	printf("\ticp_outliers: valid %d/%d (limit: %f) mean error = %f \n",nvalid,k,error_limit,
+		*total_error/nvalid);	
 }
 
 

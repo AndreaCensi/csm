@@ -122,6 +122,7 @@ end
 
 
 def standard_parameters
+	#include MathUtils
 	p = Hash.new
 	p[:maxAngularCorrectionDeg]= 30
 	p[:maxLinearCorrection]=    0.5
@@ -131,8 +132,9 @@ def standard_parameters
 	p[:epsilon_theta]=   0.0001
 	p[:sigma]=           0.01
 	p[:restart]=         1
+	p[:restart_threshold_mean_error] = 3.0 / 300.0
 	p[:restart_dt]=      0.1
-	p[:restart_dtheta]=     deg2rad(1.5)
+	p[:restart_dtheta]=    1.5 * 3.14 /180
 	
 	p[:clusteringThreshold] = 0.05
 	p[:orientationNeighbourhood] = 3
@@ -141,7 +143,7 @@ def standard_parameters
 	p[:doAlphaTest_thresholdDeg]=20
 	
 	p[:outliers_maxPerc] = 0.95;
-	
+	p[:doVisibilityTest] = 0
 	p
 end
 

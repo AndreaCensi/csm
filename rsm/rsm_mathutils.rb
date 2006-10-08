@@ -1,3 +1,19 @@
+require 'gsl'
+
+module GSL
+	class Vector
+		def marshal_dump
+			to_a
+		end
+		
+		def marshal_load(a)
+	#		puts "A is a #{a.class}: #{a}"
+			a.each_index { |i| 
+	#			puts "i=#{i.class} a(i) = #{a[i].class}"
+			}
+		end
+	end
+end
 
 module MathUtils 
 	public

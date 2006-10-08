@@ -48,6 +48,7 @@ def Sm.get_result_from_c_structures()
 	res[:x] = Vector[x[0],x[1],x[2]]
 	res[:iterations] = Sm::rb_sm_result.iterations;
 	res[:error] = Sm::rb_sm_result.error
+	res[:nvalid] = Sm::rb_sm_result.nvalid
 	res
 end
 

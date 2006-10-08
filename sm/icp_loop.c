@@ -9,15 +9,16 @@
 #include "journal.h"
 
 
-void compute_next_estimate(LDP laser_ref, LDP laser_sens, const gsl_vector*x_old, gsl_vector*x_new,
-	double *error);
+void compute_next_estimate(LDP laser_ref, LDP laser_sens, const gsl_vector*x_old, gsl_vector*x_new);
 int termination_criterion(gsl_vector*delta, struct sm_params*params);
 
 void find_correspondences_tricks(struct sm_params*params, gsl_vector* x_old);
 void kill_outliers(int K, struct gpc_corr*c, const gsl_vector*x_old, int*valid);
-void icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new, double*error, int*iterations);
+void icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new, 
+ 	double*total_error, int*nvalid, int*iterations);
 
-void kill_outliers_trim(struct sm_params*params, const gsl_vector*x_old, double perc);
+void kill_outliers_trim(struct sm_params*params, const gsl_vector*x_old,
+	double*total_error);
 
 void sm_icp(struct sm_params*params, struct sm_result*res) {
 	LDP laser_ref  = &(params->laser_ref);
@@ -39,15 +40,29 @@ void sm_icp(struct sm_params*params, struct sm_result*res) {
 	gsl_vector * x_new = gsl_vector_alloc(3);
 	gsl_vector * x_old = vector_from_array(3, params->odometry);
 	
+	if(params->doVisibilityTest) {
+		printf("laser_ref:\n");
+		visibilityTest(laser_ref, x_old);
+
+		printf("laser_sens:\n");
+		gsl_vector * minus_x_old = gsl_vector_alloc(3);
+		ominus(x_old,minus_x_old);
+		visibilityTest(laser_sens, minus_x_old);
+		gsl_vector_free(minus_x_old);
+	}
+	
 	double error;
 	int iterations;
-	icp_loop(params, x_old, x_new, &error, &iterations);
+	int nvalid;
+	icp_loop(params, x_old, x_new, &error, &nvalid,&iterations);
 
 	double best_error = error;
 	gsl_vector * best_x = gsl_vector_alloc(3);
 	gsl_vector_memcpy(best_x, x_new);
 
-	if(params->restart) {
+	if(params->restart && 
+		(error/nvalid)>(params->restart_threshold_mean_error) ) {
+		printf("Restarting: %f > %f \n",(error/nvalid),(params->restart_threshold_mean_error));
 		double dt  = params->restart_dt;
 		double dth = params->restart_dtheta;
 		printf("icp_loop: dt = %f dtheta= %f deg\n",dt,rad2deg(dth));
@@ -66,8 +81,8 @@ void sm_icp(struct sm_params*params, struct sm_result*res) {
 				gvs(start, 1, gvg(x_new,1)+perturb[a][1]);
 				gvs(start, 2, gvg(x_new,2)+perturb[a][2]);
 			gsl_vector * x_a = gsl_vector_alloc(3);
-			double my_error; int my_iterations;
-			icp_loop(&my_params, start, x_a, &my_error, &my_iterations);
+			double my_error; int my_valid; int my_iterations;
+			icp_loop(&my_params, start, x_a, &my_error, &my_valid, &my_iterations);
 			iterations+=my_iterations;
 		
 			if(my_error < best_error) {
@@ -82,13 +97,14 @@ void sm_icp(struct sm_params*params, struct sm_result*res) {
 	vector_to_array(best_x, res->x);
 	res->error = best_error;
 	res->iterations = iterations;
+	res->nvalid = nvalid;
 }
 
 unsigned int ld_corr_hash(LDP ld){
 	unsigned int hash = 0;
 	unsigned int i    = 0;
 
-	for(i = 0; i < ld->nrays; i++) {
+	for(i = 0; i < (unsigned)ld->nrays; i++) {
 		int str = ld->corr[i].valid ? ld->corr[i].j1 : -1;
 		hash ^= ((i & 1) == 0) ? (  (hash <<  7) ^ (str) ^ (hash >> 3)) :
 		                         (~((hash << 11) ^ (str) ^ (hash >> 5)));
@@ -107,7 +123,8 @@ int ld_num_valid_correspondences(LDP ld) {
 	return num;
 }
 
-void icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new, double*error, int*iterations) {
+void icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new, 
+	double*total_error, int*valid, int*iterations) {
 	LDP laser_ref  = &(params->laser_ref);
 	LDP laser_sens = &(params->laser_sens);
 	
@@ -135,15 +152,19 @@ void icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 			break;
 		}
 
-		kill_outliers_trim(params, x_old, 0.9);
-		
+		double error;
+		kill_outliers_trim(params, x_old, &error);
 		int num_corr_after = ld_num_valid_correspondences(laser_sens);
+		
+		*total_error = error; 
+		*valid = num_corr_after;
+		
 		if(num_corr_after <0.2 * laser_sens->nrays){
 			printf("Failed: after trimming, only %d correspondences.\n",num_corr_after);
 			break;
 		}
 		journal_correspondences(laser_sens);
-		compute_next_estimate(laser_ref, laser_sens, x_old, x_new, error);
+		compute_next_estimate(laser_ref, laser_sens, x_old, x_new);
 		
 		pose_diff(x_new, x_old, delta);
 		
@@ -158,8 +179,9 @@ void icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 			oscillations = 0;
 		
 		hashes[iteration] = ld_corr_hash(laser_sens);
-		printf("icp_loop: it. %d  hash = %d error = %f, x_new= %f %f %f°  \n", 
-			iteration, hashes[iteration], *error, gvg(x_new,0),gvg(x_new,1),rad2deg(gvg(x_new,2)));
+		printf("icp_loop: it. %d  hash = %d nvalid=%d mean error = %f, x_new= %f %f %f°  \n", 
+			iteration, hashes[iteration], *valid, *total_error/ *valid, 
+			gvg(x_new,0),gvg(x_new,1),rad2deg(gvg(x_new,2)));
 			
 		int detected = 0;
 		int a; for(a=0;a<iteration;a++) {
@@ -196,11 +218,10 @@ int termination_criterion(gsl_vector*delta, struct sm_params*params){
 	return (a<params->epsilon_xy) && (b<params->epsilon_theta);
 }
 
-void compute_next_estimate(LDP laser_ref, LDP laser_sens, const gsl_vector*x_old, gsl_vector*x_new,
-	double *error) {
+void compute_next_estimate(LDP laser_ref, LDP laser_sens, 
+	const gsl_vector*x_old, gsl_vector*x_new) {
 	struct gpc_corr c[laser_sens->nrays];
 
-	*error = 0;
 	int i; int k=0;
 	for(i=0;i<laser_sens->nrays;i++) {
 		if(!ld_valid_corr(laser_sens,i))
@@ -217,16 +238,19 @@ void compute_next_estimate(LDP laser_ref, LDP laser_sens, const gsl_vector*x_old
 		double alpha = M_PI/2 + atan2( 
 			gvg(laser_ref->p[j1],1)-gvg(laser_ref->p[j2],1),
 			gvg(laser_ref->p[j1],0)-gvg(laser_ref->p[j2],0));
-		
+
 		c[k].C[0][0] = cos(alpha)*cos(alpha);
 		c[k].C[1][0] = 
 		c[k].C[0][1] = cos(alpha)*sin(alpha);
 		c[k].C[1][1] = sin(alpha)*sin(alpha);
 
+	//	c[k].C[0][0] = 1;
+	//	c[k].C[1][0] = 
+	//	c[k].C[0][1] = 0;
+	//	c[k].C[1][1] = 1;
+
 	//	c[k].C[0][0] += 0.02;
 	//	c[k].C[1][1] += 0.02;
-		*error += gpc_error(c+k, x_old->data);	
-		
 		k++;
 	}
 

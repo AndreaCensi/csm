@@ -3,7 +3,7 @@
 #include "math_utils.h"
 
 void possible_interval(
-	gsl_vector*p_i_w, LDP ld, 
+	const gsl_vector*p_i_w, LDP ld, 
 	double maxAngularCorrectionDeg, double maxLinearCorrection, int*from, int*to, int*start_cell) 
 {
 	double angleRes = (ld->max_theta-ld->min_theta)/ld->nrays;
@@ -39,7 +39,7 @@ void gsl_vector_set_nan(gsl_vector*v) {
 }
 
 
-double distance(gsl_vector* a, gsl_vector* b) {
+double distance(const gsl_vector* a, const gsl_vector* b) {
 	double x = gvg(a,0)-gvg(b,0);
 	double y = gvg(a,1)-gvg(b,1);
 	return sqrt(x*x+y*y);
@@ -115,3 +115,40 @@ double angleDiff(double a, double b) {
 }
 
 
+/// Computes the projection of x onto the line which goes through a-b
+void projection_on_line(const gsl_vector*a,const gsl_vector*b,const gsl_vector*x,
+	gsl_vector * proj) 
+{
+	double t0 = gvg(a,0)-gvg(b,0);
+	double t1 = gvg(a,1)-gvg(b,1);
+	
+	double alpha = atan2(t1,t0) + M_PI/2;
+	double rho = cos(alpha)*gvg(a,0)+sin(alpha)*gvg(a,1);
+	
+	double c = cos(alpha); double s = sin(alpha);
+	double px =  gvg(x,0); double py = gvg(x,1);
+	gvs(proj, 0, c*rho + s*s*px - c*s*py );
+	gvs(proj, 1, s*rho - c*s*px + c*c*py );	
+}
+
+/// Computes the projection of x onto the segment a-b
+void projection_on_segment(const gsl_vector*a,const gsl_vector*b,const gsl_vector*x,
+	gsl_vector * proj ) {
+	projection_on_line(a,b,x,proj);
+	if ((gvg(proj,0)-gvg(a,0))*(gvg(proj,0)-gvg(b,0)) +
+	    (gvg(proj,1)-gvg(a,1))*(gvg(proj,1)-gvg(b,1)) < 0 ) {
+		// the projection is inside the segment
+	} else 
+		if(distance(a,x)<distance(b,x)) 
+			gsl_vector_memcpy(proj,a);
+		else
+			gsl_vector_memcpy(proj,b);
+}
+
+double dist_to_segment(const gsl_vector*a,const gsl_vector*b,const gsl_vector*x) {
+	gsl_vector * projection = gsl_vector_alloc(2);
+	projection_on_segment(a,b,x,projection);
+	double dist = distance(projection, x);
+	gsl_vector_free(projection);
+	return dist;
+}

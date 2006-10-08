@@ -58,6 +58,7 @@ struct sm_params {
 	double sigma;
 	
 	int restart;
+	double restart_threshold_mean_error;
 	double restart_dt;
 	double restart_dtheta;
 	
@@ -69,12 +70,15 @@ struct sm_params {
 	
 	// Percentage of correspondences to consider
 	double outliers_maxPerc;
+	
+	int doVisibilityTest;
 };
 
 struct sm_result {
 	double x[3];
 	double x_cov[3][3];
 	int iterations;
+	int nvalid;
 	double error;
 	
 	double ** dx_dy1;
