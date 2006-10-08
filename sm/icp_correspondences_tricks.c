@@ -5,7 +5,7 @@
 
 #define DEBUG_SEARCH(a) ;
 
-int compatible(struct sm_params*params, int i, int j) {
+inline int compatible(struct sm_params*params, int i, int j) {
 	if(!params->doAlphaTest) return 1;
 	
 	double theta0 = 0; // FIXME

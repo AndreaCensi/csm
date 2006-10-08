@@ -108,11 +108,41 @@ int ld_next_valid_down(LDP ld, int i){
 }
 
 void ld_create_jump_tables(struct laser_data* ld) {
+
 	int i;
 	for(i=0;i<ld->nrays;i++) {
 		int j=i+1;
 
-		while(ld_valid_ray(ld,j) && ld->readings[j]<=ld->readings[i]) j++;
+		while(ld->valid[j] && ld->readings[j]<=ld->readings[i]) j++;
+		ld->up_bigger[i] = j-i;
+
+		j = i+1;
+		while(ld->valid[j] && ld->readings[j]>=ld->readings[i]) j++;
+		ld->up_smaller[i] = j-i;
+		
+		j = i-1;
+		while(ld->valid[j] && ld->readings[j]>=ld->readings[i]) j--;
+		ld->down_smaller[i] = j-i;
+
+		j = i-1;
+		while(ld->valid[j] && ld->readings[j]<=ld->readings[i]) j--;
+		ld->down_bigger[i] = j-i;
+	}
+	
+}
+
+
+
+/*
+void ld_create_jump_tables(struct laser_data* ld) {
+	int ireadings[ld->nrays]
+	for(i=0;i<ld->nrays;i++) ireadings[i]=ld->readings[i]*1000;
+
+	int i;
+	for(i=0;i<ld->nrays;i++) {
+		int j=i+1;
+
+		while(ld_valid_ray(ld,j) && readings[j]<=ireadings[i]) j++;
 		ld->up_bigger[i] = j-i;
 
 		j = i+1;
@@ -129,6 +159,5 @@ void ld_create_jump_tables(struct laser_data* ld) {
 	}
 	
 }
-
-
+*/
 
