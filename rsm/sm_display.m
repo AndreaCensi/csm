@@ -112,6 +112,11 @@ function [next_r, laser_data] = read_laser_data(cells, r)
 		if strcmp(cells{r, 3}, 'nrays')
 			ld.nrays = str2double(cells{r,4});
 		end
+		if strcmp(cells{r, 3}, 'valid')
+			for i=1:ld.nrays
+				ld.valid(i) = str2num(cells{r,3+i});
+			end
+		end
 		if strcmp(cells{r, 3}, 'readings')
 			for i=1:ld.nrays
 				ld.readings(i) = str2double(cells{r,3+i});
@@ -126,6 +131,16 @@ function [next_r, laser_data] = read_laser_data(cells, r)
 		if strcmp(cells{r, 3}, 'alpha')
 			for i=1:ld.nrays
 				ld.alpha(i) = str2double(cells{r,3+i});
+			end
+		end
+		if strcmp(cells{r, 3}, 'cov_alpha')
+			for i=1:ld.nrays
+				ld.cov_alpha(i) = str2double(cells{r,3+i});
+			end
+		end
+		if strcmp(cells{r, 3}, 'cluster')
+			for i=1:ld.nrays
+				ld.cluster(i) = str2num(cells{r,3+i});
 			end
 		end
 		r = r+1;

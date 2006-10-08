@@ -29,6 +29,7 @@ void rb_sm_l_max_theta(int laser, double max_theta){
 
 void rb_sm_l_ray(int laser, int ray, int valid, double theta, double reading){
 	struct laser_data * ld = get_ld(laser);
+//	printf("l%d i=%d valid=%d theta=%f reading=%f\n",laser,ray,valid,theta,reading);
 	if(valid) {
 		ld->valid[ray] = 1;
 		ld->readings[ray] = reading;

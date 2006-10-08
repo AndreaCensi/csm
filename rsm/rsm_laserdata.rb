@@ -131,7 +131,7 @@ def standard_parameters
 	p[:epsilon_theta]=   0.0001
 	p[:sigma]=           0.01
 	p[:restart]=         1
-	p[:restart_dt]=      0.01
+	p[:restart_dt]=      0.1
 	p[:restart_dtheta]=     deg2rad(1.5)
 	
 	p[:clusteringThreshold] = 0.05
@@ -140,7 +140,7 @@ def standard_parameters
 	p[:doAlphaTest] = 1
 	p[:doAlphaTest_thresholdDeg]=20
 	
-	p[:outliers_maxPerc] = 0.9;
+	p[:outliers_maxPerc] = 0.95;
 	
 	p
 end

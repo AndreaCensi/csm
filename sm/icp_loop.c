@@ -52,13 +52,13 @@ void sm_icp(struct sm_params*params, struct sm_result*res) {
 		double dth = params->restart_dtheta;
 		printf("icp_loop: dt = %f dtheta= %f deg\n",dt,rad2deg(dth));
 		
-		double perturb[2][3] = {
-//			{dt,0,0}, {-dt,0,0},
-//			{0,dt,0}, {0,-dt,0},
+		double perturb[6][3] = {
+			{dt,0,0}, {-dt,0,0},
+			{0,dt,0}, {0,-dt,0},
 			{0,0,dth}, {0,0,-dth}
 		};
 
-		int a; for(a=0;a<2;a++){
+		int a; for(a=0;a<6;a++){
 			printf("-- Restarting with perturbation #%d\n", a);
 			struct sm_params my_params = *params;
 			gsl_vector * start = gsl_vector_alloc(3);

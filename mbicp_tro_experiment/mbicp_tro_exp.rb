@@ -15,7 +15,7 @@ def main(scans, klass)
 		Vector[0.20, 0.20, deg2rad(45.0)].col
 ];
 	
-	repetitions_per_scan = 1;	
+	repetitions_per_scan = 2;	
 	
 	# Use a known seed for repeatability of the experiments
 	rng = Rng.alloc(GSL::Rng::MT19937, 24)
@@ -31,15 +31,14 @@ def main(scans, klass)
 			
 		failed = 0;
 		puts "Experiment #{i}"
-		scans.each_index do |s| repetitions_per_scan.times do |n|
+		scans.each_index do |s| 
+			next if s < 400
+			
+		repetitions_per_scan.times do |n|
 			disp = random_displacement(max_displacement[i],rng);
 			
 			code = "#{i}-#{s}-#{n}"
 
-			if not ARGV.empty?
-				next if not ARGV.include?(code)
-			end
-			
 			sm = klass.new
 			
 			if ARGV.include?(code)
@@ -58,6 +57,10 @@ def main(scans, klass)
 			sm.params[:laser_sens].add_noise!(sigma, rng)
 			sm.params[:firstGuess] = disp
 			sm.params[:maxIterations] = 100
+
+			if not ARGV.empty?
+				next if not ARGV.include?(code)
+			end
 			
 			#begin
 			res = nil
@@ -108,7 +111,7 @@ end
 scan_matcher = eval ARGV.shift
 
 log = 'laserazosSM3.off'
-log = 'a.off'
+#log = 'a.off'
 scans = nil
 File.open(log) do |f| 
 	scans = read_log(f) 

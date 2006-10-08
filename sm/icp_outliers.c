@@ -37,7 +37,7 @@ void kill_outliers_trim(struct sm_params*params, const gsl_vector*x_old, double 
 	
 	double error_limit = dist2[(int)floor(k*(params->outliers_maxPerc))];
 	
-	printf("icp_outliers: maxPerc %f error_limit: %f \n",params->outliers_maxPerc,error_limit);
+//	printf("icp_outliers: maxPerc %f error_limit: %f \n",params->outliers_maxPerc,error_limit);
 	
 	int nvalid = 0;
 	for(i=0;i<laser_sens->nrays;i++) {

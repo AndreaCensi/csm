@@ -18,9 +18,14 @@ void journal_open(const char*file){
 }
 
 void write_array_d(int n, double*v) {
-	int i; for(i=0;i<n;i++) 
-		fprintf(f, "%f ", v[i]);	
+	int i; 
+	for(i=0;i<n;i++) 
+		if(v[i]==GSL_NAN)
+			fprintf(f, "nan ");	
+		else
+			fprintf(f, "%f ", v[i]);	
 }
+
 void write_array_i(int n, int*v) {
 	int i; for(i=0;i<n;i++) 
 		fprintf(f, "%d ", v[i]);	
@@ -45,24 +50,14 @@ void journal_laser_data(const char*name, struct laser_data*ld) {
 	fprintf(f, "laser %s nrays %d\n", name, ld->nrays);
 	fprintf(f, "laser %s min_theta %f\n", name, ld->min_theta);
 	fprintf(f, "laser %s max_theta %f\n", name, ld->max_theta);
-	fprintf(f, "laser %s valid ", name);
-		write_array_i(ld->nrays, ld->valid);
-		fprintf(f, "\n");
-	fprintf(f, "laser %s readings ", name);
-		write_array_d(ld->nrays, ld->readings);
-		fprintf(f, "\n");
-	fprintf(f, "laser %s cluster ", name);
-		write_array_i(ld->nrays, ld->cluster);
-		fprintf(f, "\n");
-	fprintf(f, "laser %s alpha_valid ", name);
-		write_array_i(ld->nrays, ld->alpha_valid);
-		fprintf(f, "\n");
-	fprintf(f, "laser %s alpha ", name);
-		write_array_d(ld->nrays, ld->alpha);
-		fprintf(f, "\n");
-	fprintf(f, "laser %s cov_alpha ", name);
-		write_array_d(ld->nrays, ld->cov_alpha);
-		fprintf(f, "\n");
+	fprintf(f, "laser %s valid ", name);       write_array_i(ld->nrays, ld->valid);
+	fprintf(f, "\nlaser %s readings ", name);    write_array_d(ld->nrays, ld->readings);
+	fprintf(f, "\nlaser %s cluster ", name);     write_array_i(ld->nrays, ld->cluster);
+	fprintf(f, "\nlaser %s alpha_valid ", name); write_array_i(ld->nrays, ld->alpha_valid);
+	fprintf(f, "\nlaser %s alpha ", name);       write_array_d(ld->nrays, ld->alpha);
+	fprintf(f, "\nlaser %s cov_alpha ", name);   write_array_d(ld->nrays, ld->cov_alpha);
+	fprintf(f, "\n");
+
 	journal_write_array_i("down_bigger", ld->nrays, ld->down_bigger );
 	journal_write_array_i("down_smaller",ld->nrays, ld->down_smaller);
 	journal_write_array_i("up_bigger",   ld->nrays, ld->up_bigger );

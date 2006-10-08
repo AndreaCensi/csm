@@ -1,8 +1,8 @@
-#ifndef H_ICP_RUBY
-#define H_ICP_RUBY
+#ifndef H_SM_RUBY
+#define H_SM_RUBY
 
 
-/** Interface for interfacing with Ruby: there are no pointers around. */
+/** Interface for Ruby: there are no pointers around. */
 
 void rb_sm_init_journal(const char*journal_file);
 
@@ -17,9 +17,9 @@ void rb_sm_odometry_cov(double cov_x, double cov_y, double cov_theta);
 void rb_sm_icp();
 void rb_sm_gpm();
 
-void rb_sm_cleanup();
-
 void rb_sm_get_x(double *x,double*y,double*theta);
+
+void rb_sm_cleanup();
 
 
 #include <sm.h>

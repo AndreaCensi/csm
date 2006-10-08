@@ -40,7 +40,21 @@ function res = ld_plot(ld, params)
 		
 	hold on
 	
-	res.points = plotVectors(reference, ld.points, params.color);
+	if isfield(ld,'valid') == 0
+		ld.valid = ones(ld.nrays,1);
+	end
+	
+	for i=1:ld.nrays
+		if 0 == ld.valid(i)
+			continue
+		end
+		theta = ld.theta(i);
+		readings = ld.readings(i);
+		p = readings*[cos(theta);sin(theta)];
+		plotVectors(reference, p, params.color);
+	end
+	
+%	res.points = plotVectors(reference, ld.points, params.color);
 	
 	if params.plot_rays
 		for i=1:params.plot_rays_interval:ld.nrays
