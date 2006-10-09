@@ -1,224 +1,98 @@
+#include <math.h>
+#include "laser_data.h"
 #include <gpc_utils.h>
+#include "easy_gsl.h"
+#include "easy_gsl_macros.h"
 
-void compute_C_k(const gsl_vector*p_j1, const gsl_vector*p_j2, gsl_matrix*C_k)  {
-	double alpha = M_PI/2 + atan2( gvg(p_j1,1)-gvg(p_j2,1), gvg(p_j1,0)-gvg(p_j2,0));
+val compute_C_k(val p_j1, val p_j2)  {	
+	val d = sub(p_j1, p_j2);
+	double alpha = M_PI/2 + atan2( atv(d,1), atv(d,0));
+	double c = cos(alpha); double s = sin(alpha);
+	double m[2][2] = {
+		{c*c, c*s},
+		{c*s, s*s}
+	};
+	return egsl_vFda(2,2,m);
+}
+
+
+
+val dC_drho(val p1, val p2) {
+	double eps = 0.001;
+
+	val C_k = compute_C_k(p1, p2);	
+	val p1b = sum(p1, sc(eps/egsl_norm(p1),p1));
+	val C_k_eps = compute_C_k(p1b,p2);
+	return sc(1/eps, sub(C_k, C_k_eps));
+}
+
+
+void compute_covariance_exact(LDP laser_ref, LDP laser_sens, gsl_vector*x) {
+	egsl_push();
 	
-	gms(C_k,0,0, cos(alpha)*cos(alpha));
-	gms(C_k,1,0, sin(alpha)*cos(alpha));
-	gms(C_k,0,1, cos(alpha)*sin(alpha));
-	gms(C_k,1,1, sin(alpha)*sin(alpha));
-}
+	val d2J_dxdy1 = zeros(3,laser_ref->nrays);
+	val d2J_dxdy2 = zeros(3,laser_sens->nrays);
 
-// Computes a' * B * c where B is symmetric
-double quad(const gsl_matrix*a, const gsl_matrix*B, const gsl_matrix*c) {
-	return gmg(a,0,0)*gmg(c,0,0)*gmg(B,0,0) + gmg(a,1,0)*gmg(c,1,0)*gmg(B,1,1)  +
-	 	 2*gmg(a,1,0)*gmg(c,0,1)*gmg(B,1,0);
-}
-
-void set_polar(gsl_matrix*v,double theta,double rho) {
-	gms(v, 0,0, cos(theta)*rho);
-	gms(v, 1,0, sin(theta)*rho);
-}
-
-void compute_covariance_exact(LDP laser_ref, LDP laser_sens, int*valid, gsl_vector*x){
-	MAT(d2J_dxdy1,3,laser_ref->nrays);
-	MAT(d2J_dxdy2,3,laser_sens->nrays);
-	
 	// the three pieces of d2J_dx2
-	MAT(d2J_dt2,2,2);
-	MAT(d2J_dt_dtheta,2,1);
-	MAT(d2J_dtheta2,1,1);
+	val d2J_dt2       = zeros(2,2);
+	val d2J_dt_dtheta = zeros(2,1);
+	val d2J_dtheta2   = zeros(1,1);
 	
-	MAT(Ck,2,2);	
-	MAT(v1,2,1); MAT(v1,1,2);
-	MAT(v2,2,1); MAT(v2,1,2);
-	MAT(v_i,2,1);
-	MAT(v3,2,1); MAT(v3t,1,2);
-	MAT(v4,2,1); MAT(v4t,1,2);
+	double theta = x->data[2];
+	val t = egsl_vFa(2,x->data);
 	
 	int i; 
 	for(i=0;i<laser_sens->nrays;i++) {
 		if(!ld_valid_corr(laser_sens,i)) continue;
+		egsl_push();
 
 		int j1 = laser_sens->corr[i].j1;
 		int j2 = laser_sens->corr[i].j2;
 
-		gsl_vector*p_i  = laser_sens->p[i];
-		gsl_vector*p_j1  = laser_ref->p[j1];
-		
-		gsl_vector *p_j2  = laser_ref->p[j2];
+		val p_i  = egsl_vFgslv(laser_sens->p[i]);
+		val p_j1 = egsl_vFgslv(laser_ref ->p[j1]);
+		val p_j2 = egsl_vFgslv(laser_ref ->p[j2]);
 		
 		// v1 := rot(theta+PI/2)*p_i
-		set_polar(v1, theta+PI/2 + laser_sens->theta[i], laser_sens->readings[i] );
-		// v3 := rot(theta)*v_i)
+		val v1 = m(rot(theta+M_PI/2), p_i);		
+		// v2 := (rot(theta)*p_i+t-p_j1)
+		val v2 = sum3( m(rot(theta),p_i), t, minus(p_j1));
+		// v3 := rot(theta)*v_i
+		val v3 = vers(theta + laser_sens->theta[i]);
 		// v4 := rot(theta+PI/2)*v_i;
-		set_polar(v3, theta + laser_sens->theta[i], 1 );
-		set_polar(v4, theta + PI/2 + laser_sens->theta[i], 1 );
-
-		m_trans(v1,v1t); m_trans(v2,v2t); m_trans(v3,v3t); m_trans(v4,v4t);
+		val v4 = vers(theta + laser_sens->theta[i] + M_PI/2);
 		
-		v2 := (rot(theta)*p_i+t-p_j1)
-
-		compute_C_k(q_k,other,C_k);
-		
-		d2J_dt2       += 2 * C_k
-		d2J_dt_dtheta += 2 * v1t*C_k
-		d2J_dtheta2   += 2 * quad(v2,C_k,v1) + 2 * quad(v1,C_k,v1);
+		val C_k = compute_C_k(p_j1, p_j2);
+		add_to(d2J_dt2, sc(2.0, C_k));
+		add_to(d2J_dt_dtheta, sc(2.0,m(tr(v1),C_k)));
+		add_to(d2J_dtheta2, sc(2.0, sum( m3(tr(v2),C_k,v1), m3(tr(v1),C_k,v1))));
 		
 		// for measurement rho_i  in the second scan
+		val d2Jk_dtdrho_i = sc(2.0, m(tr(v3), C_k));
+		val d2Jk_dtheta_drho_i = sc(2.0, sum( m3(tr(v2),C_k,v4),  m3(tr(v3),C_k,v1)));
+		add_to_col(d2J_dxdy2, i, comp_col(d2Jk_dtdrho_i, d2Jk_dtheta_drho_i));
 		
-		d2Jk_dtdrho_i = 2 * v3t * C_k
-		d2Jk_dtheta_drho_i = 2*quad(v2,C_k,v4)+ 2 *quad(v3,C_k,v1)
-		
-		d2J_dxdy2.col(c.i)[0] += d2Jk_dtdrho_i[0]
-		d2J_dxdy2.col(c.i)[1] += d2Jk_dtdrho_i[1]
-		d2J_dxdy2.col(c.i)[2] += d2Jk_dtheta_drho_i
-	
 		// for measurements rho_j1, rho_j2 in the first scan
-		MAT(dC_drho_j1,2,2);
-		MAT(dC_drho_j2,2,2);
-		 
-		dC_drho_j12(laser_ref, laser_sens, c)
 		
-		v_j1  := = laser_ref.points[c.j1].v
-		v_j2  := = laser_ref.points[c.j2].v
-		v_j1t := 
-		v_j2t :=
+		val dC_drho_j1 = dC_drho(p_j1, p_j2);
+		val dC_drho_j2 = dC_drho(p_j2, p_j1);
 		
-		d2Jk_dtheta_drho_j1 = -2*quad(v_j1,C_k,v1) + quad(v2,dC_drho_j1,v1);
+		val v_j1 = vers(laser_ref->theta[j1]);
+		val v_j2 = vers(laser_ref->theta[j2]);
 		
-		d2Jk_dt_drho_j1 = 2 * (-v_j1t*m+v2t*dC_drho_j1)
+		val d2Jk_dt_drho_j1 = sum(sc(-2.0,m(tr(v_j1),C_k)), sc(2.0,m(tr(v2),dC_drho_j1)));
+		val d2Jk_dtheta_drho_j1 = sum( sc(-2.0, m3(tr(v_j1),C_k,v1)), m3(tr(v2),dC_drho_j1,v1));
+		add_to_col(d2J_dxdy1, j1, comp_col(d2Jk_dt_drho_j1, d2Jk_dtheta_drho_j1));
 		
-		d2J_dxdy1.col(c.j1)[0] += d2Jk_dt_drho_j1[0]
-		d2J_dxdy1.col(c.j1)[1] += d2Jk_dt_drho_j1[1]
-		d2J_dxdy1.col(c.j1)[2] += d2Jk_dtheta_drho_j1
-		
-		# for measurement rho_j2
-		d2Jk_dtheta_drho_j2 = 2 * quad(v2, dC_drho_j2, v1);
-			
-		d2Jk_dt_drho_j2 = 2*v2t * dC_drho_j2 
-		
-		d2J_dxdy1.col(c.j2)[0] += d2Jk_dt_drho_j2[0]
-		d2J_dxdy1.col(c.j2)[1] += d2Jk_dt_drho_j2[1]
-		d2J_dxdy1.col(c.j2)[2] += d2Jk_dtheta_drho_j2
-		
+		// for measurement rho_j2
+		val d2Jk_dt_drho_j2 = 2 * m( tr(v2), dC_drho_j2);
+		val d2Jk_dtheta_drho_j2 = 2 * m3( tr(v2), dC_drho_j2, v1);
+		add_to_col(d2J_dxdy1, j2, comp_col(d2Jk_dt_drho_j2, d2Jk_dtheta_drho_j2));
+
+		egsl_pop();
 	}
-	
+	egsl_pop();	
 }
 
-def compute_covariance_exact(laser_ref, laser_sens, correspondences, x)
-	y1 = Vector.alloc(laser_ref.points.map{|p| p.reading}).col
-	y2 = Vector.alloc(laser_sens.points.map{|p| p.reading}).col
-
-	d2J_dxdy2 = Matrix.alloc(3, laser_sens.nrays)
-	d2J_dxdy1 = Matrix.alloc(3, laser_ref.nrays)
-	
-	t = Vector.alloc(x[0],x[1]).col
-	theta = x[2].to_f;
-	
-	# the three pieces of d2J_dx2
-	d2J_dt2       = Matrix.alloc(2,2)
-	d2J_dt_dtheta = Vector.alloc(0,0).col
-	d2J_dtheta2   = 0
-	
-	for c in correspondences.compact
-		p_k  = laser_sens.points[c.i ].cartesian
-		q_k  = laser_ref .points[c.j1].cartesian
-
-		other  = laser_ref .points[c.j2].cartesian
-		v_alpha = rot(PI/2) * (q_k-other)
-		v_alpha = v_alpha / v_alpha.nrm2
-		m = v_alpha*v_alpha.trans
-		
-		
-		d2J_dt2       += 2 * m
-		d2J_dt_dtheta += 2 * (rot(theta+PI/2)*p_k).trans * m
-		d2J_dtheta2   += 2 * (rot(theta)*p_k+t-q_k).trans * 
-		   m * rot(theta+PI/2) * p_k + 2 * (rot(theta+PI/2)*p_k).trans * m *
-			rot(theta+PI/2) * p_k
-			
-		###########
-		
-			
-		# for measurement rho_i  in the second scan
-		v_i = laser_sens.points[c.i].v
-		d2Jk_dtdrho_i = 2 * (rot(theta)*v_i).trans * m
-		d2Jk_dtheta_drho_i = 2*(rot(theta)*p_k+t-q_k).trans*m*rot(theta+PI/2)*v_i +
-			2 *(rot(theta)*v_i).trans*m*rot(theta+PI/2)*p_k
-		
-		d2J_dxdy2.col(c.i)[0] += d2Jk_dtdrho_i[0]
-		d2J_dxdy2.col(c.i)[1] += d2Jk_dtdrho_i[1]
-		d2J_dxdy2.col(c.i)[2] += d2Jk_dtheta_drho_i
-	
-		# for measurements rho_j1, rho_j2 in the first scan
-		dC_drho_j1, dC_drho_j2 = dC_drho_j12(laser_ref, laser_sens, c)
-		
-		v_j1 = laser_ref.points[c.j1].v
-		v_j2 = laser_ref.points[c.j2].v
-		
-		d2Jk_dtheta_drho_j1 = 2 * ( -v_j1.trans*m+(rot(theta)*p_k+t-q_k).trans*dC_drho_j1)*
-			rot(theta+PI/2)*p_k
-		d2Jk_dt_drho_j1 = 2 * (-v_j1.trans*m+(rot(theta)*p_k+t-q_k).trans*dC_drho_j1)
-		
-		d2J_dxdy1.col(c.j1)[0] += d2Jk_dt_drho_j1[0]
-		d2J_dxdy1.col(c.j1)[1] += d2Jk_dt_drho_j1[1]
-		d2J_dxdy1.col(c.j1)[2] += d2Jk_dtheta_drho_j1
-		
-		# for measurement rho_j2
-		d2Jk_dtheta_drho_j2 = 2*(rot(theta)*p_k+t-q_k).trans * dC_drho_j2 *
-			rot(theta+PI/2)*p_k;
-			
-		d2Jk_dt_drho_j2 = 2*(rot(theta)*p_k+t-q_k).trans * dC_drho_j2 
-		
-		d2J_dxdy1.col(c.j2)[0] += d2Jk_dt_drho_j2[0]
-		d2J_dxdy1.col(c.j2)[1] += d2Jk_dt_drho_j2[1]
-		d2J_dxdy1.col(c.j2)[2] += d2Jk_dtheta_drho_j2
-		
-	end
-	# put the pieces together
-	d2J_dx2 = Matrix.alloc(3,3)
-	d2J_dx2[0,0]=d2J_dt2[0,0]
-	d2J_dx2[1,0]=d2J_dt2[1,0]
-	d2J_dx2[1,1]=d2J_dt2[1,1]
-	d2J_dx2[0,1]=d2J_dt2[0,1]
-	d2J_dx2[2,0]=d2J_dx2[0,2]=d2J_dt_dtheta[0]
-	d2J_dx2[2,1]=d2J_dx2[1,2]=d2J_dt_dtheta[1]
-	d2J_dx2[2,2] = d2J_dtheta2
-
-	dx_dy1 =  -d2J_dx2.inv * d2J_dxdy1
-	dx_dy2 =  -d2J_dx2.inv * d2J_dxdy2
-	
-	return dx_dy1, dx_dy2
-end
-
-def getC(rho_j1,v_j1,rho_j2,v_j2)
-	p_j1 = v_j1 * rho_j1
-	p_j2 = v_j2 * rho_j2
-	v_alpha = rot(PI/2) * (p_j1-p_j2)
-	v_alpha = v_alpha / v_alpha.nrm2
-	m = v_alpha*(v_alpha.trans)
-	m
-end
-
-def dC_drho_j12(laser_ref, laser_sens, c)
-	
-	rho_j1 = laser_ref.points[c.j1].reading
-	  v_j1 = laser_ref.points[c.j1].v
-	rho_j2 = laser_ref.points[c.j2].reading
-	  v_j2 = laser_ref.points[c.j2].v
-
-	eps = 0.001;
-	
-	dC_drho_j1 = 
-	  (getC(rho_j1+eps,v_j1,rho_j2,v_j2)-
-		getC(rho_j1    ,v_j1,rho_j2,v_j2))/eps;
-
-	dC_drho_j2 = 
-	  (getC(rho_j1,v_j1,rho_j2+eps,v_j2)-
-		getC(rho_j1,v_j1,rho_j2    ,v_j2))/eps;
-
-	return dC_drho_j1, dC_drho_j2
-	
-end
 
 

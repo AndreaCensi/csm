@@ -17,6 +17,7 @@ PROJECT (icp C)
 
 ADD_LIBRARY(sm STATIC icp.c icp_correspondences_dumb.c 
 icp_correspondences_tricks.c icp_loop.c journal.c laser_data.c math_utils.c
+icp_covariance.c easy_gsl.c
 icp_outliers.c gsl_stack.c orientation.c clustering.c gpm.c 
 lib/gpc/gpc.c
 lib/gpc/gpc_utils.c
@@ -25,7 +26,7 @@ lib/gpc/gpc_utils.c
 TARGET_LINK_LIBRARIES(sm ${GSL_LIBRARIES})
 
 
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}  -Wall -W -Wconversion  -Wunreachable-code ")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused -Wall -Wno-long-double -W -Wconversion  -Wunreachable-code ")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Ilib/gpc")
 
@@ -34,10 +35,13 @@ INSTALL(TARGETS sm ARCHIVE DESTINATION lib)
 INSTALL(FILES sm.h  DESTINATION include)
 
 
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mtune=powerpc -O3")
+#SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mtune=powerpc -O3")
 
 ADD_EXECUTABLE(sm_test sm_test.c)
 TARGET_LINK_LIBRARIES(sm_test sm ${GSL_LIBRARIES})
 
 ADD_EXECUTABLE(test_math_utils test_math_utils.c)
 TARGET_LINK_LIBRARIES(test_math_utils sm ${GSL_LIBRARIES})
+
+ADD_EXECUTABLE(easy_gsl_test easy_gsl_test.c easy_gsl.c)
+TARGET_LINK_LIBRARIES(easy_gsl_test  ${GSL_LIBRARIES})
