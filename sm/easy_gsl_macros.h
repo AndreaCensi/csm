@@ -10,6 +10,7 @@
 #define m(v1,v2)         egsl_mult(v1,v2)
 #define m3(v1,v2,v3)     egsl_mult(v1,egsl_mult(v2,v3))
 #define comp_col(v1,v2)  egsl_compose_col(v1,v2)
+#define comp_row(v1,v2)  egsl_compose_row(v1,v2)
 
 #define zeros(rows,cols) egsl_zeros(rows,cols)
 #define vers(th)         egsl_vers(th)
@@ -18,5 +19,6 @@
 #define sc(d,v)         egsl_scale(d, v)
 #define add_to(v1,v2)   egsl_add_to(v1, v2)
 #define add_to_col(v1,j,v2)   egsl_add_to_col(v1, j, v2)
+#define inv(v)   egsl_inverse(v)
 
 

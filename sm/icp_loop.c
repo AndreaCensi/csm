@@ -1,5 +1,5 @@
 #include <math.h>
-#include <gsl/gsl_histogram.h>
+#include <gsl/gsl_matrix.h>
 
 #include <gpc.h>
 
@@ -8,6 +8,7 @@
 #include "sm.h"
 #include "journal.h"
 
+void visibilityTest(LDP ld, const gsl_vector*x_old);
 
 void compute_next_estimate(LDP laser_ref, LDP laser_sens, const gsl_vector*x_old, gsl_vector*x_new);
 int termination_criterion(gsl_vector*delta, struct sm_params*params);
@@ -19,6 +20,12 @@ void icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 
 void kill_outliers_trim(struct sm_params*params, const gsl_vector*x_old,
 	double*total_error);
+	
+void compute_covariance_exact(
+	LDP laser_ref, LDP laser_sens, const gsl_vector*x,
+		gsl_matrix **cov0_x,
+		gsl_matrix **dx_dy1, gsl_matrix **dx_dy2);
+
 
 void sm_icp(struct sm_params*params, struct sm_result*res) {
 	LDP laser_ref  = &(params->laser_ref);
@@ -98,6 +105,12 @@ void sm_icp(struct sm_params*params, struct sm_result*res) {
 	}
 	
 	vector_to_array(best_x, res->x);
+	
+	gsl_matrix *cov0_x, *dx_dy1, *dx_dy2;
+	
+	compute_covariance_exact(laser_ref, laser_sens, best_x,
+		&cov0_x, &dx_dy1, &dx_dy2);
+	
 	res->error = best_error;
 	res->iterations = iterations;
 	res->nvalid = nvalid;

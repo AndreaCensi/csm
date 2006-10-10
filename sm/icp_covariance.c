@@ -8,13 +8,12 @@ val compute_C_k(val p_j1, val p_j2)  {
 	val d = sub(p_j1, p_j2);
 	double alpha = M_PI/2 + atan2( atv(d,1), atv(d,0));
 	double c = cos(alpha); double s = sin(alpha);
-	double m[2][2] = {
-		{c*c, c*s},
-		{c*s, s*s}
+	double m[2*2] = {
+		c*c, c*s,
+		c*s, s*s
 	};
 	return egsl_vFda(2,2,m);
 }
-
 
 
 val dC_drho(val p1, val p2) {
@@ -27,12 +26,16 @@ val dC_drho(val p1, val p2) {
 }
 
 
-void compute_covariance_exact(LDP laser_ref, LDP laser_sens, gsl_vector*x) {
+void compute_covariance_exact(
+	LDP laser_ref, LDP laser_sens, const gsl_vector*x,
+		gsl_matrix **cov0_x,
+		gsl_matrix **dx_dy1, gsl_matrix **dx_dy2 ) 
+{
 	egsl_push();
 	
-	val d2J_dxdy1 = zeros(3,laser_ref->nrays);
-	val d2J_dxdy2 = zeros(3,laser_sens->nrays);
-
+	val d2J_dxdy1 = zeros(3,(size_t)laser_ref ->nrays);
+	val d2J_dxdy2 = zeros(3,(size_t)laser_sens->nrays);
+	
 	// the three pieces of d2J_dx2
 	val d2J_dt2       = zeros(2,2);
 	val d2J_dt_dtheta = zeros(2,1);
@@ -64,13 +67,13 @@ void compute_covariance_exact(LDP laser_ref, LDP laser_sens, gsl_vector*x) {
 		
 		val C_k = compute_C_k(p_j1, p_j2);
 		add_to(d2J_dt2, sc(2.0, C_k));
-		add_to(d2J_dt_dtheta, sc(2.0,m(tr(v1),C_k)));
+		add_to(d2J_dt_dtheta,  sc(2.0,m(C_k,v1)) ); // FIXME: check this
 		add_to(d2J_dtheta2, sc(2.0, sum( m3(tr(v2),C_k,v1), m3(tr(v1),C_k,v1))));
 		
 		// for measurement rho_i  in the second scan
-		val d2Jk_dtdrho_i = sc(2.0, m(tr(v3), C_k));
+		val d2Jk_dtdrho_i = sc(2.0, m(C_k,v3)); // FIXME: check this
 		val d2Jk_dtheta_drho_i = sc(2.0, sum( m3(tr(v2),C_k,v4),  m3(tr(v3),C_k,v1)));
-		add_to_col(d2J_dxdy2, i, comp_col(d2Jk_dtdrho_i, d2Jk_dtheta_drho_i));
+		add_to_col(d2J_dxdy2, (size_t)i, comp_col(d2Jk_dtdrho_i, d2Jk_dtheta_drho_i));
 		
 		// for measurements rho_j1, rho_j2 in the first scan
 		
@@ -80,17 +83,42 @@ void compute_covariance_exact(LDP laser_ref, LDP laser_sens, gsl_vector*x) {
 		val v_j1 = vers(laser_ref->theta[j1]);
 		val v_j2 = vers(laser_ref->theta[j2]);
 		
-		val d2Jk_dt_drho_j1 = sum(sc(-2.0,m(tr(v_j1),C_k)), sc(2.0,m(tr(v2),dC_drho_j1)));
+		val d2Jk_dt_drho_j1 = sum(sc(-2.0,m(C_k,v_j1)), sc(2.0,m(dC_drho_j1,v2)));
 		val d2Jk_dtheta_drho_j1 = sum( sc(-2.0, m3(tr(v_j1),C_k,v1)), m3(tr(v2),dC_drho_j1,v1));
-		add_to_col(d2J_dxdy1, j1, comp_col(d2Jk_dt_drho_j1, d2Jk_dtheta_drho_j1));
+		add_to_col(d2J_dxdy1, (size_t)j1, comp_col(d2Jk_dt_drho_j1, d2Jk_dtheta_drho_j1));
 		
 		// for measurement rho_j2
-		val d2Jk_dt_drho_j2 = 2 * m( tr(v2), dC_drho_j2);
-		val d2Jk_dtheta_drho_j2 = 2 * m3( tr(v2), dC_drho_j2, v1);
-		add_to_col(d2J_dxdy1, j2, comp_col(d2Jk_dt_drho_j2, d2Jk_dtheta_drho_j2));
+		val d2Jk_dt_drho_j2 = sc(2, m( dC_drho_j2,v2));
+		val d2Jk_dtheta_drho_j2 = sc(2, m3( tr(v2), dC_drho_j2, v1));
+		add_to_col(d2J_dxdy1, (size_t)j2, comp_col(d2Jk_dt_drho_j2, d2Jk_dtheta_drho_j2));
 
 		egsl_pop();
 	}
+	egsl_print("d2J_dt2",d2J_dt2);
+	egsl_print("d2J_dt_dtheta",d2J_dt_dtheta);
+	egsl_print("d2J_dtheta2",d2J_dtheta2);
+	egsl_print("tr(d2J_dt_dtheta)",tr(d2J_dt_dtheta));
+	egsl_print("row1", comp_row(d2J_dt2, d2J_dt_dtheta));
+	egsl_print("row2", comp_row(tr(d2J_dt_dtheta),d2J_dtheta2));
+	
+	val d2J_dx2   = comp_col( comp_row(d2J_dt2, d2J_dt_dtheta),
+	                          comp_row(tr(d2J_dt_dtheta),d2J_dtheta2));
+	
+	egsl_print("d2J_dx2",d2J_dx2);
+	egsl_print("inv(d2J_dx2)",inv(d2J_dx2));	
+
+//	egsl_print("d2J_dxdy1",d2J_dxdy1);
+//	egsl_print("d2J_dxdy2",d2J_dxdy2);
+
+	val dx_dy1 = m(inv(d2J_dx2), d2J_dxdy1);
+	val dx_dy2 = m(inv(d2J_dx2), d2J_dxdy2);
+
+//	egsl_print("dx_dy1",dx_dy1);
+//	egsl_print("dx_dy2",dx_dy2);
+	
+	val cov_x = sc(0.01*0.01,sum(m(dx_dy1,tr(dx_dy1)),m(dx_dy2,tr(dx_dy2)) ));
+
+	egsl_print("cov_x",cov_x);
 	egsl_pop();	
 }
 

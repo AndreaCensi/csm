@@ -1,4 +1,5 @@
 #include <time.h>
+#include "../math_utils.h"
 #include "../sm.h"
 #include "../laser_data.h"
 
@@ -25,7 +26,11 @@ int main(int argc, const char*argv[]) {
 	params.epsilon_theta = 0.001;
 	params.maxCorrespondenceDist = 2;
 	params.sigma = 0.01;
-	params.restart = 0;
+	params.restart = 1;
+	params.restart_threshold_mean_error = 3.0 / 300.0;
+	params.restart_dt= 0.1;
+	params.restart_dtheta=    1.5 * 3.14 /180;
+
 	params.clusteringThreshold = 0.05;
 	params.orientationNeighbourhood = 3;
 	params.doAlphaTest = 0;
