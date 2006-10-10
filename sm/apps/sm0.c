@@ -64,9 +64,10 @@ int main(int argc, const char*argv[]) {
 	
 	printf("sm0: CPU time = %f (seconds) (start=%d end=%d)\n", seconds,start,end);
 	printf("sm0: Matchings = %d\n", num_matchings);
+	printf("sm0: Total iterations = %d\n", num_iterations);
 	printf("sm0: Mean Iterations per matching = %f\n", num_iterations/((float)num_matchings));
 	printf("sm0: Mean Seconds per matching = %f\n", seconds/num_matchings);
-	
+	printf("sm0: Mean Seconds per iteration = %f (note: very imprecise)\n", seconds/num_iterations);
 	
 	gsl_vector_free(u);
 	gsl_vector_free(x_old);
