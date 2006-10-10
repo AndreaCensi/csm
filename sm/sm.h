@@ -18,6 +18,7 @@ struct laser_data {
 	int*valid;
 	double *readings;
 	
+	
 	int *cluster;
 	
 	double *alpha;
@@ -31,6 +32,10 @@ struct laser_data {
 	gsl_vector**p;
 	
 	struct correspondence* corr;
+
+	
+	double odometry[3];	
+	double estimate[3];	
 };
 
 void ld_alloc(struct laser_data*, int nrays);

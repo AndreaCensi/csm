@@ -1,3 +1,4 @@
+#include <time.h>
 #include "../sm.h"
 #include "../laser_data.h"
 
@@ -31,20 +32,44 @@ int main(int argc, const char*argv[]) {
 	params.outliers_maxPerc = 0.85;
 	params.doVisibilityTest = 1;
 
+	int num_matchings = 0;
+	int num_iterations = 0;
+	clock_t start = clock();
+	
 	if(ld_read_next_laser_carmen(file, &params.laser_ref)) {
 		printf("Could not read first scan.\n");
 		return -1;
 	}
 	
+	gsl_vector *u = gsl_vector_alloc(3);
+	gsl_vector *x_old = gsl_vector_alloc(3);
+	gsl_vector *x_new = gsl_vector_alloc(3);
 	while(!ld_read_next_laser_carmen(file, &params.laser_sens)) {
-		params.odometry[0] = 0; 
-		params.odometry[1] = 0; 
-		params.odometry[2] = 0; 
-		
+		copy_from_array(x_old, params.laser_ref.odometry);
+		copy_from_array(x_new, params.laser_sens.odometry);
+		pose_diff(x_new,x_old,u);
+		vector_to_array(u, params.odometry);
+	
 	 	sm_icp(&params,&result);
-	 
+		
+		num_matchings++;
+		num_iterations += result.iterations;
+	
 		ld_free(&(params.laser_ref));
 		params.laser_ref = params.laser_sens;
 	}
+
+	clock_t end = clock();
+	float seconds = (end-start)/((float)CLOCKS_PER_SEC);
+	
+	printf("sm0: CPU time = %f (seconds) (start=%d end=%d)\n", seconds,start,end);
+	printf("sm0: Matchings = %d\n", num_matchings);
+	printf("sm0: Mean Iterations per matching = %f\n", num_iterations/((float)num_matchings));
+	printf("sm0: Mean Seconds per matching = %f\n", seconds/num_matchings);
+	
+	
+	gsl_vector_free(u);
+	gsl_vector_free(x_old);
+	gsl_vector_free(x_new);
 	return 0;
 }

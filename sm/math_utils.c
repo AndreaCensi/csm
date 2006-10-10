@@ -67,6 +67,11 @@ gsl_vector * vector_from_array(unsigned int n, double *x) {
 	
 	return v;
 }
+void copy_from_array(gsl_vector*v, double*x) {
+	size_t i; 
+	for(i=0;i<v->size;i++)
+		gsl_vector_set(v,i, x[i]);
+}
 
 void vector_to_array(const gsl_vector*v, double*x){
 	size_t i; 

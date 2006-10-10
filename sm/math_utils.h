@@ -21,6 +21,7 @@ double deg2rad(double deg);
 double rad2deg(double rad);
 gsl_vector * vector_from_array(unsigned int n, double *x);
 void vector_to_array(const gsl_vector*v, double*);
+void copy_from_array(gsl_vector*v, double*);
 
 double minmax(int from,int to,int x);
 

@@ -18,3 +18,5 @@
 #define sc(d,v)         egsl_scale(d, v)
 #define add_to(v1,v2)   egsl_add_to(v1, v2)
 #define add_to_col(v1,j,v2)   egsl_add_to_col(v1, j, v2)
+
+

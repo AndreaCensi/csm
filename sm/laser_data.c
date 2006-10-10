@@ -108,8 +108,10 @@ const char * prefix = "FLASER ";
 // Returns 0 on success
 int read_next_double(const char*line, int*cur, double*d) {
 	int inc;
-	if(1 != sscanf(line+*cur, "%lf %n", d, &inc)) 
+	if(1 != sscanf(line+*cur, " %lf %n", d, &inc)) {
+		printf("Could not read double.\n");
 		return -1;
+	}
 	*cur += inc;
 	return 0;
 }
@@ -159,7 +161,14 @@ int ld_read_next_laser_carmen(FILE*file, LDP ld) {
 			ld->readings[i] = ld->valid[i] ? reading : GSL_NAN;
 			ld->theta[i] = ld->min_theta+ i * (ld->max_theta-ld->min_theta) / (ld->nrays-1);
 		}
-
+		
+		if(read_next_double(line,&cur,ld->odometry+0)) goto error;
+		if(read_next_double(line,&cur,ld->odometry+1)) goto error;
+		if(read_next_double(line,&cur,ld->odometry+2)) goto error;
+		if(read_next_double(line,&cur,ld->estimate+0)) goto error;
+		if(read_next_double(line,&cur,ld->estimate+1)) goto error;
+		if(read_next_double(line,&cur,ld->estimate+2)) goto error;
+		
 		fprintf(stderr, "l");
 		return 0;
 		
