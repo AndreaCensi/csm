@@ -25,13 +25,32 @@ inline int compatible(struct sm_params*params, int i, int j) {
 	}
 }
 
+
+void ld_create_jump_tables(struct laser_data* ld) {
+	int i;
+	for(i=0;i<ld->nrays;i++) {
+		int j=i+1;
+
+		while(ld->valid[j] && ld->readings[j]<=ld->readings[i]) j++;
+		ld->up_bigger[i] = j-i;
+
+		j = i+1;
+		while(ld->valid[j] && ld->readings[j]>=ld->readings[i]) j++;
+		ld->up_smaller[i] = j-i;
+		
+		j = i-1;
+		while(ld->valid[j] && ld->readings[j]>=ld->readings[i]) j--;
+		ld->down_smaller[i] = j-i;
+
+		j = i-1;
+		while(ld->valid[j] && ld->readings[j]<=ld->readings[i]) j--;
+		ld->down_bigger[i] = j-i;
+	}	
+}
+
 void find_correspondences_tricks(struct sm_params*params, gsl_vector* x_old) {
 	LDP laser_ref  = &(params->laser_ref);
 	LDP laser_sens = &(params->laser_sens);
-	double maxDist = params->maxCorrespondenceDist;
-	if(jf()) fprintf(jf(),"param maxCorrespondenceDist %f\n",params->maxCorrespondenceDist);
-	if(jf()) fprintf(jf(),"param maxLinearCorrection %f\n",params->maxLinearCorrection);
-	if(jf()) fprintf(jf(),"param maxAngularCorrectionDeg %f\n",params->maxAngularCorrectionDeg);
 	
 	gsl_vector * p_i_w = gsl_vector_alloc(3);
 
@@ -75,45 +94,53 @@ void find_correspondences_tricks(struct sm_params*params, gsl_vector* x_old) {
 			int now_up = up_stopped ? 0 : 
 			           down_stopped ? 1  : last_dist_up < last_dist_down;
 			DEBUG_SEARCH(printf("|"));
+
 			if(now_up) {
 				DEBUG_SEARCH(printf("up %d ",up));
 				if(up > to) { up_stopped = 1; continue; }
-				if(!ld_valid_ray(laser_ref,up)) { ++up; continue; }
+				if(!laser_ref->valid[up]) { ++up; continue; }
+				
 				++dbg_number_points;
+				
 				last_dist_up = distance(p_i_w, laser_ref->p[up]);
-				if( (last_dist_up<maxDist) && ((j1==-1)||(last_dist_up < best_dist))) {
+				if( (last_dist_up<params->maxCorrespondenceDist) && ((j1==-1)||(last_dist_up < best_dist))) {
 					if(compatible(params, i, up)) {
 						j1 = up; best_dist = last_dist_up;
 					}
 				}
-				double delta_theta = GSL_MAX(up-start_cell,0) * (M_PI/laser_ref->nrays);
-				double min_dist_up = sin(delta_theta) * p_i_w_nrm2;
-				if(min_dist_up > best_dist){ up_stopped = 1; continue;}
 				
 				if (up>start_cell) {
+					double delta_theta = (up-start_cell) * (M_PI/laser_ref->nrays);
+					double min_dist_up = sin(delta_theta) * p_i_w_nrm2;
+					if(min_dist_up > best_dist) { 
+						up_stopped = 1; continue;
+					}
 					up += (laser_ref->readings[up] <= p_i_w_nrm2) ?
 						laser_ref->up_bigger[up] : laser_ref->up_smaller[up];
 				} else ++up;
+				
 			}
 			
 			if(!now_up) {
 				DEBUG_SEARCH(printf("down %d ",down));
 				if(down < from) { down_stopped = 1; continue; }
-				if(!ld_valid_ray(laser_ref,down)) { --down; continue; }
+				if(!laser_ref->valid[down]) { --down; continue; }
 		
 				++dbg_number_points;
+
 				last_dist_down = distance(p_i_w, laser_ref->p[down]);
-				if( (last_dist_down<maxDist) && ((j1==-1)||(last_dist_down < best_dist))) {
+				if( (last_dist_down<params->maxCorrespondenceDist) && ((j1==-1)||(last_dist_down < best_dist))) {
 					if(compatible(params, i, down)) {
 						j1 = down; best_dist = last_dist_down;
 					}
 				}
 
-				double delta_theta = GSL_MAX(start_cell-down,0) * (M_PI/laser_ref->nrays);
-				double min_dist_down = sin(delta_theta) * p_i_w_nrm2;
-				if(min_dist_down > best_dist){ down_stopped = 1; continue;}
-	
 				if (down<start_cell) {
+					double delta_theta = (start_cell-down) * (M_PI/laser_ref->nrays);
+					double min_dist_down = sin(delta_theta) * p_i_w_nrm2;
+					if(min_dist_down > best_dist) { 
+						down_stopped = 1; continue;
+					}
 					down += (laser_ref->readings[down] <= p_i_w_nrm2) ?
 						laser_ref->down_bigger[down] : laser_ref->down_smaller[down];
 				} else --down;

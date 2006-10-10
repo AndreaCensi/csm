@@ -1,5 +1,5 @@
-#ifndef H_ICP
-#define H_ICP
+#ifndef H_SCAN_MATCHING_LIB
+#define H_SCAN_MATCHING_LIB
 
 #include <gsl/gsl_vector.h>
 

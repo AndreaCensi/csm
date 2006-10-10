@@ -1,4 +1,6 @@
 #include <math.h>
+#include <stdlib.h>
+#include <string.h>
 #include "laser_data.h"
 #include "math_utils.h"
 #include "journal.h"
@@ -61,14 +63,6 @@ void ld_free(struct laser_data*ld){
 	free(ld->p);
 }
 
-int ld_valid_ray(struct laser_data* ld, int i) {
-	return (i>=0) && (i<ld->nrays) && (ld->valid[i]);
-}
-
-int ld_valid_corr(LDP ld, int i) {
-	return ld->corr[i].valid;
-}
-
 void ld_set_null_correspondence(struct laser_data*ld, int i) {
 	ld->corr[i].valid = 0;
 }
@@ -107,57 +101,90 @@ int ld_next_valid_down(LDP ld, int i){
 	return ld_next_valid(ld, i, -1);
 }
 
-void ld_create_jump_tables(struct laser_data* ld) {
 
-	int i;
-	for(i=0;i<ld->nrays;i++) {
-		int j=i+1;
 
-		while(ld->valid[j] && ld->readings[j]<=ld->readings[i]) j++;
-		ld->up_bigger[i] = j-i;
+const char * prefix = "FLASER ";
 
-		j = i+1;
-		while(ld->valid[j] && ld->readings[j]>=ld->readings[i]) j++;
-		ld->up_smaller[i] = j-i;
+// Returns 0 on success
+int read_next_double(const char*line, int*cur, double*d) {
+	int inc;
+	if(1 != sscanf(line+*cur, "%lf %n", d, &inc)) 
+		return -1;
+	*cur += inc;
+	return 0;
+}
+
+int ld_valid_ray(struct laser_data* ld, int i) {
+	return (i>=0) && (i<ld->nrays) && (ld->valid[i]);
+}
+
+int ld_valid_corr(LDP ld, int i) {
+	return ld->corr[i].valid;
+}
+
+
+// Read next FLASER line in file (initializes ld). Returns 0 if error or eof.
+int ld_read_next_laser_carmen(FILE*file, LDP ld) {
+	#define MAX_LINE_LENGTH 10000
+   char line[MAX_LINE_LENGTH];
+
+	while(fgets(line, MAX_LINE_LENGTH-1, file)) {
 		
-		j = i-1;
-		while(ld->valid[j] && ld->readings[j]>=ld->readings[i]) j--;
-		ld->down_smaller[i] = j-i;
+		if(0 != strncmp(line, prefix, strlen(prefix))) {
+			printf("Skipping line: \n-> %s\n", line);
+			continue;
+		}
+		
+		int cur = strlen(prefix); int inc;
+		
+		int nrays;
+		if(1 != sscanf(line+cur, "%d %n", &nrays, &inc)) 
+			goto error;
+		cur += inc;
+			
+		ld_alloc(ld, nrays);	
+		
+		ld->min_theta = -M_PI/2;
+		ld->max_theta = +M_PI/2;
+		
+		int i;
+		for(i=0;i<nrays;i++) {
+			double reading;
+			if(read_next_double(line,&cur,&reading)) {
+				printf("At ray #%d, ",i); 
+				goto error;
+			}
+				
+			ld->valid[i] = reading>0 && reading<80;
+			ld->readings[i] = ld->valid[i] ? reading : GSL_NAN;
+			ld->theta[i] = ld->min_theta+ i * (ld->max_theta-ld->min_theta) / (ld->nrays-1);
+		}
 
-		j = i-1;
-		while(ld->valid[j] && ld->readings[j]<=ld->readings[i]) j--;
-		ld->down_bigger[i] = j-i;
+		fprintf(stderr, "l");
+		return 0;
+		
+		error:
+			printf("Malformed line? \n-> %s\nat cur = %d\n\t-> %s\n", line,cur,line+cur);
+			return -1;
 	}
-	
+	return -2;
 }
 
 
 
-/*
-void ld_create_jump_tables(struct laser_data* ld) {
-	int ireadings[ld->nrays]
-	for(i=0;i<ld->nrays;i++) ireadings[i]=ld->readings[i]*1000;
 
-	int i;
-	for(i=0;i<ld->nrays;i++) {
-		int j=i+1;
 
-		while(ld_valid_ray(ld,j) && readings[j]<=ireadings[i]) j++;
-		ld->up_bigger[i] = j-i;
 
-		j = i+1;
-		while(ld_valid_ray(ld,j) && ld->readings[j]>=ld->readings[i]) j++;
-		ld->up_smaller[i] = j-i;
-		
-		j = i-1;
-		while(ld_valid_ray(ld,j) && ld->readings[j]>=ld->readings[i]) j--;
-		ld->down_smaller[i] = j-i;
 
-		j = i-1;
-		while(ld_valid_ray(ld,j) && ld->readings[j]<=ld->readings[i]) j--;
-		ld->down_bigger[i] = j-i;
-	}
-	
-}
-*/
+
+
+
+
+
+
+
+
+
+
+
 

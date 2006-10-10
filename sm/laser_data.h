@@ -1,17 +1,22 @@
 #ifndef H_LASER_DATA
 #define H_LASER_DATA
 
+#include <stdio.h>
 #include "sm.h"
 
 #define LDP   struct laser_data*
 
 void ld_compute_cartesian(LDP);
 void ld_create_jump_tables(LDP);
-int  ld_valid_ray(LDP, int i);
+
 // -1 if not found
 int ld_next_valid(LDP ld, int i, int dir);
 
-int ld_valid_corr(LDP, int i);
+
+int ld_valid_ray(struct laser_data* ld, int i);
+int ld_valid_corr(LDP ld, int i);
+
+
 void ld_set_correspondence(LDP, int i, int j1, int j2);
 void ld_set_null_correspondence(LDP, int i);
 /** -1 if not found */
@@ -20,6 +25,9 @@ int ld_next_valid_down(LDP, int i);
 
 void ld_simple_clustering(LDP ld, double threshold);
 void ld_compute_orientation(LDP ld, int size_neighbourhood, double sigma);
+
+// Read next FLASER line in file (initializes ld). Returns 0 on success, -1 if error, -2 eof.
+int ld_read_next_laser_carmen(FILE*, LDP ld);
 
 #endif
 

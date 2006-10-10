@@ -89,7 +89,7 @@ void kill_outliers_trim(struct sm_params*params, const gsl_vector*x_old,
 }
 
 
-void swap_double(double*a,double*b) {
+inline void swap_double(double*a,double*b) {
 	double t = *a; *a = *b; *b=t;
 }
 
