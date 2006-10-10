@@ -31,12 +31,16 @@ SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused -Wall -Wno-long-double -W -Wconv
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Ilib/gpc")
 
+IF(APPLE)
+	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mtune=powerpc -O2")
+ELSE(APPLE)
+
+ENDIF(APPLE)
 
 INSTALL(TARGETS sm ARCHIVE DESTINATION lib)
 INSTALL(FILES sm.h  DESTINATION include)
 
 
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mtune=powerpc -O2")
 
 ADD_EXECUTABLE(sm_test sm_test.c)
 TARGET_LINK_LIBRARIES(sm_test sm ${GSL_LIBRARIES})
