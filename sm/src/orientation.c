@@ -1,9 +1,11 @@
 #include <math.h>
 #include <gsl/gsl_nan.h>
-#include "math_utils.h"
 
-#include "gsl_stack.h"
+#include "math_utils.h"
 #include "laser_data.h"
+
+#include <egsl_macros.h>
+
 
 void find_neighbours(LDP ld, int i, int max_num, int*indexes, size_t*num_found);
 void filter_orientation(double theta0, double rho0, size_t n,
@@ -51,7 +53,6 @@ void ld_compute_orientation(LDP ld, int size_neighbourhood, double sigma) {
 	}
 }
 
-#include "easy_gsl_macros.h"
 
 void filter_orientation(double theta0, double rho0, size_t n,
  	const double*thetas, const double*rhos, double *alpha, double*cov0_alpha ) {

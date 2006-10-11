@@ -1,7 +1,8 @@
 #include <gsl/gsl_vector.h>
-#include "sm.h"
-#include "journal.h"
-#include "math_utils.h"
+
+#include "../sm.h"
+#include "../journal.h"
+#include "../math_utils.h"
 
 void find_correspondences(struct sm_params*params, gsl_vector* x_old) {
 	LDP laser_ref  = &(params->laser_ref);

@@ -1,4 +1,4 @@
-PROJECT (icp C)
+PROJECT (scan_matching_lib C)
 
 	INCLUDE (FindGSL.cmake)                                                                                         
 
@@ -15,21 +15,41 @@ PROJECT (icp C)
 		MESSAGE(ERROR "GSL not found.")
 	ENDIF(GSL_FOUND)
 
-ADD_LIBRARY(sm STATIC icp.c icp_correspondences_dumb.c 
-icp_correspondences_tricks.c icp_loop.c journal.c laser_data.c math_utils.c
-icp_covariance.c easy_gsl.c
-icp_outliers.c gsl_stack.c orientation.c clustering.c gpm.c 
-lib/gpc/gpc.c
-lib/gpc/gpc_utils.c
+ADD_LIBRARY(sm STATIC 
+	src/journal.c
+	src/laser_data.c
+	src/math_utils.c
+	src/orientation.c
+	src/clustering.c
+	
+	src/icp/icp.c
+	src/icp/icp_loop.c
+	src/icp/icp_corr_dumb.c
+	src/icp/icp_corr_tricks.c
+	src/icp/icp_outliers.c
+	src/icp/icp_covariance.c
+	
+	lib/gpc/gpc.c
+	lib/gpc/gpc_utils.c
 )
 
-TARGET_LINK_LIBRARIES(sm ${GSL_LIBRARIES})
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Ilib/gpc")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Ilib/egsl")
+
+
+########### Easy GSL ########## 
+ADD_LIBRARY(egsl STATIC lib/egsl/egsl.c lib/egsl/egsl_ops.c)
+
+ADD_EXECUTABLE(test_egsl lib/egsl/egsl_test.c)
+TARGET_LINK_LIBRARIES(test_egsl egsl  ${GSL_LIBRARIES})
+
+
+TARGET_LINK_LIBRARIES(sm egsl ${GSL_LIBRARIES})
 
 
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused -Wall -Wno-long-double -W -Wconversion  -Wunreachable-code ")
 #SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pg")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb")
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Ilib/gpc")
 
 IF(APPLE)
 #	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mtune=7450 -mcpu=7450 -O3")
@@ -38,18 +58,11 @@ ELSE(APPLE)
 ENDIF(APPLE)
 
 INSTALL(TARGETS sm ARCHIVE DESTINATION lib)
-INSTALL(FILES sm.h  DESTINATION include)
+INSTALL(FILES src/sm.h  DESTINATION include)
 
-
-
-ADD_EXECUTABLE(sm_test sm_test.c)
-TARGET_LINK_LIBRARIES(sm_test sm ${GSL_LIBRARIES})
 
 ADD_EXECUTABLE(sm0 apps/sm0.c)
 TARGET_LINK_LIBRARIES(sm0 sm ${GSL_LIBRARIES})
 
-ADD_EXECUTABLE(test_math_utils test_math_utils.c)
+ADD_EXECUTABLE(test_math_utils src/math_utils_test.c)
 TARGET_LINK_LIBRARIES(test_math_utils sm ${GSL_LIBRARIES})
-
-ADD_EXECUTABLE(easy_gsl_test easy_gsl_test.c easy_gsl.c)
-TARGET_LINK_LIBRARIES(easy_gsl_test  ${GSL_LIBRARIES})

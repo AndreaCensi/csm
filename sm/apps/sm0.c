@@ -1,7 +1,7 @@
 #include <time.h>
-#include "../math_utils.h"
-#include "../sm.h"
-#include "../laser_data.h"
+#include "../src/math_utils.h"
+#include "../src/sm.h"
+#include "../src/laser_data.h"
 
 int main(int argc, const char*argv[]) {
 	FILE * file;
@@ -32,10 +32,11 @@ int main(int argc, const char*argv[]) {
 	params.restart_dtheta=    1.5 * 3.14 /180;
 
 	params.clusteringThreshold = 0.05;
-	params.orientationNeighbourhood = 3;
+	params.orientationNeighbourhood = 2;
 	params.doAlphaTest = 1;
 	params.outliers_maxPerc = 0.85;
 	params.doVisibilityTest = 1;
+	params.doComputeCovariance = 0;
 
 	int num_matchings = 0;
 	int num_iterations = 0;

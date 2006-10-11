@@ -1,8 +1,7 @@
 #include <math.h>
-#include "laser_data.h"
-#include <gpc_utils.h>
-#include "easy_gsl.h"
-#include "easy_gsl_macros.h"
+#include "../laser_data.h"
+
+#include <egsl_macros.h>
 
 val compute_C_k(val p_j1, val p_j2)  {	
 	val d = sub(p_j1, p_j2);

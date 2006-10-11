@@ -1,8 +1,9 @@
 #include <math.h>
-#include "math_utils.h"
-#include "laser_data.h"
-#include "sm.h"
-#include "journal.h"
+
+#include "../math_utils.h"
+#include "../laser_data.h"
+#include "../sm.h"
+#include "../journal.h"
 
 void quicksort(double *array, int begin, int end);
 

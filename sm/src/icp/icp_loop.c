@@ -3,10 +3,10 @@
 
 #include <gpc.h>
 
-#include "math_utils.h"
-#include "laser_data.h"
-#include "sm.h"
-#include "journal.h"
+#include "../math_utils.h"
+#include "../laser_data.h"
+#include "../sm.h"
+#include "../journal.h"
 
 void visibilityTest(LDP ld, const gsl_vector*x_old);
 
@@ -108,6 +108,7 @@ void sm_icp(struct sm_params*params, struct sm_result*res) {
 	
 	gsl_matrix *cov0_x, *dx_dy1, *dx_dy2;
 	
+	if(params->doComputeCovariance)
 	compute_covariance_exact(laser_ref, laser_sens, best_x,
 		&cov0_x, &dx_dy1, &dx_dy2);
 	

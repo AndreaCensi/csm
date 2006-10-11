@@ -1,8 +1,7 @@
 #include <gsl/gsl_histogram.h>
-#include "sm.h"
-#include "math_utils.h"
-#include "journal.h"
-#include "gsl_stack.h"
+#include "../sm.h"
+#include "../math_utils.h"
+#include "../journal.h"
 
 void ght_find_theta_range(LDP laser_ref, LDP laser_sens,
 		const gsl_vector*x0, double maxLinearCorrection,

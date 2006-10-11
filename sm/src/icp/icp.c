@@ -1,5 +1,5 @@
-#include "sm.h"
-#include "journal.h"
+#include "../sm.h"
+#include "../journal.h"
 
 
 

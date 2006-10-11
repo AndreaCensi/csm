@@ -77,6 +77,8 @@ struct sm_params {
 	double outliers_maxPerc;
 	
 	int doVisibilityTest;
+	
+	int doComputeCovariance;
 };
 
 struct sm_result {

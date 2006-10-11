@@ -4,7 +4,7 @@
 #include <assert.h>
 #include <math.h>
 
-#include "easy_gsl.h"
+#include "egsl.h"
 #define MAX_VALS 1024
 #define MAX_CONTEXTS 1024
 
