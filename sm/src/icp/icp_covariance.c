@@ -109,13 +109,13 @@ void compute_covariance_exact(
 //	egsl_print("d2J_dxdy1",d2J_dxdy1);
 //	egsl_print("d2J_dxdy2",d2J_dxdy2);
 
-	val dx_dy1 = m(inv(d2J_dx2), d2J_dxdy1);
-	val dx_dy2 = m(inv(d2J_dx2), d2J_dxdy2);
+	val edx_dy1 = m(inv(d2J_dx2), d2J_dxdy1);
+	val edx_dy2 = m(inv(d2J_dx2), d2J_dxdy2);
 
 //	egsl_print("dx_dy1",dx_dy1);
 //	egsl_print("dx_dy2",dx_dy2);
 	
-	val cov_x = sc(0.01*0.01,sum(m(dx_dy1,tr(dx_dy1)),m(dx_dy2,tr(dx_dy2)) ));
+	val cov_x = sc(0.01*0.01,sum(m(edx_dy1,tr(edx_dy1)),m(edx_dy2,tr(edx_dy2)) ));
 
 	egsl_print("cov_x",cov_x);
 	egsl_pop();	
