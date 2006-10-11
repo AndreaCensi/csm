@@ -179,6 +179,13 @@ val egsl_zeros(size_t rows, size_t columns) {
 	return v;
 }
 
+val egsl_ones(size_t rows, size_t columns) {
+	val v = egsl_alloc(rows,columns);
+	gsl_matrix * m = egsl_gslm(v);
+	gsl_matrix_set_all(m,1.0);
+	return v;
+}
+
 val egsl_copy_val(val v1) {
 	gsl_matrix * m1 = egsl_gslm(v1);
 	val v2 = egsl_alloc(m1->size1,m1->size2);

@@ -12,12 +12,15 @@ void egsl_print(const char*str, val);
 
 
 val egsl_zeros(size_t rows, size_t columns);
+val egsl_ones(size_t rows, size_t columns);
 val egsl_scale(double, val);
 val egsl_sum(val, val);
 val egsl_sum3(val, val, val);
 val egsl_mult(val, val);
 val egsl_transpose(val);
 val egsl_inverse(val);
+double* egsl_atmp(val v, size_t i, size_t j);
+
 double egsl_norm(val);
 
 double egsl_atv(val, size_t i);

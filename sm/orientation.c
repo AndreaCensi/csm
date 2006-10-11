@@ -51,9 +51,68 @@ void ld_compute_orientation(LDP ld, int size_neighbourhood, double sigma) {
 	}
 }
 
+#include "easy_gsl_macros.h"
+
 void filter_orientation(double theta0, double rho0, size_t n,
  	const double*thetas, const double*rhos, double *alpha, double*cov0_alpha ) {
 	
+	egsl_push();
+	// Y = L x + R epsilon
+	val Y = zeros(n,1);
+	val L = ones(n,1);
+	val R = zeros(n,n+1);
+
+ 	size_t i; for(i=0;i<n;i++) {
+		*egsl_atmp(Y, i, 0)   = (rhos[i]-rho0)/(thetas[i]-theta0);
+		*egsl_atmp(R, i, 0)   =             -1/(thetas[i]-theta0);
+		*egsl_atmp(R, i, i+1) =             +1/(thetas[i]-theta0);
+	}
+
+	val eRinv = inv(m(R, tr(R)));
+	val vcov_f1 = inv(m3(tr(L),eRinv, L));
+	val vf1 =   m4(vcov_f1, tr(L), eRinv, Y);
+	
+	double cov_f1 = *egsl_atmp(vcov_f1,0,0);
+	double f1 = *egsl_atmp(vf1,0,0);
+
+	*alpha = theta0 - atan(f1/rho0);
+
+	if(cos(*alpha)*cos(theta0)+sin(*alpha)*sin(theta0)>0)
+		*alpha = *alpha + M_PI;
+	
+	double dalpha_df1  = rho0 / (square(rho0) + square(f1));
+	double dalpha_drho = -f1 /  (square(rho0) + square(f1));
+	
+	*cov0_alpha	= square(dalpha_df1) * cov_f1 + square(dalpha_drho);
+
+	egsl_pop();
+
+//	printf("dalpha_df1 = %f dalpha_drho = %f\n",dalpha_df1,dalpha_drho);
+//	printf("f1 = %f covf1 = %f alpha = %f cov_alpha = %f\n ",f1,cov_f1,*alpha,*cov0_alpha);
+//	printf("sotto = %f\n ",(square(rho0) + square(f1)));
+	
+/*	printf("   f1 = %f cov =%f \n", f1,cov_f1);
+	printf("   f1/rho = %f \n", f1/rho0);
+	printf("   atan = %f \n", atan(f1/rho0));
+	printf("   theta0= %f \n", theta0);*/
+//	printf("   alpha = %f sigma= %f°\n", *alpha, rad2deg(0.01*sqrt(*cov0_alpha)));
+/*	
+	printf("l= ");
+	gsl_matrix_fprintf(stdout, l, "%f");
+	printf("\ny= ");
+	gsl_matrix_fprintf(stdout, y, "%f");
+	printf("\nr= ");
+	gsl_matrix_fprintf(stdout, r, "%f");
+	printf("\ninv(r*r)= ");
+	gsl_matrix_fprintf(stdout, Rinv, "%f");
+	printf("\nf1 = %lf ",f1);
+	printf("\ncov_f1 = %lf ",cov_f1);
+*/
+}
+	
+#if 0
+void filter_orientation(double theta0, double rho0, size_t n,
+ 	const double*thetas, const double*rhos, double *alpha, double*cov0_alpha ) {
 	
 	// y = l x + r epsilon
 	gsl_matrix * y = gsl_matrix_alloc(n,1);
@@ -68,7 +127,7 @@ void filter_orientation(double theta0, double rho0, size_t n,
 		gms(r,i,0,    -1/(thetas[i]-theta0) );
 		gms(r,i,i+1,   1/(thetas[i]-theta0) );
 	}
-	
+
 	int m;
 	gsls_set(r);
 	gsls_trans();
@@ -89,14 +148,16 @@ void filter_orientation(double theta0, double rho0, size_t n,
 	gsls_mult(y);
 	double f1 = gsls_get_at(0,0);
 	
-/*	printf("l= ");
+	printf("l= ");
 	gsl_matrix_fprintf(stdout, l, "%f");
 	printf("\ny= ");
 	gsl_matrix_fprintf(stdout, y, "%f");
 	printf("\nr= ");
 	gsl_matrix_fprintf(stdout, r, "%f");
 	printf("\ninv(r*r)= ");
-	gsl_matrix_fprintf(stdout, Rinv, "%f");*/
+	gsl_matrix_fprintf(stdout, Rinv, "%f");
+	printf("\nf1 = %lf ",f1);
+	printf("\ncov_f1 = %lf ",cov_f1); 
 
 	gsl_matrix_free(Rinv);
 	gsl_matrix_free(y);
@@ -113,18 +174,9 @@ void filter_orientation(double theta0, double rho0, size_t n,
 	double dalpha_drho = -f1 /  (square(rho0) + square(f1));
 	
 	*cov0_alpha	= square(dalpha_df1) * cov_f1 + square(dalpha_drho);
-//	printf("dalpha_df1 = %f dalpha_drho = %f\n",dalpha_df1,dalpha_drho);
-//	printf("f1 = %f covf1 = %f alpha = %f cov_alpha = %f\n ",f1,cov_f1,*alpha,*cov0_alpha);
-//	printf("sotto = %f\n ",(square(rho0) + square(f1)));
-	
-/*	printf("   f1 = %f cov =%f \n", f1,cov_f1);
-	printf("   f1/rho = %f \n", f1/rho0);
-	printf("   atan = %f \n", atan(f1/rho0));
-	printf("   theta0= %f \n", theta0);*/
-//	printf("   alpha = %f sigma= %f°\n", *alpha, rad2deg(0.01*sqrt(*cov0_alpha)));
 }
 	
-
+#endif
 
 // indexes: an array of size "max_num*2"
 void find_neighbours(LDP ld, int i, int max_num, int*indexes, size_t*num_found) {

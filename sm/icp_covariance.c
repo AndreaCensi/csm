@@ -88,8 +88,8 @@ void compute_covariance_exact(
 		add_to_col(d2J_dxdy1, (size_t)j1, comp_col(d2Jk_dt_drho_j1, d2Jk_dtheta_drho_j1));
 		
 		// for measurement rho_j2
-		val d2Jk_dt_drho_j2 = sc(2, m( dC_drho_j2,v2));
-		val d2Jk_dtheta_drho_j2 = sc(2, m3( tr(v2), dC_drho_j2, v1));
+		val d2Jk_dt_drho_j2 = sc(2.0, m( dC_drho_j2,v2));
+		val d2Jk_dtheta_drho_j2 = sc(2.0, m3( tr(v2), dC_drho_j2, v1));
 		add_to_col(d2J_dxdy1, (size_t)j2, comp_col(d2Jk_dt_drho_j2, d2Jk_dtheta_drho_j2));
 
 		egsl_pop();

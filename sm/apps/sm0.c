@@ -33,7 +33,7 @@ int main(int argc, const char*argv[]) {
 
 	params.clusteringThreshold = 0.05;
 	params.orientationNeighbourhood = 3;
-	params.doAlphaTest = 0;
+	params.doAlphaTest = 1;
 	params.outliers_maxPerc = 0.85;
 	params.doVisibilityTest = 1;
 
