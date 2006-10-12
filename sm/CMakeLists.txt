@@ -15,54 +15,67 @@ PROJECT (scan_matching_lib C)
 		MESSAGE(ERROR "GSL not found.")
 	ENDIF(GSL_FOUND)
 
-ADD_LIBRARY(sm STATIC 
-	src/journal.c
-	src/laser_data.c
-	src/math_utils.c
-	src/orientation.c
-	src/clustering.c
-	
-	src/icp/icp.c
-	src/icp/icp_loop.c
-	src/icp/icp_corr_dumb.c
-	src/icp/icp_corr_tricks.c
-	src/icp/icp_outliers.c
-	src/icp/icp_covariance.c
-	
-	lib/gpc/gpc.c
-	lib/gpc/gpc_utils.c
-)
 
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Ilib/gpc")
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Ilib/egsl")
+	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused -Wall -Wno-long-double -W -Wconversion  -Wunreachable-code ")
+	#SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pg")
+	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb")
+
+	IF(APPLE)
+	#	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mtune=7450 -mcpu=7450 -O3")
+	ELSE(APPLE)
+
+	ENDIF(APPLE)
 
 
 ########### Easy GSL ########## 
-ADD_LIBRARY(egsl STATIC lib/egsl/egsl.c lib/egsl/egsl_ops.c)
+	ADD_LIBRARY(egsl STATIC 
+		lib/egsl/egsl.c 
+		lib/egsl/egsl_ops.c
+		lib/egsl/egsl_conversions.c
+		lib/egsl/egsl_misc.c
+	)
 
-ADD_EXECUTABLE(test_egsl lib/egsl/egsl_test.c)
-TARGET_LINK_LIBRARIES(test_egsl egsl  ${GSL_LIBRARIES})
+	ADD_EXECUTABLE(test_egsl lib/egsl/egsl_test.c)
+	TARGET_LINK_LIBRARIES(test_egsl egsl  ${GSL_LIBRARIES})
 
+########### SM ########## 
 
-TARGET_LINK_LIBRARIES(sm egsl ${GSL_LIBRARIES})
+	ADD_LIBRARY(sm STATIC 
+		src/journal.c
+		src/laser_data.c
+		src/math_utils.c
+		src/orientation.c
+		src/clustering.c
+	
+		src/icp/icp.c
+		src/icp/icp_loop.c
+		src/icp/icp_corr_dumb.c
+		src/icp/icp_corr_tricks.c
+		src/icp/icp_outliers.c
+		src/icp/icp_covariance.c
+	
+		src/gpm/gpm.c
+	
+		lib/gpc/gpc.c
+		lib/gpc/gpc_utils.c
 
+		lib/egsl/egsl.c 
+		lib/egsl/egsl_ops.c
+		lib/egsl/egsl_conversions.c
+		lib/egsl/egsl_misc.c
+	)
 
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused -Wall -Wno-long-double -W -Wconversion  -Wunreachable-code ")
-#SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pg")
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb")
+	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Ilib/gpc")
+	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Ilib/egsl")
 
-IF(APPLE)
-#	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mtune=7450 -mcpu=7450 -O3")
-ELSE(APPLE)
+	TARGET_LINK_LIBRARIES(sm ${GSL_LIBRARIES})
+	INSTALL(TARGETS sm ARCHIVE DESTINATION lib)
+	INSTALL(FILES src/sm.h  DESTINATION include)
 
-ENDIF(APPLE)
+########### SM applications ########## 
 
-INSTALL(TARGETS sm ARCHIVE DESTINATION lib)
-INSTALL(FILES src/sm.h  DESTINATION include)
+	ADD_EXECUTABLE(sm0 apps/sm0.c)
+	TARGET_LINK_LIBRARIES(sm0 sm ${GSL_LIBRARIES})
 
-
-ADD_EXECUTABLE(sm0 apps/sm0.c)
-TARGET_LINK_LIBRARIES(sm0 sm ${GSL_LIBRARIES})
-
-ADD_EXECUTABLE(test_math_utils src/math_utils_test.c)
-TARGET_LINK_LIBRARIES(test_math_utils sm ${GSL_LIBRARIES})
+	ADD_EXECUTABLE(test_math_utils src/math_utils_test.c)
+	TARGET_LINK_LIBRARIES(test_math_utils sm ${GSL_LIBRARIES})

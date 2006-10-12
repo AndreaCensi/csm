@@ -1,4 +1,9 @@
 #include <gsl/gsl_histogram.h>
+#include <gsl/gsl_matrix.h>
+#include <gsl/gsl_vector.h>
+
+#include <egsl_macros.h>
+
 #include "../sm.h"
 #include "../math_utils.h"
 #include "../journal.h"
@@ -197,20 +202,20 @@ void ght_one_shot(LDP laser_ref, LDP laser_sens,
 		}
 	}
 	
-	gsl_matrix * gL = gsl_matrix_alloc(3,3);
-	size_t a,b; for(a=0;a<3;a++) for(b=0;b<3;b++) gms(gL,a,b,L[a][b]);
-	gsl_matrix * gz = gsl_matrix_alloc(3,1);
-	for(a=0;a<3;a++) gms(gz,a,0,z[a]);
-	
-	gsls_set(gL);
-	gsls_inv();
-	gsls_mult(gz);
-	
-	for(a=0;a<3;a++) 
-		gvs(x, a, gsls_get_at(a,0));
-	
-	gsl_matrix_free(gL);
-	gsl_matrix_free(gz);
+	egsl_push();
+		val eL = egsl_alloc(3,3);
+			size_t a,b; 
+			for(a=0;a<3;a++) 
+			for(b=0;b<3;b++) 
+				*egsl_atmp(eL,a,b) = L[a][b];
+
+		val ez = egsl_vFa(3,z);
+		
+		val ex = m(inv(eL), ez);
+		
+		egsl_v2vec(ex, x);
+		
+	egsl_pop();
 	
 	printf(" found %d correspondences\n",count);
 }

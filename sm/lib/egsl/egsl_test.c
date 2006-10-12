@@ -17,5 +17,7 @@ int main() {
 		egsl_print("vrot", vrot);
 	
 	egsl_pop();
+	
+	return 0;
 }
 

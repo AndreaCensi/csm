@@ -14,15 +14,74 @@ struct egsl_variable {
 	gsl_matrix * gsl_m;
 };
 
-gsl_matrix * egsl_gslm(val v);
-
 struct egsl_context {
+	int nallocated;
 	int nvars;
 	struct egsl_variable vars[MAX_VALS]; 
 };
 
 int cid=0;
 struct egsl_context egsl_contexts[MAX_CONTEXTS];
+
+
+int egsl_first_time = 1;
+
+int egsl_total_allocations = 0;
+int egsl_cache_hits = 0;
+
+
+void egsl_push() {
+	if(egsl_first_time) {
+		int c;
+		for(c=0;c<MAX_CONTEXTS;c++) {
+			egsl_contexts[c].nallocated = 0;
+		}
+		egsl_first_time  = 0;
+	}
+	cid++;
+	assert(cid<MAX_CONTEXTS);// "Maximum number of contexts reached");
+}
+
+void egsl_pop() {
+	assert(cid>=0);//, "No egsl_push before?");
+	egsl_contexts[cid].nvars = 0;
+	cid--;
+	if(cid==0) 
+		printf("egsl: total allocations: %d   cache hits:%d\n",	
+			egsl_total_allocations, egsl_cache_hits);
+}
+
+val egsl_alloc(size_t rows, size_t columns) {
+	struct egsl_context*c = egsl_contexts+cid;
+	if(c->nvars>=MAX_VALS) {
+		printf("Limit reached\n");
+		error();
+	}
+	int index = c->nvars;
+	if(index<c->nallocated) {
+		if(c->vars[index].gsl_m->size1 == rows && 
+			c->vars[index].gsl_m->size2 == columns) {
+				egsl_cache_hits++;
+				c->nvars++;
+				return val_from_context_and_index(cid,index);
+		} else {
+			egsl_total_allocations++;
+			gsl_matrix_free(c->vars[index].gsl_m);
+			c->vars[index].gsl_m = gsl_matrix_alloc((size_t)rows,(size_t)columns);
+			c->nvars++;
+			return val_from_context_and_index(cid,index);
+		}
+	} else {
+		egsl_total_allocations++;
+		c->vars[index].gsl_m = gsl_matrix_alloc((size_t)rows,(size_t)columns);
+		val v = val_from_context_and_index(cid,index);
+		c->nvars++;
+		c->nallocated++;
+		return v;
+	}
+	//printf("Allocated %d\n",v);
+}
+
 
 void error() {
 	assert(0);
@@ -34,39 +93,11 @@ void egsl_expect_size(val v, size_t rows, size_t cols) {
 	int bad = (rows && (m->size1!=rows)) || (cols && (m->size2!=cols));
 	if(bad) {
 		fprintf(stderr, "Matrix size is %d,%d while I expect %d,%d",
-			m->size1,m->size2,rows,cols);
+			(int)m->size1,(int)m->size2,(int)rows,(int)cols);
 		
 		error();
 	}
 }
-
-void egsl_init_context(int i) {
-	
-}
-
-void egsl_free_context(int i) {
-	struct egsl_context * c = egsl_contexts+i;
-	int v;
-	for(v=0;v<c->nvars;v++) {
-		gsl_matrix_free(c->vars[v].gsl_m);
-	}
-	c->nvars = 0;
-}
-
-void egsl_push() {
-	cid++;
-	assert(cid<MAX_CONTEXTS);// "Maximum number of contexts reached");
-	egsl_init_context(cid);
-//	printf("Now context is %d\n",cid);
-}
-
-void egsl_pop() {
-	assert(cid>=0);//, "No egsl_push before?");
-	egsl_free_context(cid);
-	cid--;
-//	printf("pop: Now context is %d\n",cid);
-}
-
 int its_context(val v) {
 	return (v>>16) & 0x0fff;
 }
@@ -106,7 +137,7 @@ void egsl_print(const char*str, val v) {
 	int context = its_context(v);
 	int var_index = its_var_index(v);
 	printf("%s =  (%d x %d) val=%d context=%d index=%d\n",
-		str,m->size1,m->size2, v, context, var_index);
+		str,(int)m->size1,(int)m->size2, v, context, var_index);
 
 	for(i=0;i<m->size1;i++) {
 		if(i==0)
@@ -125,130 +156,11 @@ void egsl_print(const char*str, val v) {
 	}	
 }
 
-val egsl_alloc(size_t rows, size_t columns) {
-	struct egsl_context*c = egsl_contexts+cid;
-	if(c->nvars>=MAX_VALS) {
-		printf("Limit reached\n");
-		error();
-	}
-	int index = c->nvars;
-	c->vars[index].gsl_m = gsl_matrix_alloc((size_t)rows,(size_t)columns);
-	val v = val_from_context_and_index(cid,index);
-	c->nvars++;
-	
-	//printf("Allocated %d\n",v);
-	return v;
-}
-
 double* egsl_atmp(val v, size_t i, size_t j) {
 	gsl_matrix * m = egsl_gslm(v);
 	return gsl_matrix_ptr(m,(size_t)i,(size_t)j);
 }
 
-val egsl_vFda(size_t rows, size_t cols, const double *a) {
-	val v = egsl_alloc(rows, cols);
-
-	size_t i; size_t j;
-	for(i=0;i<rows;i++)
-	for(j=0;j<cols;j++) {
-		*egsl_atmp(v,i,j) = a[i+j*cols];
-	}
-	return v;
-}
-
-val egsl_vFa(size_t rows, const double*a) {
-	val v = egsl_alloc(rows,1);
-	size_t i;
-	for(i=0;i<rows;i++)
-		*egsl_atmp(v,i,0) =  a[i];
-	return v;
-}
-
-val egsl_rot(double theta) {
-	double R[2*2] = {
-		cos(theta), -sin(theta),
-		sin(theta),  cos(theta)
-	};
-	return egsl_vFda(2,2,R);
-}
-
-val egsl_zeros(size_t rows, size_t columns) {
-	val v = egsl_alloc(rows,columns);
-	gsl_matrix * m = egsl_gslm(v);
-	gsl_matrix_set_all(m,0.0);
-	return v;
-}
-
-val egsl_ones(size_t rows, size_t columns) {
-	val v = egsl_alloc(rows,columns);
-	gsl_matrix * m = egsl_gslm(v);
-	gsl_matrix_set_all(m,1.0);
-	return v;
-}
-
-val egsl_copy_val(val v1) {
-	gsl_matrix * m1 = egsl_gslm(v1);
-	val v2 = egsl_alloc(m1->size1,m1->size2);
-	gsl_matrix * m2 = egsl_gslm(v2);
-	gsl_matrix_memcpy(m2,m1);
-	return v2;
-}
-
-val egsl_scale(double s, val v1){
-	val v2 = egsl_copy_val(v1);
-	gsl_matrix * m2 = egsl_gslm(v2);
-	gsl_matrix_scale(m2, s);
-	return v2;
-}
-
-val egsl_sum(val v1, val v2){
-	gsl_matrix * m1 = egsl_gslm(v1);
-	gsl_matrix * m2 = egsl_gslm(v2);
-	val v3 = egsl_alloc(m1->size1,m1->size2);
-	gsl_matrix * m3 = egsl_gslm(v3);
-	gsl_matrix_memcpy(m3,m1);
-	gsl_matrix_add(m3,m2);	
-	return v3;
-}
-
-val egsl_sum3(val v1, val v2, val v3){
-	return egsl_sum(v1, egsl_sum(v2,v3));
-}
-
-val egsl_mult(val v1, val v2){
-	gsl_matrix * a = egsl_gslm(v1);
-	gsl_matrix * b = egsl_gslm(v2);
-	val v = egsl_alloc(a->size1,b->size2);
-	gsl_matrix * ab = egsl_gslm(v); 
-	gsl_blas_dgemm(CblasNoTrans,CblasNoTrans,1.0,a,b,0.0,ab);
-	return v;
-}
-
-val egsl_transpose(val v1){
-	gsl_matrix * m1 = egsl_gslm(v1);
-	val v2 = egsl_alloc(m1->size2,m1->size1);
-	gsl_matrix * m2 = egsl_gslm(v2);
-	gsl_matrix_transpose_memcpy(m2,m1);
-	return v2;
-}
-
-val egsl_inverse(val v1){
-	gsl_matrix*A = egsl_gslm(v1);
-	val v2 = egsl_alloc(A->size1,A->size1);
-	gsl_matrix*invA = egsl_gslm(v2);
-	size_t n = A->size1;
-	gsl_matrix * m = gsl_matrix_alloc(n,n);
-	gsl_matrix_memcpy(m,A);
-	gsl_permutation * perm = gsl_permutation_alloc (n);
-	// Make LU decomposition of matrix m
-	int s;
-	gsl_linalg_LU_decomp (m, perm, &s);
-	// Invert the matrix m
-	gsl_linalg_LU_invert (m, perm, invA);
-	gsl_permutation_free(perm);
-	gsl_matrix_free(m);
-	return v2;
-}
 
 double egsl_norm(val v1){
 	egsl_expect_size(v1, 0, 1);
@@ -270,98 +182,5 @@ double egsl_atm(val v1, size_t i, size_t j){
 	return *egsl_atmp(v1, i, j);
 }
 
-val egsl_sub(val v1,val v2){
-	return egsl_sum(v1, egsl_scale(-1.0,v2));
-}
-
-val egsl_compose_col(val v1, val v2){
-	gsl_matrix *m1 = egsl_gslm(v1);
-	gsl_matrix *m2 = egsl_gslm(v2);
-	egsl_expect_size(v2, 0, m1->size2);
-	val v3 = egsl_alloc(m1->size1+m2->size1,m1->size2);
-	gsl_matrix *m3 = egsl_gslm(v3);
-	size_t i,j;
-	for(j=0;j<m1->size2;j++) {
-		for(i=0;i<m1->size1;i++)
-			gsl_matrix_set(m3, i, j, gsl_matrix_get(m1,i,j));
-		
-		for(i=0;i<m2->size1;i++)
-			gsl_matrix_set(m3, m1->size1+i, j, gsl_matrix_get(m2,i,j));
-	}
-	return v3;
-}
-
-val egsl_compose_row(val v1, val v2){
-	gsl_matrix *m1 = egsl_gslm(v1);
-	gsl_matrix *m2 = egsl_gslm(v2);
-	egsl_expect_size(v2, m1->size1, 0);
-	val v3 = egsl_alloc(m1->size1, m1->size2 + m2->size2);
-	gsl_matrix *m3 = egsl_gslm(v3);
-	size_t i,j;
-	for(i=0;i<m1->size1;i++) {
-		for(j=0;j<m1->size2;j++) 
-			gsl_matrix_set(m3, i, j, gsl_matrix_get(m1,i,j));
-		
-		for(j=0;j<m2->size2;j++) 
-			gsl_matrix_set(m3, i, m1->size2+j, gsl_matrix_get(m2,i,j));
-	}
-	return v3;
-}
-
-val egsl_vers(double theta){
-	double v[2] = { cos(theta), sin(theta)};
-	return egsl_vFa(2,v);
-}
-
-
-void egsl_v2da(val v, double*a){
-	gsl_matrix *m = egsl_gslm(v);
-	size_t i,j;
-	for(i=0;i<m->size1;i++)
-		for(j=0;j<m->size2;j++)
-			a[j*m->size1 +i] = gsl_matrix_get(m,i,j);
-}
-
-val egsl_vFgslv(const gsl_vector*vec){
-	val v = egsl_alloc(vec->size,1);
-	size_t i;
-	for(i=0;i<vec->size;i++)
-		*egsl_atmp(v,i,0) = gsl_vector_get(vec,i);
-	return v;
-}
-
-val egsl_vFgslm(const gsl_matrix*m){
-	val v = egsl_alloc(m->size1,m->size2);
-	gsl_matrix * m2 = egsl_gslm(v);
-	gsl_matrix_memcpy(m2,m);
-	return v;
-}
-
-gsl_matrix* egsl_v2gslm(val v){
-	gsl_matrix * m = egsl_gslm(v); 
-	gsl_matrix * m2 = gsl_matrix_alloc(m->size1,m->size2);
-	gsl_matrix_memcpy(m2,m);
-	return m;
-}
-
-void egsl_add_to(val v1, val v2) {
-	gsl_matrix * m1 = egsl_gslm(v1); 
-	gsl_matrix * m2 = egsl_gslm(v2);
-	gsl_matrix_add(m1,m2);	
-}
-
-void egsl_add_to_col(val v1, size_t j, val v2) {
-//	egsl_print("m1",v1);
-//	egsl_print("m2",v2);
-	gsl_matrix * m1 = egsl_gslm(v1); 
-	gsl_matrix * m2 = egsl_gslm(v2);
-	
-//	printf("m1 size = %d,%d j = %d\n",m1->size1,m1->size2,j);
-	egsl_expect_size(v2, m1->size1, 1);
-	size_t i;
-	for(i=0;i<m1->size1;i++) {
-		*gsl_matrix_ptr(m1, i, j) += gsl_matrix_get(m2,i,0);
-	}
-}
 
 
