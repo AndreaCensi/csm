@@ -35,14 +35,18 @@ void error() {
 }
 
 #if 1
-val val_from_context_and_index(int cid, int index) {
-	val v; v.cid=cid; v.index=index; return v;
+inline val assemble_val(int cid, int index, gsl_matrix*m) {
+	val v; 
+		v.cid=cid; 
+		v.index=index; 
+		v.gslm = m; 
+	return v;
 }
-int its_context(val v) {
+inline int its_context(val v) {
 	return v.cid;
 }
 
-int its_var_index(val v) {
+inline int its_var_index(val v) {
 	return v.index;
 }
 #else
@@ -91,23 +95,44 @@ val egsl_alloc(size_t rows, size_t columns) {
 			c->vars[index].gsl_m->size2 == columns) {
 				egsl_cache_hits++;
 				c->nvars++;
-				return val_from_context_and_index(cid,index);
+				return assemble_val(cid,index,c->vars[index].gsl_m);
 		} else {
 			egsl_total_allocations++;
 			gsl_matrix_free(c->vars[index].gsl_m);
 			c->vars[index].gsl_m = gsl_matrix_alloc((size_t)rows,(size_t)columns);
 			c->nvars++;
-			return val_from_context_and_index(cid,index);
+			return assemble_val(cid,index,c->vars[index].gsl_m);
 		}
 	} else {
 		egsl_total_allocations++;
 		c->vars[index].gsl_m = gsl_matrix_alloc((size_t)rows,(size_t)columns);
-		val v = val_from_context_and_index(cid,index);
 		c->nvars++;
 		c->nallocated++;
-		return v;
+		return assemble_val(cid,index,c->vars[index].gsl_m);
 	}
 	//printf("Allocated %d\n",v);
+}
+
+void check_valid_val(val v) {
+	int context = its_context(v);
+	if(context>cid) {
+		printf("Val is from invalid context (%d>%d)\n",context,cid);
+		error();
+	}
+	int var_index = its_var_index(v);
+	if(var_index >= egsl_contexts[context].nvars) {
+		printf("Val is invalid  (%d>%d)\n",var_index, 
+			egsl_contexts[context].nvars);		
+		error();
+	}
+}
+
+inline gsl_matrix * egsl_gslm(val v) {
+	check_valid_val(v);
+	return v.gslm;
+/*	int context = its_context(v);
+	int var_index = its_var_index(v);
+	return egsl_contexts[context].vars[var_index].gsl_m;*/
 }
 
 
@@ -124,27 +149,6 @@ void egsl_expect_size(val v, size_t rows, size_t cols) {
 	}
 }
 
-
-void check_valid_val(val v) {
-	int context = its_context(v);
-	if(context>cid) {
-		printf("Val is from invalid context (%d>%d)\n",context,cid);
-		error();
-	}
-	int var_index = its_var_index(v);
-	if(var_index >= egsl_contexts[context].nvars) {
-		printf("Val is invalid  (%d>%d)\n",var_index, 
-			egsl_contexts[context].nvars);		
-		error();
-	}
-}
-
-gsl_matrix * egsl_gslm(val v) {
-	check_valid_val(v);
-	int context = its_context(v);
-	int var_index = its_var_index(v);
-	return egsl_contexts[context].vars[var_index].gsl_m;
-}
 
 void egsl_print(const char*str, val v) {
 	gsl_matrix * m = egsl_gslm(v);

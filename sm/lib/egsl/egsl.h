@@ -7,6 +7,7 @@
 struct egsl_val {
 	int cid : 10;
 	int index : 10;
+	gsl_matrix * gslm;
 };
 
 typedef struct egsl_val val;
