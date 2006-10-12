@@ -68,7 +68,7 @@ int main(int argc, const char*argv[]) {
 	clock_t end = clock();
 	float seconds = (end-start)/((float)CLOCKS_PER_SEC);
 	
-	printf("sm0: CPU time = %f (seconds) (start=%d end=%d)\n", seconds,start,end);
+	printf("sm0: CPU time = %f (seconds) (start=%d end=%d)\n", seconds,(int)start,(int)end);
 	printf("sm0: Matchings = %d\n", num_matchings);
 	printf("sm0: Total iterations = %d\n", num_iterations);
 	printf("sm0: Mean Iterations per matching = %f\n", num_iterations/((float)num_matchings));

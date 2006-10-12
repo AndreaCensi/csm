@@ -4,7 +4,12 @@
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_matrix.h>
 
-typedef int val;
+struct egsl_val {
+	int cid : 10;
+	int index : 10;
+};
+
+typedef struct egsl_val val;
 
 void egsl_push();
 void egsl_pop();

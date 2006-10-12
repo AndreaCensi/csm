@@ -1,6 +1,7 @@
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_linalg.h>
+
 #include <assert.h>
 #include <math.h>
 
@@ -29,6 +30,33 @@ int egsl_first_time = 1;
 int egsl_total_allocations = 0;
 int egsl_cache_hits = 0;
 
+void error() {
+	assert(0);
+}
+
+#if 1
+val val_from_context_and_index(int cid, int index) {
+	val v; v.cid=cid; v.index=index; return v;
+}
+int its_context(val v) {
+	return v.cid;
+}
+
+int its_var_index(val v) {
+	return v.index;
+}
+#else
+val val_from_context_and_index(int cid, int index) {
+	return ((cid& 0x0fff)<<16) | (index& 0x0fff);
+}
+int its_context(val v) {
+	return (v>>16) & 0x0fff;
+}
+
+int its_var_index(val v) {
+	return v & 0x0fff;
+}
+#endif
 
 void egsl_push() {
 	if(egsl_first_time) {
@@ -83,9 +111,6 @@ val egsl_alloc(size_t rows, size_t columns) {
 }
 
 
-void error() {
-	assert(0);
-}
 
 void egsl_expect_size(val v, size_t rows, size_t cols) {
 	gsl_matrix * m = egsl_gslm(v);
@@ -98,27 +123,17 @@ void egsl_expect_size(val v, size_t rows, size_t cols) {
 		error();
 	}
 }
-int its_context(val v) {
-	return (v>>16) & 0x0fff;
-}
 
-int its_var_index(val v) {
-	return v & 0x0fff;
-}
-
-val val_from_context_and_index(int cid, int index) {
-	return ((cid& 0x0fff)<<16) | (index& 0x0fff);
-}
 
 void check_valid_val(val v) {
 	int context = its_context(v);
 	if(context>cid) {
-		printf("Val %d is from invalid context (%d>%d)\n",v,context,cid);
+		printf("Val is from invalid context (%d>%d)\n",context,cid);
 		error();
 	}
 	int var_index = its_var_index(v);
 	if(var_index >= egsl_contexts[context].nvars) {
-		printf("Val %d is invalid  (%d>%d)\n",v,var_index, 
+		printf("Val is invalid  (%d>%d)\n",var_index, 
 			egsl_contexts[context].nvars);		
 		error();
 	}
@@ -136,8 +151,8 @@ void egsl_print(const char*str, val v) {
 	size_t i,j;
 	int context = its_context(v);
 	int var_index = its_var_index(v);
-	printf("%s =  (%d x %d) val=%d context=%d index=%d\n",
-		str,(int)m->size1,(int)m->size2, v, context, var_index);
+	printf("%s =  (%d x %d)  context=%d index=%d\n",
+		str,(int)m->size1,(int)m->size2,  context, var_index);
 
 	for(i=0;i<m->size1;i++) {
 		if(i==0)

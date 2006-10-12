@@ -21,7 +21,8 @@ PROJECT (scan_matching_lib C)
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb")
 
 	IF(APPLE)
-	#	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mtune=7450 -mcpu=7450 -O3")
+		MESSAGE(STATUS "Using optimizations: ")
+		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mtune=7450 -mcpu=7450 -O3")
 	ELSE(APPLE)
 
 	ENDIF(APPLE)

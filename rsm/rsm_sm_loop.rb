@@ -55,6 +55,7 @@ def scan_matching(klass,scan_list,input,output,params)
 		realtime = Benchmark.realtime do
 			res = sm.scan_matching
 		end
+		res[:u] = u
 		res[:time] = realtime
 		results.push res
 		

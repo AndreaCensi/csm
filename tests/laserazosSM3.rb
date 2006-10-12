@@ -8,9 +8,6 @@ scan_matcher = Sm::ICPC
 #scan_matcher = GPM_then_ICP
 name = scan_matcher.new.name
 
-input = File.open '../mbicp_tro_experiment/laserazosSM3.log'
-output = File.open "out/laserazosSM3.#{name}.log", "w"
-
 params = standard_parameters
 
 params[:doAlphaTest] = 0
@@ -23,19 +20,29 @@ params[:outliers_maxPerc] = 0.85;
 
 scan_list = (447..450).to_a
 scan_list = []
+scan_list = [3]
+
+input = File.open '../mbicp_tro_experiment/laserazosSM3.log'
+output = File.open "out/laserazosSM3.#{name}.#{params.hash}.log", "w"
 
 
 results = scan_matching(scan_matcher,scan_list,input,output,params)
 
 if scan_list.empty?
-	f = File.open("out/laserazosSM3.#{name}.stats.txt", "w")
-
+	f = File.open("out/laserazosSM3.#{name}.#{params.hash}.params.txt", "w")
+	params.each_key do |k|
+		f.puts "#{k} = #{params[k]}"
+	end
+	
+	f = File.open("out/laserazosSM3.#{name}.#{params.hash}.txt", "w")
 	results.each_index do |i| res = results[i]
 		x = res[:x]
+		u = res[:u]
 		iterations = res[:iterations]
 		error = res[:error]
 		nvalid = res[:nvalid]
 		time = res[:time]
-		f.puts "#{i} #{error} #{nvalid} #{error/nvalid} #{iterations} #{time}"
+		f.puts "#{i} #{error} #{nvalid} #{error/nvalid} #{iterations} #{time} "+
+			"#{x[0]} #{x[1]} #{x[2]} #{u[0]} #{u[1]} #{u[2]}"
 	end
 end
