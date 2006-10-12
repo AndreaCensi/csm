@@ -5,9 +5,9 @@
 #include <gsl/gsl_matrix.h>
 
 struct egsl_val {
-	int cid : 10;
-	int index : 10;
 	gsl_matrix * gslm;
+	int cid : 16;
+	int index : 16;
 };
 
 typedef struct egsl_val val;

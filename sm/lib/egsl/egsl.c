@@ -78,9 +78,11 @@ void egsl_pop() {
 	assert(cid>=0);//, "No egsl_push before?");
 	egsl_contexts[cid].nvars = 0;
 	cid--;
-	if(cid==0) 
+	if(cid==0) {
 		printf("egsl: total allocations: %d   cache hits:%d\n",	
 			egsl_total_allocations, egsl_cache_hits);
+		printf("egsl: sizeof(val) = %d\n",(int)sizeof(val));
+	}
 }
 
 val egsl_alloc(size_t rows, size_t columns) {
@@ -91,14 +93,14 @@ val egsl_alloc(size_t rows, size_t columns) {
 	}
 	int index = c->nvars;
 	if(index<c->nallocated) {
-		if(c->vars[index].gsl_m->size1 == rows && 
-			c->vars[index].gsl_m->size2 == columns) {
-				egsl_cache_hits++;
-				c->nvars++;
-				return assemble_val(cid,index,c->vars[index].gsl_m);
+		gsl_matrix*m = c->vars[index].gsl_m;
+		if(m->size1 == rows && m->size2 == columns) {
+			egsl_cache_hits++;
+			c->nvars++;
+			return assemble_val(cid,index,c->vars[index].gsl_m);
 		} else {
 			egsl_total_allocations++;
-			gsl_matrix_free(c->vars[index].gsl_m);
+			gsl_matrix_free(m);
 			c->vars[index].gsl_m = gsl_matrix_alloc((size_t)rows,(size_t)columns);
 			c->nvars++;
 			return assemble_val(cid,index,c->vars[index].gsl_m);
