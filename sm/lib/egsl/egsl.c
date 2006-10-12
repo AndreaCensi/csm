@@ -113,6 +113,9 @@ val egsl_alloc(size_t rows, size_t columns) {
 	//printf("Allocated %d\n",v);
 }
 
+#if 1
+inline void check_valid_val(val v) {}	
+#else
 void check_valid_val(val v) {
 	int context = its_context(v);
 	if(context>cid) {
@@ -126,6 +129,7 @@ void check_valid_val(val v) {
 		error();
 	}
 }
+#endif
 
 inline gsl_matrix * egsl_gslm(val v) {
 	check_valid_val(v);
