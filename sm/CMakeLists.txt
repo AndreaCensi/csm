@@ -18,7 +18,7 @@ PROJECT (scan_matching_lib C)
 
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused -Wall -Wno-long-double -W -Wconversion  -Wunreachable-code ")
 	#SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pg")
-	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb")
+#	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb")
 
 	IF(APPLE)
 		MESSAGE(STATUS "Using optimizations: ")

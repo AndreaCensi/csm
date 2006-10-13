@@ -66,18 +66,27 @@ void find_correspondences_tricks(struct sm_params*params, gsl_vector* x_old) {
 		transform(laser_sens->p[i], x_old, p_i_w);
 		double p_i_w_nrm2 = norm(p_i_w);
 		
-		int j1 = -1;
-		double best_dist = 42;
 		
 		int from; int to; int start_cell;
 		
-		if(1) {
+		if(0) {
 		possible_interval(p_i_w, laser_ref, params->maxAngularCorrectionDeg,
 			params->maxLinearCorrection, &from, &to, &start_cell);
 		} else {
 			from = 0; to = laser_ref->nrays-1; 
-			start_cell = (int)(0.5*from+0.5*to);
+			
+			// To be turned into an interval of cells
+			double start_theta = atan2(gvg(p_i_w,1),gvg(p_i_w,0));
+
+			start_cell  = (int)
+				((start_theta - laser_ref->min_theta) /
+				 (laser_ref->max_theta-laser_ref->min_theta) * laser_ref->nrays);
+			
 		}
+
+		int j1 = -1;
+		double best_dist = 42;
+		
 //		printf("> i=%d [from %d to %d]\n",	i,from,to);
 
 		int we_start_at = (last_best==-1) ? start_cell : last_best + 1;
@@ -90,7 +99,6 @@ void find_correspondences_tricks(struct sm_params*params, gsl_vector* x_old) {
 
 		int up_stopped = 0; 
 		int down_stopped = 0;
-		int dbg_number_points = 0;
 	
 		DEBUG_SEARCH(printf("i=%d p_i_w = %f %f\n",i, gvg(p_i_w,0),gvg(p_i_w,1)));
 		DEBUG_SEARCH(printf("i=%d [from %d down %d mid %d up %d to %d]\n",
