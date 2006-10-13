@@ -18,11 +18,12 @@ PROJECT (scan_matching_lib C)
 
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused -Wall -Wno-long-double -W -Wconversion  -Wunreachable-code ")
 	#SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pg")
-#	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb")
+	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb")
 
 	IF(APPLE)
 		MESSAGE(STATUS "Using optimizations: ")
-		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mtune=7450 -mcpu=7450 -O3")
+#		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mtune=7450 -mcpu=7450 -O3")
+		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ffast-math -fomit-frame-pointer -mtune=7450 -mcpu=7450 -O3")
 	ELSE(APPLE)
 
 	ENDIF(APPLE)

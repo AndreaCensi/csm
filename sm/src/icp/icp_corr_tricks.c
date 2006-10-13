@@ -32,19 +32,19 @@ void ld_create_jump_tables(struct laser_data* ld) {
 	for(i=0;i<ld->nrays;i++) {
 		int j=i+1;
 
-		while(ld->valid[j] && ld->readings[j]<=ld->readings[i]) j++;
+		while(j<ld->nrays && ld->valid[j] && ld->readings[j]<=ld->readings[i]) j++;
 		ld->up_bigger[i] = j-i;
 
 		j = i+1;
-		while(ld->valid[j] && ld->readings[j]>=ld->readings[i]) j++;
+		while(j<ld->nrays && ld->valid[j] && ld->readings[j]>=ld->readings[i]) j++;
 		ld->up_smaller[i] = j-i;
 		
 		j = i-1;
-		while(ld->valid[j] && ld->readings[j]>=ld->readings[i]) j--;
+		while(j>=0 && ld->valid[j] && ld->readings[j]>=ld->readings[i]) j--;
 		ld->down_smaller[i] = j-i;
 
 		j = i-1;
-		while(ld->valid[j] && ld->readings[j]<=ld->readings[i]) j--;
+		while(j>=0 && ld->valid[j] && ld->readings[j]<=ld->readings[i]) j--;
 		ld->down_bigger[i] = j-i;
 	}	
 }
@@ -54,6 +54,11 @@ void find_correspondences_tricks(struct sm_params*params, gsl_vector* x_old) {
 	LDP laser_sens = &(params->laser_sens);
 	
 	gsl_vector * p_i_w = gsl_vector_alloc(3);
+
+/*	double table[laser_ref->nrays];
+	int delta;
+	for(delta=0;delta<laser_ref->nrays;delta++) 
+		table[delta] = sin(delta * M_PI/laser_ref->nrays); */
 
 	int last_best = -1;
 	int i;
@@ -103,7 +108,8 @@ void find_correspondences_tricks(struct sm_params*params, gsl_vector* x_old) {
 		DEBUG_SEARCH(printf("i=%d p_i_w = %f %f\n",i, gvg(p_i_w,0),gvg(p_i_w,1)));
 		DEBUG_SEARCH(printf("i=%d [from %d down %d mid %d up %d to %d]\n",
 			i,from,down,start_cell,up,to));
-			
+		
+		
 		while ( (!up_stopped) || (!down_stopped) ) {
 			int now_up = up_stopped ? 0 : 
 			           down_stopped ? 1 : last_dist_up < last_dist_down;
@@ -124,6 +130,7 @@ void find_correspondences_tricks(struct sm_params*params, gsl_vector* x_old) {
 				if (up>start_cell) {
 					double delta_theta = (up-start_cell) * (M_PI/laser_ref->nrays);
 					double min_dist_up = sin(delta_theta) * p_i_w_nrm2;
+//					double min_dist_up = table[up-start_cell] * p_i_w_nrm2;
 					if(min_dist_up > best_dist) { 
 						up_stopped = 1; continue;
 					}
@@ -146,6 +153,7 @@ void find_correspondences_tricks(struct sm_params*params, gsl_vector* x_old) {
 				}
 
 				if (down<start_cell) {
+				//	double min_dist_down = table[start_cell-down] * p_i_w_nrm2;
 					double delta_theta = (start_cell-down) * (M_PI/laser_ref->nrays);
 					double min_dist_down = sin(delta_theta) * p_i_w_nrm2;
 					if(min_dist_down > best_dist) { 

@@ -20,7 +20,7 @@ int main(int argc, const char*argv[]) {
 	struct sm_params params;
 	struct sm_result result;
 	
-	params.maxAngularCorrectionDeg = 30;
+	params.maxAngularCorrectionDeg = 5;
 	params.maxLinearCorrection = 0.2;
 	params.maxIterations = 30;
 	params.epsilon_xy = 0.001;
