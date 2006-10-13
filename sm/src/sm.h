@@ -62,6 +62,8 @@ struct sm_params {
 	
 	double sigma;
 	
+	int useCorrTricks;
+	
 	int restart;
 	double restart_threshold_mean_error;
 	double restart_dt;

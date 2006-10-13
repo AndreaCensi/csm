@@ -2,6 +2,10 @@
 
 #include "math_utils.h"
 
+inline double minmax(int from,int to,int x){
+	return GSL_MAX(GSL_MIN(x,to),from);
+}
+
 void possible_interval(
 	const gsl_vector*p_i_w, LDP ld, 
 	double maxAngularCorrectionDeg, double maxLinearCorrection, int*from, int*to, int*start_cell) 
@@ -38,8 +42,9 @@ void gsl_vector_set_nan(gsl_vector*v) {
 	gvs(v,1,GSL_NAN);
 }
 
-
+int distance_counter = 0;
 double distance(const gsl_vector* a, const gsl_vector* b) {
+	distance_counter++;
 	double x = gvg(a,0)-gvg(b,0);
 	double y = gvg(a,1)-gvg(b,1);
 	return sqrt(x*x+y*y);
@@ -104,9 +109,6 @@ void pose_diff(const gsl_vector*pose2,const gsl_vector*pose1,gsl_vector*res) {
 }
 
 
-double minmax(int from,int to,int x){
-	return GSL_MAX(GSL_MIN(x,to),from);
-}
 
 double square(double x) {
 	return x*x;

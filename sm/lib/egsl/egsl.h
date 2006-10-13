@@ -12,14 +12,13 @@ struct egsl_val {
 
 typedef struct egsl_val val;
 
+
+/// Core functions
 void egsl_push();
 void egsl_pop();
-
-void egsl_print(const char*str, val);
 double* egsl_atmp(val v, size_t i, size_t j);
 val egsl_alloc(size_t rows, size_t columns);
 gsl_matrix * egsl_gslm(val v);
-
 
 /// Operations among values
 val egsl_scale(double, val);
@@ -65,6 +64,9 @@ val egsl_ones(size_t rows, size_t columns);
 val egsl_vers(double theta);
 val egsl_rot(double theta);
 
+
+/// Misc
+void egsl_print(const char*str, val);	
 
 /// Private implementations things
 void egsl_expect_size(val v, size_t rows, size_t cols);

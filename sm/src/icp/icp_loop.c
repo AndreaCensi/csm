@@ -31,7 +31,8 @@ void sm_icp(struct sm_params*params, struct sm_result*res) {
 	LDP laser_ref  = &(params->laser_ref);
 	LDP laser_sens = &(params->laser_sens);
 			
-	ld_create_jump_tables(laser_ref);
+	if(params->useCorrTricks)
+		ld_create_jump_tables(laser_ref);
 		
 	ld_compute_cartesian(laser_ref);
 
@@ -161,8 +162,11 @@ void icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 		if(jf()) fprintf(jf(), "iteration %d\n", iteration);
 		journal_pose("x_old", x_old);
 		
-//		find_correspondences(params, x_old);
-		find_correspondences_tricks(params, x_old);
+		if(params->useCorrTricks)
+			find_correspondences_tricks(params, x_old);
+		else
+			find_correspondences(params, x_old);
+
 		int num_corr = ld_num_valid_correspondences(laser_sens);
 		if(num_corr <0.2 * laser_sens->nrays){
 			printf("Failed: before trimming, only %d correspondences.\n",num_corr);

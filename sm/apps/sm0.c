@@ -3,6 +3,7 @@
 #include "../src/sm.h"
 #include "../src/laser_data.h"
 
+extern int distance_counter;
 int main(int argc, const char*argv[]) {
 	FILE * file;
 	if(argc==1) {
@@ -19,8 +20,8 @@ int main(int argc, const char*argv[]) {
 	struct sm_params params;
 	struct sm_result result;
 	
-	params.maxAngularCorrectionDeg = 40;
-	params.maxLinearCorrection = 0.5;
+	params.maxAngularCorrectionDeg = 30;
+	params.maxLinearCorrection = 0.2;
 	params.maxIterations = 30;
 	params.epsilon_xy = 0.001;
 	params.epsilon_theta = 0.001;
@@ -33,10 +34,12 @@ int main(int argc, const char*argv[]) {
 
 	params.clusteringThreshold = 0.05;
 	params.orientationNeighbourhood = 3;
+	params.useCorrTricks = 1;
+
 	params.doAlphaTest = 0;
 	params.outliers_maxPerc = 0.85;
 	params.doVisibilityTest = 1;
-	params.doComputeCovariance = 1;
+	params.doComputeCovariance = 0;
 
 	int num_matchings = 0;
 	int num_iterations = 0;
@@ -69,11 +72,15 @@ int main(int argc, const char*argv[]) {
 	float seconds = (end-start)/((float)CLOCKS_PER_SEC);
 	
 	printf("sm0: CPU time = %f (seconds) (start=%d end=%d)\n", seconds,(int)start,(int)end);
-	printf("sm0: Matchings = %d\n", num_matchings);
-	printf("sm0: Total iterations = %d\n", num_iterations);
-	printf("sm0: Mean Iterations per matching = %f\n", num_iterations/((float)num_matchings));
-	printf("sm0: Mean Seconds per matching = %f\n", seconds/num_matchings);
-	printf("sm0: Mean Seconds per iteration = %f (note: very imprecise)\n", seconds/num_iterations);
+	printf("sm0: Total number of matchings = %d\n", num_matchings);
+	printf("sm0: Total number of iterations = %d\n", num_iterations);
+	printf("sm0: Avg. iterations per matching = %f\n", num_iterations/((float)num_matchings));
+	printf("sm0: Avg. seconds per matching = %f\n", seconds/num_matchings);
+	printf("sm0:   that is, %d matchings per second\n", (int)floor(num_matchings/seconds));
+	printf("sm0: Avg. seconds per iteration = %f (note: very imprecise)\n", seconds/num_iterations);
+	printf("sm0: Number of comparisons = %d \n", distance_counter);
+	printf("sm0: Avg. comparisons per ray = %f \n", 
+		(distance_counter/((float)num_iterations*params.laser_ref.nrays)));
 	
 	gsl_vector_free(u);
 	gsl_vector_free(x_old);

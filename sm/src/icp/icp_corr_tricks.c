@@ -70,18 +70,23 @@ void find_correspondences_tricks(struct sm_params*params, gsl_vector* x_old) {
 		double best_dist = 42;
 		
 		int from; int to; int start_cell;
+		
+		if(1) {
 		possible_interval(p_i_w, laser_ref, params->maxAngularCorrectionDeg,
 			params->maxLinearCorrection, &from, &to, &start_cell);
-
+		} else {
+			from = 0; to = laser_ref->nrays-1; 
+			start_cell = (int)(0.5*from+0.5*to);
+		}
 //		printf("> i=%d [from %d to %d]\n",	i,from,to);
 
-		int we_start_at = (last_best!=-1) ? start_cell : last_best;
+		int we_start_at = (last_best==-1) ? start_cell : last_best + 1;
 			 we_start_at = minmax(from, to, we_start_at);
 		
 		int up =  we_start_at+1; 
 		int down = we_start_at; 
-		double last_dist_up = -1; // first is up
-		double last_dist_down = 0;	
+		double last_dist_up = 0; // first is down
+		double last_dist_down = -1;	
 
 		int up_stopped = 0; 
 		int down_stopped = 0;
@@ -93,15 +98,13 @@ void find_correspondences_tricks(struct sm_params*params, gsl_vector* x_old) {
 			
 		while ( (!up_stopped) || (!down_stopped) ) {
 			int now_up = up_stopped ? 0 : 
-			           down_stopped ? 1  : last_dist_up < last_dist_down;
+			           down_stopped ? 1 : last_dist_up < last_dist_down;
 			DEBUG_SEARCH(printf("|"));
 
 			if(now_up) {
 				DEBUG_SEARCH(printf("up %d ",up));
 				if(up > to) { up_stopped = 1; continue; }
 				if(!laser_ref->valid[up]) { ++up; continue; }
-				
-				++dbg_number_points;
 				
 				last_dist_up = distance(p_i_w, laser_ref->p[up]);
 				if( (last_dist_up<params->maxCorrespondenceDist) && ((j1==-1)||(last_dist_up < best_dist))) {
@@ -127,8 +130,6 @@ void find_correspondences_tricks(struct sm_params*params, gsl_vector* x_old) {
 				if(down < from) { down_stopped = 1; continue; }
 				if(!laser_ref->valid[down]) { --down; continue; }
 		
-				++dbg_number_points;
-
 				last_dist_down = distance(p_i_w, laser_ref->p[down]);
 				if( (last_dist_down<params->maxCorrespondenceDist) && ((j1==-1)||(last_dist_down < best_dist))) {
 					if(compatible(params, i, down)) {
@@ -151,12 +152,12 @@ void find_correspondences_tricks(struct sm_params*params, gsl_vector* x_old) {
 		
 		DEBUG_SEARCH(printf("i=%d j1=%d dist=%f\n",i,j1,best_dist));
 		
-		if(j1==-1) {// no match
+		if(-1==j1) {// no match
 			ld_set_null_correspondence(laser_sens, i);
 			continue;
 		}
 		// Do not match with extrema
-		if( (j1==0) || (j1 == (laser_ref->nrays-1))) {// no match
+		if( (0==j1) || (j1 == (laser_ref->nrays-1))) {// no match
 			ld_set_null_correspondence(laser_sens, i);
 			continue;
 		}
