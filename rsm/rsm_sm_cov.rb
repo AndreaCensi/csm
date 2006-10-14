@@ -55,6 +55,7 @@ def scan_matching(io, scan_matcher)
 		icp.params[:firstGuess] = u
 		icp.params[:maxIterations] = 20
 
+
 		m = Matching.new
 		
 		m.x, m.dx_dy1, m.dx_dy2 = icp.scan_matching

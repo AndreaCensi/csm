@@ -1,10 +1,10 @@
 class ICP
-	def compute_covariance(laser_ref, laser_sens, correspondences, x_new)
-		fJ = create_J_function(laser_ref, laser_sens, correspondences)
+	def compute_covariance(laser_ref, laser_sens, x_new)
+		fJ = create_J_function(laser_ref, laser_sens)
 
 		mx  = x_new
-		my1 = Vector.alloc(laser_ref.points.map{|p| p.reading}).col
-		my2 = Vector.alloc(laser_sens.points.map{|p| p.reading}).col
+		my1 = Vector.alloc(laser_ref.readings).col
+		my2 = Vector.alloc(laser_sens.readings).col
 
 #		tot = fJ.call(x,y1,y2)
 #		puts "tot= #{tot} , total_error = #{@total_error}"
@@ -76,17 +76,23 @@ class ICP
 		puts "d2J_dxdy1 = #{d2J_dxdy1.trans}"
 		puts "d2J_dxdy2 = #{d2J_dxdy2.trans}"
 		
-		return d2, d2J_dxdy1, d2J_dxdy2
+		dx_dy1 = - d2.inv * d2J_dxdy1
+		dx_dy2 = - d2.inv * d2J_dxdy2
+		
+		return dx_dy1, dx_dy2
 	end
 	
-	def create_J_function(laser_ref, laser_sens, correspondences)
+	def create_J_function(laser_ref, laser_sens)
 		Proc.new { |x,y1,y2|
 			fJtot = 0;
-			for c in correspondences
-				next if c.nil? 
-				p_i  = laser_sens.points[c.i ].v * y2[c.i]
-				p_j1 = laser_ref .points[c.j1].v * y1[c.j1]
-				p_j2 = laser_ref .points[c.j2].v * y1[c.j2]
+			
+			for i in 0..laser_sens.nrays-1
+				next if not laser_sens.corr[i].valid
+				j1 = laser_sens.corr[i].j1
+				j2 = laser_sens.corr[i].j2
+				p_i  = laser_sens.v(i) * y2[i]
+				p_j1 = laser_ref.v(j1) * y1[j1]
+				p_j2 = laser_ref.v(j2) * y1[j2]
 
 				v_alpha = rot(PI/2) * (p_j1-p_j2)
 				v_alpha = v_alpha / v_alpha.nrm2

@@ -39,7 +39,7 @@ int main(int argc, const char*argv[]) {
 	params.doAlphaTest = 0;
 	params.outliers_maxPerc = 0.85;
 	params.doVisibilityTest = 1;
-	params.doComputeCovariance = 0;
+	params.doComputeCovariance = 1;
 
 	int num_matchings = 0;
 	int num_iterations = 0;

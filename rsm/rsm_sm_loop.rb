@@ -48,8 +48,10 @@ def scan_matching(klass,scan_list,input,output,params)
 		sm.params[:laser_sens] = laser_sens;
 		sm.params[:firstGuess] = u
 
-		#		sm.params[:laser_sens] = laser_ref;
-		#		sm.params[:firstGuess] = GSL::Vector.alloc(0.2,0.2,deg2rad(30))
+		if true
+			sm.params[:laser_sens] = laser_ref;
+			sm.params[:firstGuess] = GSL::Vector.alloc(0,0,0)
+		end
 		
 		res = nil
 		realtime = Benchmark.realtime do

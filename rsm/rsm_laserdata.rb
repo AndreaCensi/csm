@@ -59,9 +59,9 @@ class LaserData
 		for i in 0..nrays-1
 			@p[i] = Vector[GSL::NAN,GSL::NAN].col
 			@corr[i] = Correspondence.new;
-			@corr[i].valid = false;
-			@corr[i].j1 = -1;
-			@corr[i].j2 = -1;
+			@corr[i].valid = false
+			@corr[i].j1 = -1
+			@corr[i].j2 = -1
 		end
 		
 		# jump tables
@@ -94,33 +94,6 @@ class LaserData
 	end
 end
 
-=begin
-class LaserPoint 
-	include MathUtils
-	
-	attr_accessor :reading
-	attr_accessor :intensity
-	attr_accessor :theta
-	
-	# Estimated alpha (relative to robot)
-	attr_accessor :alpha
-	attr_accessor :alpha_valid
-	# Covariance of estimated alpha (relative to robot)
-	attr_accessor :cov_alpha
-
-	# Cluster id (integer)
-	attr_accessor :cluster
-
-	attr_accessor :valid
-	
-	def alpha_valid?; @alpha_valid end
-	def valid?; @valid end
-	def v; MathUtils.vers(theta) end
-	def cartesian; MathUtils.vers(theta)*reading; end
-end
-=end
-
-
 def standard_parameters
 	#include MathUtils
 	p = Hash.new
@@ -138,7 +111,9 @@ def standard_parameters
 	
 	p[:clusteringThreshold] = 0.05
 	p[:orientationNeighbourhood] = 3
-	
+	p[:useCorrTricks] = 1;
+	p[:doComputeCovariance] = 1;
+		
 	p[:doAlphaTest] = 1
 	p[:doAlphaTest_thresholdDeg]=20
 	

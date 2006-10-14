@@ -29,6 +29,9 @@ struct sm_params {
 	double outliers_maxPerc;
 	
 	int doVisibilityTest;
+	int useCorrTricks;
+	int doComputeCovariance;
+	
 };
 
 struct sm_result {

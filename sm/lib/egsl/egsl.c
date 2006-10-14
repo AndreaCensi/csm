@@ -78,11 +78,13 @@ void egsl_pop() {
 	assert(cid>=0);//, "No egsl_push before?");
 	egsl_contexts[cid].nvars = 0;
 	cid--;
+#if 0
 	if(cid==0) {
 		printf("egsl: total allocations: %d   cache hits:%d\n",	
 			egsl_total_allocations, egsl_cache_hits);
 		printf("egsl: sizeof(val) = %d\n",(int)sizeof(val));
 	}
+#endif
 }
 
 val egsl_alloc(size_t rows, size_t columns) {

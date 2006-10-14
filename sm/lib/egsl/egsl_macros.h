@@ -6,7 +6,7 @@
 #define atv(v,i)         egsl_atv(v,i)
 #define atm(v,i,j)       egsl_atm(v,i,j)
 #define sub(v1,v2)       egsl_sub(v1,v2)
-#define minus(v)         egsl_scale(-1.0,v1)
+#define minus(v)         egsl_scale(-1.0,v)
 #define sum(v1,v2)       egsl_sum(v1,v2)
 #define sum3(v1,v2,v3)   egsl_sum(v1,egsl_sum(v2,v3))
 #define tr(v)            egsl_transpose(v)

@@ -195,8 +195,8 @@ class ICP
 					if j_up.nil? or j_down.nil?
 						[j_up,j_down].compact[0]
 					else	
-						p_prev = laser_ref.p[j_up]
-						p_next = laser_ref.p[j_down]
+						p_prev = laser_ref.p[j_down]
+						p_next = laser_ref.p[j_up]
 						dist_prev = (p_prev-p_i_w).nrm2;
 						dist_next = (p_next-p_i_w).nrm2;
 						if dist_prev < dist_next then j_down else j_up end

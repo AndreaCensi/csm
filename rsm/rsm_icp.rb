@@ -46,14 +46,15 @@ class ICP
 			journal "iteration #{iteration}"
 			journal     "x_old #{to_j(x_old)}"
 
-			find_correspondences_tricks(x_old)
-			
-			x_new, dx_dy1, dx_dy2 = compute_next_estimate( x_old)
+			if params[:useCorrTricks] == 1
+				find_correspondences_tricks(x_old)
+			else
+				find_correspondences(x_old)
+			end
+		
+			x_new = compute_next_estimate(x_old)
 
-			sigma = 0.01 # cm
-			
-			cov_x = (sigma*sigma) * dx_dy1 * (dx_dy1.trans) +
-			        (sigma*sigma) * dx_dy2 * (dx_dy2.trans);
+			sigma = params[:sigma]
 			
 
 			journal     "x_new #{to_j(x_new)}"
@@ -61,9 +62,8 @@ class ICP
 			new_delta = pose_diff(x_new, x_old)
 			journal     "delta #{to_j(new_delta)}"
 			
-	#		puts "#{iteration} x_new = #{pv(x_new)} delta = #{pv(new_delta)}"+
-	#			" neg #{new_delta.trans * delta>0} error #{@total_error} "
-	#		puts "    cov_x #{pm(cov_x)}"
+			puts "#{iteration} x_old = #{pv(x_old)} x_new = #{pv(x_new)} "
+			
 			delta = new_delta
 		
 			if delta[0,1].nrm2 < params[:epsilon_xy] &&
@@ -75,6 +75,38 @@ class ICP
 			x_old = x_new
 		end
 		
+		
+		dx_dy1=Matrix.alloc(3,laser_ref.nrays)
+		dx_dy2=Matrix.alloc(3,laser_sens.nrays)
+
+
+		if 1 == params[:doComputeCovariance] 
+			dx_dy1, dx_dy2 = 
+				compute_covariance_exact(laser_ref, laser_sens,  x_new)
+
+		end
+
+		cov_x = (sigma*sigma) * dx_dy1 * (dx_dy1.trans) +
+		        (sigma*sigma) * dx_dy2 * (dx_dy2.trans);
+		
+		puts "sigma : #{sigma}"
+	#	puts "dx_dy1 : #{dx_dy1}"
+	#	puts "dx_dy2 : #{dx_dy2}"
+		puts "cov_x : #{cov_x}"
+		
+		if false
+		
+			num_dx_dy1, num_dx_dy2 = 
+				compute_covariance(laser_ref, laser_sens, x_new)
+		
+			num_cov_x = (sigma*sigma) * num_dx_dy1 * (num_dx_dy1.trans) +
+				        (sigma*sigma) * num_dx_dy2 * (num_dx_dy2.trans)
+
+			puts "num_dx_dy1 : #{num_dx_dy1}"
+			puts "num_dx_dy2 : #{num_dx_dy2}"
+			puts "num_cov_x : #{num_cov_x}"
+		end
+
 		res = Hash.new
 		res[:x] = x_new
 		res[:iterations] = iteration
@@ -124,18 +156,10 @@ class ICP
 #	journal_correspondences("candidate", correspondences)
 	journal_correspondences("correspondences", laser_sens.corr)
 	
-
-	corrs = corrs.compact
-	puts "Found #{corrs.size} correspondences."
+		corrs = corrs.compact
+		puts "Found #{corrs.size} correspondences."
 		x_new = GPC.gpc(corrs)
-		
-#		cov = compute_covariance(laser_ref, laser_sens, correspondences, x_old)
-#		dx_dy1, dx_dy2 = 
-#			compute_covariance_exact(laser_ref, laser_sens,  x_old)
-		
-		dx_dy1=Matrix.alloc(3,laser_ref.nrays)
-		dx_dy2=Matrix.alloc(3,laser_sens.nrays)
-		return x_new, dx_dy1, dx_dy2
+		return x_new
 	end
 
 end

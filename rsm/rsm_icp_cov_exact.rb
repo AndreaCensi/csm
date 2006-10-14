@@ -27,12 +27,34 @@ class ICP
 			v_alpha = v_alpha / v_alpha.nrm2
 			m = v_alpha*v_alpha.trans
 			
-			
-			d2J_dt2       += 2 * m
-			d2J_dt_dtheta += 2 * (rot(theta+PI/2)*p_k).trans * m
-			d2J_dtheta2   += 2 * (rot(theta)*p_k+t-q_k).trans * 
+			d2J_dt2_k = 2*m
+			d2J_dt_dtheta_k = 2 * (rot(theta+PI/2)*p_k).trans * m 
+			d2J_dtheta2_k =  2 * (rot(theta)*p_k+t-q_k).trans * 
 			   m * rot(theta+PI/2) * p_k + 2 * (rot(theta+PI/2)*p_k).trans * m *
 				rot(theta+PI/2) * p_k
+							
+			if i == 45 
+				d2J_dtheta2_k_1 = 2 * (rot(theta)*p_k+t-q_k).trans * 
+				   m * rot(theta+PI/2) * p_k;
+				d2J_dtheta2_k_2 = 2 * (rot(theta+PI/2)*p_k).trans * m *
+					rot(theta+PI/2) * p_k;
+				
+					puts "d2J_dtheta2_k =\n #{d2J_dtheta2_k}"
+					puts "d2J_dtheta2_k_1 =\n #{d2J_dtheta2_k_1}"
+					puts "d2J_dtheta2_k_2 =\n #{d2J_dtheta2_k_2}"
+
+					puts "t = #{t}" 
+					puts "theta = #{theta}" 
+					puts "p_k = #{p_k}" 
+					puts "q_k = #{q_k}" 
+					
+					
+					puts "v2 = #{(rot(theta)*p_k+t-q_k)}"
+			end
+			
+			d2J_dt2       += d2J_dt2_k
+			d2J_dt_dtheta += d2J_dt_dtheta_k
+			d2J_dtheta2   += d2J_dtheta2_k
 				
 			###########
 			
@@ -51,10 +73,9 @@ class ICP
 			dC_drho_j1, dC_drho_j2 = dC_drho_j12(laser_ref, laser_sens, j1, j2)
 			
 			v_j1 = laser_ref.v(j1)
-			v_j2 = laser_ref.v(j2)
 			
-			d2Jk_dtheta_drho_j1 = 2 * ( -v_j1.trans*m+(rot(theta)*p_k+t-q_k).trans*dC_drho_j1)*
-				rot(theta+PI/2)*p_k
+			d2Jk_dtheta_drho_j1 = 
+				2*( -v_j1.trans*m+(rot(theta)*p_k+t-q_k).trans*dC_drho_j1)*rot(theta+PI/2)*p_k
 			d2Jk_dt_drho_j1 = 2 * (-v_j1.trans*m+(rot(theta)*p_k+t-q_k).trans*dC_drho_j1)
 			
 			d2J_dxdy1.col(j1)[0] += d2Jk_dt_drho_j1[0]
@@ -71,7 +92,19 @@ class ICP
 			d2J_dxdy1.col(j2)[1] += d2Jk_dt_drho_j2[1]
 			d2J_dxdy1.col(j2)[2] += d2Jk_dtheta_drho_j2
 			
+			if i==45 then
+				puts "Corr i=#{i} j1=#{j1} j2=#{j2}"
+				puts "C_k=\n#{m}";
+				puts "dC_drho_j1=\n#{dC_drho_j1}"
+				puts "dC_drho_j2=\n#{dC_drho_j2}"
+				d = 
+				 2 * (rot(theta)*p_k+t-q_k).trans * 
+				   m * rot(theta+PI/2) * p_k + 2 * (rot(theta+PI/2)*p_k).trans * m *
+					rot(theta+PI/2) * p_k
+				puts "Contribution = \n#{d}"
+			end
 		end
+		
 		# put the pieces together
 		d2J_dx2 = Matrix.alloc(3,3)
 		d2J_dx2[0,0]=d2J_dt2[0,0]
@@ -82,9 +115,17 @@ class ICP
 		d2J_dx2[2,1]=d2J_dx2[1,2]=d2J_dt_dtheta[1]
 		d2J_dx2[2,2] = d2J_dtheta2
 
+		puts "d2J_dx2 =　#{d2J_dx2}"
+		puts "inv(d2J_dx2) =　#{d2J_dx2.inv}"
+		
 		dx_dy1 =  -d2J_dx2.inv * d2J_dxdy1
 		dx_dy2 =  -d2J_dx2.inv * d2J_dxdy2
 		
+		j1=laser_sens.corr[24].j1
+		j2=laser_sens.corr[24].j2
+
+		puts "cov0_x =　#{dx_dy1*dx_dy1.trans+dx_dy2*dx_dy2.trans}"
+
 		return dx_dy1, dx_dy2
 	end
 	

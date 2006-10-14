@@ -173,8 +173,8 @@ void icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 			break;
 		}
 
-		double error;
-		kill_outliers_trim(params, x_old, &error);
+		double error=0;
+//		kill_outliers_trim(params, x_old, &error);
 		int num_corr_after = ld_num_valid_correspondences(laser_sens);
 		
 		*total_error = error; 
