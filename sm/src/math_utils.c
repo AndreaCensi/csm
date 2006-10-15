@@ -159,3 +159,32 @@ double dist_to_segment(const gsl_vector*a,const gsl_vector*b,const gsl_vector*x)
 	gsl_vector_free(projection);
 	return dist;
 }
+
+char tmp_buf[100];
+const char* gsl_friendly_pose(gsl_vector*v) {
+	sprintf(tmp_buf, "(%4.2f mm, %4.2f mm, %4.4f deg)",
+		1000*gvg(v,0),1000*gvg(v,1),rad2deg(gvg(v,2)));
+	return tmp_buf;
+}
+
+const char* egsl_friendly_pose(val v) {
+	sprintf(tmp_buf, "(%4.2f mm, %4.2f mm, %4.4f deg)",
+		1000*egsl_atv(v,0),
+		1000*egsl_atv(v,1),
+		rad2deg(egsl_atv(v,2)));
+	return tmp_buf;
+}
+
+const char* egsl_friendly_cov(val cov) {
+	
+	double limit_x  = 2 * sqrt(egsl_atm(cov, 0, 0));
+	double limit_y  = 2 * sqrt(egsl_atm(cov, 1, 1));
+	double limit_th = 2 * sqrt(egsl_atm(cov, 2, 2));
+	
+	sprintf(tmp_buf, "(+- %4.2f mm,+- %4.2f mm,+- %4.4f deg)",
+		1000*limit_x,
+		1000*limit_y,
+		rad2deg(limit_th));
+	return tmp_buf;
+}
+

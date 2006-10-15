@@ -4,6 +4,9 @@
 #include <gsl/gsl_math.h>
 #include "laser_data.h"
 
+#define gvg gsl_vector_get
+#define gvs gsl_vector_set
+
 void possible_interval(
 	const gsl_vector*p_i_w, struct laser_data*laser_sens, 
 	double maxAngularCorrectionDeg, double maxLinearCorrection, int*from, int*to, int*start_cell);
@@ -30,18 +33,26 @@ void ominus(const gsl_vector*x, gsl_vector*res);
 void pose_diff(const gsl_vector*pose2,const gsl_vector*pose1,gsl_vector*res);
 
 /// Projects x on the LINE going through a and b
-void projection_on_line(const gsl_vector*a,const gsl_vector*b,const gsl_vector*x,
-	gsl_vector * proj);
+void projection_on_line(
+	const gsl_vector*a,
+	const gsl_vector*b,
+	const gsl_vector*x,
+	      gsl_vector*proj);
 	
 /// Projects x on the SEGMENT a-b
-void projection_on_segment(const gsl_vector*a,const gsl_vector*b,const gsl_vector*x,
-	gsl_vector*proj);
+void projection_on_segment(
+	const gsl_vector*a,
+	const gsl_vector*b,
+	const gsl_vector*x,
+	      gsl_vector*proj);
 
 /// Distance of x from its projection on segment a-b
 double dist_to_segment(const gsl_vector*a,const gsl_vector*b,const gsl_vector*x);
 
-#define gvg gsl_vector_get
-#define gvs gsl_vector_set
+/// Some functions to print poses and covariances in a friendly way
+const char* gsl_friendly_pose(gsl_vector*v);
+const char* egsl_friendly_pose(val pose);
+const char* egsl_friendly_cov(val cov);
 
 #endif
 

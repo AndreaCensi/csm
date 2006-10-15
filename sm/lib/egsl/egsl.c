@@ -31,10 +31,10 @@ int egsl_total_allocations = 0;
 int egsl_cache_hits = 0;
 
 void error() {
+	// TODO: better handling of errors
 	assert(0);
 }
 
-#if 1
 inline val assemble_val(int cid, int index, gsl_matrix*m) {
 	val v; 
 		v.cid=cid; 
@@ -49,18 +49,6 @@ inline int its_context(val v) {
 inline int its_var_index(val v) {
 	return v.index;
 }
-#else
-val val_from_context_and_index(int cid, int index) {
-	return ((cid& 0x0fff)<<16) | (index& 0x0fff);
-}
-int its_context(val v) {
-	return (v>>16) & 0x0fff;
-}
-
-int its_var_index(val v) {
-	return v & 0x0fff;
-}
-#endif
 
 
 #if 1
@@ -106,7 +94,7 @@ void egsl_pop() {
 }
 
 void egsl_print_stats() {
-	printf("egsl: total allocations: %d   cache hits:%d\n",	
+	printf("egsl: total allocations: %d   cache hits: %d\n",	
 		egsl_total_allocations, egsl_cache_hits);
 //	printf("egsl: sizeof(val) = %d\n",(int)sizeof(val));
 }

@@ -32,8 +32,8 @@
 <body>
 	<h1>Easy GSL: Making GSL easy for simple tasks.</h1>
 
-<p>This is a small C library that I wrote for making simple matrix 
-computations easy. It is based on 
+<p>This is a small C library for <em>making</em> <strong>simple</strong> <em>matrix 
+computations</em> <strong>easy</strong>. It is built on top of
 <a href="http://www.gnu.org/software/gsl/">the GNU Scientific Library</a>.</p>
 
 <p>
@@ -53,7 +53,7 @@ computations easy. It is based on
 </ul>
 <li><a href="#subsection_toc8">Usage</a></li>
 <ul compact>
-<li><a href="#subsubsection_toc9">Start with a <tt>push()</tt>, end with a <tt>pop()</tt></a></li>
+<li><a href="#subsubsection_toc9">Start with a <tt>egsl_push()</tt>, end with a <tt>egsl_pop()</tt></a></li>
 <li><a href="#subsubsection_toc10">Promotion of <code>val</code>s to previous contexts</a></li>
 <li><a href="#subsubsection_toc11">Useful macros</a></li>
 </ul>
@@ -140,7 +140,7 @@ egsl_print_stats();
 
 <p>The output of this program is:</p>
 
-<pre><code>egsl: total allocations: 2   cache hits:999999
+<pre><code>egsl: total allocations: 2   cache hits: 999999
 </code></pre>
 
 <p>Even though the loop executes one million times, the total number
@@ -155,11 +155,11 @@ allocated a matrix of the requested size and re-utilizes the memory.</p>
 <p>For <code>EGSL</code> to work, you must remember some simple rules:</p>
 
 <ol>
-<li><p>Always include your code between a pair of <code>egsl_push</code>/<code>egsl_pop</code> calls.</p></li>
-<li><p>All values are returned as <code>val</code> structs: <code>val</code> object are not valid outside of the context they are created into (unless you tell <code>EGSL</code>).</p></li>
+<li>Always include your code between a pair of <code>egsl_push</code>/<code>egsl_pop</code> calls.</li>
+<li>All values are returned as <code>val</code> structs: <code>val</code> object are not valid outside of the context they are created into (unless you tell <code>EGSL</code>).</li>
 </ol>
 
-<p><h3><a name="subsubsection_toc9">Start with a <tt>push()</tt>, end with a <tt>pop()</tt></a></h3></p>
+<p><h3><a name="subsubsection_toc9">Start with a <tt>egsl_push()</tt>, end with a <tt>egsl_pop()</tt></a></h3></p>
 
 <p>A first, simple program may look like this:</p>
 

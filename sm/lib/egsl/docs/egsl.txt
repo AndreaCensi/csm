@@ -1,8 +1,8 @@
 Easy GSL: Making GSL easy for simple tasks.
 =======================================
 
-This is a small C library that I wrote for making simple matrix 
-computations easy. It is based on 
+This is a small C library for _making_ **simple** _matrix 
+computations_ **easy**. It is built on top of
 [the GNU Scientific Library](http://www.gnu.org/software/gsl/).
 
 <tableofcontents></tableofcontents>
@@ -76,7 +76,7 @@ uses objects. Consider this code:
 
 The output of this program is:
 
-	egsl: total allocations: 2   cache hits:999999
+	egsl: total allocations: 2   cache hits: 999999
 
 Even though the loop executes one million times, the total number
 of matrix allocations is 2. Note that there is an inner context.
@@ -90,11 +90,10 @@ allocated a matrix of the requested size and re-utilizes the memory.
 For `EGSL` to work, you must remember some simple rules:
 
 1. Always include your code between a pair of `egsl_push`/`egsl_pop` calls.
-
 2. All values are returned as `val` structs: `val` object are not valid outside of the context they are created into (unless you tell `EGSL`).
 
 
-<subsubsection number=no>Start with a <tt>push()</tt>, end with a <tt>pop()</tt></subsubsection>
+<subsubsection number=no>Start with a <tt>egsl\_push()</tt>, end with a <tt>egsl\_pop()</tt></subsubsection>
 
 A first, simple program may look like this:
 

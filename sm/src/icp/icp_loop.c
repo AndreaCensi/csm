@@ -9,6 +9,7 @@
 #include "../sm.h"
 #include "../journal.h"
 
+#define EXPERIMENT_COVARIANCE
 void visibilityTest(LDP ld, const gsl_vector*x_old);
 
 void compute_next_estimate(LDP laser_ref, LDP laser_sens, const gsl_vector*x_old, gsl_vector*x_new);
@@ -108,9 +109,10 @@ void sm_icp(struct sm_params*params, struct sm_result*res) {
 	
 	vector_to_array(best_x, res->x);
 	
-	val cov0_x, dx_dy1, dx_dy2;
 	
 	if(params->doComputeCovariance)  {
+
+		val cov0_x, dx_dy1, dx_dy2;
 		compute_covariance_exact(
 			laser_ref, laser_sens, best_x,
 			&cov0_x, &dx_dy1, &dx_dy2);
@@ -158,12 +160,15 @@ void icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 	gsl_vector * delta_old = gsl_vector_alloc(3);
 	gsl_vector_set_all(delta_old,0.0);
 
-	int oscillations = 0;
 	unsigned int hashes[params->maxIterations];
 	int iteration;
 
-	printf("icp_loop: starting at x_old= %f %f %f°  \n", 
-		gvg(x_old,0),gvg(x_old,1),rad2deg(gvg(x_old,2)));
+	printf("icp_loop: starting at x_old= %s  \n",
+		gsl_friendly_pose(x_old));
+	
+	#ifdef EXPERIMENT_COVARIANCE
+		printf("icp_cov next\n");
+	#endif
 	
 	for(iteration=0; iteration<params->maxIterations;iteration++) {
 		if(jf()) fprintf(jf(), "iteration %d\n", iteration);
@@ -199,18 +204,37 @@ void icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 		journal_pose("x_new", x_new);
 		journal_pose("delta", delta);
 
-		double delta_sign = gvg(delta,0)*gvg(delta_old,0)+gvg(delta,1)*gvg(delta_old,1)+gvg(delta,2)*gvg(delta_old,2);
-		
-		if(delta_sign<0)
-			oscillations ++;
-		else 
-			oscillations = 0;
-		
+
+		/** Checks for oscillations */
 		hashes[iteration] = ld_corr_hash(laser_sens);
-		printf("icp_loop: it. %d  hash = %d nvalid=%d mean error = %f, x_new= %f %f %f°  \n", 
+		printf("icp_loop: it. %d  hash=%d nvalid=%d mean error = %f, x_new= %s\n", 
 			iteration, hashes[iteration], *valid, *total_error/ *valid, 
-			gvg(x_new,0),gvg(x_new,1),rad2deg(gvg(x_new,2)));
+			gsl_friendly_pose(x_new));
+
+#ifdef EXPERIMENT_COVARIANCE
+				val cov0_x, dx_dy1, dx_dy2;
+				compute_covariance_exact(
+					laser_ref, laser_sens, x_new,
+					&cov0_x, &dx_dy1, &dx_dy2);
+		//		egsl_print_spectrum("cov0_x", cov0_x);
+
+				val cov_x = sc(square(params->sigma), cov0_x);
+		printf("icp_cov x_new %f %f %f \n",
+			gvg(x_new,0),gvg(x_new,1),gvg(x_new,2));
 			
+		printf("icp_cov cov0 ");
+			size_t i,j;
+			for(i=0;i<3;i++) {
+				printf("\t");
+				for(j=0;j<3;j++) {
+					printf("%f ", egsl_atm(cov0_x, i, j) );
+				} 
+			}
+
+		printf("\n");
+		
+#endif
+						
 		int detected = 0;
 		int a; for(a=0;a<iteration;a++) {
 			if(hashes[a]==hashes[iteration]) {
@@ -279,10 +303,7 @@ void compute_next_estimate(LDP laser_ref, LDP laser_sens,
 
 	int valid[k];
 	int kk; for(kk=0;kk<k;kk++) valid[kk]=1;
-	
-	//kill_outliers(k, c, x_old, valid);
-///	kill_outliers_trim(k,c,x_old,0.9,valid);
-	
+		
 	journal_write_array_i("valid", k, valid);
 	
 	double x[3];
