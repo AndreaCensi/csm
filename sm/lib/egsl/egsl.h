@@ -75,6 +75,8 @@ void egsl_print(const char*str, val);
 /// Prints eigenvalues and eigenvectors of a symmetric matrix
 void egsl_print_spectrum(const char*s, val v);
 void egsl_print_stats();
+
+
 	
 /// Private implementations things
 void egsl_expect_size(val v, size_t rows, size_t cols);

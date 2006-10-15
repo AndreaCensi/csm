@@ -23,8 +23,8 @@
 		pre {
 			margin-left:  +1em;
 			padding:  +5px;
-			background-color:  #ddd;
-			color:  #0a0;
+			background-color:  #eee;
+			color:  #00e;
 		}
 	</style>
  	<link rel="stylesheet" type="text/css" href="style.css" />

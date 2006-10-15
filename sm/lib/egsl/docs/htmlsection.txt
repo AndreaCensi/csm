@@ -1,0 +1,358 @@
+
+htmlsection - insert section number in HTML and make the table of contents.
+
+* Insert section number in HTML and make links to the section.
+* Make the table of contents.
+* Insert table, figure, and program-list number and make links.
+* Make the index of tables, figures, and program-lists.
+* Insert reference number and make links.
+
+htmlsection Copyright (C) 2001 SAKAI Hiroaki.
+All Rights Reserved.
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2, or (at your option)
+any later version.
+
+SYNOPSIS
+
+    htmlsection [-options] [files ...]
+
+DESCRIPTION
+
+htmlsection is a perl script to insert section number in HTML. When you use
+htmlsection, you don't have to manage section, table, figure, program-list,
+and reference numbers and you don't have to make the table of contents,
+table index, figure index, and program-list index.
+
+If files are specified, htmlsection reads HTML from these files. But, if
+files are not specified, htmlsection reads HTML from standard input.
+
+EXAMPLES
+
+* Insert section number in HTML and make links to the section.
+
+htmlsection changes <section></section> tag to <h1></h1> tag and section
+number. You can use tag <section>, <subsection>, ..., and
+<subsubsubsubsubsection>.
+If name option is specified, htmlsection changes <sectionref> tag to the
+number and title of the section and make link to the section.
+If you want not to use number, use number option as <section number=no>.
+
+Example:
+
+For example, make the file example.html as below,
+-------- begin of example --------
+<section name="intro" number=no>Introduction</section>
+
+    This is introduction.
+
+<section name="howto">How to use htmlsection</section>
+
+<subsection name="howtouse">Let's use htmlsection!</subsection>
+
+    If you want to know about htmlsection, see
+<sectionref name="howto">, and
+<subsectionref name="howtouse" title=no>.
+
+<section number=no>Ending</section>
+-------- end of example --------
+
+And execute, 
+> cat example.html | htmlsection
+htmlsection will output as,
+-------- begin of example --------
+<spacer type=vertical size=70>
+<h1><a name="section_intro">Introduction</a></h1>
+<spacer type=vertical size=30>
+
+    This is introduction.
+
+<spacer type=vertical size=70>
+<h1><a name="section_howto">1 How to use htmlsection</a></h1>
+<spacer type=vertical size=30>
+
+<spacer type=vertical size=50>
+<h2><a name="subsection_howtouse">1.1 Let's use htmlsection!</a></h2>
+<spacer type=vertical size=25>
+
+    If you want to know about htmlsection, see
+<a href="#section_howto">1 How to use htmlsection</a>, and
+<a href="#subsection_howtouse">1.1</a>.
+
+<spacer type=vertical size=70>
+<h1><a name="section_toc2">Ending</a></h1>
+<spacer type=vertical size=30>
+-------- end of example --------
+
+* Make the table of contents.
+
+htmlsection inserts the table of contents at
+<tableofcontents></tableofcontents> tag.
+
+* Insert table, figure, and program-list number and make links.
+
+htmlsection inserts the number at <tablereference> tag.
+
+Example:
+
+Before convertion
+-------- begin of example --------
+<center>
+<tablereference name="sample_table">Sample Table</tablereference>
+<table border=1>
+<tr><td align=center>name</td><td align=center>function</td></tr>
+<tr><td>printf</td><td>print strings by a format.</td></tr>
+</table>
+</center>
+
+<p>
+<center>
+<img src="picture/sample.jpg">
+<br>
+<figurereference name="sample_figure">Sample Figure</figurereference>
+</center>
+
+<p>
+<pre>
+<listreference name="sample_list">Sample List</listreference>
+
+int main()
+{
+  int i;
+  for (i = 0; i < 10; i++)
+    printf("%d\n", i);
+  exit (0);
+}
+</pre>
+
+<p>
+See <tableref name="sample_table">.
+See <figureref name="sample_figure">.
+See <listref name="sample_list">.
+-------- end of example --------
+
+After convertion by htmlsection
+-------- begin of example --------
+<center>
+<a name="tbl_sample_table">table1: Sample Table</a>
+<table border=1>
+<tr><td align=center>name</td><td align=center>function</td></tr>
+<tr><td>printf</td><td>print strings by a format.</td></tr>
+</table>
+</center>
+
+<p>
+<center>
+<img src="picture/sample.jpg">
+<br>
+<a name="fig_sample_figure">figure1: Sample Figure</a>
+</center>
+
+<p>
+<pre>
+<a name="lst_sample_list">list1: Sample List</a>
+
+int main()
+{
+  int i;
+  for (i = 0; i < 10; i++)
+    printf("%d\n", i);
+  exit (0);
+}
+</pre>
+
+<p>
+See <a href="#tbl_sample_table">table1</a>.
+See <a href="#fig_sample_figure">figure1</a>.
+See <a href="#lst_sample_list">list1</a>.
+-------- end of example --------
+
+* Make the index of tables, figures, and program-lists.
+
+htmlsection inserts the index of table, figure, and list at
+<tableindex></tableindex>, <figureindex></figureindex>, and
+<listindex></listindex> tag.
+
+* Insert reference number and make links.
+
+htmlsention makes reference table.
+
+Example:
+
+Before convertion
+-------- begin of example --------
+See <ref name="KandR2">.
+
+<references>
+<reference name="KandR">Brian W. Kernighan and Dennis M. Ritchie,
+"The C Programming Language", Prentice-Hall, 1978.
+<reference name="KandR2">Brian W. Kernighan and Dennis M. Ritchie,
+"The C Programming Language", Second Edition, Prentice Hall, 1988.
+<reference name="NumericalRecipe">William H. Press, Saul A. Teukolsky,
+William T. Vetterling, and Brian P.Flannery,
+"Numerical Recipes in C", Second Edition, Cambridge University Press, 1992.
+</references>
+-------- end of example --------
+
+After convertion by htmlsection
+-------- begin of example --------
+See <a href="#ref_KandR2">[2]</a>.
+
+<ul>
+<li><a name="ref_KandR">[1]</a>Brian W. Kernighan and Dennis M. Ritchie,
+"The C Programming Language", Prentice-Hall, 1978.
+<li><a name="ref_KandR2">[2]</a>Brian W. Kernighan and Dennis M. Ritchie,
+"The C Programming Language", Second Edition, Prentice Hall, 1988.
+<li><a name="ref_NumericalRecipe">[3]</a>William H. Press, Saul A. Teukolsky,
+William T. Vetterling, and Brian P.Flannery,
+"Numerical Recipes in C", Second Edition, Cambridge University Press, 1992.
+</ul>
+-------- end of example --------
+
+OPTIONS
+
+The following options are available:
+
+-h, -help
+    Output help messages.
+
+-max-depth [depth]
+    Specify the max depth of subsection of section tag. If you specify
+    -max-depth 10, you can use <subsubsubsubsubsubsubsubsubsection> tag.
+
+-spacer
+    Spacing <section>, <subsection> and <subsubsection> tag.
+
+-no-spacer
+    No spacing.
+
+-english, -japanese
+    Specify the language. If you don't specify these options, htmlsection
+    sees environment variable LANG.
+
+-start-section [section]
+    Specify the section number at start. For example, if you specify
+    -start-section 3.5.6, htmlsection sets the section number to it at start.
+
+-toc-section [section]
+    Specify the section depth to make the table of contents. If you
+    specify -toc-section 2, htmlsection makes the table of contents
+    by section and subsection only.
+
+-table-section [section]
+    Specify the section number at beginning of table number.
+    If you specify -table-section 2, format of table number is
+    [section_number].[subsection_number].[table_number].
+    If you specify -table-section 0, format of table number is
+    [table_number] only.
+
+-figure-section [section], -list-section [section]
+    Same as -table-section option.
+
+-start-table [number]
+    Specify the table number at start.
+
+-start-figure [number], -start-list [number], -start-ref [number]
+    Same as -start-table option.
+
+-toc-file [filename]
+    If you specify -toc-file, output the table of contents to the file.
+
+-table-file [filename]
+    If you specify -table-file, output the table index to the file.
+
+-figure-file [filename], -list-file [filename]
+    Same as -table-file option.
+
+-o [filename]
+    Specify the output file. If you don't specify the filename, htmlsection
+    outputs HTML to the standard output.
+
+ENVIRONMENT VARIABLES
+
+    LANG
+    Specify the language.
+
+TAGS
+
+    <section>Title</section>, <subsection>Title</subsection>, ...
+        options:
+        name="section_name"
+        number=yes or no
+
+    <sectionref>, <subsectionref>, ...
+        options:
+        name="section_name"
+        title=yes or no
+
+    <tablereference>Title</tablereference>
+        options:
+        name="table_name"
+        number=yes or no
+
+    <figurereference>Title</figurereference>
+        options:
+        name="figure_name"
+        number=yes or no
+
+    <listreference>Title</listreference>
+        options:
+        name="list_name"
+        number=yes or no
+
+    <tableref>Title</tableref>
+        options:
+        name="table_name"
+        title=yes or no
+
+    <figureref>Title</figureref>
+        options:
+        name="figure_name"
+        title=yes or no
+
+    <listref>Title</listref>
+        options:
+        name="list_name"
+        title=yes or no
+
+    <references></references>
+
+    <reference>
+        options:
+        name="reference_name"
+
+    <ref>
+        options:
+        name="reference_name"
+        title=yes or no
+    
+    <tableofcontents></tableofcontents>
+    <tableindex></tableindex>
+    <figureindex></figureindex>
+    <listindex></listindex>
+
+SEE ALSO
+
+    perl(1)
+
+    If you want to see more detail information, See,
+        Comments at the head of htmlsection script.
+        HTMLSECTION_PREFIX/share/doc/htmlsection - Documents.
+        HTMLSECTION_PREFIX/share/doc/htmlsection/README - Readme file.
+        HTMLSECTION_PREFIX/share/doc/htmlsection/htmlsection.html
+            - Sample HTML file and description about htmlsection.
+        http://www.seki.ee.kagu.sut.ac.jp/~sakai/myfreesoft/htmlsection.html
+
+AUTHOR
+
+    Programmed by SAKAI Hiroaki.
+    E-Mail: sakai@seki.ee.kagu.sut.ac.jp, hsakai@m8.people.or.jp,
+            hsakai@pfu.fujitsu.com
+    Web site:
+    http://www.seki.ee.kagu.sut.ac.jp/~sakai/myfreesoft/index.html
+    Mirror site:
+    http://hp.vector.co.jp/authors/VA014157/myfreesoft/index.html
+    http://www.people.or.jp/~hsakai/myfreesoft/index.html
+

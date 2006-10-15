@@ -1,0 +1,1022 @@
+#!/usr/bin/perl
+
+# htmlsection-1.0
+# 
+# htmlsection - insert section number in HTML and make the table of contents.
+# 
+# * Insert section number in HTML and make links to the section.
+# * Make the table of contents.
+# * Insert table, figure, and program-list number and make links.
+# * Make the index of tables, figures, and program-lists.
+# * Insert reference number and make links.
+# 
+# htmlsection Copyright (C) 2001 SAKAI Hiroaki.
+# All Rights Reserved.
+# 
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+# 
+# SYNOPSIS
+# 
+#     htmlsection [-options] [files ...]
+# 
+# DESCRIPTION
+# 
+# htmlsection is a perl script to insert section number in HTML. When you use
+# htmlsection, you don't have to manage section, table, figure, program-list,
+# and reference numbers and you don't have to make the table of contents,
+# table index, figure index, and program-list index.
+# 
+# If files are specified, htmlsection reads HTML from these files. But, if
+# files are not specified, htmlsection reads HTML from standard input.
+# 
+# EXAMPLES
+# 
+# * Insert section number in HTML and make links to the section.
+# 
+# htmlsection changes <section></section> tag to <h1></h1> tag and section
+# number. You can use tag <section>, <subsection>, ..., and
+# <subsubsubsubsubsection>.
+# If name option is specified, htmlsection changes <sectionref> tag to the
+# number and title of the section and make link to the section.
+# If you want not to use number, use number option as <section number=no>.
+# 
+# Example:
+# 
+# For example, make the file example.html as below,
+# -------- begin of example --------
+# <section name="intro" number=no>Introduction</section>
+# 
+#     This is introduction.
+# 
+# <section name="howto">How to use htmlsection</section>
+# 
+# <subsection name="howtouse">Let's use htmlsection!</subsection>
+# 
+#     If you want to know about htmlsection, see
+# <sectionref name="howto">, and
+# <subsectionref name="howtouse" title=no>.
+# 
+# <section number=no>Ending</section>
+# -------- end of example --------
+# 
+# And execute, 
+# > cat example.html | htmlsection
+# htmlsection will output as,
+# -------- begin of example --------
+# <spacer type=vertical size=70>
+# <h1><a name="section_intro">Introduction</a></h1>
+# <spacer type=vertical size=30>
+# 
+#     This is introduction.
+# 
+# <spacer type=vertical size=70>
+# <h1><a name="section_howto">1 How to use htmlsection</a></h1>
+# <spacer type=vertical size=30>
+# 
+# <spacer type=vertical size=50>
+# <h2><a name="subsection_howtouse">1.1 Let's use htmlsection!</a></h2>
+# <spacer type=vertical size=25>
+# 
+#     If you want to know about htmlsection, see
+# <a href="#section_howto">1 How to use htmlsection</a>, and
+# <a href="#subsection_howtouse">1.1</a>.
+# 
+# <spacer type=vertical size=70>
+# <h1><a name="section_toc2">Ending</a></h1>
+# <spacer type=vertical size=30>
+# -------- end of example --------
+# 
+# * Make the table of contents.
+# 
+# htmlsection inserts the table of contents at
+# <tableofcontents></tableofcontents> tag.
+# 
+# * Insert table, figure, and program-list number and make links.
+# 
+# htmlsection inserts the number at <tablereference> tag.
+# 
+# Example:
+# 
+# Before convertion
+# -------- begin of example --------
+# <center>
+# <tablereference name="sample_table">Sample Table</tablereference>
+# <table border=1>
+# <tr><td align=center>name</td><td align=center>function</td></tr>
+# <tr><td>printf</td><td>print strings by a format.</td></tr>
+# </table>
+# </center>
+# 
+# <p>
+# <center>
+# <img src="picture/sample.jpg">
+# <br>
+# <figurereference name="sample_figure">Sample Figure</figurereference>
+# </center>
+# 
+# <p>
+# <pre>
+# <listreference name="sample_list">Sample List</listreference>
+# 
+# int main()
+# {
+#   int i;
+#   for (i = 0; i < 10; i++)
+#     printf("%d\n", i);
+#   exit (0);
+# }
+# </pre>
+# 
+# <p>
+# See <tableref name="sample_table">.
+# See <figureref name="sample_figure">.
+# See <listref name="sample_list">.
+# -------- end of example --------
+# 
+# After convertion by htmlsection
+# -------- begin of example --------
+# <center>
+# <a name="tbl_sample_table">table1: Sample Table</a>
+# <table border=1>
+# <tr><td align=center>name</td><td align=center>function</td></tr>
+# <tr><td>printf</td><td>print strings by a format.</td></tr>
+# </table>
+# </center>
+# 
+# <p>
+# <center>
+# <img src="picture/sample.jpg">
+# <br>
+# <a name="fig_sample_figure">figure1: Sample Figure</a>
+# </center>
+# 
+# <p>
+# <pre>
+# <a name="lst_sample_list">list1: Sample List</a>
+# 
+# int main()
+# {
+#   int i;
+#   for (i = 0; i < 10; i++)
+#     printf("%d\n", i);
+#   exit (0);
+# }
+# </pre>
+# 
+# <p>
+# See <a href="#tbl_sample_table">table1</a>.
+# See <a href="#fig_sample_figure">figure1</a>.
+# See <a href="#lst_sample_list">list1</a>.
+# -------- end of example --------
+# 
+# * Make the index of tables, figures, and program-lists.
+# 
+# htmlsection inserts the index of table, figure, and list at
+# <tableindex></tableindex>, <figureindex></figureindex>, and
+# <listindex></listindex> tag.
+# 
+# * Insert reference number and make links.
+# 
+# htmlsention makes reference table.
+# 
+# Example:
+# 
+# Before convertion
+# -------- begin of example --------
+# See <ref name="KandR2">.
+# 
+# <references>
+# <reference name="KandR">Brian W. Kernighan and Dennis M. Ritchie,
+# "The C Programming Language", Prentice-Hall, 1978.
+# <reference name="KandR2">Brian W. Kernighan and Dennis M. Ritchie,
+# "The C Programming Language", Second Edition, Prentice Hall, 1988.
+# <reference name="NumericalRecipe">William H. Press, Saul A. Teukolsky,
+# William T. Vetterling, and Brian P.Flannery,
+# "Numerical Recipes in C", Second Edition, Cambridge University Press, 1992.
+# </references>
+# -------- end of example --------
+# 
+# After convertion by htmlsection
+# -------- begin of example --------
+# See <a href="#ref_KandR2">[2]</a>.
+# 
+# <ul>
+# <li><a name="ref_KandR">[1]</a>Brian W. Kernighan and Dennis M. Ritchie,
+# "The C Programming Language", Prentice-Hall, 1978.
+# <li><a name="ref_KandR2">[2]</a>Brian W. Kernighan and Dennis M. Ritchie,
+# "The C Programming Language", Second Edition, Prentice Hall, 1988.
+# <li><a name="ref_NumericalRecipe">[3]</a>William H. Press, Saul A. Teukolsky,
+# William T. Vetterling, and Brian P.Flannery,
+# "Numerical Recipes in C", Second Edition, Cambridge University Press, 1992.
+# </ul>
+# -------- end of example --------
+# 
+# OPTIONS
+# 
+# The following options are available:
+# 
+# -h, -help
+#     Output help messages.
+# 
+# -max-depth [depth]
+#     Specify the max depth of subsection of section tag. If you specify
+#     -max-depth 10, you can use <subsubsubsubsubsubsubsubsubsection> tag.
+# 
+# -spacer
+#     Spacing <section>, <subsection> and <subsubsection> tag.
+# 
+# -no-spacer
+#     No spacing.
+# 
+# -english, -japanese
+#     Specify the language. If you don't specify these options, htmlsection
+#     sees environment variable LANG.
+# 
+# -start-section [section]
+#     Specify the section number at start. For example, if you specify
+#     -start-section 3.5.6, htmlsection sets the section number to it at start.
+# 
+# -toc-section [section]
+#     Specify the section depth to make the table of contents. If you
+#     specify -toc-section 2, htmlsection makes the table of contents
+#     by section and subsection only.
+# 
+# -table-section [section]
+#     Specify the section number at beginning of table number.
+#     If you specify -table-section 2, format of table number is
+#     [section_number].[subsection_number].[table_number].
+#     If you specify -table-section 0, format of table number is
+#     [table_number] only.
+# 
+# -figure-section [section], -list-section [section]
+#     Same as -table-section option.
+# 
+# -start-table [number]
+#     Specify the table number at start.
+# 
+# -start-figure [number], -start-list [number], -start-ref [number]
+#     Same as -start-table option.
+# 
+# -toc-file [filename]
+#     If you specify -toc-file, output the table of contents to the file.
+# 
+# -table-file [filename]
+#     If you specify -table-file, output the table index to the file.
+# 
+# -figure-file [filename], -list-file [filename]
+#     Same as -table-file option.
+# 
+# -o [filename]
+#     Specify the output file. If you don't specify the filename, htmlsection
+#     outputs HTML to the standard output.
+# 
+# ENVIRONMENT VARIABLES
+# 
+#     LANG
+#     Specify the language.
+# 
+# TAGS
+# 
+#     <section>Title</section>, <subsection>Title</subsection>, ...
+#         options:
+#         name="section_name"
+#         number=yes or no
+# 
+#     <sectionref>, <subsectionref>, ...
+#         options:
+#         name="section_name"
+#         title=yes or no
+# 
+#     <tablereference>Title</tablereference>
+#         options:
+#         name="table_name"
+#         number=yes or no
+# 
+#     <figurereference>Title</figurereference>
+#         options:
+#         name="figure_name"
+#         number=yes or no
+# 
+#     <listreference>Title</listreference>
+#         options:
+#         name="list_name"
+#         number=yes or no
+# 
+#     <tableref>Title</tableref>
+#         options:
+#         name="table_name"
+#         title=yes or no
+# 
+#     <figureref>Title</figureref>
+#         options:
+#         name="figure_name"
+#         title=yes or no
+# 
+#     <listref>Title</listref>
+#         options:
+#         name="list_name"
+#         title=yes or no
+# 
+#     <references></references>
+# 
+#     <reference>
+#         options:
+#         name="reference_name"
+# 
+#     <ref>
+#         options:
+#         name="reference_name"
+#         title=yes or no
+#     
+#     <tableofcontents></tableofcontents>
+#     <tableindex></tableindex>
+#     <figureindex></figureindex>
+#     <listindex></listindex>
+# 
+# SEE ALSO
+# 
+#     perl(1)
+# 
+#     If you want to see more detail information, See,
+#         Comments at the head of htmlsection script.
+#         /usr/local/share/doc/htmlsection - Documents.
+#         /usr/local/share/doc/htmlsection/README - Readme file.
+#         /usr/local/share/doc/htmlsection/htmlsection.html
+#             - Sample HTML file and description about htmlsection.
+#         http://www.seki.ee.kagu.sut.ac.jp/~sakai/myfreesoft/htmlsection.html
+# 
+# AUTHOR
+# 
+#     Programmed by SAKAI Hiroaki.
+#     E-Mail: sakai@seki.ee.kagu.sut.ac.jp, hsakai@m8.people.or.jp,
+#             hsakai@pfu.fujitsu.com
+#     Web site:
+#     http://www.seki.ee.kagu.sut.ac.jp/~sakai/myfreesoft/index.html
+#     Mirror site:
+#     http://hp.vector.co.jp/authors/VA014157/myfreesoft/index.html
+#     http://www.people.or.jp/~hsakai/myfreesoft/index.html
+# 
+
+#use IO::Handle;
+
+$help_message = "
+htmlsection-1.0
+
+\thtmlsection [-options] [files ...]
+
+htmlsection is a perl script to insert section number in HTML. When you use
+htmlsection, you don't have to manage section, table, figure, program-list,
+and reference numbers and you don't have to make the table of contents,
+table index, figure index, and program-list index.
+
+* Insert section number in HTML and make links to the section.
+* Make the table of contents.
+* Insert table, figure, and program-list number and make links.
+* Make the index of tables, figures, and program-lists.
+* Insert reference number and make links.
+
+If you want to see more detail information, See htmlsection(1),
+documents in /usr/local/share/doc/htmlsection, and comments
+at the head of htmlsection script. And see,
+
+\thttp://www.seki.ee.kagu.sut.ac.jp/~sakai/myfreesoft/htmlsection.html
+
+htmlsection Copyright (C) 2001 SAKAI Hiroaki.
+All Rights Reserved.
+
+";
+
+$max_depth = 6;
+$spacer = 1;
+@prev_space = (70, 50, 30);
+@next_space = (30, 25, 20);
+
+for ($i = 0; $i < $max_depth; $i++) {
+	$section[$i] = 0;
+}
+
+# This is for temporary files. But, temporary files are not used.
+# 
+# -tmpdir [directry]
+#     Specify the directry to make temporary file. If you don't specify
+#     -tmpdir option, environment variable TMPDIR will be used.
+# 
+#     TMPDIR
+#     Directry to make the temporary file. If you don't specify environment
+#     variable TMPDIR and -tmpdir option, /tmp will be used.
+# 
+#$tmpdir = $ENV{"TMPDIR"};
+#if ($tmpdir eq "") { $tmpdir = "/tmp"; }
+
+$lang = $ENV{"LANG"};
+if (($lang eq "ja_JP.EUC") || ($lang eq "japanese")) {
+	$lang = "japanese";
+} else {
+	$lang = "english";
+}
+
+$table_section_num  = 1;
+$figure_section_num = 1;
+$list_section_num   = 1;
+$tablenum  = 0;
+$figurenum = 0;
+$listnum   = 0;
+$refnum = 0;
+$toc_filename    = "";
+$table_filename  = "";
+$figure_filename = "";
+$list_filename   = "";
+$output_filename = "";
+
+$toc_section = 4;
+
+while ($_ = shift(@ARGV)) {
+
+	if (($_ eq "-h") || ($_ eq "-help")) {
+		print "$help_message";
+		exit (0);
+	}
+
+	elsif ($_ eq "-max-depth") { $max_depth = shift(@ARGV); }
+	elsif ($_ eq "-spacer") { $spacer = 1; }
+	elsif ($_ eq "-no-spacer") { $spacer = 0; }
+	elsif ($_ eq "-english" ) { $lang = "english"; }
+	elsif ($_ eq "-japanese") { $lang = "japanese"; }
+	elsif ($_ eq "-start-section") {
+		$sec = shift(@ARGV);
+		for ($i = 0; $i < $max_depth; $i++) {
+			($n) = $sec =~ /^(\d*)/;
+			$sec =~ s/^(\d*)(\D*)//;
+			if ($n ne "") { $section[$i] = $n; }
+		}
+	}
+	elsif ($_ eq "-toc-section"   ) { $toc_section        = shift(@ARGV); }
+	elsif ($_ eq "-table-section" ) { $table_section_num  = shift(@ARGV); }
+	elsif ($_ eq "-figure-section") { $figure_section_num = shift(@ARGV); }
+	elsif ($_ eq "-list-section"  ) { $list_section_num   = shift(@ARGV); }
+	elsif ($_ eq "-start-table" ) { $tablenum  = shift(@ARGV); }
+	elsif ($_ eq "-start-figure") { $figurenum = shift(@ARGV); }
+	elsif ($_ eq "-start-list"  ) { $listnum   = shift(@ARGV); }
+	elsif ($_ eq "-start-ref"   ) { $refnum    = shift(@ARGV); }
+	elsif ($_ eq "-toc-file"    ) { $toc_filename    = shift(@ARGV); }
+	elsif ($_ eq "-table-file"  ) { $table_filename  = shift(@ARGV); }
+	elsif ($_ eq "-figure-file" ) { $figure_filename = shift(@ARGV); }
+	elsif ($_ eq "-list-file"   ) { $list_filename   = shift(@ARGV); }
+	elsif ($_ eq "-o"           ) { $output_filename = shift(@ARGV); }
+# This is for temporary files. But, temporary files are not used.
+#	elsif ($_ eq "-tmpdir") { $tmpdir = shift(@ARGV); }
+}
+
+# This is for temporary files. But, temporary files are not used.
+##system ("rm -f $tmpdir/htmlsection.tmp.*");
+#$r = rand();
+#($filename) = $r =~ /(........)$/;
+#$filename = "$tmpdir/htmlsection.tmp.$filename";
+
+if ($lang eq "japanese") {
+	$table_string = "表";
+	$figure_string = "図";
+	$list_string = "リスト";
+	$reference_string = "文献";
+	$toc_string = "目次";
+	$table_index_string = "表目次";
+	$figure_index_string = "図目次";
+	$list_index_string = "リスト目次";
+	$references_string = "参考文献";
+} else {
+	$table_string = "table";
+	$figure_string = "figure";
+	$list_string = "list";
+	$reference_string = "Reference";
+	$toc_string = "Table of Contents";
+	$table_index_string = "Table Index";
+	$figure_index_string = "Figure Index";
+	$list_index_string = "List Index";
+	$references_string = "References";
+}
+
+@table_toc  = ();
+@figure_toc = ();
+@list_toc   = ();
+
+# This is for temporary files. But, temporary files are not used.
+#$filename_num = 0;
+#$filename_num++;
+#open (WFILE, "> $filename.$filename_num");
+
+# This is for debug
+#WFILE->autoflush(1);
+
+$no_space = 0;
+$toc_num = 0;
+$table_num = 0;
+$figure_num = 0;
+$list_num = 0;
+$ref_num = 0;
+$toc = "";
+$depth = 0;
+$line = 0;
+@lines = ();
+
+while(<>) {
+	$line++;
+	$prev = "";
+	$next = "";
+
+	$sec_flag = 0;
+
+	if (/section/i) {
+		for ($i = 0; $i < $max_depth; $i++) {
+			$sub = "sub" x $i;
+			$sec = $sub . "section";
+			while (($tag) = /(<$sec[^>]*?>.*?<\/$sec[^>]*?>)/i) {
+				$sec_flag = 1;
+#				if (($i > $depth) && ($i - $depth > 1)) {
+#					die "line$line: invalid section.\n";
+#				}
+
+				($title) = $tag =~ /<$sec[^>]*?>(.*?)<\/$sec[^>]*?>/i;
+				($n) = $tag =~ /<$sec[^>]*?number\s*=\s*([^\s>]*)[\s>]/i;
+				if ($n =~ /\".*\"/) { ($n) = $n =~ /\"(.*)\"/; }
+				$number_flag = 1;
+				if    ($n =~ /^yes$/i) { $number_flag = 1; }
+				elsif ($n =~ /^on$/i ) { $number_flag = 1; }
+				elsif ($n =~ /^no$/i ) { $number_flag = 0; }
+				elsif ($n =~ /^off$/i) { $number_flag = 0; }
+
+				if ($number_flag) {
+					$section[$i]++;
+					for ($j = $i+1; $j < $max_depth; $j++) {
+						$section[$j] = 0;
+					}
+
+					$t = "";
+					for ($j = 0; $j <= $i; $j++) {
+						$t = "$t$section[$j]";
+						if ($j < $i) {
+							$t = "$t.";
+						}
+					}
+					$title = "$t $title";
+				} else {
+					$toc_num++;
+					$t = "toc$toc_num";
+				}
+
+				($name) = $tag =~ /<$sec[^>]*?name\s*=\s*([^\s>]*)[\s>]/i;
+				if ($name =~ /\".*\"/) { ($name) = $name =~ /\"(.*)\"/; }
+				$name =~ s/\//\_/g;
+				if ($name eq "") { $name = "$t"; }
+				$name = "$sec\_$name";
+				if ($sectionref[$i]{$name} ne "") {
+					die "line$line: duplicate section name: $name\n";
+				}
+				$sectionref[$i]{$name} = $t;
+				$sectionref_title[$i]{$name} = $title;
+				$t = "<a name=\"$name\">$title</a>";
+				$n = $i+1;
+				unless (s/\Q$tag/<h$n>$t<\/h$n>/i) {
+					die "line$line: fail to parse: $_\n";
+				}
+
+				if ($n <= $toc_section) {
+					if ($n > $depth) {
+						$toc = $toc . "<ul compact>\n" x ($n - $depth);
+					} elsif ($n < $depth) {
+						$toc = $toc . "</ul>\n" x ($depth - $n);
+					}
+					$toc = $toc . "<li><a href=\"#$name\">$title</a></li>\n";
+					$depth = $n;
+
+				}
+
+				if ($n <= $table_section_num ) { $tablenum  = 0; }
+				if ($n <= $figure_section_num) { $figurenum = 0; }
+				if ($n <= $list_section_num  ) { $listnum   = 0; }
+
+				if (($prev_space[$i] != 0) && ($no_space == 0)) {
+					$prev = "<spacer type=vertical size=$prev_space[$i]>\n";
+				}
+				if ($next_space[$i] != 0) {
+					$next = "<spacer type=vertical size=$next_space[$i]>\n";
+					$no_space = 1;
+				}
+			}
+		}
+	}
+
+	if ($sec_flag == 0) {
+		unless (/^\s*$/) {
+			$no_space = 0;
+		}
+	}
+
+	while (($tag) = /(<tablereference[^>]*?>.*?<\/tablereference[^>]*?>)/i) {
+		($title) = $tag =~ /<tablereference[^>]*?>(.*?)<\/tablereference[^>]*?>/i;
+		($num) = $tag =~ /<tablereference[^>]*?number\s*=\s*([^\s>]*)[\s>]/i;
+		if ($num =~ /\".*\"/) { ($num) = $num =~ /\"(.*)\"/; }
+		$number_flag = 1;
+		if    ($num =~ /^yes$/i) { $number_flag = 1; }
+		elsif ($num =~ /^on$/i ) { $number_flag = 1; }
+		elsif ($num =~ /^no$/i ) { $number_flag = 0; }
+		elsif ($num =~ /^off$/i) { $number_flag = 0; }
+		($name) = $tag =~ /<tablereference[^>]*?name\s*=\s*([^\s>]*)[\s>]/i;
+		if ($name =~ /\".*\"/) { ($name) = $name =~ /\"(.*)\"/; }
+		$name =~ s/\//\_/g;
+		if ($number_flag) {
+			$tablenum++;
+			$r = "";
+			for ($i = 0; $i < $table_section_num; $i++) {
+				if ($section[$i] < 1) { last; }
+				$r = "$r$section[$i].";
+			}
+			$r = "$r$tablenum";
+			if ($name eq "") { $name = "$r"; }
+		} else {
+			$table_num++;
+			$r = "";
+			if ($name eq "") { $name = "num$table_num"; }
+		}
+		$name = "tbl_$name";
+		$r = "$table_string$r";
+		$ref = "$r: $title";
+		if ($tableref{$name} ne "") {
+			die "line$line: duplicate table name: $name\n";
+		}
+		$tableref{$name} = $r;
+		$tableref_title{$name} = $ref;
+		$t = "<li><a href=\"#$name\">$ref</a>\n";
+		push(@table_toc, $t);
+		unless (s/\Q$tag/<a name=\"$name\">$ref<\/a>/i) {
+			die "line$line: fail to parse: $_\n";
+		}
+	}
+
+	while (($tag) = /(<figurereference[^>]*?>.*?<\/figurereference[^>]*?>)/i) {
+		($title) = $tag =~ /<figurereference[^>]*?>(.*?)<\/figurereference[^>]*?>/i;
+		($num) = $tag =~ /<figurereference[^>]*?number\s*=\s*([^\s>]*)[\s>]/i;
+		if ($num =~ /\".*\"/) { ($num) = $num =~ /\"(.*)\"/; }
+		$number_flag = 1;
+		if    ($num =~ /^yes$/i) { $number_flag = 1; }
+		elsif ($num =~ /^on$/i ) { $number_flag = 1; }
+		elsif ($num =~ /^no$/i ) { $number_flag = 0; }
+		elsif ($num =~ /^off$/i) { $number_flag = 0; }
+		($name) = $tag =~ /<figurereference[^>]*?name\s*=\s*([^\s>]*)[\s>]/i;
+		if ($name =~ /\".*\"/) { ($name) = $name =~ /\"(.*)\"/; }
+		$name =~ s/\//\_/g;
+		if ($number_flag) {
+			$figurenum++;
+			$r = "";
+			for ($i = 0; $i < $figure_section_num; $i++) {
+				if ($section[$i] < 1) { last; }
+				$r = "$r$section[$i].";
+			}
+			$r = "$r$figurenum";
+			if ($name eq "") { $name = "$r"; }
+		} else {
+			$figure_num++;
+			$r = "";
+			if ($name eq "") { $name = "num$figure_num"; }
+		}
+		$name = "fig_$name";
+		$r = "$figure_string$r";
+		$ref = "$r: $title";
+		if ($figureref{$name} ne "") {
+			die "line$line: duplicate figure name: $name\n";
+		}
+		$figureref{$name} = $r;
+		$figureref_title{$name} = $ref;
+		$t = "<li><a href=\"#$name\">$ref</a>\n";
+		push(@figure_toc, $t);
+		unless (s/\Q$tag/<a name=\"$name\">$ref<\/a>/i) {
+			die "line$line: fail to parse: $_\n";
+		}
+	}
+
+	while (($tag) = /(<listreference[^>]*?>.*?<\/listreference[^>]*?>)/i) {
+		($title) = $tag =~ /<listreference[^>]*?>(.*?)<\/listreference[^>]*?>/i;
+		($num) = $tag =~ /<listreference[^>]*?number\s*=\s*([^\s>]*)[\s>]/i;
+		if ($num =~ /\".*\"/) { ($num) = $num =~ /\"(.*)\"/; }
+		$number_flag = 1;
+		if    ($num =~ /^yes$/i) { $number_flag = 1; }
+		elsif ($num =~ /^on$/i ) { $number_flag = 1; }
+		elsif ($num =~ /^no$/i ) { $number_flag = 0; }
+		elsif ($num =~ /^off$/i) { $number_flag = 0; }
+		($name) = $tag =~ /<listreference[^>]*?name\s*=\s*([^\s>]*)[\s>]/i;
+		if ($name =~ /\".*\"/) { ($name) = $name =~ /\"(.*)\"/; }
+		$name =~ s/\//\_/g;
+		if ($number_flag) {
+			$listnum++;
+			$r = "";
+			for ($i = 0; $i < $list_section_num; $i++) {
+				if ($section[$i] < 1) { last; }
+				$r = "$r$section[$i].";
+			}
+			$r = "$r$listnum";
+			if ($name eq "") { $name = "$r"; }
+		} else {
+			$list_num++;
+			$r = "";
+			if ($name eq "") { $name = "num$list_num"; }
+		}
+		$name = "lst_$name";
+		$r = "$list_string$r";
+		$ref = "$r: $title";
+		if ($listref{$name} ne "") {
+			die "line$line: duplicate list name: $name\n";
+		}
+		$listref{$name} = $r;
+		$listref_title{$name} = $ref;
+		$t = "<li><a href=\"#$name\">$ref</a>\n";
+		push(@list_toc, $t);
+		unless (s/\Q$tag/<a name=\"$name\">$ref<\/a>/i) {
+			die "line$line: fail to parse: $_\n";
+		}
+	}
+
+	if (($spacer) && ($prev ne "")) {
+# This is for temporary files. But, temporary files are not used.
+#		print WFILE $prev;
+		push(@lines, $prev);
+	}
+# This is for temporary files. But, temporary files are not used.
+#	print WFILE $_;
+	push(@lines, $_);
+	if (($spacer) && ($next ne "")) {
+# This is for temporary files. But, temporary files are not used.
+#		print WFILE $next;
+		push(@lines, $next);
+	}
+}
+
+$toc = $toc . "</ul>\n" x ($depth);
+
+# This is for temporary files. But, temporary files are not used.
+#close (WFILE);
+#open (RFILE, "< $filename.$filename_num");
+#$filename_num++;
+#open (WFILE, "> $filename.$filename_num");
+
+$line = 0;
+@lines2 = ();
+
+# This is for temporary files. But, temporary files are not used.
+#while (<RFILE>)
+while ($_ = shift(@lines))
+{
+	$line++;
+
+	if (/sectionref/i) {
+		for ($i = 0; $i < $max_depth; $i++) {
+			$sub = "sub" x $i;
+			$sec = $sub . "sectionref";
+
+			while (($tag) = /(<$sec[^>]*?>)/i) {
+				($t) = $tag =~ /<$sec[^>]*?title\s*=\s*([^\s>]*)[\s>]/i;
+				if ($t =~ /\".*\"/) { ($t) = $t =~ /\"(.*)\"/; }
+				($n) = $tag =~ /<$sec[^>]*?name\s*=\s*([^\s>]*)[\s>]/i;
+				if ($n =~ /\".*\"/) { ($n) = $n =~ /\"(.*)\"/; }
+				$title_flag = 1;
+				if    ($t =~ /^yes$/i) { $title_flag = 1; }
+				elsif ($t =~ /^on$/i ) { $title_flag = 1; }
+				elsif ($t =~ /^no$/i ) { $title_flag = 0; }
+				elsif ($t =~ /^off$/i) { $title_flag = 0; }
+				$n =~ s/\//\_/g;
+				if ($n eq "") { die "line$line: $_:no name.\n"; }
+				$name = "$sub" . "section\_$n";
+				if ($title_flag) { $ref = $sectionref_title[$i]{$name}; }
+				else { $ref = $sectionref[$i]{$name}; }
+				if ($ref eq "") { die "line$line: $_$n: not found.\n"; }
+				unless (s/\Q$tag/<a href=\"\#$name\">$ref<\/a>/i) {
+					die "line$line: fail to parse: $_\n";
+				}
+			}
+		}
+	}
+
+	while (($tag) = /(<tableref[^>]*?>)/i) {
+		($t) = $tag =~ /<tableref[^>]*?title\s*=\s*([^\s>]*)[\s>]/i;
+		if ($t =~ /\".*\"/) { ($t) = $t =~ /\"(.*)\"/; }
+		($n) = $tag =~ /<tableref[^>]*?name\s*=\s*([^\s>]*)[\s>]/i;
+		if ($n =~ /\".*\"/) { ($n) = $n =~ /\"(.*)\"/; }
+		$title_flag = 0;
+		if    ($t =~ /^yes$/i) { $title_flag = 1; }
+		elsif ($t =~ /^on$/i ) { $title_flag = 1; }
+		elsif ($t =~ /^no$/i ) { $title_flag = 0; }
+		elsif ($t =~ /^off$/i) { $title_flag = 0; }
+		$n =~ s/\//\_/g;
+		if ($n eq "") { die "line$line: $_:no name.\n"; }
+		$name = "tbl_$n";
+		if ($title_flag) { $ref = $tableref_title{$name}; }
+		else { $ref = $tableref{$name}; }
+		if ($ref eq "") { die "line$line: $_$n: not found.\n"; }
+		unless (s/\Q$tag/<a href=\"\#$name\">$ref<\/a>/i) {
+			die "line$line: fail to parse: $_\n";
+		}
+	}
+	while (($tag) = /(<figureref[^>]*?>)/i) {
+		($t) = $tag =~ /<figureref[^>]*?title\s*=\s*([^\s>]*)[\s>]/i;
+		if ($t =~ /\".*\"/) { ($t) = $t =~ /\"(.*)\"/; }
+		($n) = $tag =~ /<figureref[^>]*?name\s*=\s*([^\s>]*)[\s>]/i;
+		if ($n =~ /\".*\"/) { ($n) = $n =~ /\"(.*)\"/; }
+		$title_flag = 0;
+		if    ($t =~ /^yes$/i) { $title_flag = 1; }
+		elsif ($t =~ /^on$/i ) { $title_flag = 1; }
+		elsif ($t =~ /^no$/i ) { $title_flag = 0; }
+		elsif ($t =~ /^off$/i) { $title_flag = 0; }
+		$n =~ s/\//\_/g;
+		if ($n eq "") { die "line$line: $_:no name.\n"; }
+		$name = "fig_$n";
+		if ($title_flag) { $ref = $figureref_title{$name}; }
+		else { $ref = $figureref{$name}; }
+		if ($ref eq "") { die "line$line: $_$n: not found.\n"; }
+		unless (s/\Q$tag/<a href=\"\#$name\">$ref<\/a>/i) {
+			die "line$line: fail to parse: $_\n";
+		}
+	}
+	while (($tag) = /(<listref[^>]*?>)/i) {
+		($t) = $tag =~ /<listref[^>]*?title\s*=\s*([^\s>]*)[\s>]/i;
+		if ($t =~ /\".*\"/) { ($t) = $t =~ /\"(.*)\"/; }
+		($n) = $tag =~ /<listref[^>]*?name\s*=\s*([^\s>]*)[\s>]/i;
+		if ($n =~ /\".*\"/) { ($n) = $n =~ /\"(.*)\"/; }
+		$title_flag = 0;
+		if    ($t =~ /^yes$/i) { $title_flag = 1; }
+		elsif ($t =~ /^on$/i ) { $title_flag = 1; }
+		elsif ($t =~ /^no$/i ) { $title_flag = 0; }
+		elsif ($t =~ /^off$/i) { $title_flag = 0; }
+		$n =~ s/\//\_/g;
+		if ($n eq "") { die "line$line: $_:no name.\n"; }
+		$name = "lst_$n";
+		if ($title_flag) { $ref = $listref_title{$name}; }
+		else { $ref = $listref{$name}; }
+		if ($ref eq "") { die "line$line: $_$n: not found.\n"; }
+		unless (s/\Q$tag/<a href=\"\#$name\">$ref<\/a>/i) {
+			die "line$line: fail to parse: $_\n";
+		}
+	}
+# This is for temporary files. But, temporary files are not used.
+#	print WFILE $_;
+	push(@lines2, $_);
+}
+
+# This is for temporary files. But, temporary files are not used.
+#close (RFILE);
+#close (WFILE);
+#open (RFILE, "< $filename.$filename_num");
+#$filename_num++;
+#open (WFILE, "> $filename.$filename_num");
+
+@lines = ();
+
+# This is for temporary files. But, temporary files are not used.
+#while (<RFILE>)
+while ($_ = shift(@lines2))
+{
+	if (/<references>/i) {
+		s/<references>/<h1>$references_string<\/h1>\n\n<ul>/i;
+		while (!(/<\/references>/i)) {
+			if (($tag) = /(<reference[^>]*?>)/i) {
+				$refnum++;
+				($name) = $tag =~ /<reference[^>]*?name\s*=\s*([^\s>]*)[\s>]/i;
+				if ($name =~ /\".*\"/) { ($name) = $name =~ /\"(.*)\"/; }
+				$name =~ s/\//\_/g;
+				if ($name eq "") { $name = "$refnum"; }
+				$name = "ref_$name";
+				if ($reference{$name} ne "") {
+					die "line$line: duplicate reference name: $name\n";
+				}
+				$reference{$name} = $refnum;
+				unless (s/\Q$tag/<li><a name=\"$name\">\[$refnum\]<\/a>/i) {
+					die "line$line: fail to parse: $_\n";
+				}
+			}
+# This is for temporary files. But, temporary files are not used.
+#			print WFILE $_;
+#			unless ($_ = <RFILE>) { last; }
+			push(@lines, $_);
+			unless ($_ = shift(@lines2)) { last; }
+		}
+		s/<\/references>/<\/ul>/i;
+	}
+# This is for temporary files. But, temporary files are not used.
+#	print WFILE $_;
+	push(@lines, $_);
+}
+
+# This is for temporary files. But, temporary files are not used.
+#close (RFILE);
+#close (WFILE);
+#open (RFILE, "< $filename.$filename_num");
+#$filename_num++;
+#open (WFILE, "> $filename.$filename_num");
+
+$line = 0;
+@lines2 = ();
+
+# This is for temporary files. But, temporary files are not used.
+#while (<RFILE>)
+while ($_ = shift(@lines))
+{
+	$line++;
+	while (($tag) = /(<ref[^>]*?>)/i) {
+		($t) = $tag =~ /<ref[^>]*?title\s*=\s*([^\s>]*)[\s>]/i;
+		if ($t =~ /\".*\"/) { ($t) = $t =~ /\"(.*)\"/; }
+		($n) = $tag =~ /<ref[^>]*?name\s*=\s*([^\s>]*)[\s>]/i;
+		if ($n =~ /\".*\"/) { ($n) = $n =~ /\"(.*)\"/; }
+		$title_flag = 0;
+		if    ($t =~ /^yes$/i) { $title_flag = 1; }
+		elsif ($t =~ /^on$/i ) { $title_flag = 1; }
+		elsif ($t =~ /^no$/i ) { $title_flag = 0; }
+		elsif ($t =~ /^off$/i) { $title_flag = 0; }
+		$n =~ s/\//\_/g;
+		if ($n eq "") { die "line$line: $_:no name.\n"; }
+		$name = "ref_$n";
+		$ref = $reference{$name};
+		if ($ref eq "") { die "line$line: $_$n: not found.\n"; }
+		if ($title_flag) { $ref = "$reference_string\[$ref\]"; }
+		else { $ref = "\[$ref\]"; }
+		unless (s/\Q$tag/<a href=\"\#$name\">$ref<\/a>/i) {
+			die "line$line: fail to parse: $_\n";
+		}
+	}
+# This is for temporary files. But, temporary files are not used.
+#	print WFILE $_;
+	push(@lines2, $_);
+}
+
+# This is for temporary files. But, temporary files are not used.
+#close (RFILE);
+#close (WFILE);
+#open (RFILE, "< $filename.$filename_num");
+
+if ($output_filename ne "") {
+	open (WFILE, "> $output_filename") || die "cannot open: $output_filename\n";
+}
+
+$toc_string = "\n\n$toc";
+#AC $toc_string = "<h1>$toc_string<\/h1>\n\n$toc";
+$table_index_string = "<h1>$table_index_string<\/h1>\n\n<ul>\n@table_toc<\/ul>";
+$figure_index_string = "<h1>$figure_index_string<\/h1>\n\n<ul>\n@figure_toc<\/ul>";
+$list_index_string = "<h1>$list_index_string<\/h1>\n\n<ul>\n@list_toc<\/ul>";
+
+# This is for temporary files. But, temporary files are not used.
+#while (<RFILE>)
+while ($_ = shift(@lines2))
+{
+	if (/<tableofcontents>.*<\/tableofcontents>/i) {
+		s/<tableofcontents>.*?<\/tableofcontents>/$toc_string/i;
+	}
+	if (/<tableindex>.*<\/tableindex>/i) {
+		s/<tableindex>.*?<\/tableindex>/$table_index_string/i;
+	}
+	if (/<figureindex>.*<\/figureindex>/i) {
+		s/<figureindex>.*?<\/figureindex>/$figure_index_string/i;
+	}
+	if (/<listindex>.*<\/listindex>/i) {
+		s/<listindex>.*?<\/listindex>/$list_index_string/i;
+	}
+	if ($output_filename ne "") {
+		print WFILE $_;
+	} else {
+		print $_;
+	}
+}
+
+# This is for temporary files. But, temporary files are not used.
+#close (RFILE);
+
+if ($output_filename ne "") {
+	close (WFILE);
+}
+
+if ($toc_filename ne "") {
+	open (WFILE, "> $toc_filename");
+	print WFILE "$toc_string";
+	close (WFILE);
+}
+if ($table_filename ne "") {
+	open (WFILE, "> $table_filename");
+	print WFILE "$table_index_string";
+	close (WFILE);
+}
+if ($figure_filename ne "") {
+	open (WFILE, "> $figure_filename");
+	print WFILE "$figure_index_string";
+	close (WFILE);
+}
+if ($list_filename ne "") {
+	open (WFILE, "> $list_filename");
+	print WFILE "$list_index_string";
+	close (WFILE);
+}
+
+# This is for temporary files. But, temporary files are not used.
+#system ("rm -f $filename.*");
+
+exit (0);
+
+###############################################################################
+# htmlsection-1.0
