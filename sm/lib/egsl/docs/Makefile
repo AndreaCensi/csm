@@ -1,4 +1,5 @@
 
+input=egsl.txt
 output=egsl.html
 
 htmlsection=./htmlsection -no-spacer
@@ -11,8 +12,8 @@ tmp=tmp
 
 all: $(output)
 
-$(output): README.txt $(header) $(footer)
-	$(markdown) $< | $(htmlsection) > $(tmp)
+$(output): $(input) $(header) $(footer)
+	$(markdown) $(input) | $(htmlsection) > $(tmp)
 	cat $(header) $(tmp) $(footer) > $@
 	-rm $(tmp)
 
