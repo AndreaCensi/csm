@@ -44,12 +44,12 @@ computations easy. It is based on
 <ul compact>
 <li><a href="#subsubsection_toc2">Download</a></li>
 <li><a href="#subsubsection_toc3">License</a></li>
-<li><a href="#subsubsection_toc4">Acknoweledgements</a></li>
+<li><a href="#subsubsection_toc4">Acknowledgements</a></li>
 </ul>
 <li><a href="#subsection_toc5">The two main features of <tt>EGSL</tt></a></li>
 <ul compact>
-<li><a href="#subsubsection_toc6">Feature #1: Automatic (de)allocation of matrixes</a></li>
-<li><a href="#subsubsection_toc7">Feature #2: Caching of matrixes</a></li>
+<li><a href="#subsubsection_toc6">Feature #1: Automatic (de)allocation of matrices</a></li>
+<li><a href="#subsubsection_toc7">Feature #2: Caching of matrices</a></li>
 </ul>
 <li><a href="#subsection_toc8">Usage</a></li>
 <ul compact>
@@ -59,8 +59,8 @@ computations easy. It is based on
 </ul>
 <li><a href="#subsection_toc12">Library reference</a></li>
 <ul compact>
-<li><a href="#subsubsection_toc13">Allocation of matrixes</a></li>
-<li><a href="#subsubsection_toc14">Operation with matrixes</a></li>
+<li><a href="#subsubsection_toc13">Allocation of matrices</a></li>
+<li><a href="#subsubsection_toc14">Operation with matrices</a></li>
 <li><a href="#subsubsection_toc15">Accessing matrix elements</a></li>
 <li><a href="#subsubsection_toc16">Eigenvalues and eigenvectors</a></li>
 <li><a href="#subsubsection_toc17">Conversions</a></li>
@@ -85,15 +85,15 @@ and <code>gsl_matrix_free</code>.</p>
 
 <p><h3><a name="subsubsection_toc3">License</a></h3></p>
 
-<p><h3><a name="subsubsection_toc4">Acknoweledgements</a></h3></p>
+<p><h3><a name="subsubsection_toc4">Acknowledgements</a></h3></p>
 
 <p>This documentation is written using <a href="http://daringfireball.net/projects/markdown/">Markdown</a> and a tool called <a href="http://www.seki.ee.kagu.sut.ac.jp/~sakai/myfreesoft/htmlsection.html">htmlsection</a>.</p>
 
 <p><h2><a name="subsection_toc5">The two main features of <tt>EGSL</tt></a></h2></p>
 
-<p><h3><a name="subsubsection_toc6">Feature #1: Automatic (de)allocation of matrixes</a></h3></p>
+<p><h3><a name="subsubsection_toc6">Feature #1: Automatic (de)allocation of matrices</a></h3></p>
 
-<p>Its main feature is that matrixes are automatically allocated and 
+<p>Its main feature is that matrices are automatically allocated and 
 deallocated. For example, you can write:</p>
 
 <pre><code>egsl_push();
@@ -106,9 +106,9 @@ deallocated. For example, you can write:</p>
 egsl_pop();
 </code></pre>
 
-<p>and not worry about (de)allocalization.</p>
+<p>and not worry about (de)allocation.</p>
 
-<p><h3><a name="subsubsection_toc7">Feature #2: Caching of matrixes</a></h3></p>
+<p><h3><a name="subsubsection_toc7">Feature #2: Caching of matrices</a></h3></p>
 
 <p>This feature makes <code>EGSL</code> faster than any other C++ equivalent that
 uses objects. Consider this code:</p>
@@ -193,7 +193,7 @@ int main() {
     // First of all, push a context
     egsl_push();
 
-        // push anoter
+        // push another
         egsl_push();
 
             // Allocates a matrix
@@ -242,10 +242,10 @@ into:</p>
 <li><code>m(A, B)</code> is matrix--matrix multiplication; <code>A + B</code></li>
 </ul>
 
-<p>This is the best that we can do withouth operator overloading. </p>
+<p>This is the best that we can do without operator overloading. </p>
 
 <p>Notice that for evaluating this expression <code>EGSL</code> needs a lot of 
-intermediate matrixes, and it's managing all memory allocations for you.
+intermediate matrices, and it's managing all memory allocations for you.
 How many <code>egsl_matrix_alloc</code> would you need to write the same code in <code>GSL</code>?</p>
 
 <p><h2><a name="subsection_toc12">Library reference</a></h2></p>
@@ -254,19 +254,19 @@ How many <code>egsl_matrix_alloc</code> would you need to write the same code in
 extended function name (beginning with <code>egsl_</code>) and the macro
 defined in <code>&lt;egsl_macros.h&gt;</code></p>
 
-<p><h3><a name="subsubsection_toc13">Allocation of matrixes</a></h3></p>
+<p><h3><a name="subsubsection_toc13">Allocation of matrices</a></h3></p>
 
 <ul>
 <li><code>zeros(rows, cols)</code> (<code>egsl_zeros</code>): Allocates a matrix with all zeros.</li>
 <li><code>ones(rows, cols)</code> (<code>egsl_ones</code>): Allocates a matrix with all zeros.</li>
 </ul>
 
-<p><h3><a name="subsubsection_toc14">Operation with matrixes</a></h3></p>
+<p><h3><a name="subsubsection_toc14">Operation with matrices</a></h3></p>
 
 <p>All this functions return a new <code>val</code>:</p>
 
 <ul>
-<li><code>sum(A, B)</code> (<code>egsl_sum</code>):  Sums two matrixes.</li>
+<li><code>sum(A, B)</code> (<code>egsl_sum</code>):  Sums two matrices.</li>
 <li><code>sc(a, B)</code> (<code>egsl_scale</code>): Represents scalar--matrix multiplication: <code>a * B</code></li>
 <li><code>m(A, B)</code> (<code>egsl_mult</code>): Represents matrix--matrix multiplication; <code>A * B</code></li>
 <li><code>inv(A)</code> (<code>egsl_inverse</code>): Returns the inverse of <code>A</code>.</li>

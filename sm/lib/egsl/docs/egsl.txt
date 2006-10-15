@@ -22,15 +22,15 @@ Download from [here](http://purl.org/censi/2006/egsl).
 
 <subsubsection number=no>License</subsubsection>
 
-<subsubsection number=no>Acknoweledgements</subsubsection>
+<subsubsection number=no>Acknowledgements</subsubsection>
 
 This documentation is written using [Markdown](http://daringfireball.net/projects/markdown/) and a tool called [htmlsection](http://www.seki.ee.kagu.sut.ac.jp/~sakai/myfreesoft/htmlsection.html).
 
 <subsection number=no>The two main features of <tt>EGSL</tt></subsection>
 
-<subsubsection number=no>Feature #1: Automatic (de)allocation of matrixes</subsubsection number=no>
+<subsubsection number=no>Feature #1: Automatic (de)allocation of matrices</subsubsection number=no>
 
-Its main feature is that matrixes are automatically allocated and 
+Its main feature is that matrices are automatically allocated and 
 deallocated. For example, you can write:
 
 	egsl_push();
@@ -42,10 +42,10 @@ deallocated. For example, you can write:
 	
 	egsl_pop();
 
-and not worry about (de)allocalization.
+and not worry about (de)allocation.
 
 
-<subsubsection number=no>Feature #2: Caching of matrixes</subsubsection number=no>
+<subsubsection number=no>Feature #2: Caching of matrices</subsubsection number=no>
 
 This feature makes `EGSL` faster than any other C++ equivalent that
 uses objects. Consider this code:
@@ -127,7 +127,7 @@ you may use the `egsl_promote(val)` function.
 		// First of all, push a context
 		egsl_push();
 		
-			// push anoter
+			// push another
 			egsl_push();
 			
 				// Allocates a matrix
@@ -170,10 +170,10 @@ where
 * `sc(a, B)` is scalar--matrix multiplication: `a * B`
 * `m(A, B)` is matrix--matrix multiplication; `A + B`
 
-This is the best that we can do withouth operator overloading. 
+This is the best that we can do without operator overloading. 
 
 Notice that for evaluating this expression `EGSL` needs a lot of 
-intermediate matrixes, and it's managing all memory allocations for you.
+intermediate matrices, and it's managing all memory allocations for you.
 How many `egsl_matrix_alloc` would you need to write the same code in `GSL`?
 
 <subsection number=no>Library reference</subsection>
@@ -182,16 +182,16 @@ This is a summary of available operations. It is shown both the
 extended function name (beginning with `egsl_`) and the macro
 defined in `<egsl_macros.h>`
 
-<subsubsection number=no>Allocation of matrixes</subsubsection>
+<subsubsection number=no>Allocation of matrices</subsubsection>
 
 * `zeros(rows, cols)` (`egsl_zeros`): Allocates a matrix with all zeros.
 * `ones(rows, cols)` (`egsl_ones`): Allocates a matrix with all zeros.
 
-<subsubsection number=no>Operation with matrixes</subsubsection>
+<subsubsection number=no>Operation with matrices</subsubsection>
 
 All this functions return a new `val`:
 
-* `sum(A, B)` (`egsl_sum`):  Sums two matrixes.
+* `sum(A, B)` (`egsl_sum`):  Sums two matrices.
 * `sc(a, B)` (`egsl_scale`): Represents scalar--matrix multiplication: `a * B`
 * `m(A, B)` (`egsl_mult`): Represents matrix--matrix multiplication; `A * B`
 * `inv(A)` (`egsl_inverse`): Returns the inverse of `A`.
