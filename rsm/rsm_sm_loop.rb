@@ -25,12 +25,11 @@ def scan_matching(klass,scan_list,input,output,params)
 			next
 		end
 
-		puts "Ref: #{pv(laser_ref.odometry)}"
+#		puts "Ref: #{pv(laser_ref.odometry)}"
 #		puts "New: #{pv(laser_sens.odometry)}"
 
 		if (not scan_list.empty?) && (not scan_list.include? count)
 			break if count > scan_list.max
-			puts "NEXT!"
 			count+=1
 			laser_ref = laser_sens;
 			next
@@ -48,7 +47,7 @@ def scan_matching(klass,scan_list,input,output,params)
 		sm.params[:laser_sens] = laser_sens;
 		sm.params[:firstGuess] = u
 
-		if true
+		if false
 			sm.params[:laser_sens] = laser_ref;
 			sm.params[:firstGuess] = GSL::Vector.alloc(0,0,0)
 		end

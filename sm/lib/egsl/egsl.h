@@ -12,13 +12,16 @@ struct egsl_val {
 
 typedef struct egsl_val val;
 
-
 /// Core functions
 void egsl_push();
 void egsl_pop();
 double* egsl_atmp(val v, size_t i, size_t j);
 val egsl_alloc(size_t rows, size_t columns);
+val egsl_alloc_in_context(int cid, size_t rows, size_t cols);
 gsl_matrix * egsl_gslm(val v);
+/// Creates a copy of v in the previous context.
+val egsl_promote(val v);
+
 
 /// Operations among values
 val egsl_scale(double, val);
@@ -35,6 +38,8 @@ void egsl_add_to(val v1, val v2);
 void egsl_add_to_col(val v1, size_t j, val v2);
 
 double egsl_norm(val);
+
+void egsl_symm_eig(val v, double* eigenvalues, val* eigenvectors);
 
 double egsl_atv(val, size_t i);
 double egsl_atm(val, size_t i, size_t j);

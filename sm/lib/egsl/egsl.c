@@ -62,63 +62,9 @@ int its_var_index(val v) {
 }
 #endif
 
-void egsl_push() {
-	if(egsl_first_time) {
-		int c;
-		for(c=0;c<MAX_CONTEXTS;c++) {
-			egsl_contexts[c].nallocated = 0;
-		}
-		egsl_first_time  = 0;
-	}
-	cid++;
-	assert(cid<MAX_CONTEXTS);// "Maximum number of contexts reached");
-}
-
-void egsl_pop() {
-	assert(cid>=0);//, "No egsl_push before?");
-	egsl_contexts[cid].nvars = 0;
-	cid--;
-#if 0
-	if(cid==0) {
-		printf("egsl: total allocations: %d   cache hits:%d\n",	
-			egsl_total_allocations, egsl_cache_hits);
-		printf("egsl: sizeof(val) = %d\n",(int)sizeof(val));
-	}
-#endif
-}
-
-val egsl_alloc(size_t rows, size_t columns) {
-	struct egsl_context*c = egsl_contexts+cid;
-	if(c->nvars>=MAX_VALS) {
-		printf("Limit reached\n");
-		error();
-	}
-	int index = c->nvars;
-	if(index<c->nallocated) {
-		gsl_matrix*m = c->vars[index].gsl_m;
-		if(m->size1 == rows && m->size2 == columns) {
-			egsl_cache_hits++;
-			c->nvars++;
-			return assemble_val(cid,index,c->vars[index].gsl_m);
-		} else {
-			egsl_total_allocations++;
-			gsl_matrix_free(m);
-			c->vars[index].gsl_m = gsl_matrix_alloc((size_t)rows,(size_t)columns);
-			c->nvars++;
-			return assemble_val(cid,index,c->vars[index].gsl_m);
-		}
-	} else {
-		egsl_total_allocations++;
-		c->vars[index].gsl_m = gsl_matrix_alloc((size_t)rows,(size_t)columns);
-		c->nvars++;
-		c->nallocated++;
-		return assemble_val(cid,index,c->vars[index].gsl_m);
-	}
-	//printf("Allocated %d\n",v);
-}
 
 #if 1
-inline void check_valid_val(val v) {}	
+inline void check_valid_val(val v) { int i = v.cid; v.cid=i;}	
 #else
 void check_valid_val(val v) {
 	int context = its_context(v);
@@ -138,10 +84,85 @@ void check_valid_val(val v) {
 inline gsl_matrix * egsl_gslm(val v) {
 	check_valid_val(v);
 	return v.gslm;
-/*	int context = its_context(v);
-	int var_index = its_var_index(v);
-	return egsl_contexts[context].vars[var_index].gsl_m;*/
 }
+
+
+void egsl_push() {
+	if(egsl_first_time) {
+		int c;
+		for(c=0;c<MAX_CONTEXTS;c++) {
+			egsl_contexts[c].nallocated = 0;
+		}
+		egsl_first_time  = 0;
+	}
+	cid++;
+	assert(cid<MAX_CONTEXTS);// "Maximum number of contexts reached");
+}
+
+void egsl_pop() {
+	assert(cid>=0);//, "No egsl_push before?");
+	egsl_contexts[cid].nvars = 0;
+	cid--;
+}
+
+void egsl_stats() {
+	printf("egsl: total allocations: %d   cache hits:%d\n",	
+		egsl_total_allocations, egsl_cache_hits);
+	printf("egsl: sizeof(val) = %d\n",(int)sizeof(val));
+}
+
+val egsl_alloc(size_t rows, size_t columns) {
+	struct egsl_context*c = egsl_contexts+cid;
+	if(c->nvars>=MAX_VALS) {
+		printf("Limit reached\n");
+		error();
+	}
+	int index = c->nvars;
+	if(index<c->nallocated) {
+		gsl_matrix*m = c->vars[index].gsl_m;
+		if(m->size1 == rows && m->size2 == columns) {
+			egsl_cache_hits++;
+			c->nvars++;
+			return assemble_val(cid,index,c->vars[index].gsl_m);
+		} else {
+			gsl_matrix_free(m);
+			egsl_total_allocations++;			
+			c->vars[index].gsl_m = gsl_matrix_alloc((size_t)rows,(size_t)columns);
+			c->nvars++;
+			return assemble_val(cid,index,c->vars[index].gsl_m);
+		}
+	} else {
+		egsl_total_allocations++;
+		c->vars[index].gsl_m = gsl_matrix_alloc((size_t)rows,(size_t)columns);
+		c->nvars++;
+		c->nallocated++;
+		return assemble_val(cid,index,c->vars[index].gsl_m);
+	}
+	//printf("Allocated %d\n",v);
+}
+
+val egsl_alloc_in_context(int context, size_t rows, size_t columns) {
+	egsl_total_allocations++;
+	struct egsl_context *c = egsl_contexts+context;
+	int index = c->nvars;
+	c->vars[index].gsl_m = gsl_matrix_alloc((size_t)rows,(size_t)columns);
+	c->nvars++;
+	return assemble_val(context,index,c->vars[index].gsl_m);
+}
+
+/// Creates a copy of v in the previous context.
+val egsl_promote(val v) {
+	if(cid==0) {
+		error();
+	}
+
+	gsl_matrix * m = egsl_gslm(v);
+	val v2 = egsl_alloc_in_context(cid-1, m->size1, m->size2);
+	gsl_matrix * m2 = egsl_gslm(v2);
+	gsl_matrix_memcpy(m2, m);
+	return v2;
+}
+
 
 
 

@@ -23,8 +23,8 @@ params[:outliers_maxPerc] = 0.85;
 params[:doComputeCovariance] = 1
 
 scan_list = (447..450).to_a
-scan_list = []
-scan_list = [0]
+#scan_list = []
+scan_list = [552,553,558]
 
 input = File.open '../mbicp_tro_experiment/laserazosSM3.log'
 output = File.open "out/laserazosSM3.#{name}.#{params.hash}.log", "w"

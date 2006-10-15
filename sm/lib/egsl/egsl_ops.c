@@ -1,6 +1,7 @@
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_linalg.h>
+#include <gsl/gsl_eigen.h>
 
 #include "egsl.h"
 
@@ -128,5 +129,44 @@ val egsl_inverse(val v1){
 	gsl_matrix_free(m);
 	return v2;
 }
+
+void egsl_symm_eig(val v, double* eigenvalues, val* eigenvectors) {
+	gsl_matrix *m = egsl_gslm(v);
+	size_t N = m->size1;
+	// Check for v to be square
+	
+	gsl_matrix *A = gsl_matrix_alloc(N,N);
+	gsl_matrix_memcpy(A, m);
+	
+	gsl_vector *eval = gsl_vector_alloc(N); 
+	gsl_matrix *evec = gsl_matrix_alloc(N,N);
+	
+	gsl_eigen_symmv_workspace * ws = gsl_eigen_symmv_alloc(N);
+	gsl_eigen_symmv(A, eval, evec, ws);
+	gsl_eigen_symmv_free(ws);	
+
+	
+	gsl_eigen_symmv_sort(eval, evec, GSL_EIGEN_SORT_VAL_DESC);
+	
+	size_t j;
+	for(j=0;j<N;j++) {
+		eigenvalues[j] = gsl_vector_get(eval, j);
+		eigenvectors[j] = egsl_alloc(N,1);
+		size_t i;
+		for(i=0;i<N;i++)
+			*egsl_atmp(eigenvectors[j],i,0) = gsl_matrix_get(evec,i,j);
+	}
+	
+	
+	gsl_vector_free(eval);	
+	gsl_matrix_free(evec);
+	gsl_matrix_free(A);
+}
+
+
+
+
+
+
 
 

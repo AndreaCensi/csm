@@ -2,6 +2,7 @@
 #include <gsl/gsl_matrix.h>
 
 #include <gpc.h>
+#include <egsl_macros.h>
 
 #include "../math_utils.h"
 #include "../laser_data.h"
@@ -23,11 +24,13 @@ void kill_outliers_trim(struct sm_params*params, const gsl_vector*x_old,
 	
 void compute_covariance_exact(
 	LDP laser_ref, LDP laser_sens, const gsl_vector*x,
-		gsl_matrix **cov0_x,
-		gsl_matrix **dx_dy1, gsl_matrix **dx_dy2);
+		val *cov0_x, val *dx_dy1, val *dx_dy2);
+
 
 
 void sm_icp(struct sm_params*params, struct sm_result*res) {
+	egsl_push();
+	
 	LDP laser_ref  = &(params->laser_ref);
 	LDP laser_sens = &(params->laser_sens);
 			
@@ -107,15 +110,50 @@ void sm_icp(struct sm_params*params, struct sm_result*res) {
 	
 	vector_to_array(best_x, res->x);
 	
-	gsl_matrix *cov0_x, *dx_dy1, *dx_dy2;
+	val cov0_x, dx_dy1, dx_dy2;
 	
-	if(params->doComputeCovariance)
-	compute_covariance_exact(laser_ref, laser_sens, best_x,
-		&cov0_x, &dx_dy1, &dx_dy2);
+	if(params->doComputeCovariance)  {
+		compute_covariance_exact(
+			laser_ref, laser_sens, best_x,
+			&cov0_x, &dx_dy1, &dx_dy2);
+		
+//		val cov_x = sc(params->sigma*params->sigma, cov0_x);
+		
+		double eval[3]; val evec[3];
+		egsl_symm_eig(cov0_x, eval, evec);
+		
+		egsl_print("cov0_x", cov0_x);
+		int j;
+		for(j=0;j<3;j++) {
+			printf("sqrt(eval[%d])=%5.5f %4.4f %4.4f %4.4f\n", j, sqrt(eval[j]),
+				egsl_atv(evec[j],0),
+				egsl_atv(evec[j],1),
+				egsl_atv(evec[j],2));
+		}
+		
+		val fim = ld_fisher0(laser_ref);
+		val ifim = inv(fim);
+		
+		double eval2[3]; val evec2[3];
+		egsl_symm_eig(ifim, eval2, evec2);
+		egsl_print("fim", fim);
+
+		egsl_print("2*inv(fim)", sc(2,ifim));
+		for(j=0;j<3;j++) {
+			printf("sqrt(eval[%d])=%5.5f %4.4f %4.4f %4.4f\n", j, sqrt(eval2[j]),
+				egsl_atv(evec2[j],0),
+				egsl_atv(evec2[j],1),
+				egsl_atv(evec2[j],2));
+		}
+		
+		
+	}
 	
 	res->error = best_error;
 	res->iterations = iterations;
 	res->nvalid = nvalid;
+	
+	egsl_pop();
 }
 
 unsigned int ld_corr_hash(LDP ld){
@@ -129,16 +167,6 @@ unsigned int ld_corr_hash(LDP ld){
 	}
 
 	return (hash & 0x7FFFFFFF);
-}
-
-int ld_num_valid_correspondences(LDP ld) {
-	int i; 
-	int num = 0;
-	for(i=0;i<ld->nrays;i++) {
-		if(ld->corr[i].valid)
-			num++;
-	}
-	return num;
 }
 
 void icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new, 
@@ -174,7 +202,7 @@ void icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 		}
 
 		double error=0;
-//		kill_outliers_trim(params, x_old, &error);
+		kill_outliers_trim(params, x_old, &error);
 		int num_corr_after = ld_num_valid_correspondences(laser_sens);
 		
 		*total_error = error; 
@@ -212,14 +240,9 @@ void icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 			}
 		}
 		if(detected) break;
-/*
-		if( (iteration>5 && oscillations>=3) || (iteration>10 && oscillations>=2)){
-			printf("icpc: oscillation detected \n");
-//			break;
-		}*/
-		if(termination_criterion(delta, params)) {
+
+		if(termination_criterion(delta, params)) 
 			break;
-		}
 		
 		gsl_vector_memcpy(x_old, x_new);
 		gsl_vector_memcpy(delta_old, delta);

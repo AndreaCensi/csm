@@ -180,6 +180,16 @@ int ld_read_next_laser_carmen(FILE*file, LDP ld) {
 }
 
 
+int ld_num_valid_correspondences(LDP ld) {
+	int i; 
+	int num = 0;
+	for(i=0;i<ld->nrays;i++) {
+		if(ld->corr[i].valid)
+			num++;
+	}
+	return num;
+}
+
 
 
 

@@ -45,6 +45,7 @@ PROJECT (scan_matching_lib C)
 	ADD_LIBRARY(sm STATIC 
 		src/journal.c
 		src/laser_data.c
+		src/laser_data_fisher.c
 		src/math_utils.c
 		src/orientation.c
 		src/clustering.c
