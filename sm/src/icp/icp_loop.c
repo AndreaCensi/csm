@@ -26,8 +26,6 @@ void compute_covariance_exact(
 	LDP laser_ref, LDP laser_sens, const gsl_vector*x,
 		val *cov0_x, val *dx_dy1, val *dx_dy2);
 
-
-
 void sm_icp(struct sm_params*params, struct sm_result*res) {
 	egsl_push();
 	
@@ -119,35 +117,16 @@ void sm_icp(struct sm_params*params, struct sm_result*res) {
 		
 //		val cov_x = sc(params->sigma*params->sigma, cov0_x);
 		
-		double eval[3]; val evec[3];
-		egsl_symm_eig(cov0_x, eval, evec);
-		
 		egsl_print("cov0_x", cov0_x);
-		int j;
-		for(j=0;j<3;j++) {
-			printf("sqrt(eval[%d])=%5.5f %4.4f %4.4f %4.4f\n", j, sqrt(eval[j]),
-				egsl_atv(evec[j],0),
-				egsl_atv(evec[j],1),
-				egsl_atv(evec[j],2));
-		}
+		egsl_print_spectrum("cov0_x", cov0_x);
 		
 		val fim = ld_fisher0(laser_ref);
 		val ifim = inv(fim);
-		
-		double eval2[3]; val evec2[3];
-		egsl_symm_eig(ifim, eval2, evec2);
 		egsl_print("fim", fim);
-
-		egsl_print("2*inv(fim)", sc(2,ifim));
-		for(j=0;j<3;j++) {
-			printf("sqrt(eval[%d])=%5.5f %4.4f %4.4f %4.4f\n", j, sqrt(eval2[j]),
-				egsl_atv(evec2[j],0),
-				egsl_atv(evec2[j],1),
-				egsl_atv(evec2[j],2));
-		}
-		
-		
+		egsl_print_spectrum("ifim", ifim);
 	}
+	
+	
 	
 	res->error = best_error;
 	res->iterations = iterations;

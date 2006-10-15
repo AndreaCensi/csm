@@ -105,10 +105,10 @@ void egsl_pop() {
 	cid--;
 }
 
-void egsl_stats() {
+void egsl_print_stats() {
 	printf("egsl: total allocations: %d   cache hits:%d\n",	
 		egsl_total_allocations, egsl_cache_hits);
-	printf("egsl: sizeof(val) = %d\n",(int)sizeof(val));
+//	printf("egsl: sizeof(val) = %d\n",(int)sizeof(val));
 }
 
 val egsl_alloc(size_t rows, size_t columns) {

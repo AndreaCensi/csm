@@ -27,3 +27,19 @@ val egsl_vers(double theta){
 	double v[2] = { cos(theta), sin(theta)};
 	return egsl_vFa(2,v);
 }
+
+void egsl_print_spectrum(const char*s, val v) {
+	gsl_matrix *m = egsl_gslm(v);
+	// expect same size
+	size_t n = m->size1;
+	double eval[n]; val evec[n];
+	egsl_symm_eig(v, eval, evec);
+ 	size_t i,j;
+	for(j=0;j<n;j++) {
+		printf("%s | eval[%d] = %+5.5f evec[%d]= ",
+			s, (int)j, eval[j],(int)j);
+		for(i=0;i<n;i++) 
+			printf("%+4.4f ", egsl_atv(evec[j],i));
+		printf(" sqrt(eval[%d])=%5.5f  \n", (int)j, sqrt(eval[j]));
+	}		
+}

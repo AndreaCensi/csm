@@ -40,6 +40,9 @@ PROJECT (scan_matching_lib C)
 	ADD_EXECUTABLE(test_egsl lib/egsl/egsl_test.c)
 	TARGET_LINK_LIBRARIES(test_egsl egsl  ${GSL_LIBRARIES})
 
+	ADD_EXECUTABLE(egsl_test_allocation lib/egsl/egsl_test_allocation.c)
+	TARGET_LINK_LIBRARIES(egsl_test_allocation egsl  ${GSL_LIBRARIES})
+
 ########### SM ########## 
 
 	ADD_LIBRARY(sm STATIC 
