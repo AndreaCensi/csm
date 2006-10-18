@@ -12,7 +12,7 @@
 #define tr(v)            egsl_transpose(v)
 #define m(v1,v2)         egsl_mult(v1,v2)
 #define m3(v1,v2,v3)     egsl_mult(v1,egsl_mult(v2,v3))
-#define m4(v1,v2,v3,v4)     egsl_mult(v1,egsl_mult(v2,egsl_mult(v3,v4)))
+#define m4(v1,v2,v3,v4)  egsl_mult(v1,egsl_mult(v2,egsl_mult(v3,v4)))
 #define comp_col(v1,v2)  egsl_compose_col(v1,v2)
 #define comp_row(v1,v2)  egsl_compose_row(v1,v2)
 
