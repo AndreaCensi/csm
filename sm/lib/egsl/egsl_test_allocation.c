@@ -18,4 +18,6 @@ int main() {
 
 	egsl_pop();
 	egsl_print_stats();
+	
+	return 0;
 }

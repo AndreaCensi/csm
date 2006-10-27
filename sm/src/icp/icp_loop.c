@@ -9,7 +9,9 @@
 #include "../sm.h"
 #include "../journal.h"
 
-#define EXPERIMENT_COVARIANCE
+//#define EXPERIMENT_COVARIANCE
+
+
 void visibilityTest(LDP ld, const gsl_vector*x_old);
 
 void compute_next_estimate(LDP laser_ref, LDP laser_sens, const gsl_vector*x_old, gsl_vector*x_new);
@@ -22,6 +24,7 @@ void icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 
 void kill_outliers_trim(struct sm_params*params, const gsl_vector*x_old,
 	double*total_error);
+void kill_outliers_double(struct sm_params*params, const gsl_vector*x_old);
 	
 void compute_covariance_exact(
 	LDP laser_ref, LDP laser_sens, const gsl_vector*x,
@@ -171,6 +174,8 @@ void icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 	#endif
 	
 	for(iteration=0; iteration<params->maxIterations;iteration++) {
+		egsl_push();
+		
 		if(jf()) fprintf(jf(), "iteration %d\n", iteration);
 		journal_pose("x_old", x_old);
 		
@@ -181,9 +186,13 @@ void icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 
 		int num_corr = ld_num_valid_correspondences(laser_sens);
 		if(num_corr <0.2 * laser_sens->nrays){
+			egsl_pop();
 			printf("Failed: before trimming, only %d correspondences.\n",num_corr);
 			break;
 		}
+
+//		kill_outliers_double(params, x_old);
+		int num_corr2 = ld_num_valid_correspondences(laser_sens);
 
 		double error=0;
 		kill_outliers_trim(params, x_old, &error);
@@ -194,6 +203,7 @@ void icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 		
 		if(num_corr_after <0.2 * laser_sens->nrays){
 			printf("Failed: after trimming, only %d correspondences.\n",num_corr_after);
+			egsl_pop();
 			break;
 		}
 		journal_correspondences(laser_sens);
@@ -201,6 +211,8 @@ void icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 		
 		pose_diff(x_new, x_old, delta);
 		
+		
+		printf("killing %d -> %d -> %d \n", num_corr, num_corr2, num_corr_after);
 		journal_pose("x_new", x_new);
 		journal_pose("delta", delta);
 
@@ -234,6 +246,7 @@ void icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 		printf("\n");
 		
 #endif
+		egsl_pop();
 						
 		int detected = 0;
 		int a; for(a=0;a<iteration;a++) {

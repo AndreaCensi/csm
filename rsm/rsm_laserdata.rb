@@ -92,6 +92,11 @@ class LaserData
 		end
 		nil
 	end
+	
+	def correspondences_hash
+		indexes = @corr.map{|c| c.j1}
+		indexes.hash
+	end
 end
 
 def standard_parameters

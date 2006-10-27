@@ -1,5 +1,7 @@
+function res = laserazosSM3_analyze(file)
 
-data = load('out/laserazosSM3.ICPC.stats.txt');
+%	data = load('out/laserazosSM3.ICPC.stats.txt');
+data = load(file);
 
 total_error = data(:,2)';
 nvalid = data(:,3)';
@@ -7,6 +9,12 @@ mean_error = data(:,4)';
 iterations = data(:,5)';
 realtime = data(:,6)';
 
+res.total_error = total_error;
+res.nvalid = nvalid;
+res.mean_error = mean_error;
+res.iterations = iterations;
+res.realtime = realtime;
+res.data = data;
 
 figure
 n = 4;

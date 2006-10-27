@@ -22,7 +22,6 @@ gsl_matrix * egsl_gslm(val v);
 /// Creates a copy of v in the previous context.
 val egsl_promote(val v);
 
-
 /// Operations among values
 val egsl_scale(double, val);
 val egsl_sum(val, val);

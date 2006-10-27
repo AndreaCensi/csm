@@ -42,6 +42,7 @@ class ICP
 		x_old = params[:firstGuess]
 		delta = Vector.alloc(0,0,0).col
 		
+		hashes = []
 		for iteration in 1..params[:maxIterations]
 			journal "iteration #{iteration}"
 			journal     "x_old #{to_j(x_old)}"
@@ -68,8 +69,16 @@ class ICP
 		
 			if delta[0,1].nrm2 < params[:epsilon_xy] &&
 			   delta[2].abs < params[:epsilon_theta]
-				
 				break
+			end
+			
+			hash = laser_sens.correspondences_hash
+			if hashes.include? hash
+				cycle = hashes.size-hashes.find{|h|h==hash}
+				puts "Found cycle lenght = #{cycle}"
+				break
+			else
+				hashes.push hash
 			end
 			
 			x_old = x_new

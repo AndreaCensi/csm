@@ -32,6 +32,48 @@ void visibilityTest(LDP laser_ref, const gsl_vector*u) {
 	printf("\n");
 }
 
+
+/** If multiple points in laser_sens match to the same point in laser_ref, only
+the nearest win.
+
+	Uses: laser_sens->corr, laser_sens->p
+	Modifies: laser_sens->corr
+ */
+void kill_outliers_double(struct sm_params*params, const gsl_vector*x_old) {
+	double threshold = 3;
+
+	LDP laser_ref  = &(params->laser_ref);
+	LDP laser_sens = &(params->laser_sens);
+
+	double dist_i[laser_sens->nrays];
+	double dist_j[laser_ref->nrays];
+	int j; for(j=0;j<laser_ref->nrays;j++) 
+		dist_j[j]= 1000;
+	
+	gsl_vector * p_i_w = gsl_vector_alloc(3);
+	int i;
+	for(i=0;i<laser_sens->nrays;i++) {
+		if(!laser_sens->corr[i].valid) continue;
+		transform(laser_sens->p[i], x_old, p_i_w);
+		int j1 = laser_sens->corr[i].j1;
+		dist_i[i] = distance(p_i_w, laser_ref->p[j1]);
+		dist_j[j1] = GSL_MIN(dist_j[j1], dist_i[i]);
+	}
+	
+	int nkilled = 0;
+	for(i=0;i<laser_sens->nrays;i++) {
+		if(!laser_sens->corr[i].valid) continue;
+		int j1 = laser_sens->corr[i].j1;
+		if(dist_i[i] > threshold*dist_j[j1]) {
+			laser_sens->corr[i].valid=0;
+			nkilled ++;
+		}
+	}
+	printf("kill_outliers_double: killed %d correspondences\n",nkilled);
+	gsl_vector_free(p_i_w);
+}
+	
+	
 void kill_outliers_trim(struct sm_params*params, const gsl_vector*x_old, 
 	double*total_error) {
 	LDP laser_ref  = &(params->laser_ref);

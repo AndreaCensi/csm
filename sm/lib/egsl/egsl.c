@@ -32,6 +32,9 @@ int egsl_cache_hits = 0;
 
 void error() {
 	// TODO: better handling of errors
+	
+	egsl_print_stats();
+	
 	assert(0);
 }
 
@@ -51,7 +54,7 @@ inline int its_var_index(val v) {
 }
 
 
-#if 1
+#if 0
 inline void check_valid_val(val v) { int i = v.cid; v.cid=i;}	
 #else
 void check_valid_val(val v) {
@@ -80,6 +83,7 @@ void egsl_push() {
 		int c;
 		for(c=0;c<MAX_CONTEXTS;c++) {
 			egsl_contexts[c].nallocated = 0;
+			egsl_contexts[c].nvars = 0;
 		}
 		egsl_first_time  = 0;
 	}
@@ -97,12 +101,22 @@ void egsl_print_stats() {
 	printf("egsl: total allocations: %d   cache hits: %d\n",	
 		egsl_total_allocations, egsl_cache_hits);
 //	printf("egsl: sizeof(val) = %d\n",(int)sizeof(val));
+	int c; for(c=0;c<MAX_CONTEXTS;c++) {
+	//	printf("egsl: context #%d\n ",c);
+	//	if(0==egsl_contexts[c].nallocated) break;
+		printf("egsl: context #%d allocations: %d active: %d\n",
+			c,	egsl_contexts[c].nallocated, 	egsl_contexts[c].nvars);
+	}
 }
 
 val egsl_alloc(size_t rows, size_t columns) {
 	struct egsl_context*c = egsl_contexts+cid;
+	
+	if(cid<3)
+	printf("Alloc cid=%d nvars=%d nalloc=%d\n",cid,c->nvars,c->nallocated);
+	
 	if(c->nvars>=MAX_VALS) {
-		printf("Limit reached\n");
+		fprintf(stderr,"Limit reached, in context %d, nvars is %d\n",cid,c->nvars);
 		error();
 	}
 	int index = c->nvars;
@@ -126,7 +140,6 @@ val egsl_alloc(size_t rows, size_t columns) {
 		c->nallocated++;
 		return assemble_val(cid,index,c->vars[index].gsl_m);
 	}
-	//printf("Allocated %d\n",v);
 }
 
 val egsl_alloc_in_context(int context, size_t rows, size_t columns) {
