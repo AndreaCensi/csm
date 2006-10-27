@@ -56,18 +56,19 @@ double m_dot(const gsl_matrix*A,const gsl_matrix*B) {
 }
 
 double poly_greatest_real_root(unsigned int n, double*a) {
-	double z[n*2];
+	double z[(n-1)*2];
 	gsl_poly_complex_workspace * w  = gsl_poly_complex_workspace_alloc(n);
 	gsl_poly_complex_solve (a, n, w, z);
 	gsl_poly_complex_workspace_free (w);
 	double lambda = 0;
 	unsigned int i;
-	for (i = 0; i < n; i++) {
-//		printf ("z%d = %+.18f %+.18f\n", i, z[2*i], z[2*i+1]);
+	for (i = 0; i < n-1; i++) {
+		printf ("z%d = %+.18f %+.18f\n", i, z[2*i], z[2*i+1]);
 		// XXX ==0 is bad
 		if( (z[2*i+1]==0) && (z[2*i]>lambda))
 			lambda = z[2*i];
 	}
+	printf ("lambda = %+.18f \n", lambda);
 	return lambda;
 }
 

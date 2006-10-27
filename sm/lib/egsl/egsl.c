@@ -112,8 +112,8 @@ void egsl_print_stats() {
 val egsl_alloc(size_t rows, size_t columns) {
 	struct egsl_context*c = egsl_contexts+cid;
 	
-	if(cid<3)
-	printf("Alloc cid=%d nvars=%d nalloc=%d\n",cid,c->nvars,c->nallocated);
+//	if(cid<3)
+//	printf("Alloc cid=%d nvars=%d nalloc=%d\n",cid,c->nvars,c->nallocated);
 	
 	if(c->nvars>=MAX_VALS) {
 		fprintf(stderr,"Limit reached, in context %d, nvars is %d\n",cid,c->nvars);
