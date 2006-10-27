@@ -136,7 +136,10 @@ void sm_icp(struct sm_params*params, struct sm_result*res) {
 	res->error = best_error;
 	res->iterations = iterations;
 	res->nvalid = nvalid;
-	
+
+	gsl_vector_free(x_new);
+	gsl_vector_free(x_old);
+	gsl_vector_free(best_x);
 	egsl_pop();
 }
 
@@ -191,7 +194,7 @@ void icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 			break;
 		}
 
-//		kill_outliers_double(params, x_old);
+		kill_outliers_double(params, x_old);
 		int num_corr2 = ld_num_valid_correspondences(laser_sens);
 
 		double error=0;

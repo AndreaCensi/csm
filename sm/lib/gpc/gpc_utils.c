@@ -43,6 +43,8 @@ double m_det(const gsl_matrix*A) {
 	int sign;
 	gsl_linalg_LU_decomp (m, perm, &sign);
 	double det = gsl_linalg_LU_det(m, sign);
+	
+	gsl_permutation_free(perm);
 	gsl_matrix_free(m);
 	return det;
 }
@@ -63,12 +65,12 @@ double poly_greatest_real_root(unsigned int n, double*a) {
 	double lambda = 0;
 	unsigned int i;
 	for (i = 0; i < n-1; i++) {
-		printf ("z%d = %+.18f %+.18f\n", i, z[2*i], z[2*i+1]);
+//		printf ("z%d = %+.18f %+.18f\n", i, z[2*i], z[2*i+1]);
 		// XXX ==0 is bad
 		if( (z[2*i+1]==0) && (z[2*i]>lambda))
 			lambda = z[2*i];
 	}
-	printf ("lambda = %+.18f \n", lambda);
+//	printf ("lambda = %+.18f \n", lambda);
 	return lambda;
 }
 
