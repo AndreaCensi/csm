@@ -15,6 +15,8 @@ typedef struct egsl_val val;
 /// Core functions
 void egsl_push();
 void egsl_pop();
+void egsl_free();
+
 double* egsl_atmp(val v, size_t i, size_t j);
 val egsl_alloc(size_t rows, size_t columns);
 val egsl_alloc_in_context(int cid, size_t rows, size_t cols);

@@ -11,7 +11,7 @@ void possible_interval(
 	const gsl_vector*p_i_w, struct laser_data*laser_sens, 
 	double maxAngularCorrectionDeg, double maxLinearCorrection, int*from, int*to, int*start_cell);
 
-void transform(const gsl_vector* point, const gsl_vector* x, gsl_vector*result);
+void transform(const gsl_vector* point2d, const gsl_vector* pose, gsl_vector*result2d);
 
 void gsl_vector_set_nan(gsl_vector*v);
 

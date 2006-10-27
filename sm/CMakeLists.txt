@@ -29,19 +29,22 @@ PROJECT (scan_matching_lib C)
 	ENDIF(APPLE)
 
 
-########### Easy GSL ########## 
-	ADD_LIBRARY(egsl STATIC 
-		lib/egsl/egsl.c 
-		lib/egsl/egsl_ops.c
-		lib/egsl/egsl_conversions.c
-		lib/egsl/egsl_misc.c
-	)
+	########### Easy GSL ########## 
+		ADD_LIBRARY(egsl STATIC 
+			lib/egsl/egsl.c 
+			lib/egsl/egsl_ops.c
+			lib/egsl/egsl_conversions.c
+			lib/egsl/egsl_misc.c
+		)
 
-	ADD_EXECUTABLE(test_egsl lib/egsl/egsl_test.c)
-	TARGET_LINK_LIBRARIES(test_egsl egsl  ${GSL_LIBRARIES})
+		ADD_EXECUTABLE(test_egsl lib/egsl/egsl_test.c)
+		TARGET_LINK_LIBRARIES(test_egsl egsl  ${GSL_LIBRARIES})
 
-	ADD_EXECUTABLE(egsl_test_allocation lib/egsl/egsl_test_allocation.c)
-	TARGET_LINK_LIBRARIES(egsl_test_allocation egsl  ${GSL_LIBRARIES})
+		ADD_EXECUTABLE(egsl_test_allocation lib/egsl/egsl_test_allocation.c)
+		TARGET_LINK_LIBRARIES(egsl_test_allocation egsl  ${GSL_LIBRARIES})
+
+	########### Options ########## 
+		ADD_LIBRARY(options STATIC lib/options/options.c)
 
 ########### SM ########## 
 
@@ -78,10 +81,18 @@ PROJECT (scan_matching_lib C)
 	INSTALL(TARGETS sm ARCHIVE DESTINATION lib)
 	INSTALL(FILES src/sm.h  DESTINATION include)
 
-########### SM applications ########## 
+	########### SM applications ########## 
 
-	ADD_EXECUTABLE(sm0 apps/sm0.c)
-	TARGET_LINK_LIBRARIES(sm0 sm ${GSL_LIBRARIES})
+		ADD_EXECUTABLE(sm0 apps/sm0.c)
+		TARGET_LINK_LIBRARIES(sm0 sm ${GSL_LIBRARIES})
 
-	ADD_EXECUTABLE(test_math_utils src/math_utils_test.c)
-	TARGET_LINK_LIBRARIES(test_math_utils sm ${GSL_LIBRARIES})
+		ADD_EXECUTABLE(test_math_utils src/math_utils_test.c)
+		TARGET_LINK_LIBRARIES(test_math_utils sm ${GSL_LIBRARIES})
+
+	########### Carmen2pdf ########## 
+
+	ADD_EXECUTABLE(carmen2pdf apps/carmen2pdf.c)
+	TARGET_LINK_LIBRARIES(carmen2pdf sm ${GSL_LIBRARIES})
+	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -I../deploy/include/cairo")
+	TARGET_LINK_LIBRARIES(carmen2pdf options -lcairo)
+
