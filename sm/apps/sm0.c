@@ -38,6 +38,9 @@ int main(int argc, const char*argv[]) {
 
 	params.doAlphaTest = 0;
 	params.outliers_maxPerc = 0.85;
+
+	params.outliers_adaptive_order =0.7;
+	params.outliers_adaptive_mult=2;
 	params.doVisibilityTest = 1;
 	params.doComputeCovariance = 1;
 
