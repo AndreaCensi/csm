@@ -117,12 +117,15 @@ def standard_parameters
 	p[:clusteringThreshold] = 0.05
 	p[:orientationNeighbourhood] = 3
 	p[:useCorrTricks] = 1;
-	p[:doComputeCovariance] = 1;
+	p[:doComputeCovariance] = 0;
 		
-	p[:doAlphaTest] = 1
+	p[:doAlphaTest] = 0
 	p[:doAlphaTest_thresholdDeg]=20
 	
 	p[:outliers_maxPerc] = 0.95;
+	p[:outliers_adaptive_order] = 0.7; 
+	p[:outliers_adaptive_mult] = 2; 
+	
 	p[:doVisibilityTest] = 0
 	p
 end

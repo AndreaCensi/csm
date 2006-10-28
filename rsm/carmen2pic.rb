@@ -109,10 +109,18 @@ end
 def carmen2pic(input,output_file)
 	include MathUtils
 	
-	count = 0
+	count = 0; interval = 10
 	lds = []
 	until input.eof? 
-		lds.push LogReader.shift_laser(input)
+		ld = LogReader.shift_laser(input)
+		
+		break if ld.nil? 
+		
+		if count%interval == 0
+			puts count
+			lds.push ld
+		end
+		count+=1
 	end
 	
 	puts "Read #{lds.size} laser scans."
@@ -120,7 +128,7 @@ def carmen2pic(input,output_file)
 	bbox_min = nil
 	bbox_max = nil
 	all_points = []
-	interval = 10
+	
 	lds.each_index do |i|
 		ld = lds[i]
 		ld.compute_cartesian
@@ -142,7 +150,6 @@ def carmen2pic(input,output_file)
 	ca.cr.stroke
 
 	lds.each_index do |i|
-		next if i%interval>0
 		ca.write_points(all_points[i])
 	end
 	

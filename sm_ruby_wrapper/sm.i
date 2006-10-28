@@ -10,7 +10,7 @@ struct sm_params {
 	double maxLinearCorrection;
 	int maxIterations;
 	double epsilon_xy;
-	double epsilon_theta;
+	double epsilon_theta; 
 	double maxCorrespondenceDist;
 	
 	int restart;
@@ -27,6 +27,8 @@ struct sm_params {
 	double doAlphaTest_thresholdDeg;
 	
 	double outliers_maxPerc;
+	double outliers_adaptive_order; 
+	double outliers_adaptive_mult; 
 	
 	int doVisibilityTest;
 	int useCorrTricks;

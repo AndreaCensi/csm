@@ -104,8 +104,8 @@ void kill_outliers_trim(struct sm_params*params, const gsl_vector*x_old,
 	printf("\n");*/
 	
 	double error_limit1 = dist2[(int)floor(k*(params->outliers_maxPerc))];
-	double error_limit2 = 2*dist2[(int)floor(k*0.7)];
-	//double error_limit = 2*dist2[(int)floor(k*0.8)];
+	double error_limit2 = params->outliers_adaptive_mult*
+		dist2[(int)floor(k*params->outliers_adaptive_order)];
 	
 	double error_limit = GSL_MIN(error_limit1,error_limit2);
 	printf("icp_outliers: maxPerc %f error_limit: fix %f adaptive %f \n",

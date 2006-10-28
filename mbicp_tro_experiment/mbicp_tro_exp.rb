@@ -15,12 +15,12 @@ def main(scans, klass)
 		Vector[0.20, 0.20, deg2rad(45.0)].col
 ];
 	
-	repetitions_per_scan = 20;	
+	repetitions_per_scan = 10;	
 	
 	# Use a known seed for repeatability of the experiments
 	rng = Rng.alloc(GSL::Rng::MT19937, 24)
 	sigma = 0.01;
-#	sigma = 0;
+	sigma = 0;
 	
 	f = File.open("results.txt",'w')
 	failed_codes = Array.new
@@ -39,13 +39,18 @@ def main(scans, klass)
 			
 			code = "#{i}-#{s}-#{n}"
 
-			sm = klass.new
 			
+			
+	#		puts "#{code} displacement: #{pv(disp)}"
+			
+			if not ARGV.empty?
+				next if not ARGV.include?(code)
+			end
+			
+			sm = klass.new
 			if ARGV.include?(code)
 				sm.journal_open("sm_#{sm.name}_#{code}.txt")
 			end
-			
-			puts "#{code} displacement: #{pv(disp)}"
 			sm.params = standard_parameters
 			sm.params[:epsilon_xy]=  0.001 / 10
 			sm.params[:epsilon_theta]= 0.001 / 10
@@ -57,10 +62,10 @@ def main(scans, klass)
 			sm.params[:laser_sens].add_noise!(sigma, rng)
 			sm.params[:firstGuess] = disp
 			sm.params[:maxIterations] = 100
+			sm.params[:outliers_maxPerc] = 0.999; 
+			sm.params[:outliers_adaptive_order] = 0.95; 
+			sm.params[:outliers_adaptive_mult] = 3; 
 
-			if not ARGV.empty?
-				next if not ARGV.include?(code)
-			end
 			
 			#begin
 			res = nil
@@ -111,7 +116,7 @@ end
 scan_matcher = eval ARGV.shift
 
 log = 'laserazosSM3.off'
-#log = 'a.off'
+#log = 'b.off'
 scans = nil
 File.open(log) do |f| 
 	scans = read_log(f) 

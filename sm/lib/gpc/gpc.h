@@ -35,7 +35,10 @@ struct gpc_corr {
 int gpc_solve(int K, const struct gpc_corr*, double *x);
 
 // if valid[k] is 0, the correspondence is not used
-int gpc_solve_valid(int K, const struct gpc_corr*, int*valid, double *x);
+int gpc_solve_valid(int K, const struct gpc_corr*, 
+	const int*valid, 
+	const double*x0, const double *cov_x0,
+	double *x);
 
 // Some utilities functions
 

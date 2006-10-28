@@ -15,6 +15,20 @@ PROJECT (scan_matching_lib C)
 		MESSAGE(ERROR "GSL not found.")
 	ENDIF(GSL_FOUND)
 
+	INCLUDE (FindCairo.cmake)                                                                                         
+	
+	IF(CAIRO_FOUND)
+		MESSAGE(STATUS "Found Cairo at.")
+		MESSAGE(STATUS "   PREFIX_CAIRO= ${PREFIX_CAIRO}")
+		MESSAGE(STATUS "   CAIRO_CFLAGS = ${CAIRO_CFLAGS}")
+		
+#		INCLUDE_DIRECTORIES(${GSL_INCLUDE_DIR})	
+#		LINK_DIRECTORIES(${GSL_LINK_DIRECTORIES})		 
+	ELSE(CAIRO_FOUND)
+		MESSAGE(WARNING "Cairo not found: carmen2pdf will not be built.")
+	ENDIF(CAIRO_FOUND)
+	
+
 
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused -Wall -Wno-long-double -W -Wconversion  -Wunreachable-code ")
 	#SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pg")

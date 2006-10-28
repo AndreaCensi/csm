@@ -21,10 +21,13 @@
 #include "gpc_utils.h"
 
 int gpc_solve(int K, const struct gpc_corr*c, double *x) {
-	return gpc_solve_valid(K,c,0,x);
+	return gpc_solve_valid(K,c,0,0,0,x);
 }
 
-int gpc_solve_valid(int K, const struct gpc_corr*c, int*valid, double *x_out) {
+int gpc_solve_valid(int K, const struct gpc_corr*c, const int*valid, 
+	const double*x0, const double *cov_x0,
+	double *x_out) 
+{
 	M(bigM,    4,4); M(g,  4,1); M(bigM_k,2,4);
 	M(bigM_k_t,4,2); M(C_k,2,2); M(q_k,   2,1);
 	M(temp42,  4,2); M(temp44,4,4);	M(temp21, 2,1);
@@ -63,6 +66,39 @@ int gpc_solve_valid(int K, const struct gpc_corr*c, int*valid, double *x_out) {
 			m_display("now M is ",bigM);
 			m_display("now g is ",g);
 		}
+	}
+	
+	if(x0) {
+		m_display("bigM_k",bigM_k);
+		m_display("q_k",q_k);
+		m_display("C_k",C_k);
+		m_display("now M is ",bigM);
+		m_display("now g is ",g);
+		// M_k = 1 0 0 0 
+		//       0 1 0 0
+		gms(bigM_k,0,0,1.0); gms(bigM_k,0,1,0.0); gms(bigM_k,0,2, c[k].p[0]);
+		gms(bigM_k,0,3,0.0);
+		gms(bigM_k,1,0,0.0); gms(bigM_k,1,1,1.0); gms(bigM_k,1,2,c[k].p[1]);
+		gms(bigM_k,1,3,0.0);
+		gms(C_k,0,0,cov_x0[0]); gms(C_k,0,1,cov_x0[1]);
+		gms(C_k,1,0,cov_x0[3]); gms(C_k,1,1,cov_x0[4]);
+		gms(q_k,0,0,x0[0]);
+		gms(q_k,1,0,x0[0]);
+		m_trans(bigM_k, bigM_k_t);
+		m_mult(bigM_k_t, C_k, temp42);
+		m_mult(temp42, bigM_k, temp44);
+		m_scale(2.0, temp44);
+		m_add_to(temp44, bigM);
+		
+		m_mult(C_k, q_k, temp21);
+		m_mult(bigM_k_t, temp21, temp41);
+		m_scale(-2.0, temp41);
+		m_add_to(temp41, g);	
+		m_display("bigM_k",bigM_k);
+		m_display("q_k",q_k);
+		m_display("C_k",C_k);
+		m_display("now M is ",bigM);
+		m_display("now g is ",g);
 	}
 	
 	if(0) {

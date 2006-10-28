@@ -14,7 +14,7 @@
 
 void visibilityTest(LDP ld, const gsl_vector*x_old);
 
-void compute_next_estimate(LDP laser_ref, LDP laser_sens, const gsl_vector*x_old, gsl_vector*x_new);
+void compute_next_estimate(LDP laser_ref, LDP laser_sens,  gsl_vector*x_new);
 int termination_criterion(gsl_vector*delta, struct sm_params*params);
 
 void find_correspondences_tricks(struct sm_params*params, gsl_vector* x_old);
@@ -210,7 +210,7 @@ void icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 			break;
 		}
 		journal_correspondences(laser_sens);
-		compute_next_estimate(laser_ref, laser_sens, x_old, x_new);
+		compute_next_estimate(laser_ref, laser_sens,	 x_new);
 		
 		pose_diff(x_new, x_old, delta);
 		
@@ -281,8 +281,7 @@ int termination_criterion(gsl_vector*delta, struct sm_params*params){
 	return (a<params->epsilon_xy) && (b<params->epsilon_theta);
 }
 
-void compute_next_estimate(LDP laser_ref, LDP laser_sens, 
-	const gsl_vector*x_old, gsl_vector*x_new) {
+void compute_next_estimate(LDP laser_ref, LDP laser_sens, gsl_vector*x_new) {
 	struct gpc_corr c[laser_sens->nrays];
 
 	int i; int k=0;
@@ -316,14 +315,16 @@ void compute_next_estimate(LDP laser_ref, LDP laser_sens,
 	//	c[k].C[1][1] += 0.02;
 		k++;
 	}
-
-	int valid[k];
-	int kk; for(kk=0;kk<k;kk++) valid[kk]=1;
-		
-	journal_write_array_i("valid", k, valid);
+	
+	const double x0[3] = {0, 0, 0};
+	double std = 0.11;
+	const double inv_cov_x0[9] = 
+		{1/(std*std), 0, 0,
+		 0, 1/(std*std), 0,
+		 0, 0, 0};
 	
 	double x[3];
-	gpc_solve_valid(k, c, valid, x);
+	gpc_solve_valid(k, c, 0, 0, inv_cov_x0, x);
 	
 	gvs(x_new,0,x[0]);
 	gvs(x_new,1,x[1]);
