@@ -131,7 +131,7 @@ int gpc_solve_valid(int K, const struct gpc_corr*c, const int*valid,
 	m_inv(mS, mSa);
 	m_scale(m_det(mS), mSa);
 	
-	if(0) {
+	if(1) {
 		m_display("mA",mA);
 		m_display("mB",mB);
 		m_display("mD",mD);
@@ -179,15 +179,18 @@ int gpc_solve_valid(int K, const struct gpc_corr*c, const int*valid,
 	double q[5] = {p[0]-(l[0]*l[0]), p[1]-(2*l[1]*l[0]), 
 		p[2]-(l[1]*l[1]+2*l[0]*l[2]), -(2*l[2]*l[1]), -(l[2]*l[2])};
 	
-	double lambda = poly_greatest_real_root(5,q);
 	
 	if(0) {
 		printf("p = %f %f %f \n", p[2], p[1], p[0]);
 		printf("l = %f %f %f \n", l[2], l[1], l[0]);
 		printf("q = %f %f %f %f %f \n", q[4],  q[3],  q[2], q[1], q[0]);
-		printf("lambda = %f \n", lambda);
 	}	
+	
+	double lambda = poly_greatest_real_root(5,q);
 
+	if(0) {
+		printf("lambda = %f \n", lambda);
+	}
 	M(W,4,4); gsl_matrix_set_zero(W); gms(W,2,2,1.0); gms(W,3,3,1.0);
 	M(x,4,1);
 	

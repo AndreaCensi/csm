@@ -72,11 +72,11 @@ void sm_gpm(struct sm_params*params, struct sm_result*res) {
 			newRangeDeg, x_new) ;
 
 		printf("gpm : max_correction_lin %f def %f\n", params->maxLinearCorrection, 		params->maxAngularCorrectionDeg);
-		printf("gpm 2/2: Solution: %f %f %f\n",gvg(x_new,0),gvg(x_new,1),gvg(x_new,2));
-
-		printf("gpm 1/2: New range: %f to %f\n",rad2deg(min_range),rad2deg(max_range));
 
 		printf("gpm 1/2: new u = : %f %f %f\n",gvg(u,0),gvg(u,1),gvg(u,2));
+		printf("gpm 1/2: New range: %f to %f\n",rad2deg(min_range),rad2deg(max_range));
+
+		printf("gpm 2/2: Solution: %f %f %f\n",gvg(x_new,0),gvg(x_new,1),gvg(x_new,2));
 	
 	
 	if(jf()) fprintf(jf(), "iteration 2\n");
@@ -95,8 +95,10 @@ void sm_gpm(struct sm_params*params, struct sm_result*res) {
 	res->iterations = 0;
 	
 	gsl_vector_free(x_old);
+	gsl_vector_free(u);
 	gsl_vector_free(x_new);
 	gsl_vector_free(delta);
+	gsl_histogram_free(hist);
 }
 
 void ght_find_theta_range(LDP laser_ref, LDP laser_sens,
@@ -186,9 +188,12 @@ void ght_one_shot(LDP laser_ref, LDP laser_sens,
 			double weight = 1/(laser_sens->cov_alpha[i]+laser_ref->cov_alpha[j]);
 
 			weight = exp(-square(t_dist)-5*square(theta-gvg(x0,2)));
-
 			double alpha = laser_ref->alpha[j];
 			double ca = cos(alpha); double sa=sin(alpha);
+
+//			printf("valid %d alpha %f weight %f t_x %f t_y %f\n",
+//				laser_ref->alpha_valid[j],alpha,weight,
+//				t_x, t_y);
 			z[0] += weight*(ca*ca*t_x + sa*ca*t_y);
 			z[1] += weight*(sa*ca*t_x + sa*sa*t_y);
 			z[2] += weight*theta;
@@ -202,6 +207,8 @@ void ght_one_shot(LDP laser_ref, LDP laser_sens,
 		}
 	}
 	
+	printf("gpm: second step: found %d correspondences\n",count);
+	
 	egsl_push();
 		val eL = egsl_alloc(3,3);
 			size_t a,b; 
@@ -209,14 +216,18 @@ void ght_one_shot(LDP laser_ref, LDP laser_sens,
 			for(b=0;b<3;b++) 
 				*egsl_atmp(eL,a,b) = L[a][b];
 
+		egsl_print("eL", eL);
 		val ez = egsl_vFa(3,z);
 		
 		val ex = m(inv(eL), ez);
 		
 		egsl_v2vec(ex, x);
-		
+
+		egsl_print("eL", eL);
+		egsl_print("ez", ez);
+		egsl_print("ex", ex);
+
 	egsl_pop();
 	
-	printf(" found %d correspondences\n",count);
 }
 

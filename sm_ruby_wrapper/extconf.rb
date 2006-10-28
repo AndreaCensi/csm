@@ -36,7 +36,7 @@ end
 
 
 if (not have_library('sm')) #or (not find_header('icp.h','/usr/local/include'))
-	puts "Error: not having library 'icp'"
+	puts "Error: not having library 'sm'"
 	exit
 else
 	$LOCAL_LIBS += ' -lsm'

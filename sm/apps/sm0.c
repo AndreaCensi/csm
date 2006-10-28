@@ -42,7 +42,7 @@ int main(int argc, const char*argv[]) {
 	params.outliers_adaptive_order =0.7;
 	params.outliers_adaptive_mult=2;
 	params.doVisibilityTest = 1;
-	params.doComputeCovariance = 1;
+	params.doComputeCovariance = 0;
 
 	int num_matchings = 0;
 	int num_iterations = 0;
@@ -62,7 +62,8 @@ int main(int argc, const char*argv[]) {
 		pose_diff(x_new,x_old,u);
 		vector_to_array(u, params.odometry);
 	
-	 	sm_icp(&params,&result);
+	 	sm_gpm(&params,&result);
+	 	//sm_icp(&params,&result);
 		
 		num_matchings++;
 		num_iterations += result.iterations;
@@ -70,6 +71,7 @@ int main(int argc, const char*argv[]) {
 		ld_free(&(params.laser_ref));
 		params.laser_ref = params.laser_sens;
 	}
+	ld_free(&(params.laser_ref));
 
 	clock_t end = clock();
 	float seconds = (end-start)/((float)CLOCKS_PER_SEC);

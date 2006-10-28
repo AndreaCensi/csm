@@ -16,7 +16,8 @@ PROJECT (scan_matching_lib C)
 	ENDIF(GSL_FOUND)
 
 	INCLUDE (FindCairo.cmake)                                                                                         
-	
+SET(CAIRO_FOUND no)
+
 	IF(CAIRO_FOUND)
 		MESSAGE(STATUS "Found Cairo at.")
 		MESSAGE(STATUS "   PREFIX_CAIRO= ${PREFIX_CAIRO}")
@@ -30,15 +31,17 @@ PROJECT (scan_matching_lib C)
 	
 
 
-	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused -Wall -Wno-long-double -W -Wconversion  -Wunreachable-code ")
+	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused -Wall -W -Wconversion  -Wunreachable-code ")
 	#SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pg")
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb")
 
 	IF(APPLE)
 		MESSAGE(STATUS "Using optimizations: ")
+		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-long-double")
 #		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mtune=7450 -mcpu=7450 -O3")
 		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ffast-math -fomit-frame-pointer -mtune=7450 -mcpu=7450 -O3")
 	ELSE(APPLE)
+	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2")
 
 	ENDIF(APPLE)
 
@@ -104,9 +107,10 @@ PROJECT (scan_matching_lib C)
 		TARGET_LINK_LIBRARIES(test_math_utils sm ${GSL_LIBRARIES})
 
 	########### Carmen2pdf ########## 
-
+IF(CAIRO_FOUND)
 	ADD_EXECUTABLE(carmen2pdf apps/carmen2pdf.c)
 	TARGET_LINK_LIBRARIES(carmen2pdf sm ${GSL_LIBRARIES})
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -I../deploy/include/cairo")
+	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CAIRO_CFLAGS}")
 	TARGET_LINK_LIBRARIES(carmen2pdf options -lcairo)
-
+ENDIF(CAIRO_FOUND)

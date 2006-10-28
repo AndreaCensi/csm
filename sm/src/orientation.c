@@ -44,10 +44,17 @@ void ld_compute_orientation(LDP ld, int size_neighbourhood, double sigma) {
 		double alpha=42, cov0_alpha=32;
 		filter_orientation(ld->theta[i],ld->readings[i],num_neighbours,
 			thetas,readings,&alpha,&cov0_alpha);
-			
-		ld->alpha[i] = alpha;
-		ld->cov_alpha[i] = cov0_alpha * square(sigma);
-		ld->alpha_valid[i] = 1;
+
+		
+		if(gsl_isnan(alpha)) {
+			ld->alpha[i] = GSL_NAN;
+			ld->cov_alpha[i] = GSL_NAN;
+			ld->alpha_valid[i] = 0;
+		}else{  
+			ld->alpha[i] = alpha;
+			ld->cov_alpha[i] = cov0_alpha * square(sigma);
+			ld->alpha_valid[i] = 1;
+		}
 //		printf("---------- i = %d alpha = %f sigma=%f cov_alpha = %f\n", i,
 //			alpha, ld->cov_alpha[i]);
 	}
