@@ -39,9 +39,9 @@ SET(CAIRO_FOUND no)
 		MESSAGE(STATUS "Using optimizations: ")
 		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-long-double")
 #		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mtune=7450 -mcpu=7450 -O3")
-		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ffast-math -fomit-frame-pointer -mtune=7450 -mcpu=7450 -O3")
+#		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ffast-math -fomit-frame-pointer -mtune=7450 -mcpu=7450 -O3")
 	ELSE(APPLE)
-	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2")
+		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2")
 
 	ENDIF(APPLE)
 

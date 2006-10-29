@@ -93,16 +93,28 @@ void filter_orientation(double theta0, double rho0, size_t n,
 	
 	*cov0_alpha	= square(dalpha_df1) * cov_f1 + square(dalpha_drho);
 
+
+	if(gsl_isnan(*alpha)) {
+		egsl_print("Y",Y);
+		egsl_print("L",L);
+		egsl_print("R",R);
+		egsl_print("eRinv",eRinv);
+		egsl_print("vcov_f1",vcov_f1);
+		
+		printf("   f1 = %f cov =%f \n", f1,cov_f1);
+		printf("   f1/rho = %f \n", f1/rho0);
+		printf("   atan = %f \n", atan(f1/rho0));
+		printf("   theta0= %f \n", theta0);
+		
+		
+	}
+	
 	egsl_pop();
 
 //	printf("dalpha_df1 = %f dalpha_drho = %f\n",dalpha_df1,dalpha_drho);
 //	printf("f1 = %f covf1 = %f alpha = %f cov_alpha = %f\n ",f1,cov_f1,*alpha,*cov0_alpha);
 //	printf("sotto = %f\n ",(square(rho0) + square(f1)));
 	
-/*	printf("   f1 = %f cov =%f \n", f1,cov_f1);
-	printf("   f1/rho = %f \n", f1/rho0);
-	printf("   atan = %f \n", atan(f1/rho0));
-	printf("   theta0= %f \n", theta0);*/
 //	printf("   alpha = %f sigma= %f°\n", *alpha, rad2deg(0.01*sqrt(*cov0_alpha)));
 /*	
 	printf("l= ");

@@ -1,4 +1,4 @@
-#LyX 1.4.2 created this file. For more info see http://www.lyx.org/
+#LyX 1.4.3 created this file. For more info see http://www.lyx.org/
 \lyxformat 245
 \begin_document
 \begin_header
@@ -60,7 +60,7 @@ Consider the following minimization problem:
 
 \end_inset
 
-2Setting 
+Setting 
 \begin_inset Formula $P_{k}=\left[\begin{array}{cc}
 \fp_{k1} & -\fp_{k2}\\
 \fp_{k2} & \fp_{k1}\end{array}\right]=\left[\begin{array}{cc}
@@ -114,8 +114,8 @@ Therefore the new function to minimize is
 \end_inset
 
 The new problem is 
-\begin_inset Formula \[
-\min J'(\fx)=\fx^{T}M\fx+\boldsymbol{g}^{T}\fx\]
+\begin_inset Formula \begin{equation}
+\min J'(\fx)=\fx^{T}M\fx+\boldsymbol{g}^{T}\fx\label{eq:j1}\end{equation}
 
 \end_inset
 
@@ -123,8 +123,8 @@ The new problem is
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \[
-\mbox{s.t.}\quad\fx^{T}W\fx=1\]
+\begin_inset Formula \begin{equation}
+\mbox{s.t.}\quad\fx^{T}W\fx=1\label{eq:constraint}\end{equation}
 
 \end_inset
 
@@ -136,35 +136,57 @@ Minimizing using Lagrange
 \end_layout
 
 \begin_layout Standard
-Solve using Lagrange's multipliers:
+Solve using Lagrange's multipliers.
+ This is the Lagrangian:
 \begin_inset Formula \[
 L(\fx)=\fx^{T}M\fx+g^{T}\fx+\lambda(\fx^{T}W\fx-1)\]
 
 \end_inset
 
+This is the condition for optimality (
+\begin_inset Formula $\partial L/\partial\fx=\boldsymbol{0}^{T})$
+\end_inset
 
+:
 \begin_inset Formula \[
-\frac{\partial L}{\partial\fx}=2\fx^{T}M+g^{T}+2\lambda\fx^{T}W=0\]
+2\fx^{T}M+g^{T}+2\lambda\fx^{T}W=\boldsymbol{0}^{T}\]
+
+\end_inset
+
+that can be turned into this:
+\begin_inset Formula \begin{equation}
+\fx=\left(2M+2\lambda W\right)^{-T}k^{T}\label{eq:iniziale}\end{equation}
+
+\end_inset
+
+If we put this last relation into the constraint\InsetSpace ~
+
+\begin_inset LatexCommand \eqref{eq:constraint}
+
+\end_inset
+
+, we obtain
+\begin_inset Formula \begin{equation}
+k\left(M+2\lambda W\right)^{-1}W\left(M+2\lambda W\right)^{-T}k=1\label{eq:final}\end{equation}
 
 \end_inset
 
 
-\begin_inset Formula \[
-\fx=\left(2M+2\lambda W\right)^{-T}k^{T}\]
+\end_layout
+
+\begin_layout Standard
+Even if not objoius\InsetSpace ~
+
+\begin_inset LatexCommand \eqref{eq:final}
 
 \end_inset
 
-putting this into the constraint:
-\begin_inset Formula \[
-k\left(M+2\lambda W\right)^{-1}W\left(M+2\lambda W\right)^{-T}k=1\]
-
-\end_inset
-
-This is a fourth order polynomial in 
+ is a fourth-order polynomial in 
 \begin_inset Formula $\lambda$
 \end_inset
 
 .
+ The following computations will prove this assertion.
  Partition the matrix 
 \begin_inset Formula $\left(M+2\lambda W\right)$
 \end_inset
@@ -177,19 +199,25 @@ B^{T} & D+2\lambda I\end{array}\right]\]
 
 \end_inset
 
-because 
-\begin_inset Formula $W=\left[\begin{array}{cc}
-0 & 0\\
-0 & I\end{array}\right]$
+In the middle of\InsetSpace ~
+
+\begin_inset LatexCommand \eqref{eq:final}
+
 \end_inset
 
-, it is needed to compute only the last column of 
+ there is the matrix 
+\begin_inset Formula $W$
+\end_inset
+
+, which has a sparse form, it is needed to compute only the last column
+ of 
 \begin_inset Formula $(M+2\lambda W)^{-1}$
 \end_inset
 
- which is given by the matrix inversion lemma as:
+.
+ Using the matrix inversion lemma, one obtains that
 \begin_inset Formula \[
-\left[\begin{array}{cc}
+(M+2\lambda W)^{-1}=\left[\begin{array}{cc}
 A & B\\
 B^{T} & \left(D+2\lambda I\right)\end{array}\right]^{-1}=\left[\begin{array}{cc}
 \ast & -A^{-1}BQ^{-1}\\
@@ -197,12 +225,18 @@ B^{T} & \left(D+2\lambda I\right)\end{array}\right]^{-1}=\left[\begin{array}{cc}
 
 \end_inset
 
-With 
-\begin_inset Formula $Q=\left(D-B^{T}A^{-1}B+2\lambda I\right):=\left(S+2\lambda I\right)$
+Where 
+\begin_inset Formula $Q=\left(D-B^{T}A^{-1}B+2\lambda I\right)\triangleq\left(S+2\lambda I\right)$
 \end_inset
 
 .
- The constraint now appears as 
+ The constraint\InsetSpace ~
+
+\begin_inset LatexCommand \eqref{eq:constraint}
+
+\end_inset
+
+ now appears as 
 \begin_inset Formula \[
 g^{T}\left[\begin{array}{cc}
 A^{-1}BQ^{-1}Q^{-T}B^{T}A^{-T} & -A^{-1}BQ^{-1}Q^{-T}\\
@@ -214,14 +248,18 @@ A^{-1}BQ^{-1}Q^{-T}B^{T}A^{-T} & -A^{-1}BQ^{-1}Q^{-T}\\
 \end_layout
 
 \begin_layout Standard
-Also
+Now write 
+\begin_inset Formula $Q$
+\end_inset
+
+ in this way: 
 \begin_inset Formula \[
-\left(S+2\lambda I\right)^{-1}=\frac{S^{A}+2\lambda I}{p(\lambda)}\]
+Q=\left(S+2\lambda I\right)^{-1}=\frac{S^{A}+2\lambda I}{p(\lambda)}\]
 
 \end_inset
 
 where 
-\begin_inset Formula $S^{A}=inv(S)*det(S)$
+\begin_inset Formula $S^{A}=\det(S)\cdot S^{-1}$
 \end_inset
 
  and 
@@ -229,31 +267,52 @@ where
 \end_inset
 
 .
- 
-\end_layout
-
-\begin_layout Standard
-Because 
+ Because 
 \begin_inset Formula \[
 Q^{-1}Q^{-T}=\frac{\left(S^{A}+2\lambda I\right)\left(S^{A}+2\lambda I\right)^{T}}{p(\lambda)^{2}}=\frac{S^{A}S^{A^{T}}+4\lambda^{2}I+4\lambda S^{A}}{p(\lambda)^{2}}\]
 
 \end_inset
 
-
-\begin_inset Formula \begin{eqnarray*}
+One finally obtains the following polynomials: 
+\begin_inset Formula \begin{eqnarray}
 \lambda^{2}\cdot4k^{T}\left[\begin{array}{cc}
 A^{-1}BB^{T}A^{-T} & -A^{-1}B\\
-\ast & I\end{array}\right]k & +\\
+\ast & I\end{array}\right]k & +\nonumber \\
 \lambda\cdot4k^{T}\left[\begin{array}{cc}
 A^{-1}BS^{A}B^{T}A^{-T} & -A^{-1}BS^{A}\\
-\ast & S^{A}\end{array}\right]k & +\\
+\ast & S^{A}\end{array}\right]k & +\nonumber \\
 k^{T}\left[\begin{array}{cc}
 A^{-1}BS^{A^{T}}S^{A}B^{T}A^{-T} & -A^{-1}BS^{A^{T}}S^{A}\\
-\ast & S^{A^{T}}S^{A}\end{array}\right]k & = & \left(p(\lambda)\right)^{2}\end{eqnarray*}
+\ast & S^{A^{T}}S^{A}\end{array}\right]k & -\left(p(\lambda)\right)^{2}= & 0\label{eq:gigantesco}\end{eqnarray}
 
 \end_inset
 
+Because 
+\begin_inset Formula $p(\lambda)$
+\end_inset
 
+ is a second-order polynomial, the order of\InsetSpace ~
+
+\begin_inset LatexCommand \eqref{eq:gigantesco}
+
+\end_inset
+
+ is 4, therefore the solution can be found in closed form.
+ After one has found 
+\begin_inset Formula $\lambda$
+\end_inset
+
+, one can obtain 
+\begin_inset Formula $\fx$
+\end_inset
+
+ using\InsetSpace ~
+
+\begin_inset LatexCommand \eqref{eq:iniziale}
+
+\end_inset
+
+.
 \end_layout
 
 \end_body
