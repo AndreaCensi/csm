@@ -6,32 +6,13 @@
 
 #define DEBUG_SEARCH(a) ;
 
-inline int compatible(struct sm_params*params, int i, int j) {
-	if(!params->doAlphaTest) return 1;
-	
-	double theta0 = 0; // FIXME
-	if((params->laser_sens.alpha_valid[i]==0) ||
-		(params->laser_ref.alpha_valid[j]==0)) 
-		return 1;
-		
-	double alpha_i = params->laser_sens.alpha[i];
-	double alpha_j = params->laser_ref.alpha[j];
-	double tolerance = deg2rad(params->doAlphaTest_thresholdDeg);
-	
-	double theta = angleDiff(alpha_j, alpha_i);
-	if(fabs(angleDiff(theta,theta0))>tolerance+deg2rad(params->maxAngularCorrectionDeg)) {
-		return 0;
-	} else {
-		return 1;
-	}
-}
-
 
 void ld_create_jump_tables(struct laser_data* ld) {
 	int i;
 	for(i=0;i<ld->nrays;i++) {
-		int j=i+1;
-
+		int j;
+		
+		j=i+1;
 		while(j<ld->nrays && ld->valid[j] && ld->readings[j]<=ld->readings[i]) j++;
 		ld->up_bigger[i] = j-i;
 
@@ -115,41 +96,64 @@ void find_correspondences_tricks(struct sm_params*params, gsl_vector* x_old) {
 			           down_stopped ? 1 : last_dist_up < last_dist_down;
 			DEBUG_SEARCH(printf("|"));
 
+			/* Now two symmetric chunks of code, the now_up and the !now_up */
 			if(now_up) {
 				DEBUG_SEARCH(printf("up %d ",up));
+				/* If we have crossed the "to" boundary we stop searching
+					on the "up" direction. */
 				if(up > to) { up_stopped = 1; continue; }
+				/* Just ignore invalid rays */
 				if(!laser_ref->valid[up]) { ++up; continue; }
 				
+				/* This is the distance from p_i_w to the "up" point*/
 				last_dist_up = distance(p_i_w, laser_ref->p[up]);
-				if( (last_dist_up<params->maxCorrespondenceDist) && ((j1==-1)||(last_dist_up < best_dist))) {
-					if(compatible(params, i, up)) {
+				/* If it is less than the best point, it is our new j1 */
+				if( (last_dist_up<params->maxCorrespondenceDist) && 
+					((j1==-1)||(last_dist_up < best_dist))) {
 						j1 = up; best_dist = last_dist_up;
-					}
 				}
 				
+				/* If we are moving away from start_cell */
 				if (up>start_cell) {
+					/* We can compute a bound for early stopping. Currently
+					   our best point has distance best_dist; we can compute
+					   min_dist_up, which is the minimum distance that can have
+					   points for j>up (see figure)*/
 					double delta_theta = (up-start_cell) * (M_PI/laser_ref->nrays);
 					double min_dist_up = sin(delta_theta) * p_i_w_nrm2;
-//					double min_dist_up = table[up-start_cell] * p_i_w_nrm2;
+					/* If going up we can't make better than best_dist, then
+					    we stop searching in the "up" direction */
 					if(min_dist_up > best_dist) { 
 						up_stopped = 1; continue;
 					}
-					up += (laser_ref->readings[up] <= p_i_w_nrm2) ?
-						laser_ref->up_bigger[up] : laser_ref->up_smaller[up];
-				} else ++up;
+					/* If we are moving away, then we can implement the jump tables
+					   optimizations. */
+					up += 
+						/* If p_i_w is shorter than "up" */
+						(laser_ref->readings[up] <= p_i_w_nrm2) 
+						?
+						/* We can jump to a bigger point */
+						laser_ref->up_bigger[up] 
+						/* Or else we jump to a smaller point */ 
+						: laser_ref->up_smaller[up];
+						
+				} else 
+					/* If we are moving towards "start_cell", we can't do any
+					   ot the previous optimizations and we just move to the next point */
+					++up;
 				
 			}
 			
+			/* This is the specular part of the previous chunk of code. */
 			if(!now_up) {
 				DEBUG_SEARCH(printf("down %d ",down));
 				if(down < from) { down_stopped = 1; continue; }
 				if(!laser_ref->valid[down]) { --down; continue; }
 		
 				last_dist_down = distance(p_i_w, laser_ref->p[down]);
-				if( (last_dist_down<params->maxCorrespondenceDist) && ((j1==-1)||(last_dist_down < best_dist))) {
-					if(compatible(params, i, down)) {
+				if( (last_dist_down<params->maxCorrespondenceDist) && 
+				    ((j1==-1)||(last_dist_down < best_dist))) {
 						j1 = down; best_dist = last_dist_down;
-					}
 				}
 
 				if (down<start_cell) {
@@ -168,19 +172,23 @@ void find_correspondences_tricks(struct sm_params*params, gsl_vector* x_old) {
 		
 		DEBUG_SEARCH(printf("i=%d j1=%d dist=%f\n",i,j1,best_dist));
 		
-		if(-1==j1) {// no match
+		/* If no point matched. */
+		if(-1==j1) {
 			ld_set_null_correspondence(laser_sens, i);
 			continue;
 		}
-		// Do not match with extrema
-		if( (0==j1) || (j1 == (laser_ref->nrays-1))) {// no match
+		/* We ignore matching the first or the last point in the scan */
+		if( 0==j1 || j1 == (laser_ref->nrays-1)) {// no match
 			ld_set_null_correspondence(laser_sens, i);
 			continue;
 		}
 
+		/* Now we want to find j2, the second best match. */
 		int j2;
+		/* We find the next valid point, up and down */
 		int j2up   = ld_next_valid_up   (laser_ref, j1);
 		int j2down = ld_next_valid_down (laser_ref, j1);
+		/* And then (very boring) we use the nearest */
 		if((j2up==-1)&&(j2down==-1)) {
 			ld_set_null_correspondence(laser_sens, i);
 			continue;

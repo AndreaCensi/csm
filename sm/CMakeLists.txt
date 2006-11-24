@@ -34,6 +34,7 @@ SET(CAIRO_FOUND no)
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused -Wall -W -Wconversion  -Wunreachable-code ")
 	#SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pg")
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb")
+	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fstrict-aliasing -std=c99")
 
 	IF(APPLE)
 		MESSAGE(STATUS "Using optimizations: ")
