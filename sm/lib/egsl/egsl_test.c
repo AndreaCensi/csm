@@ -1,5 +1,5 @@
 #include <math.h>
-
+#include <gsl/gsl_math.h>
 #include "egsl_macros.h"
 
 int main() {	

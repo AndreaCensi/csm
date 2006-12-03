@@ -1,6 +1,6 @@
 #include <math.h>
 #include "../laser_data.h"
-
+#include <gsl/gsl_math.h>
 #include <egsl_macros.h>
 
 val compute_C_k(val p_j1, val p_j2);
@@ -36,7 +36,7 @@ void compute_covariance_exact(
 		val p_j1 = egsl_vFgslv(laser_ref ->p[j1]);
 		val p_j2 = egsl_vFgslv(laser_ref ->p[j2]);
 		
-		// v1 := rot(theta+PI/2)*p_i
+		// v1 := rot(theta+M_PI/2)*p_i
 		val v1 = m(rot(theta+M_PI/2), p_i);		
 		// v2 := (rot(theta)*p_i+t-p_j1)
 		val v2 = sum3( m(rot(theta),p_i), t, minus(p_j1));

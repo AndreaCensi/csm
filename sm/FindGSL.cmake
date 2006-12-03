@@ -19,11 +19,11 @@
 ## www.mip.informatik.uni-kiel.de
 ## --------------------------------
 
-IF(WIN32)
-  MESSAGE(SEND_ERROR "FindGSL.cmake: gnu scientific library GSL not (yet) supported on WIN32")
+#IF(WIN32)
+#  MESSAGE(SEND_ERROR "FindGSL.cmake: gnu scientific library GSL not (yet) supported on WIN32")
   
-ELSE(WIN32)
-  IF(UNIX) 
+#ELSE(WIN32)
+#  IF(UNIX) 
   SET(GSL_CONFIG_PREFER_PATH "$ENV{GSL_HOME}/bin" CACHE STRING "preferred path to OpenSG (osg-config)")
     FIND_PROGRAM(GSL_CONFIG gsl-config
       ${GSL_CONFIG_PREFER_PATH}
@@ -81,8 +81,8 @@ ELSE(WIN32)
       MESSAGE("FindGSL.cmake: gsl-config not found. Please set it manually. GSL_CONFIG=${GSL_CONFIG}")
     ENDIF(GSL_CONFIG)
 
-  ENDIF(UNIX)
-ENDIF(WIN32)
+#  ENDIF(UNIX)
+#ENDIF(WIN32)
 
 
 IF(GSL_LIBRARIES)
