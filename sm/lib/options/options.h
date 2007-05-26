@@ -1,4 +1,3 @@
-/* $Id: options.h 764 2005-04-26 08:45:06Z andrea $ */
 #ifndef H_OPTIONS
 #define H_OPTIONS
 
@@ -10,10 +9,10 @@
  *  See options_example.c.
  */
 
- enum option_type { OPTION_STRING, OPTION_INT, OPTION_DOUBLE };
+enum option_type { OPTION_STRING=0, OPTION_INT=1, OPTION_DOUBLE=2 };
  
 struct option {
-	/** Name of the option. */
+	/** Name of the option (or 0 if this is the last element). */
 	const char * name;
 	const char * desc;
 
@@ -29,6 +28,7 @@ struct option {
 	 *   type=DOUBLE:	value_pointer is a "double *"
 	 *      A new string is allocated using malloc():
 	 *          *(value_pointer) = malloc( ... )
+	 *      and you should free it yourself.
 	 */
 	void * value_pointer;
 
@@ -37,10 +37,41 @@ struct option {
 	int * set_pointer;
 };
 
+/** User-friendly interface */
+struct option* options_allocate(size_t n);
+void options_int    (struct option*, const char* name,  int *p,    int def_value, const char*desc);
+void options_double (struct option*, const char* name,  double *p, double def_value, const char*desc);
+void options_string (struct option*, const char* name, const char** p,const char*def_balue,const char*desc);
 
-/* 0 on error */
-int auto_option(int argc, const char* argv[], int noptions, struct option * options);
+/** Returns 0 on error */
+int options_parse_args(struct option*ops, int argc, const char* argv[]);
+/** Returns 0 on error */
+int options_parse_file(struct option*ops, const char*pwd, const char*file);
 
-void print_help(FILE*where, int noptions, struct option * options);
+void options_print_help(struct option*ops, FILE*where);
+
+/** Internal use */
+
+/** Finds an option in the array. Returns 0 if not found. */
+struct option * options_find(struct option*ops, const char * name);
+
+/** Returns true if the option needs an argument */
+int options_requires_argument(struct option*o);
+
+/** Flags the option as passed */
+void options_set_passed(struct option*o);
+
+/** Returns 0 on error */
+int options_try_pair(struct option*ops, const char*name, const char*value);
+
+/** Returns 0 on error. */
+int options_set(struct option*op, const char*value);
+
+int options_valid(struct option*op);
+
+
+#define OPTIONS_NAME_MAXSIZE 32
+#define OPTIONS_VALUE_MAXSIZE 256
+
 
 #endif

@@ -16,7 +16,7 @@ PROJECT (scan_matching_lib C)
 	ENDIF(GSL_FOUND)
 
 	INCLUDE (FindCairo.cmake)                                                                                         
-SET(CAIRO_FOUND no)
+#SET(CAIRO_FOUND no)
 
 	IF(CAIRO_FOUND)
 		MESSAGE(STATUS "Found Cairo at.")
@@ -62,7 +62,7 @@ SET(CAIRO_FOUND no)
 		TARGET_LINK_LIBRARIES(egsl_test_allocation egsl  ${GSL_LIBRARIES})
 
 	########### Options ########## 
-		ADD_LIBRARY(options STATIC lib/options/options.c)
+	SUBDIRS(lib/options)
 
 ########### SM ########## 
 
@@ -92,8 +92,11 @@ SET(CAIRO_FOUND no)
 		lib/egsl/egsl_misc.c
 	)
 
-	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Ilib/gpc")
-	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Ilib/egsl")
+	INCLUDE_DIRECTORIES(lib/egsl)
+	INCLUDE_DIRECTORIES(lib/gpc)
+	
+#	#SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Ilib/gpc")
+#	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Ilib/egsl")
 
 	TARGET_LINK_LIBRARIES(sm ${GSL_LIBRARIES})
 	INSTALL(TARGETS sm ARCHIVE DESTINATION lib)

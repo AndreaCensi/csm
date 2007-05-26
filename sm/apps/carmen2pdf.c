@@ -30,6 +30,7 @@ void ld_getbb(struct laser_data* ld, double*x0, double*y0, double*x1, double*y1,
 int main(int argc, const char*argv[]) {
 	struct params p;
 	p.interval = 10;
+	
 	p.input_filename = "in.log";
 	p.output_filename = "out.pdf";
 	p.use_odometry = 0;
@@ -37,20 +38,19 @@ int main(int argc, const char*argv[]) {
 	p.horizon = 8;
 	p.dimension=500;
 	
-	#define noptions 7
-	struct option options[noptions] = 
-		{ {"--interval", "how many to ignore", OPTION_INT, &(p.interval)},
-		  {"--in", "input filename (Carmen format)",OPTION_STRING, &(p.input_filename)},
-		  {"--out", "output filename (pdf)",OPTION_STRING, &(p.output_filename)},
-		  {"--lt", "threshold for linking points (m)",OPTION_DOUBLE, &(p.line_threshold)},
-		  {"--horizon", "horizon of the laser (m)",OPTION_DOUBLE, &(p.horizon)},
-		  {"--dimension", "dimension of image (points)",OPTION_DOUBLE, &(p.dimension)},
-			{"--use_odometry", "if 1 uses odometry, else estimate",
-				OPTION_INT, &(p.use_odometry)}};
+	struct option options[8] = 
+		{ {"--interval",  "how many to ignore",                   OPTION_INT,    &(p.interval), 0},
+		  {"--in",        "input filename (Carmen format)",       OPTION_STRING, &(p.input_filename), 0},
+		  {"--out",       "output filename (pdf)",                OPTION_STRING, &(p.output_filename), 0},
+		  {"--lt",        "threshold for linking points (m)",     OPTION_DOUBLE, &(p.line_threshold), 0},
+		  {"--horizon",   "horizon of the laser (m)",             OPTION_DOUBLE, &(p.horizon), 0},
+		  {"--dimension", "dimension of image (points)",          OPTION_DOUBLE, &(p.dimension), 0},
+		  {"--use_odometry", "if 1 uses odometry, else estimate", OPTION_INT,    &(p.use_odometry), 0},
+		  {0,0,0,0,0}};
 	
-	if(!auto_option(argc, argv, noptions, options)) {
+	if(!options_parse_args(options, argc, argv)) {
 		printf("error.");
-		print_help(stderr, noptions, options);
+		options_print_help(options, stderr);
 		return -1;
 	}
 	

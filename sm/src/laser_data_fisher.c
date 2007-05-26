@@ -27,7 +27,7 @@ val ld_fisher0(LDP ld) {
 		double fim_k[9] ={
 			c*c*z*z,    c*s*z*z,   c*z *t*r,
 			c*s*z*z,    s*s*z*z,   s*z *t*r, 
-			c*z *t*r, s*z*t*r, t*r *t*r 
+			c*z*t*r,    s*z*t*r,   t*r *t*r 
 		};
 		
 		egsl_push();
