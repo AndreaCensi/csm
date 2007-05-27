@@ -116,7 +116,7 @@ void ght_find_theta_range(LDP laser_ref, LDP laser_sens,
 		possible_interval(p_i, laser_ref, maxAngularCorrectionDeg,
 			maxLinearCorrection, &from, &to, &start_cell);
 
-//		printf("i=%d alpah=%f cov=%f\n", i,laser_sens->alpha[i],laser_sens->cov_alpha[i]);
+/*		printf("i=%d alpah=%f cov=%f\n", i,laser_sens->alpha[i],laser_sens->cov_alpha[i]);*/
 		int j;
 		for(j=from;j<=to;j++) {
 			if(!laser_ref->alpha_valid[j]) continue;
@@ -191,9 +191,9 @@ void ght_one_shot(LDP laser_ref, LDP laser_sens,
 			double alpha = laser_ref->alpha[j];
 			double ca = cos(alpha); double sa=sin(alpha);
 
-//			printf("valid %d alpha %f weight %f t_x %f t_y %f\n",
-//				laser_ref->alpha_valid[j],alpha,weight,
-//				t_x, t_y);
+/*			printf("valid %d alpha %f weight %f t_x %f t_y %f\n",
+				laser_ref->alpha_valid[j],alpha,weight,
+				t_x, t_y); */
 			z[0] += weight*(ca*ca*t_x + sa*ca*t_y);
 			z[1] += weight*(sa*ca*t_x + sa*sa*t_y);
 			z[2] += weight*theta;

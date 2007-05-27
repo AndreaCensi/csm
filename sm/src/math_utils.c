@@ -2,7 +2,7 @@
 
 #include "math_utils.h"
 
-inline double minmax(int from,int to,int x){
+double minmax(int from,int to,int x) {
 	return GSL_MAX(GSL_MIN(x,to),from);
 }
 
@@ -12,14 +12,14 @@ void possible_interval(
 {
 	double angleRes = (ld->max_theta-ld->min_theta)/ld->nrays;
 
-	// Delta for the angle
+	/* Delta for the angle */
 	double delta = fabs(deg2rad(maxAngularCorrectionDeg)) +
 	        fabs(atan(maxLinearCorrection/norm(p_i_w)));
 
-	// Dimension of the cell range
+	/* Dimension of the cell range */
 	int range = (int) ceil(delta/angleRes);
 
-	// To be turned into an interval of cells
+	/* To be turned into an interval of cells */
 	double start_theta = atan2(gvg(p_i_w,1),gvg(p_i_w,0));
 	
 	*start_cell  = (int)
@@ -122,7 +122,7 @@ double angleDiff(double a, double b) {
 }
 
 
-/// Computes the projection of x onto the line which goes through a-b
+/** Computes the projection of x onto the line which goes through a-b */
 void projection_on_line(const gsl_vector*a,const gsl_vector*b,const gsl_vector*x,
 	gsl_vector * proj) 
 {
@@ -138,13 +138,13 @@ void projection_on_line(const gsl_vector*a,const gsl_vector*b,const gsl_vector*x
 	gvs(proj, 1, s*rho - c*s*px + c*c*py );	
 }
 
-/// Computes the projection of x onto the segment a-b
+/** Computes the projection of x onto the segment a-b */
 void projection_on_segment(const gsl_vector*a,const gsl_vector*b,const gsl_vector*x,
 	gsl_vector * proj ) {
 	projection_on_line(a,b,x,proj);
 	if ((gvg(proj,0)-gvg(a,0))*(gvg(proj,0)-gvg(b,0)) +
 	    (gvg(proj,1)-gvg(a,1))*(gvg(proj,1)-gvg(b,1)) < 0 ) {
-		// the projection is inside the segment
+		/* the projection is inside the segment */
 	} else 
 		if(distance(a,x)<distance(b,x)) 
 			gsl_vector_memcpy(proj,a);

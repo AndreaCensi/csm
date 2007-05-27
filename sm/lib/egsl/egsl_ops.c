@@ -52,12 +52,12 @@ void egsl_add_to(val v1, val v2) {
 }
 
 void egsl_add_to_col(val v1, size_t j, val v2) {
-//	egsl_print("m1",v1);
-//	egsl_print("m2",v2);
+/*	egsl_print("m1",v1);
+	egsl_print("m2",v2); */
 	gsl_matrix * m1 = egsl_gslm(v1); 
 	gsl_matrix * m2 = egsl_gslm(v2);
 	
-//	printf("m1 size = %d,%d j = %d\n",m1->size1,m1->size2,j);
+/*	printf("m1 size = %d,%d j = %d\n",m1->size1,m1->size2,j); */
 	egsl_expect_size(v2, m1->size1, 1);
 	size_t i;
 	for(i=0;i<m1->size1;i++) {
@@ -120,10 +120,10 @@ val egsl_inverse(val v1){
 	gsl_matrix * m = gsl_matrix_alloc(n,n);
 	gsl_matrix_memcpy(m,A);
 	gsl_permutation * perm = gsl_permutation_alloc (n);
-	// Make LU decomposition of matrix m
+	/* Make LU decomposition of matrix m */
 	int s;
 	gsl_linalg_LU_decomp (m, perm, &s);
-	// Invert the matrix m
+	/* Invert the matrix m */
 	gsl_linalg_LU_invert (m, perm, invA);
 	gsl_permutation_free(perm);
 	gsl_matrix_free(m);
@@ -133,7 +133,7 @@ val egsl_inverse(val v1){
 void egsl_symm_eig(val v, double* eigenvalues, val* eigenvectors) {
 	gsl_matrix *m = egsl_gslm(v);
 	size_t N = m->size1;
-	// Check for v to be square
+	/* Check for v to be square */
 	
 	gsl_matrix *A = gsl_matrix_alloc(N,N);
 	gsl_matrix_memcpy(A, m);

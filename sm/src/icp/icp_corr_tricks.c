@@ -61,7 +61,7 @@ void find_correspondences_tricks(struct sm_params*params, gsl_vector* x_old) {
 		} else {
 			from = 0; to = laser_ref->nrays-1; 
 			
-			// To be turned into an interval of cells
+			/* To be turned into an interval of cells */
 			double start_theta = atan2(gvg(p_i_w,1),gvg(p_i_w,0));
 
 			start_cell  = (int)
@@ -73,14 +73,14 @@ void find_correspondences_tricks(struct sm_params*params, gsl_vector* x_old) {
 		int j1 = -1;
 		double best_dist = 42;
 		
-//		printf("> i=%d [from %d to %d]\n",	i,from,to);
+/*		printf("> i=%d [from %d to %d]\n",	i,from,to); */
 
 		int we_start_at = (last_best==-1) ? start_cell : last_best + 1;
 			 we_start_at = minmax(from, to, we_start_at);
 		
 		int up =  we_start_at+1; 
 		int down = we_start_at; 
-		double last_dist_up = 0; // first is down
+		double last_dist_up = 0; /* first is down */
 		double last_dist_down = -1;	
 
 		int up_stopped = 0; 
@@ -157,7 +157,7 @@ void find_correspondences_tricks(struct sm_params*params, gsl_vector* x_old) {
 				}
 
 				if (down<start_cell) {
-				//	double min_dist_down = table[start_cell-down] * p_i_w_nrm2;
+				/*	double min_dist_down = table[start_cell-down] * p_i_w_nrm2;*/
 					double delta_theta = (start_cell-down) * (M_PI/laser_ref->nrays);
 					double min_dist_down = sin(delta_theta) * p_i_w_nrm2;
 					if(min_dist_down > best_dist) { 
@@ -178,7 +178,7 @@ void find_correspondences_tricks(struct sm_params*params, gsl_vector* x_old) {
 			continue;
 		}
 		/* We ignore matching the first or the last point in the scan */
-		if( 0==j1 || j1 == (laser_ref->nrays-1)) {// no match
+		if( 0==j1 || j1 == (laser_ref->nrays-1)) {/* no match */
 			ld_set_null_correspondence(laser_sens, i);
 			continue;
 		}

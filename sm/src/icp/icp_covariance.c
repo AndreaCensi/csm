@@ -16,7 +16,7 @@ void compute_covariance_exact(
 	val d2J_dxdy1 = zeros(3,(size_t)laser_ref ->nrays);
 	val d2J_dxdy2 = zeros(3,(size_t)laser_sens->nrays);
 	
-	// the three pieces of d2J_dx2
+	/* the three pieces of d2J_dx2 */
 	val d2J_dt2       = zeros(2,2);
 	val d2J_dt_dtheta = zeros(2,1);
 	val d2J_dtheta2   = zeros(1,1);
@@ -36,13 +36,13 @@ void compute_covariance_exact(
 		val p_j1 = egsl_vFgslv(laser_ref ->p[j1]);
 		val p_j2 = egsl_vFgslv(laser_ref ->p[j2]);
 		
-		// v1 := rot(theta+M_PI/2)*p_i
+		/* v1 := rot(theta+M_PI/2)*p_i */
 		val v1 = m(rot(theta+M_PI/2), p_i);		
-		// v2 := (rot(theta)*p_i+t-p_j1)
+		/* v2 := (rot(theta)*p_i+t-p_j1) */
 		val v2 = sum3( m(rot(theta),p_i), t, minus(p_j1));
-		// v3 := rot(theta)*v_i
+		/* v3 := rot(theta)*v_i */
 		val v3 = vers(theta + laser_sens->theta[i]);
-		// v4 := rot(theta+PI/2)*v_i;
+		/* v4 := rot(theta+PI/2)*v_i; */
 		val v4 = vers(theta + laser_sens->theta[i] + M_PI/2);
 		
 		val C_k = compute_C_k(p_j1, p_j2);
@@ -54,12 +54,12 @@ void compute_covariance_exact(
 		add_to(d2J_dt_dtheta, d2J_dt_dtheta_k ); 
 		add_to(d2J_dtheta2, d2J_dtheta2_k);
 		
-		// for measurement rho_i  in the second scan
+		/* for measurement rho_i  in the second scan */
 		val d2Jk_dtdrho_i = sc(2.0, m(C_k,v3)); 
 		val d2Jk_dtheta_drho_i = sc(2.0, sum( m3(tr(v2),C_k,v4),  m3(tr(v3),C_k,v1)));
  		add_to_col(d2J_dxdy2, (size_t)i, comp_col(d2Jk_dtdrho_i, d2Jk_dtheta_drho_i));
 		
-		// for measurements rho_j1, rho_j2 in the first scan
+		/* for measurements rho_j1, rho_j2 in the first scan */
 		
 		val dC_drho_j1 = dC_drho(p_j1, p_j2);
 		val dC_drho_j2 = dC_drho(p_j2, p_j1);
@@ -71,7 +71,7 @@ void compute_covariance_exact(
 		val d2Jk_dtheta_drho_j1 = sum( sc(-2.0, m3(tr(v_j1),C_k,v1)), m3(tr(v2),dC_drho_j1,v1));
 		add_to_col(d2J_dxdy1, (size_t)j1, comp_col(d2Jk_dt_drho_j1, d2Jk_dtheta_drho_j1));
 		
-		// for measurement rho_j2
+		/* for measurement rho_j2*/
 		val d2Jk_dt_drho_j2 = sc(2.0, m( dC_drho_j2,v2));
 		val d2Jk_dtheta_drho_j2 = sc(2.0, m3( tr(v2), dC_drho_j2, v1));
 		add_to_col(d2J_dxdy1, (size_t)j2, comp_col(d2Jk_dt_drho_j2, d2Jk_dtheta_drho_j2));
@@ -79,7 +79,7 @@ void compute_covariance_exact(
 		egsl_pop();
 	}
 
-	// composes matrix  d2J_dx2  from the pieces
+	/* composes matrix  d2J_dx2  from the pieces*/
 	val d2J_dx2   = comp_col( comp_row(    d2J_dt2      ,   d2J_dt_dtheta),
 	                          comp_row(tr(d2J_dt_dtheta),     d2J_dtheta2));
 	
@@ -88,16 +88,16 @@ void compute_covariance_exact(
 
 	val ecov0_x = sum(m(edx_dy1,tr(edx_dy1)),m(edx_dy2,tr(edx_dy2)) );
 
-//	val cov_x = sc(0.01*0.01,ecov0_x);
+/*	val cov_x = sc(0.01*0.01,ecov0_x); */
 
-	// With the egsl_promote we save the matrix in the previous
-	// context
+	/* With the egsl_promote we save the matrix in the previous
+	   context */
 	*cov0_x = egsl_promote(ecov0_x);
 	*dx_dy1 = egsl_promote(edx_dy1);
 	*dx_dy2 = egsl_promote(edx_dy2);
 	
 	egsl_pop();	
-	// now edx_dy1 is not valid anymore, by *dx_dy1 is.
+	/* now edx_dy1 is not valid anymore, by *dx_dy1 is. */
 }
 
 

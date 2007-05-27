@@ -63,15 +63,15 @@ int main(int argc, const char*argv[]) {
 		vector_to_array(u, params.odometry);
 	
 	 	sm_gpm(&params,&result);
-	 	//sm_icp(&params,&result);
+	 	/* sm_icp(&params,&result); */
 		
 		num_matchings++;
 		num_iterations += result.iterations;
 	
-		ld_free(&(params.laser_ref));
+		ld_dealloc(&(params.laser_ref));
 		params.laser_ref = params.laser_sens;
 	}
-	ld_free(&(params.laser_ref));
+	ld_dealloc(&(params.laser_ref));
 
 	clock_t end = clock();
 	float seconds = (end-start)/((float)CLOCKS_PER_SEC);

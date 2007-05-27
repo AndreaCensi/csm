@@ -123,9 +123,7 @@ int options_parse_stream(struct option*ops, const char*pwd, FILE*file) {
 			while(isspace(*line)) line++;
 			value = line;
 		}
-		
-//		printf("Read '%s' = '%s'\n", name, value);
-		
+				
 		if(!options_try_pair(ops, name, value) && !options_tolerant) {
 			return 0;
 		}
@@ -174,7 +172,7 @@ struct option * options_find(struct option*ops, const char * name) {
 int options_try_pair(struct option*ops, const char*name, const char*value) {
 	struct option* o;
 	if(0 == (o = options_find(ops, name))) {
-		// error, option does not exist
+		/* error, option does not exist */
 		fprintf(stderr, "Option '%s' does not exist.\n", name);
 		return 0;
 	}
@@ -218,7 +216,7 @@ int options_set(struct option*o, const char*value) {
 		}
 		
 		default: {
-			/// XXX ERROR
+			/* XXX ERROR */
 			fprintf(stderr, "Could not parse type %d: '%s' = '%s'.\n", o->type, o->name, value);
 			return 0;
 		}

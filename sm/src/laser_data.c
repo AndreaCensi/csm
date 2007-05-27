@@ -53,7 +53,12 @@ void ld_alloc(LDP ld, int nrays) {
 	
 }
 
-void ld_free(struct laser_data*ld){	
+void ld_free(LDP ld) {
+	ld_dealloc(ld);
+	free(ld);
+}
+
+void ld_dealloc(struct laser_data*ld){	
 	free(ld->valid);
 	free(ld->readings);
 	free(ld->theta);
@@ -95,7 +100,7 @@ void ld_compute_cartesian(LDP ld) {
 	}
 }
 
-// -1 if not found
+/** -1 if not found */
 
 int ld_next_valid(LDP ld, int i, int dir){
 	int j;
@@ -115,7 +120,7 @@ int ld_next_valid_down(LDP ld, int i){
 
 const char * prefix = "FLASER ";
 
-// Returns 0 on success
+/** Returns 0 on success */
 int read_next_double(const char*line, int*cur, double*d) {
 	int inc;
 	if(1 != sscanf(line+*cur, " %lf %n", d, &inc)) {
@@ -135,7 +140,7 @@ int ld_valid_corr(LDP ld, int i) {
 }
 
 
-/// Read next FLASER line in file (initializes ld). Returns 0 if error or EOF.
+/** Read next FLASER line in file (initializes ld). Returns 0 if error or EOF. */
 int ld_read_next_laser_carmen(FILE*file, LDP ld) {
 	#define MAX_LINE_LENGTH 10000
    char line[MAX_LINE_LENGTH];
@@ -199,21 +204,5 @@ int ld_num_valid_correspondences(LDP ld) {
 	}
 	return num;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 

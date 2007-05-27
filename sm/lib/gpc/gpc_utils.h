@@ -6,8 +6,8 @@
 #include <gsl/gsl_linalg.h>
 #include <gsl/gsl_poly.h>
 
-// The GSL is a pain to work with. The library DOES NOT HAVE a determinant() function
-// or an inv() function: you have to write your own routines.
+/* The GSL is a pain to work with. The library DOES NOT HAVE a determinant() function
+  or an inv() function: you have to write your own routines. */
 
 #define M(matrix, rows, col) gsl_matrix*matrix = gsl_matrix_alloc(rows,col)
 #define MF(matrix) gsl_matrix_free(matrix)

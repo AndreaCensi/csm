@@ -32,13 +32,13 @@ void ld_compute_orientation(LDP ld, int size_neighbourhood, double sigma) {
 			continue;
 		}
 
-//		printf("orientation for i=%d:\n",i);
+/*		printf("orientation for i=%d:\n",i); */
 		double thetas[num_neighbours];
 		double readings[num_neighbours];
 		size_t a=0; for(a=0;a<num_neighbours;a++){
 			thetas[a] = ld->theta[neighbours[a]];
 			readings[a] = ld->readings[neighbours[a]];
-	//		printf(" j = %d theta = %f rho = %f\n",neighbours[a],thetas[a],readings[a]);
+	/*		printf(" j = %d theta = %f rho = %f\n",neighbours[a],thetas[a],readings[a]);*/
 		}
 		
 		double alpha=42, cov0_alpha=32;
@@ -55,8 +55,8 @@ void ld_compute_orientation(LDP ld, int size_neighbourhood, double sigma) {
 			ld->cov_alpha[i] = cov0_alpha * square(sigma);
 			ld->alpha_valid[i] = 1;
 		}
-//		printf("---------- i = %d alpha = %f sigma=%f cov_alpha = %f\n", i,
-//			alpha, ld->cov_alpha[i]);
+/*		printf("---------- i = %d alpha = %f sigma=%f cov_alpha = %f\n", i,
+//			alpha, ld->cov_alpha[i]);*/
 	}
 }
 
@@ -65,7 +65,7 @@ void filter_orientation(double theta0, double rho0, size_t n,
  	const double*thetas, const double*rhos, double *alpha, double*cov0_alpha ) {
 	
 	egsl_push();
-	// Y = L x + R epsilon
+	/* Y = L x + R epsilon */
 	val Y = zeros(n,1);
 	val L = ones(n,1);
 	val R = zeros(n,n+1);
@@ -110,13 +110,13 @@ void filter_orientation(double theta0, double rho0, size_t n,
 	}
 	
 	egsl_pop();
-
+/*
 //	printf("dalpha_df1 = %f dalpha_drho = %f\n",dalpha_df1,dalpha_drho);
 //	printf("f1 = %f covf1 = %f alpha = %f cov_alpha = %f\n ",f1,cov_f1,*alpha,*cov0_alpha);
 //	printf("sotto = %f\n ",(square(rho0) + square(f1)));
 	
 //	printf("   alpha = %f sigma= %f°\n", *alpha, rad2deg(0.01*sqrt(*cov0_alpha)));
-/*	
+
 	printf("l= ");
 	gsl_matrix_fprintf(stdout, l, "%f");
 	printf("\ny= ");
@@ -198,7 +198,7 @@ void filter_orientation(double theta0, double rho0, size_t n,
 	
 #endif
 
-// indexes: an array of size "max_num*2"
+/* indexes: an array of size "max_num*2" */
 void find_neighbours(LDP ld, int i, int max_num, int*indexes, size_t*num_found) {
 	*num_found = 0;
 	

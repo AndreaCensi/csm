@@ -4,11 +4,9 @@
 #include "laser_data.h"
 #include <json.h>
 
-typedef struct json_object* JO;
-
 JO ld_to_json(LDP);
 LDP json_to_ld(JO);
 
-JO json_read_stream(FILE*);
+LDP ld_from_json_stream(FILE*);
 
 #endif

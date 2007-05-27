@@ -3,7 +3,7 @@
 
 int main(int argc, char * argv[]) {
 	
-	JO jo; // the monkey
+	JO jo; 
 	
 	while((jo = json_read_stream(stdin))) {
 		printf(json_object_to_json_string(jo));

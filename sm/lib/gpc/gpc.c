@@ -1,19 +1,20 @@
-// GPC: A library for the solution of General Point Correspondence problems.
-// Copyright (C) 2006 Andrea Censi (andrea at censi dot org)
+/* GPC: A library for the solution of General Point Correspondence problems.
+  Copyright (C) 2006 Andrea Censi (andrea at censi dot org)
 
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+  This program is free software; you can redistribute it and/or
+  modify it under the terms of the GNU General Public License
+  as published by the Free Software Foundation; either version 2
+  of the License, or (at your option) any later version.
 
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+*/
 
 #include <math.h>
 #include <gsl/gsl_math.h>
@@ -74,8 +75,8 @@ int gpc_solve_valid(int K, const struct gpc_corr*c, const int*valid,
 		m_display("C_k",C_k);
 		m_display("now M is ",bigM);
 		m_display("now g is ",g);
-		// M_k = 1 0 0 0 
-		//       0 1 0 0
+		/* M_k = 1 0 0 0 
+		         0 1 0 0 */
 		gms(bigM_k,0,0,1.0); gms(bigM_k,0,1,0.0); gms(bigM_k,0,2, c[k].p[0]);
 		gms(bigM_k,0,3,0.0);
 		gms(bigM_k,1,0,0.0); gms(bigM_k,1,1,1.0); gms(bigM_k,1,2,c[k].p[1]);
@@ -116,18 +117,18 @@ int gpc_solve_valid(int K, const struct gpc_corr*c, const int*valid,
 	M(mS,2,2); M(mSa,2,2);
 
 	 
-	//	mS = mD - mB.trans * mA.inv * mB;
-	// temp22b = inv(A)
+	/*	mS = mD - mB.trans * mA.inv * mB;
+	  temp22b = inv(A) */
 	m_inv(mA, temp22b); 
-	// temp22c = inv(A) * mB
+	/* temp22c = inv(A) * mB           */
 	m_mult(temp22b, mB, temp22c);
-	// temp22 = mB'
+	/* temp22 = mB'               */
 	m_trans(mB, temp22); 
 	m_mult(temp22, temp22c, temp22b); 
 	m_scale(-1.0,temp22b);
 	m_add(mD,temp22b,mS);
 	
-	// mSa = mS.inv * mS.det;
+	/* mSa = mS.inv * mS.det; */
 	m_inv(mS, mSa);
 	m_scale(m_det(mS), mSa);
 	
@@ -156,16 +157,16 @@ int gpc_solve_valid(int K, const struct gpc_corr*c, const int*valid,
 	M(m2t,1,2);	M(m2,2,1);
 	M(m3t,1,2);	M(m3,2,1);
 
-	// m1t = g1t*mAi*mB
+	/* m1t = g1t*mAi*mB */
 	m_mult(g1t,mAi,temp12);
 	m_mult(temp12,mB,m1t);
 
 	m_trans(m1t,m1);
-	// m2t = m1t*mSa
+	/*     m2t = m1t*mSa    */
 	m_mult(m1t,mSa,m2t);
 	m_trans(m2t,m2);
-	// m3t = g2t*mSa
-	m_mult(g2t,mSa,m3t);
+	/* m3t = g2t*mSa     */
+	m_mult(g2t,mSa,m3t); 
 	m_trans(m3t,m3);
 	
 	double p[3] = {
@@ -175,7 +176,7 @@ int gpc_solve_valid(int K, const struct gpc_corr*c, const int*valid,
 
 	double l[3] = {m_det(mS), 2*gmg(mS,0,0)+2*gmg(mS,1,1), 4};
 	
-	// q = p - l^2
+	/* q = p - l^2        */
 	double q[5] = {p[0]-(l[0]*l[0]), p[1]-(2*l[1]*l[0]), 
 		p[2]-(l[1]*l[1]+2*l[0]*l[2]), -(2*l[2]*l[1]), -(l[2]*l[2])};
 	

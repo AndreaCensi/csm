@@ -31,25 +31,26 @@ int egsl_total_allocations = 0;
 int egsl_cache_hits = 0;
 
 void error() {
-	// TODO: better handling of errors
+	/* TODO: better handling of errors */
 	
 	egsl_print_stats();
 	
 	assert(0);
 }
 
-inline val assemble_val(int cid, int index, gsl_matrix*m) {
+val assemble_val(int cid, int index, gsl_matrix*m) {
 	val v; 
 		v.cid=cid; 
 		v.index=index; 
 		v.gslm = m; 
 	return v;
 }
-inline int its_context(val v) {
+
+int its_context(val v) {
 	return v.cid;
 }
 
-inline int its_var_index(val v) {
+int its_var_index(val v) {
 	return v.index;
 }
 
@@ -72,7 +73,7 @@ void check_valid_val(val v) {
 }
 #endif
 
-inline gsl_matrix * egsl_gslm(val v) {
+gsl_matrix * egsl_gslm(val v) {
 	check_valid_val(v);
 	return v.gslm;
 }
@@ -88,11 +89,11 @@ void egsl_push() {
 		egsl_first_time  = 0;
 	}
 	cid++;
-	assert(cid<MAX_CONTEXTS);// "Maximum number of contexts reached");
+	assert(cid<MAX_CONTEXTS);/* "Maximum number of contexts reached"); */
 }
 
 void egsl_pop() {
-	assert(cid>=0);//, "No egsl_push before?");
+	assert(cid>=0);/*, "No egsl_push before?"); */
 	egsl_contexts[cid].nvars = 0;
 	cid--;
 }
@@ -100,10 +101,10 @@ void egsl_pop() {
 void egsl_print_stats() {
 	printf("egsl: total allocations: %d   cache hits: %d\n",	
 		egsl_total_allocations, egsl_cache_hits);
-//	printf("egsl: sizeof(val) = %d\n",(int)sizeof(val));
+/*	printf("egsl: sizeof(val) = %d\n",(int)sizeof(val)); */
 	int c; for(c=0;c<MAX_CONTEXTS;c++) {
-	//	printf("egsl: context #%d\n ",c);
-	//	if(0==egsl_contexts[c].nallocated) break;
+	/*	printf("egsl: context #%d\n ",c);
+	 	if(0==egsl_contexts[c].nallocated) break; */
 		printf("egsl: context #%d allocations: %d active: %d\n",
 			c,	egsl_contexts[c].nallocated, 	egsl_contexts[c].nvars);
 	}
@@ -112,8 +113,8 @@ void egsl_print_stats() {
 val egsl_alloc(size_t rows, size_t columns) {
 	struct egsl_context*c = egsl_contexts+cid;
 	
-//	if(cid<3)
-//	printf("Alloc cid=%d nvars=%d nalloc=%d\n",cid,c->nvars,c->nallocated);
+/*	if(cid<3)
+	printf("Alloc cid=%d nvars=%d nalloc=%d\n",cid,c->nvars,c->nallocated); */
 	
 	if(c->nvars>=MAX_VALS) {
 		fprintf(stderr,"Limit reached, in context %d, nvars is %d\n",cid,c->nvars);
@@ -151,7 +152,7 @@ val egsl_alloc_in_context(int context, size_t rows, size_t columns) {
 	return assemble_val(context,index,c->vars[index].gsl_m);
 }
 
-/// Creates a copy of v in the previous context.
+/** Creates a copy of v in the previous context. */
 val egsl_promote(val v) {
 	if(cid==0) {
 		error();

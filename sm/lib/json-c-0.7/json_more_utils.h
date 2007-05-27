@@ -6,11 +6,21 @@
 
 typedef struct json_object* JO;
 
-struct json_object* json_read_stream(FILE*);
+#define jo_new_double json_object_new_double 
+#define jo_new_int    json_object_new_int
+#define jo_new_array  json_object_new_array
+#define jo_add        json_object_object_add
+#define jo_new_null()   0
+#define jo_free       json_object_put
 
-struct json_object* json_tokener_parse_len(char *str, int len)
+JO json_read_stream(FILE*);
 
-	int json_read_double_array(JO s, const char*name, double*p, int n, double when_null);
-	int json_read_int_array(JO s, const char*name, int*p, int n, int when_null);
+JO json_tokener_parse_len(char *str, int len);
+
+int json_read_double_array(JO s, const char*name, double*p, int n, double when_null);
+int json_read_int_array(JO s, const char*name, int*p, int n, int when_null);
+
+JO json_double_array(const double *v, int n);
+JO json_int_array(const int *v, int n);
 
 #endif

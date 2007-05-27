@@ -2,7 +2,7 @@
 
 
 int main(int argc, char * argv[]) {
-	JO jo; // the monkey
+	JO jo; /* the monkey */
 	LDP ld;
 	
 	while((jo = json_read_stream(stdin))) {

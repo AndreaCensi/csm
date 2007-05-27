@@ -37,11 +37,11 @@ struct sm_params {
 	int doAlphaTest;
 	double doAlphaTest_thresholdDeg;
 	
-	// Percentage of correspondences to consider
+	/** Percentage of correspondences to consider */
 	double outliers_maxPerc;
 
-	double outliers_adaptive_order; // 0.7
-	double outliers_adaptive_mult; // 2
+	double outliers_adaptive_order; /* 0.7 */
+	double outliers_adaptive_mult; /* 2 */
 	
 	int doVisibilityTest;
 	

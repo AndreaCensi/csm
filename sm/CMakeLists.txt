@@ -35,6 +35,7 @@ PROJECT (scan_matching_lib C)
 	#SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pg")
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb")
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fstrict-aliasing -std=c99")
+	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ansi")
 
 	IF(APPLE)
 		MESSAGE(STATUS "Using optimizations: ")
@@ -94,12 +95,13 @@ PROJECT (scan_matching_lib C)
 		lib/egsl/egsl_conversions.c
 		lib/egsl/egsl_misc.c
 		
-		lib/JSON_checker/JSON_checker.c
 	)
 
-	INCLUDE_DIRECTORIES(lib/JSON_checker)
+#	INCLUDE_DIRECTORIES(lib/JSON_checker)
 	INCLUDE_DIRECTORIES(lib/egsl)
 	INCLUDE_DIRECTORIES(lib/gpc)
+	INCLUDE_DIRECTORIES(lib)
+
 	INCLUDE_DIRECTORIES(lib/json-c-0.7)
 	
 	TARGET_LINK_LIBRARIES(sm json-c)
@@ -127,6 +129,9 @@ PROJECT (scan_matching_lib C)
 
 		ADD_EXECUTABLE(test_json apps/test_json.c)
 		TARGET_LINK_LIBRARIES(test_json sm ${GSL_LIBRARIES})
+
+		ADD_EXECUTABLE(ld_noise apps/ld_noise.c)
+		TARGET_LINK_LIBRARIES(ld_noise sm ${GSL_LIBRARIES} options)
 
 	########### Carmen2pdf ########## 
 IF(CAIRO_FOUND)

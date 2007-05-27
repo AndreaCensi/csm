@@ -30,7 +30,7 @@ val egsl_vers(double theta){
 
 void egsl_print_spectrum(const char*s, val v) {
 	gsl_matrix *m = egsl_gslm(v);
-	// expect same size
+	/* expect same size */
 	size_t n = m->size1;
 	double eval[n]; val evec[n];
 	egsl_symm_eig(v, eval, evec);

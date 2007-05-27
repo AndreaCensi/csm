@@ -45,13 +45,17 @@ struct correspondence {
 typedef struct laser_data* LDP;
 
 LDP ld_alloc_new(int nrays);
-void ld_alloc(LDP, int nrays);
+/** This free()s the pointer  */
 void ld_free(LDP);
+
+void ld_alloc(LDP, int nrays);
+/** This does not free the pointer */
+void ld_dealloc(LDP);
 
 void ld_compute_cartesian(LDP);
 void ld_create_jump_tables(LDP);
 
-// -1 if not found
+/** -1 if not found */
 int ld_next_valid(LDP ld, int i, int dir);
 
 
@@ -73,7 +77,8 @@ val ld_fisher0(LDP ld);
 void ld_simple_clustering(LDP ld, double threshold);
 void ld_compute_orientation(LDP ld, int size_neighbourhood, double sigma);
 
-// Read next FLASER line in file (initializes ld). Returns 0 on success, -1 if error, -2 eof.
+/** Read next FLASER line in file (initializes ld). 
+	Returns 0 on success, -1 if error, -2 eof. */
 int ld_read_next_laser_carmen(FILE*, LDP ld);
 
 #endif

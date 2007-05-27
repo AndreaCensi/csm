@@ -14,7 +14,7 @@ void journal_pose(const char*, gsl_vector*v);
 void journal_point(const char*, gsl_vector*v);
 
 
-/// Returns journal file, 0 if journal is not open. (check if null!)
+/** Returns journal file, 0 if journal is not open. (check if null!) */
 FILE *jf();
 
 #endif

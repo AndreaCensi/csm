@@ -4,8 +4,9 @@
 #include "laser_data.h"
 #include "math_utils.h"
 
-// For details about the Fisher's information matrix for localization,
+/* For details about the Fisher's information matrix for localization,
 // please see this paper: http://purl.org/censi/2006/accuracy
+*/
 
 val ld_fisher0(LDP ld) {
 	val fim   = zeros(3,3);

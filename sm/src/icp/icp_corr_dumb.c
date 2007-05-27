@@ -46,12 +46,12 @@ void find_correspondences(struct sm_params*params, gsl_vector* x_old) {
 			} 
 		}
 		
-		if(j1==-1) {// no match
+		if(j1==-1) {/* no match */
 			ld_set_null_correspondence(laser_sens, i);
 			continue;
 		}
-		// Do not match with extrema
-		if(j1==0 || (j1 == (laser_ref->nrays-1))) {// no match
+		/* Do not match with extrema*/
+		if(j1==0 || (j1 == (laser_ref->nrays-1))) {/* no match */
 			ld_set_null_correspondence(laser_sens, i);
 			continue;
 		}

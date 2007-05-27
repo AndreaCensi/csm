@@ -9,7 +9,7 @@
 #include "../sm.h"
 #include "../journal.h"
 
-//#define EXPERIMENT_COVARIANCE
+/*#define EXPERIMENT_COVARIANCE*/
 
 
 void visibilityTest(LDP ld, const gsl_vector*x_old);
@@ -120,7 +120,7 @@ void sm_icp(struct sm_params*params, struct sm_result*res) {
 			laser_ref, laser_sens, best_x,
 			&cov0_x, &dx_dy1, &dx_dy2);
 		
-//		val cov_x = sc(params->sigma*params->sigma, cov0_x);
+/*		val cov_x = sc(params->sigma*params->sigma, cov0_x); */
 		
 		egsl_print("cov0_x", cov0_x);
 		egsl_print_spectrum("cov0_x", cov0_x);
@@ -231,7 +231,7 @@ void icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 				compute_covariance_exact(
 					laser_ref, laser_sens, x_new,
 					&cov0_x, &dx_dy1, &dx_dy2);
-		//		egsl_print_spectrum("cov0_x", cov0_x);
+		/*		egsl_print_spectrum("cov0_x", cov0_x); */
 
 				val cov_x = sc(square(params->sigma), cov0_x);
 		printf("icp_cov x_new %f %f %f \n",
@@ -267,7 +267,7 @@ void icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 		gsl_vector_memcpy(delta_old, delta);
 	}
 	
-	// TODO: covariance
+	/* TODO: covariance */
 	*iterations = iteration+1;
 	
 	gsl_vector_free(x_old);
@@ -306,13 +306,13 @@ void compute_next_estimate(LDP laser_ref, LDP laser_sens, gsl_vector*x_new) {
 		c[k].C[0][1] = cos(alpha)*sin(alpha);
 		c[k].C[1][1] = sin(alpha)*sin(alpha);
 
-	//	c[k].C[0][0] = 1;
-	//	c[k].C[1][0] = 
-	//	c[k].C[0][1] = 0;
-	//	c[k].C[1][1] = 1;
+	/*	c[k].C[0][0] = 1;
+	 	c[k].C[1][0] = 
+	 	c[k].C[0][1] = 0;
+	 	c[k].C[1][1] = 1;
 
-	//	c[k].C[0][0] += 0.02;
-	//	c[k].C[1][1] += 0.02;
+	 	c[k].C[0][0] += 0.02;
+		c[k].C[1][1] += 0.02; */
 		k++;
 	}
 	

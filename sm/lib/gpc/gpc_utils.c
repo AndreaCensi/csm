@@ -26,10 +26,10 @@ void m_inv(const gsl_matrix*A, gsl_matrix*invA) {
 	gsl_matrix * m = gsl_matrix_alloc(n,n);
 	gsl_matrix_memcpy(m,A);
 	gsl_permutation * perm = gsl_permutation_alloc (n);
-	// Make LU decomposition of matrix m
+	/* Make LU decomposition of matrix m */
 	int s;
 	gsl_linalg_LU_decomp (m, perm, &s);
-	// Invert the matrix m
+	/* Invert the matrix m */
 	gsl_linalg_LU_invert (m, perm, invA);
 	gsl_permutation_free(perm);
 	gsl_matrix_free(m);
@@ -65,12 +65,12 @@ double poly_greatest_real_root(unsigned int n, double*a) {
 	double lambda = 0;
 	unsigned int i;
 	for (i = 0; i < n-1; i++) {
-//		printf ("z%d = %+.18f %+.18f\n", i, z[2*i], z[2*i+1]);
-		// XXX ==0 is bad
+/*		printf ("z%d = %+.18f %+.18f\n", i, z[2*i], z[2*i+1]);
+		 XXX ==0 is bad */
 		if( (z[2*i+1]==0) && (z[2*i]>lambda))
 			lambda = z[2*i];
 	}
-//	printf ("lambda = %+.18f \n", lambda);
+/*	printf ("lambda = %+.18f \n", lambda); */
 	return lambda;
 }
 

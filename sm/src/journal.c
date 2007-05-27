@@ -13,7 +13,7 @@ void journal_open(const char*file){
 	}
 	
 	f=fopen(file, "w");
-	// XXX
+	/* XXX */
 	journal_is_open = f != 0;
 }
 

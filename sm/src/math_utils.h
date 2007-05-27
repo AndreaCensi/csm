@@ -32,24 +32,24 @@ void oplus(const gsl_vector*x1,const gsl_vector*x2, gsl_vector*res);
 void ominus(const gsl_vector*x, gsl_vector*res);
 void pose_diff(const gsl_vector*pose2,const gsl_vector*pose1,gsl_vector*res);
 
-/// Projects x on the LINE going through a and b
+/** Projects x on the LINE going through a and b */
 void projection_on_line(
 	const gsl_vector*a,
 	const gsl_vector*b,
 	const gsl_vector*x,
 	      gsl_vector*proj);
 	
-/// Projects x on the SEGMENT a-b
+/** Projects x on the SEGMENT a-b */
 void projection_on_segment(
 	const gsl_vector*a,
 	const gsl_vector*b,
 	const gsl_vector*x,
 	      gsl_vector*proj);
 
-/// Distance of x from its projection on segment a-b
+/** Distance of x from its projection on segment a-b */
 double dist_to_segment(const gsl_vector*a,const gsl_vector*b,const gsl_vector*x);
 
-/// Some functions to print poses and covariances in a friendly way
+/** Some functions to print poses and covariances in a friendly way */
 const char* gsl_friendly_pose(gsl_vector*v);
 const char* egsl_friendly_pose(val pose);
 const char* egsl_friendly_cov(val cov);

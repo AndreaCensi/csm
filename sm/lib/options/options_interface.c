@@ -23,7 +23,7 @@ struct option* options_allocate(size_t n) {
 	return ops;
 }
 
-/// XXX farlo meglio
+/* XXX farlo meglio */
 struct option* options_next_empty(struct option*ops) {
 	int i; for(i=0;;i++) {
 		if(ops[i].name == 0)

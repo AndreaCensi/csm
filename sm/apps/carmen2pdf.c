@@ -71,9 +71,9 @@ int should_consider(struct params *p, int counter) {
 void ld_get_world(struct laser_data*ld, int i, double*x, double*y,int use_odometry);
 
 struct bounding_box {
-	// World frame
+	/** World frame */
 	double x0,y0,x1,y1;
-	// Paper size
+	/* Paper size */
 	double width, height;
 };
 
@@ -89,7 +89,7 @@ void get_bb(struct params*p, struct bounding_box*bb) {
 	if(!ld_read_next_laser_carmen(p->input_file, &ld)) {
 		ld_getbb(&ld,&bb->x0,&bb->y0,&bb->x1,&bb->y1,p->use_odometry, p->horizon);
 	}
-	ld_free(&ld);
+	ld_dealloc(&ld);
 	while(!ld_read_next_laser_carmen(p->input_file, &ld)) {
 		if(should_consider(p, counter))  {
 			double x0,y0,x1,y1;
@@ -100,7 +100,7 @@ void get_bb(struct params*p, struct bounding_box*bb) {
 			bb->y1 = GSL_MAX(y1, bb->y1);
 		}
 		counter++;
-		ld_free(&ld);
+		ld_dealloc(&ld);
 	}
 	rewind(p->input_file);
 }
@@ -137,10 +137,10 @@ void carmen2pdf(struct params p) {
 	}
 	
 
-//	double scale = GSL_MIN(bb.width / (bb.x1-bb.x0), bb.height / (bb.y1-bb.y0));
+/*	double scale = GSL_MIN(bb.width / (bb.x1-bb.x0), bb.height / (bb.y1-bb.y0));
 
-//	cairo_scale(cr, 50, 1);
-	//cairo_translate(cr, 0, -0.5*bb.height);
+	cairo_scale(cr, 50, 1);
+	cairo_translate(cr, 0, -0.5*bb.height); */
 	
 	struct laser_data ld;	
 	int counter=0; 
@@ -206,7 +206,7 @@ void carmen2pdf(struct params p) {
 			cairo_stroke(cr);
 		}
 		counter++;
-		ld_free(&ld);
+		ld_dealloc(&ld);
 	}
 
 	cairo_show_page (cr);

@@ -7,7 +7,7 @@
 
 void quicksort(double *array, int begin, int end);
 
-// expects cartesian valid
+/* expects cartesian valid */
 void visibilityTest(LDP laser_ref, const gsl_vector*u) {
 
 	double theta_from_u[laser_ref->nrays];
@@ -90,7 +90,7 @@ void kill_outliers_trim(struct sm_params*params, const gsl_vector*x_old,
 		transform(laser_sens->p[i], x_old, p_i_w);
 		int j1 = laser_sens->corr[i].j1;
 		int j2 = laser_sens->corr[i].j2;
-//		dist[i] = distance(p_i_w, laser_ref->p[j1]);
+/*		dist[i] = distance(p_i_w, laser_ref->p[j1]); */
 		dist[i] = dist_to_segment(laser_ref->p[j1],laser_ref->p[j2],p_i_w);
 		dist2[k] = dist[i];
 		k++;	
@@ -116,7 +116,7 @@ void kill_outliers_trim(struct sm_params*params, const gsl_vector*x_old,
 	for(i=0;i<laser_sens->nrays;i++) {
 		if(!laser_sens->corr[i].valid) continue;
 		if(dist[i] > error_limit) {
-		//	printf("killing %d %d (%f>%f)\n",i,laser_sens->corr[i].j1,dist[i],error_limit);
+		/*	printf("killing %d %d (%f>%f)\n",i,laser_sens->corr[i].j1,dist[i],error_limit);*/
 			laser_sens->corr[i].valid = 0;
 			laser_sens->corr[i].j1 = -1;
 			laser_sens->corr[i].j2 = -1;
@@ -132,11 +132,11 @@ void kill_outliers_trim(struct sm_params*params, const gsl_vector*x_old,
 }
 
 
-inline void swap_double(double*a,double*b) {
+void swap_double(double*a,double*b) {
 	double t = *a; *a = *b; *b=t;
 }
 
-// Code taken from Wikipedia
+/* Code taken from Wikipedia */
 void quicksort(double *array, int begin, int end) {
 	if (end > begin) {
 	   double pivot = array[begin];
