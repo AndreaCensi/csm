@@ -63,6 +63,7 @@ PROJECT (scan_matching_lib C)
 
 	########### Options ########## 
 	SUBDIRS(lib/options)
+	SUBDIRS(lib/json-c-0.7)
 
 ########### SM ########## 
 
@@ -70,10 +71,12 @@ PROJECT (scan_matching_lib C)
 		src/journal.c
 		src/laser_data.c
 		src/laser_data_fisher.c
+		src/laser_data_json.c
 		src/math_utils.c
 		src/orientation.c
 		src/clustering.c
-	
+		src/logging.c
+			
 		src/icp/icp.c
 		src/icp/icp_loop.c
 		src/icp/icp_corr_dumb.c
@@ -90,11 +93,17 @@ PROJECT (scan_matching_lib C)
 		lib/egsl/egsl_ops.c
 		lib/egsl/egsl_conversions.c
 		lib/egsl/egsl_misc.c
+		
+		lib/JSON_checker/JSON_checker.c
 	)
 
+	INCLUDE_DIRECTORIES(lib/JSON_checker)
 	INCLUDE_DIRECTORIES(lib/egsl)
 	INCLUDE_DIRECTORIES(lib/gpc)
+	INCLUDE_DIRECTORIES(lib/json-c-0.7)
 	
+	TARGET_LINK_LIBRARIES(sm json-c)
+
 #	#SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Ilib/gpc")
 #	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Ilib/egsl")
 
@@ -109,6 +118,15 @@ PROJECT (scan_matching_lib C)
 
 		ADD_EXECUTABLE(test_math_utils src/math_utils_test.c)
 		TARGET_LINK_LIBRARIES(test_math_utils sm ${GSL_LIBRARIES})
+
+		ADD_EXECUTABLE(test_json_pipe apps/test_json_pipe.c)
+		TARGET_LINK_LIBRARIES(test_json_pipe sm ${GSL_LIBRARIES})
+
+		ADD_EXECUTABLE(test_json_ld apps/test_json_ld.c)
+		TARGET_LINK_LIBRARIES(test_json_ld sm ${GSL_LIBRARIES})
+
+		ADD_EXECUTABLE(test_json apps/test_json.c)
+		TARGET_LINK_LIBRARIES(test_json sm ${GSL_LIBRARIES})
 
 	########### Carmen2pdf ########## 
 IF(CAIRO_FOUND)

@@ -1,0 +1,23 @@
+#include "../src/laser_data_json.h"
+
+
+int main(int argc, char * argv[]) {
+	JO jo; // the monkey
+	LDP ld;
+	
+	while((jo = json_read_stream(stdin))) {
+		if(!(ld = json_to_ld(jo))) {
+			fprintf(stderr, "Could not transform to laser_data:\n\n");
+			fprintf(stderr, "-----\n");
+			fprintf(stderr, json_object_to_json_string(jo));
+			fprintf(stderr, "-----\n");
+			continue;
+		}
+		
+		jo = ld_to_json(ld);
+		printf(json_object_to_json_string(jo));
+		printf("\n");
+	}
+	
+	return 0;
+}

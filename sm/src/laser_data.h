@@ -4,9 +4,49 @@
 #include <stdio.h>
 
 #include <egsl.h>
-#include "sm.h"
 
-#define LDP   struct laser_data*
+struct correspondence;
+
+struct laser_data {
+	int nrays;
+	double  min_theta;
+	double  max_theta;
+	
+	double *theta;
+	
+	int*valid;
+	double *readings;
+	
+	
+	int *cluster;
+	
+	double *alpha;
+	double *cov_alpha;
+	int *alpha_valid;
+	
+	/* Jump tables */
+	int *up_bigger, *up_smaller, *down_bigger, *down_smaller;
+
+	/* Cartesian points */
+	gsl_vector**p;
+	
+	struct correspondence* corr;
+
+	
+	double odometry[3];	
+	double estimate[3];	
+};
+
+struct correspondence {
+	int valid; 
+	int j1; int j2;
+};
+
+typedef struct laser_data* LDP;
+
+LDP ld_alloc_new(int nrays);
+void ld_alloc(LDP, int nrays);
+void ld_free(LDP);
 
 void ld_compute_cartesian(LDP);
 void ld_create_jump_tables(LDP);
@@ -15,7 +55,7 @@ void ld_create_jump_tables(LDP);
 int ld_next_valid(LDP ld, int i, int dir);
 
 
-int ld_valid_ray(struct laser_data* ld, int i);
+int ld_valid_ray(LDP ld, int i);
 int ld_valid_corr(LDP ld, int i);
 
 int ld_num_valid_correspondences(LDP ld);

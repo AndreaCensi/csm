@@ -5,16 +5,22 @@
 #include "math_utils.h"
 #include "journal.h"
 
-void ld_alloc(struct laser_data*ld, int nrays) {
+LDP ld_alloc_new(int nrays) {
+	LDP ld = malloc(sizeof(struct laser_data));
+	ld_alloc(ld, nrays);
+	return ld;
+}
+
+void ld_alloc(LDP ld, int nrays) {
 	ld->nrays = nrays;
 	ld->valid = (int*) malloc(sizeof(int)*nrays);
 	ld->readings     = (double*) malloc(sizeof(double)*nrays);
 	ld->theta        = (double*) malloc(sizeof(double)*nrays);
 	
-	ld->cluster = (int*) malloc(sizeof(int)   *nrays);
-	ld->alpha = (double*) malloc(sizeof(double)*nrays);
-	ld->cov_alpha = (double*) malloc(sizeof(double)*nrays);
-	ld->alpha_valid = (int*) malloc(sizeof(int)   *nrays);
+	ld->cluster      = (int*) malloc(sizeof(int)   *nrays);
+	ld->alpha        = (double*) malloc(sizeof(double)*nrays);
+	ld->cov_alpha    = (double*) malloc(sizeof(double)*nrays);
+	ld->alpha_valid  = (int*) malloc(sizeof(int)   *nrays);
 	
 	ld->up_bigger    =    (int*) malloc(sizeof(int)   *nrays);
 	ld->up_smaller   =    (int*) malloc(sizeof(int)   *nrays);
@@ -129,7 +135,7 @@ int ld_valid_corr(LDP ld, int i) {
 }
 
 
-// Read next FLASER line in file (initializes ld). Returns 0 if error or eof.
+/// Read next FLASER line in file (initializes ld). Returns 0 if error or EOF.
 int ld_read_next_laser_carmen(FILE*file, LDP ld) {
 	#define MAX_LINE_LENGTH 10000
    char line[MAX_LINE_LENGTH];

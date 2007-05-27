@@ -1,45 +1,7 @@
 #ifndef H_SCAN_MATCHING_LIB
 #define H_SCAN_MATCHING_LIB
-
+#include "laser_data.h"
 #include <gsl/gsl_vector.h>
-
-struct correspondence {
-	int valid; 
-	int j1; int j2;
-};
-
-struct laser_data {
-	int nrays;
-	double  min_theta;
-	double  max_theta;
-	
-	double *theta;
-	
-	int*valid;
-	double *readings;
-	
-	
-	int *cluster;
-	
-	double *alpha;
-	double *cov_alpha;
-	int *alpha_valid;
-	
-	/* Jump tables */
-	int *up_bigger, *up_smaller, *down_bigger, *down_smaller;
-
-	/* Cartesian points */
-	gsl_vector**p;
-	
-	struct correspondence* corr;
-
-	
-	double odometry[3];	
-	double estimate[3];	
-};
-
-void ld_alloc(struct laser_data*, int nrays);
-void ld_free(struct laser_data*);
 
 struct sm_params {
 	struct laser_data laser_ref;
