@@ -4,6 +4,7 @@
 #include "../laser_data.h"
 #include "../sm.h"
 #include "../journal.h"
+#include "../logging.h"
 
 void quicksort(double *array, int begin, int end);
 
@@ -19,17 +20,17 @@ void visibilityTest(LDP laser_ref, const gsl_vector*u) {
 			atan2(gvg(u,1)-gvg(laser_ref->p[j],1),gvg(u,0)-gvg(laser_ref->p[j],0));
 	}
 	
-	printf("visibility: Found outliers: ");
+	sm_debug("visibility: Found outliers: ");
 	int invalid = 0;
 	for(j=1;j<laser_ref->nrays;j++) {
 		if(!ld_valid_ray(laser_ref,j)||!ld_valid_ray(laser_ref,j-1)) continue;
 		if(theta_from_u[j]<theta_from_u[j-1]) {
 			laser_ref->valid[j] = 0;
 			invalid ++;
-			printf("%d ",j);
+			sm_debug("%d ",j);
 		}
 	}
-	printf("\n");
+	sm_debug("\n");
 }
 
 
@@ -69,7 +70,7 @@ void kill_outliers_double(struct sm_params*params, const gsl_vector*x_old) {
 			nkilled ++;
 		}
 	}
-	printf("kill_outliers_double: killed %d correspondences\n",nkilled);
+	sm_debug("kill_outliers_double: killed %d correspondences\n",nkilled);
 	gsl_vector_free(p_i_w);
 }
 	
@@ -108,7 +109,7 @@ void kill_outliers_trim(struct sm_params*params, const gsl_vector*x_old,
 		dist2[(int)floor(k*params->outliers_adaptive_order)];
 	
 	double error_limit = GSL_MIN(error_limit1,error_limit2);
-	printf("icp_outliers: maxPerc %f error_limit: fix %f adaptive %f \n",
+	sm_debug("icp_outliers: maxPerc %f error_limit: fix %f adaptive %f \n",
 		params->outliers_maxPerc,error_limit1,error_limit2);
 	
 	*total_error = 0;
@@ -127,7 +128,7 @@ void kill_outliers_trim(struct sm_params*params, const gsl_vector*x_old,
 		}
 	}
 	
-	printf("\ticp_outliers: valid %d/%d (limit: %f) mean error = %f \n",nvalid,k,error_limit,
+	sm_debug("\ticp_outliers: valid %d/%d (limit: %f) mean error = %f \n",nvalid,k,error_limit,
 		*total_error/nvalid);	
 }
 

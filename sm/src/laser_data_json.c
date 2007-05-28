@@ -64,7 +64,7 @@ LDP ld_from_json_stream(FILE*file) {
 	JO jo; /* the monkey */
 	LDP ld;
 	
-	jo = json_read_stream(stdin);
+	jo = json_read_stream(file);
 	if(!jo) return 0;
 
 	ld = json_to_ld(jo);

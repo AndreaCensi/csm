@@ -132,7 +132,7 @@ int gpc_solve_valid(int K, const struct gpc_corr*c, const int*valid,
 	m_inv(mS, mSa);
 	m_scale(m_det(mS), mSa);
 	
-	if(1) {
+	if(0) {
 		m_display("mA",mA);
 		m_display("mB",mB);
 		m_display("mD",mD);

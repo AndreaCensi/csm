@@ -8,6 +8,7 @@
 #include "../laser_data.h"
 #include "../sm.h"
 #include "../journal.h"
+#include "../logging.h"
 
 /*#define EXPERIMENT_COVARIANCE*/
 
@@ -16,7 +17,7 @@ void visibilityTest(LDP ld, const gsl_vector*x_old);
 
 void compute_next_estimate(LDP laser_ref, LDP laser_sens,  gsl_vector*x_new);
 int termination_criterion(gsl_vector*delta, struct sm_params*params);
-
+void find_correspondences(struct sm_params*params, gsl_vector* x_old);
 void find_correspondences_tricks(struct sm_params*params, gsl_vector* x_old);
 void kill_outliers(int K, struct gpc_corr*c, const gsl_vector*x_old, int*valid);
 void icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new, 
@@ -57,10 +58,10 @@ void sm_icp(struct sm_params*params, struct sm_result*res) {
 	gsl_vector * x_old = vector_from_array(3, params->odometry);
 	
 	if(params->do_visibility_test) {
-		printf("laser_ref:\n");
+		sm_debug("laser_ref:\n");
 		visibilityTest(laser_ref, x_old);
 
-		printf("laser_sens:\n");
+		sm_debug("laser_sens:\n");
 		gsl_vector * minus_x_old = gsl_vector_alloc(3);
 		ominus(x_old,minus_x_old);
 		visibilityTest(laser_sens, minus_x_old);
@@ -78,10 +79,10 @@ void sm_icp(struct sm_params*params, struct sm_result*res) {
 
 	if(params->restart && 
 		(error/nvalid)>(params->restart_threshold_mean_error) ) {
-		printf("Restarting: %f > %f \n",(error/nvalid),(params->restart_threshold_mean_error));
+		sm_debug("Restarting: %f > %f \n",(error/nvalid),(params->restart_threshold_mean_error));
 		double dt  = params->restart_dt;
 		double dth = params->restart_dtheta;
-		printf("icp_loop: dt = %f dtheta= %f deg\n",dt,rad2deg(dth));
+		sm_debug("icp_loop: dt = %f dtheta= %f deg\n",dt,rad2deg(dth));
 		
 		double perturb[6][3] = {
 			{dt,0,0}, {-dt,0,0},
@@ -90,7 +91,7 @@ void sm_icp(struct sm_params*params, struct sm_result*res) {
 		};
 
 		int a; for(a=0;a<6;a++){
-			printf("-- Restarting with perturbation #%d\n", a);
+			sm_debug("-- Restarting with perturbation #%d\n", a);
 			struct sm_params my_params = *params;
 			gsl_vector * start = gsl_vector_alloc(3);
 				gvs(start, 0, gvg(x_new,0)+perturb[a][0]);
@@ -102,7 +103,7 @@ void sm_icp(struct sm_params*params, struct sm_result*res) {
 			iterations+=my_iterations;
 		
 			if(my_error < best_error) {
-				printf("--Perturbation #%d resulted in error %f < %f\n", a,my_error,best_error);
+				sm_debug("--Perturbation #%d resulted in error %f < %f\n", a,my_error,best_error);
 				gsl_vector_memcpy(best_x, x_a);
 				best_error = my_error;
 			}
@@ -169,11 +170,11 @@ void icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 	unsigned int hashes[params->max_iterations];
 	int iteration;
 
-	printf("icp_loop: starting at x_old= %s  \n",
+	sm_debug("icp_loop: starting at x_old= %s  \n",
 		gsl_friendly_pose(x_old));
 	
 	#ifdef EXPERIMENT_COVARIANCE
-		printf("icp_cov next\n");
+		sm_debug("icp_cov next\n");
 	#endif
 	
 	for(iteration=0; iteration<params->max_iterations;iteration++) {
@@ -190,7 +191,7 @@ void icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 		int num_corr = ld_num_valid_correspondences(laser_sens);
 		if(num_corr <0.2 * laser_sens->nrays){
 			egsl_pop();
-			printf("Failed: before trimming, only %d correspondences.\n",num_corr);
+			sm_error("Failed: before trimming, only %d correspondences.\n",num_corr);
 			break;
 		}
 
@@ -205,7 +206,7 @@ void icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 		*valid = num_corr_after;
 		
 		if(num_corr_after <0.2 * laser_sens->nrays){
-			printf("Failed: after trimming, only %d correspondences.\n",num_corr_after);
+			sm_error("Failed: after trimming, only %d correspondences.\n",num_corr_after);
 			egsl_pop();
 			break;
 		}
@@ -215,14 +216,14 @@ void icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 		pose_diff(x_new, x_old, delta);
 		
 		
-		printf("killing %d -> %d -> %d \n", num_corr, num_corr2, num_corr_after);
+		sm_debug("killing %d -> %d -> %d \n", num_corr, num_corr2, num_corr_after);
 		journal_pose("x_new", x_new);
 		journal_pose("delta", delta);
 
 
 		/** Checks for oscillations */
 		hashes[iteration] = ld_corr_hash(laser_sens);
-		printf("icp_loop: it. %d  hash=%d nvalid=%d mean error = %f, x_new= %s\n", 
+		sm_debug("icp_loop: it. %d  hash=%d nvalid=%d mean error = %f, x_new= %s\n", 
 			iteration, hashes[iteration], *valid, *total_error/ *valid, 
 			gsl_friendly_pose(x_new));
 
@@ -234,19 +235,19 @@ void icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 		/*		egsl_print_spectrum("cov0_x", cov0_x); */
 
 				val cov_x = sc(square(params->sigma), cov0_x);
-		printf("icp_cov x_new %f %f %f \n",
+		sm_debug("icp_cov x_new %f %f %f \n",
 			gvg(x_new,0),gvg(x_new,1),gvg(x_new,2));
 			
-		printf("icp_cov cov0 ");
+		sm_debug("icp_cov cov0 ");
 			size_t i,j;
 			for(i=0;i<3;i++) {
-				printf("\t");
+				sm_debug("\t");
 				for(j=0;j<3;j++) {
-					printf("%f ", egsl_atm(cov0_x, i, j) );
+					sm_debug("%f ", egsl_atm(cov0_x, i, j) );
 				} 
 			}
 
-		printf("\n");
+		sm_debug("\n");
 		
 #endif
 		egsl_pop();
@@ -254,7 +255,7 @@ void icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 		int detected = 0;
 		int a; for(a=0;a<iteration;a++) {
 			if(hashes[a]==hashes[iteration]) {
-				printf("icpc: oscillation detected (cycle length = %d)\n", iteration-a);
+				sm_debug("icpc: oscillation detected (cycle length = %d)\n", iteration-a);
 				detected = 1;
 			}
 		}
