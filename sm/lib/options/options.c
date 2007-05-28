@@ -50,6 +50,11 @@ int options_parse_args(struct option*ops, int argc, const char* argv[]) {
 		const char * name = argv[i];
 		while(*name == '-') name++;
 		
+		if(!strcmp("config_dump", name)) {
+			options_dump(ops, stdout, 0);
+			exit(1);
+		}
+		
 		if(!strcmp("config", name)) {
 			if(i>=argc-1) {
 				fprintf(stderr, "Please specify config file.\n");
@@ -116,7 +121,7 @@ int options_parse_stream(struct option*ops, const char*pwd, FILE*file) {
 		}
 		if(!*line) continue;
 		const char * name = line;
-		while(isalnum(*line)) line++;
+		while(!isspace(*line)) line++;
 		const char * value;
 		if(*line == 0) value = ""; else {
 			*line = 0; line++;
@@ -223,34 +228,83 @@ int options_set(struct option*o, const char*value) {
 	}
 }
 
+const char*options_value_as_string(struct option*o);
+
+void display_table(FILE*f, const char**table, int rows, int columns, int padding) {
+/*	int *col_size = malloc(sizeof(int)*columns);*/
+	int col_size[columns];
+	
+	int i,j;
+	for(j=0;j<columns;j++)  {
+		col_size[j]=0;
+		for(i=0;i<rows;i++) {
+			const char * s = table[j+i*columns];
+			col_size[j] = MAX(col_size[j], (int) strlen(s));
+		}
+		col_size[j] += padding;
+	}
+	
+	for(i=0;i<rows;i++) {
+		for(j=0;j<columns;j++)  {
+			const char * s = table[j+i*columns];
+			fprintf(f, "%s%*s", s, (int)(col_size[j]-strlen(s)), "");
+		}
+		fprintf(f, "\n");
+	}
+	
+/*	free(col_size);*/
+}
+
+void options_dump(struct option * options, FILE*f, int write_desc) {
+	int n; for (n=0;options_valid(options+n);n++);
+
+	const char**table = malloc(sizeof(char*)*n*3);
+
+	int i;
+	for (i=0;i<n;i++) {
+		table[i*3 +0] = strdup_(options[i].name);
+		table[i*3 +1] = strdup_(options_value_as_string(options+i));
+		table[i*3 +2] = write_desc ? strdup_(options[i].desc) : strdup_(""); 
+	}
+
+	display_table(f, table, n, 3, 2);
+
+	int a; for(a=0;a<n*3;a++) free((void*)table[a]);
+	free((void*)table);
+}
 
 void options_print_help(struct option * options, FILE*f) {
-	int j;
-	for (j=0;options_valid(options+j);j++) {
-		fprintf(f, "%s\t\t\t%s ", options[j].name, options[j].desc);
-			
-		if(options[j].value_pointer)
-		switch(options[j].type) {
-			case(OPTION_INT): {
-				int * value_pointer = (int*) options[j].value_pointer;
-				fprintf(f, "default: '%d'", *value_pointer);
-				break;
-			}
-
-			case(OPTION_STRING): {
-				char** value_pointer = (char**) options[j].value_pointer;
-				fprintf(f, "default: '%s'", *value_pointer);
-				break;
-			}
-			
-			case(OPTION_DOUBLE): {
-				double * value_pointer = (double*) options[j].value_pointer;
-				fprintf(f, "default: '%g'", *value_pointer);
-				break;
-			}
-		} /* switch */
-		
-		fprintf(f,"\n");
-
-	}
+	options_dump(options, f, 1);
 }
+
+char options_value_as_string_buf[1000];
+const char*options_value_as_string(struct option*o) {
+	if(!o->value_pointer) {
+		return "NULL";
+	}
+	
+	switch(o->type) {
+		case(OPTION_INT): {
+			int * value_pointer = (int*) o->value_pointer;
+			sprintf(options_value_as_string_buf, "%d", *value_pointer);
+			break;
+		}
+
+		case(OPTION_STRING): {
+			char** value_pointer = (char**) o->value_pointer;
+			sprintf(options_value_as_string_buf, "%s", *value_pointer);
+			break;
+		}
+		
+		case(OPTION_DOUBLE): {
+			double * value_pointer = (double*) o->value_pointer;
+			sprintf(options_value_as_string_buf, "%g", *value_pointer);
+			break;
+		}
+		default: 
+		strcpy(options_value_as_string_buf, "?");
+	} /* switch */	
+	
+	return options_value_as_string_buf;
+}
+

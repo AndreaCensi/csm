@@ -80,6 +80,8 @@ int options_set(struct option*op, const char*value);
 
 int options_valid(struct option*op);
 
+void options_dump(struct option * options, FILE*f, int write_desc);
+
 
 #define OPTIONS_NAME_MAXSIZE 32
 #define OPTIONS_VALUE_MAXSIZE 256

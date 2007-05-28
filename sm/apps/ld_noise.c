@@ -23,7 +23,7 @@ int main(int argc, const char * argv[]) {
 		"Seed for random number generator.");
 		
 	if(!options_parse_args(ops, argc, argv)) {
-		printf("A simple program for adding noise to sensor scans.\n\nUsage:\n");
+		fprintf(stderr, "A simple program for adding noise to sensor scans.\n\nUsage:\n");
 		options_print_help(ops, stderr);
 		return -1;
 	}

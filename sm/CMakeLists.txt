@@ -77,6 +77,7 @@
 		src/orientation.c
 		src/clustering.c
 		src/logging.c
+		src/sm_options.c
 			
 		src/icp/icp.c
 		src/icp/icp_loop.c
@@ -117,6 +118,9 @@
 
 		ADD_EXECUTABLE(sm0 apps/sm0.c)
 		TARGET_LINK_LIBRARIES(sm0 sm ${GSL_LIBRARIES})
+
+		ADD_EXECUTABLE(sm1 apps/sm1.c)
+		TARGET_LINK_LIBRARIES(sm1 sm ${GSL_LIBRARIES} options)
 
 		ADD_EXECUTABLE(test_math_utils src/math_utils_test.c)
 		TARGET_LINK_LIBRARIES(test_math_utils sm ${GSL_LIBRARIES})
