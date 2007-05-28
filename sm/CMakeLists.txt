@@ -111,6 +111,7 @@
 	TARGET_LINK_LIBRARIES(sm ${GSL_LIBRARIES})
 	INSTALL(TARGETS sm ARCHIVE DESTINATION lib)
 	INSTALL(FILES src/sm.h  DESTINATION include)
+	INSTALL(FILES src/laser_data.h  DESTINATION include)
 
 	########### SM applications ########## 
 

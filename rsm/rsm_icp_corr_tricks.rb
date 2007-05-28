@@ -9,13 +9,13 @@ class ICP
 	
 	def find_correspondences_tricks(x_old)
 		# Some parameters
-		maxAngularCorrectionDeg = params[:maxAngularCorrectionDeg]
-		maxLinearCorrection=params[:maxLinearCorrection]
-		maxDist = params[:maxCorrespondenceDist]	
+		max_angular_correction_deg = params[:max_angular_correction_deg]
+		max_linear_correction=params[:max_linear_correction]
+		maxDist = params[:max_correspondence_dist]	
 
-		journal "param maxCorrespondenceDist #{maxDist}"
-		journal "param maxAngularCorrectionDeg #{maxAngularCorrectionDeg}"
-		journal "param maxLinearCorrection #{maxLinearCorrection}"
+		journal "param max_correspondence_dist #{maxDist}"
+		journal "param max_angular_correction_deg #{max_angular_correction_deg}"
+		journal "param max_linear_correction #{max_linear_correction}"
 
 		laser_ref = params[:laser_ref];
 		laser_sens = params[:laser_sens];
@@ -46,7 +46,7 @@ class ICP
 
 			from, to, start_cell = 
 				possible_interval(p_i_w, laser_sens,
-					maxAngularCorrectionDeg, maxLinearCorrection)
+					max_angular_correction_deg, max_linear_correction)
 	
 			we_start_at = last_best.nil? ? start_cell : last_best
 		

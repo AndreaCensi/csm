@@ -16,27 +16,27 @@ class GPM
 		u = params[:firstGuess]
 		
 		laser_ref.compute_cartesian
-		laser_ref.simple_clustering(params[:clusteringThreshold])
-		laser_ref.compute_orientation(params[:orientationNeighbourhood],params[:sigma])
+		laser_ref.simple_clustering(params[:clustering_threshold])
+		laser_ref.compute_orientation(params[:orientation_neighbourhood],params[:sigma])
 
 		laser_sens.compute_cartesian		
-		laser_sens.simple_clustering(params[:clusteringThreshold])
-		laser_sens.compute_orientation(params[:orientationNeighbourhood],params[:sigma])
+		laser_sens.simple_clustering(params[:clustering_threshold])
+		laser_sens.compute_orientation(params[:orientation_neighbourhood],params[:sigma])
 
 		journal_laser 'laser_ref', laser_ref
 		journal_laser 'laser_sens',laser_sens
 		journal "odometry #{to_j(u)}"
 #		journal "odometry_cov #{to_j(params[:firstGuessCov])}"
 		
-		maxAngularCorrectionDeg = params[:maxAngularCorrectionDeg]
-		maxLinearCorrection =params[:maxLinearCorrection]
+		max_angular_correction_deg = params[:max_angular_correction_deg]
+		max_linear_correction =params[:max_linear_correction]
 		
 		theta_bin_size = deg2rad(5)
 		extend_range = deg2rad(15)
 		# Find multiple solutions for theta
 		hist = GSL::Histogram.alloc((2*PI/theta_bin_size).ceil, -PI, PI)
 		
-		ght_only_theta(u, maxLinearCorrection, maxAngularCorrectionDeg, hist)
+		ght_only_theta(u, max_linear_correction, max_angular_correction_deg, hist)
 		
 		hist.fprintf($stdout)
 		# find mode 
@@ -48,7 +48,7 @@ class GPM
 		u2 = u.clone; u2[2] = 0.5*(new_range[1]+new_range[0]);
 		
 		newAngularCorrectionDeg =  rad2deg(0.5*(new_range[1]-new_range[0]))
-		matches2 = ght(u2, maxLinearCorrection,newAngularCorrectionDeg)
+		matches2 = ght(u2, max_linear_correction,newAngularCorrectionDeg)
 		puts "Found #{matches2.size} matches."
 		result = solve_lse(matches2, u2, 6)
 		puts "Result #{pv(result)}."
@@ -106,8 +106,8 @@ class GPM
 	end
 	
 	
-	def ght(x0,maxLinearCorrection,maxAngularCorrectionDeg)
-		puts "ght: x0=#{x0}, limits: #{maxLinearCorrection}, #{maxAngularCorrectionDeg}°"
+	def ght(x0,max_linear_correction,max_angular_correction_deg)
+		puts "ght: x0=#{x0}, limits: #{max_linear_correction}, #{max_angular_correction_deg}°"
 		laser_ref = params[:laser_ref];
 		laser_sens = params[:laser_sens];
 		
@@ -120,7 +120,7 @@ class GPM
 			alpha_i = laser_sens.alpha[i]
 
 			from, to = possible_interval(p_i, laser_ref, 
-				maxAngularCorrectionDeg, maxLinearCorrection)
+				max_angular_correction_deg, max_linear_correction)
 			
 			for j in from..to
 				next if not laser_ref.alpha_valid? j
@@ -130,11 +130,11 @@ class GPM
 
 				theta = angleDiff(alpha_j, alpha_i)
 				
-				next if (theta-x0[2]).abs > deg2rad(maxAngularCorrectionDeg)
+				next if (theta-x0[2]).abs > deg2rad(max_angular_correction_deg)
 				
 				t = p_j - rot(theta) * p_i;
 				
-				next if (t-t0).nrm2 > maxLinearCorrection
+				next if (t-t0).nrm2 > max_linear_correction
 				
 				m = Match.new
 				m.t = t; 
@@ -150,7 +150,7 @@ class GPM
 		matches
 	end
 
-	def ght_only_theta(x0,maxLinearCorrection,maxAngularCorrectionDeg,hist)
+	def ght_only_theta(x0,max_linear_correction,max_angular_correction_deg,hist)
 		laser_ref = params[:laser_ref];
 		laser_sens = params[:laser_sens];
 
@@ -162,7 +162,7 @@ class GPM
 			alpha_i = laser_sens.alpha[i]
 
 			from, to = possible_interval(p_i, laser_ref, 
-				maxAngularCorrectionDeg, maxLinearCorrection)
+				max_angular_correction_deg, max_linear_correction)
 			
 			for j in from..to
 				next if not laser_ref.alpha_valid? j
@@ -172,11 +172,11 @@ class GPM
 
 				theta = angleDiff(alpha_j, alpha_i)
 				
-				next if (theta-x0[2]).abs > deg2rad(maxAngularCorrectionDeg)			
+				next if (theta-x0[2]).abs > deg2rad(max_angular_correction_deg)			
 								
 				t = p_j - rot(theta) * p_i;
 				
-				next if (t-t0).nrm2 > maxLinearCorrection
+				next if (t-t0).nrm2 > max_linear_correction
 				
 				hist.increment(theta)
 			end 

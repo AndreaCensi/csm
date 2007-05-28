@@ -1,6 +1,7 @@
 #ifndef H_MATH_UTILS
 #define H_MATH_UTILS
 
+#include <egsl.h>
 #include <gsl/gsl_math.h>
 #include "laser_data.h"
 
@@ -9,7 +10,7 @@
 
 void possible_interval(
 	const gsl_vector*p_i_w, struct laser_data*laser_sens, 
-	double maxAngularCorrectionDeg, double maxLinearCorrection, int*from, int*to, int*start_cell);
+	double max_angular_correction_deg, double max_linear_correction, int*from, int*to, int*start_cell);
 
 void transform(const gsl_vector* point2d, const gsl_vector* pose, gsl_vector*result2d);
 
@@ -53,6 +54,11 @@ double dist_to_segment(const gsl_vector*a,const gsl_vector*b,const gsl_vector*x)
 const char* gsl_friendly_pose(gsl_vector*v);
 const char* egsl_friendly_pose(val pose);
 const char* egsl_friendly_cov(val cov);
+
+
+/** Returns Fisher's information matrix. You still have to multiply
+    it by (1/sigma^2). */
+val ld_fisher0(LDP ld);
 
 #endif
 

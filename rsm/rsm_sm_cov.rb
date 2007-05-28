@@ -48,12 +48,12 @@ def scan_matching(io, scan_matcher)
 		# Write log of the icp operation
 	#	icp.journal_open("icp_sm.rb-sm#{count}.txt")
 
-		icp.params[:maxAngularCorrectionDeg]= 10
-		icp.params[:maxLinearCorrection]=  2
+		icp.params[:max_angular_correction_deg]= 10
+		icp.params[:max_linear_correction]=  2
 		icp.params[:laser_ref] = laser_ref;
 		icp.params[:laser_sens] = laser_sens;
 		icp.params[:firstGuess] = u
-		icp.params[:maxIterations] = 20
+		icp.params[:max_iterations] = 20
 
 
 		m = Matching.new

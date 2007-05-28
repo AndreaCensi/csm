@@ -20,29 +20,29 @@ int main(int argc, const char*argv[]) {
 	struct sm_params params;
 	struct sm_result result;
 	
-	params.maxAngularCorrectionDeg = 5;
-	params.maxLinearCorrection = 0.2;
-	params.maxIterations = 30;
+	params.max_angular_correction_deg = 5;
+	params.max_linear_correction = 0.2;
+	params.max_iterations = 30;
 	params.epsilon_xy = 0.001;
 	params.epsilon_theta = 0.001;
-	params.maxCorrespondenceDist = 2;
+	params.max_correspondence_dist = 2;
 	params.sigma = 0.01;
 	params.restart = 1;
 	params.restart_threshold_mean_error = 3.0 / 300.0;
 	params.restart_dt= 0.1;
 	params.restart_dtheta=    1.5 * 3.14 /180;
 
-	params.clusteringThreshold = 0.05;
-	params.orientationNeighbourhood = 3;
-	params.useCorrTricks = 1;
+	params.clustering_threshold = 0.05;
+	params.orientation_neighbourhood = 3;
+	params.use_corr_tricks = 1;
 
-	params.doAlphaTest = 0;
+	params.do_alpha_test = 0;
 	params.outliers_maxPerc = 0.85;
 
 	params.outliers_adaptive_order =0.7;
 	params.outliers_adaptive_mult=2;
-	params.doVisibilityTest = 1;
-	params.doComputeCovariance = 0;
+	params.do_visibility_test = 1;
+	params.do_compute_covariance = 0;
 
 	int num_matchings = 0;
 	int num_iterations = 0;

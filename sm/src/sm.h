@@ -11,31 +11,31 @@ struct sm_params {
  	double odometry[3]; 
  	double odometry_cov[3][3]; 
 
-	double maxAngularCorrectionDeg;
-	double maxLinearCorrection;
+	double max_angular_correction_deg;
+	double max_linear_correction;
 
 	/** When to stop */
-	int maxIterations;
+	int max_iterations;
 	double epsilon_xy;
 	double epsilon_theta;
 	
 	/** dubious parameters */
-	double maxCorrespondenceDist;
+	double max_correspondence_dist;
 	
 	double sigma;
 	
-	int useCorrTricks;
+	int use_corr_tricks;
 	
 	int restart;
 	double restart_threshold_mean_error;
 	double restart_dt;
 	double restart_dtheta;
 	
-	double clusteringThreshold;
-	int orientationNeighbourhood;
+	double clustering_threshold;
+	int orientation_neighbourhood;
 	
-	int doAlphaTest;
-	double doAlphaTest_thresholdDeg;
+	int do_alpha_test;
+	double do_alpha_test_thresholdDeg;
 	
 	/** Percentage of correspondences to consider */
 	double outliers_maxPerc;
@@ -43,9 +43,9 @@ struct sm_params {
 	double outliers_adaptive_order; /* 0.7 */
 	double outliers_adaptive_mult; /* 2 */
 	
-	int doVisibilityTest;
+	int do_visibility_test;
 	
-	int doComputeCovariance;
+	int do_compute_covariance;
 	
 };
 

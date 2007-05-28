@@ -101,14 +101,14 @@ module MathUtils
 	end
 	
 	# from, to, start_cell, range = 
-	def possible_interval(point, ld, maxAngularCorrectionDeg, 
-		maxLinearCorrection)
+	def possible_interval(point, ld, max_angular_correction_deg, 
+		max_linear_correction)
 		
 		angleRes =  (ld.max_theta-ld.min_theta)/ld.nrays;
 
 		# Delta for the angle
-		delta = deg2rad(maxAngularCorrectionDeg).abs +
-		        Math.atan(maxLinearCorrection/point.nrm2).abs;
+		delta = deg2rad(max_angular_correction_deg).abs +
+		        Math.atan(max_linear_correction/point.nrm2).abs;
 
 		# Dimension of the cell range
 		range = (delta/angleRes).ceil;

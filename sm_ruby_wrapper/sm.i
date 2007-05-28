@@ -6,12 +6,12 @@
 
 
 struct sm_params {
-	double maxAngularCorrectionDeg;
-	double maxLinearCorrection;
-	int maxIterations;
+	double max_angular_correction_deg;
+	double max_linear_correction;
+	int max_iterations;
 	double epsilon_xy;
 	double epsilon_theta; 
-	double maxCorrespondenceDist;
+	double max_correspondence_dist;
 	
 	int restart;
 	double restart_threshold_mean_error;
@@ -20,19 +20,19 @@ struct sm_params {
 	
 	double sigma;
 	
-	double clusteringThreshold;
-	int orientationNeighbourhood;
+	double clustering_threshold;
+	int orientation_neighbourhood;
 	
-	int doAlphaTest;
-	double doAlphaTest_thresholdDeg;
+	int do_alpha_test;
+	double do_alpha_test_thresholdDeg;
 	
 	double outliers_maxPerc;
 	double outliers_adaptive_order; 
 	double outliers_adaptive_mult; 
 	
-	int doVisibilityTest;
-	int useCorrTricks;
-	int doComputeCovariance;
+	int do_visibility_test;
+	int use_corr_tricks;
+	int do_compute_covariance;
 	
 };
 

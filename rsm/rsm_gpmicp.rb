@@ -48,8 +48,8 @@ class GPM_then_ICP
 			Vector[0,0,-pth],
 		];
 		
-		params[:maxLinearCorrection] = pt*5;
-		params[:maxAngularCorrectionDeg] = pth*5;
+		params[:max_linear_correction] = pt*5;
+		params[:max_angular_correction_deg] = pth*5;
 		
 		total_iterations = res[:iterations]
 		results = perturb.map { |p| 

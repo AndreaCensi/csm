@@ -8,13 +8,13 @@ double minmax(int from,int to,int x) {
 
 void possible_interval(
 	const gsl_vector*p_i_w, LDP ld, 
-	double maxAngularCorrectionDeg, double maxLinearCorrection, int*from, int*to, int*start_cell) 
+	double max_angular_correction_deg, double max_linear_correction, int*from, int*to, int*start_cell) 
 {
 	double angleRes = (ld->max_theta-ld->min_theta)/ld->nrays;
 
 	/* Delta for the angle */
-	double delta = fabs(deg2rad(maxAngularCorrectionDeg)) +
-	        fabs(atan(maxLinearCorrection/norm(p_i_w)));
+	double delta = fabs(deg2rad(max_angular_correction_deg)) +
+	        fabs(atan(max_linear_correction/norm(p_i_w)));
 
 	/* Dimension of the cell range */
 	int range = (int) ceil(delta/angleRes);

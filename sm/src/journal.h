@@ -3,6 +3,8 @@
 
 #include "laser_data.h"
 
+#include <egsl.h>
+
 void journal_open(const char*);
 
 void journal_write_array_d(const char*str, int n, double*);

@@ -157,7 +157,7 @@ void carmen2pdf(struct params p) {
 			if(first_pose) { first_pose = 0; 
 			} else {
 				cairo_set_line_width(cr, 0.5);
-				cairo_set_source_rgb (cr, 1, 0, 0);
+				cairo_set_source_rgb (cr, 1.0, 0.0, 0.0);
 				cairo_move_to(cr, old_pose_bx, old_pose_by);
 				cairo_line_to(cr, bx, by);
 				cairo_close_path(cr);
@@ -171,7 +171,7 @@ void carmen2pdf(struct params p) {
 		if(should_consider(&p, counter))  {
 				
 	
-			cairo_set_source_rgb (cr, 0, 0, 0);
+			cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
 			cairo_set_line_width(cr, 0.1);
 			int first = 1;
 			double last_x,last_y;

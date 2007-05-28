@@ -3,7 +3,9 @@
 
 #include <stdio.h>
 
+#ifndef RUBY
 #include <egsl.h>
+#endif
 
 struct correspondence;
 
@@ -26,15 +28,18 @@ struct laser_data {
 	
 	/* Jump tables */
 	int *up_bigger, *up_smaller, *down_bigger, *down_smaller;
-
-	/* Cartesian points */
-	gsl_vector**p;
 	
 	struct correspondence* corr;
 
 	
 	double odometry[3];	
 	double estimate[3];	
+	
+#ifndef RUBY
+	/* Cartesian points */
+	gsl_vector**p;
+#endif
+
 };
 
 struct correspondence {
@@ -70,9 +75,6 @@ void ld_set_null_correspondence(LDP, int i);
 int ld_next_valid_up(LDP, int i);
 int ld_next_valid_down(LDP, int i);
 
-/** Returns Fisher's information matrix. You still have to multiply
-    it by (1/sigma^2). */
-val ld_fisher0(LDP ld);
 
 void ld_simple_clustering(LDP ld, double threshold);
 void ld_compute_orientation(LDP ld, int size_neighbourhood, double sigma);

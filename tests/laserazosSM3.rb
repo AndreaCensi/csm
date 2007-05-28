@@ -13,15 +13,15 @@ scan_matcher = Sm::ICPC
 name = scan_matcher.new.name
 
 params = standard_parameters
-params[:doAlphaTest] = 0
-params[:doVisibilityTest] = 1
+params[:do_alpha_test] = 0
+params[:do_visibility_test] = 1
 params[:restart] = 1
 params[:restart_threshold_mean_error] = 3.0 / 300.0
 params[:restart_dt]=      0.03
 params[:restart_dtheta]=    1.5 * 3.14 /180
 params[:outliers_maxPerc] = 0.85;
 
-params[:doComputeCovariance] = 0
+params[:do_compute_covariance] = 0
 
 id='restart_no'
 

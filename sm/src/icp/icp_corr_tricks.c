@@ -56,8 +56,8 @@ void find_correspondences_tricks(struct sm_params*params, gsl_vector* x_old) {
 		int from; int to; int start_cell;
 		
 		if(0) {
-		possible_interval(p_i_w, laser_ref, params->maxAngularCorrectionDeg,
-			params->maxLinearCorrection, &from, &to, &start_cell);
+		possible_interval(p_i_w, laser_ref, params->max_angular_correction_deg,
+			params->max_linear_correction, &from, &to, &start_cell);
 		} else {
 			from = 0; to = laser_ref->nrays-1; 
 			
@@ -108,7 +108,7 @@ void find_correspondences_tricks(struct sm_params*params, gsl_vector* x_old) {
 				/* This is the distance from p_i_w to the "up" point*/
 				last_dist_up = distance(p_i_w, laser_ref->p[up]);
 				/* If it is less than the best point, it is our new j1 */
-				if( (last_dist_up<params->maxCorrespondenceDist) && 
+				if( (last_dist_up<params->max_correspondence_dist) && 
 					((j1==-1)||(last_dist_up < best_dist))) {
 						j1 = up; best_dist = last_dist_up;
 				}
@@ -151,7 +151,7 @@ void find_correspondences_tricks(struct sm_params*params, gsl_vector* x_old) {
 				if(!laser_ref->valid[down]) { --down; continue; }
 		
 				last_dist_down = distance(p_i_w, laser_ref->p[down]);
-				if( (last_dist_down<params->maxCorrespondenceDist) && 
+				if( (last_dist_down<params->max_correspondence_dist) && 
 				    ((j1==-1)||(last_dist_down < best_dist))) {
 						j1 = down; best_dist = last_dist_down;
 				}

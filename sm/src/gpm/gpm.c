@@ -9,24 +9,24 @@
 #include "../journal.h"
 
 void ght_find_theta_range(LDP laser_ref, LDP laser_sens,
-		const gsl_vector*x0, double maxLinearCorrection,
-	double maxAngularCorrectionDeg, gsl_histogram*hist);
+		const gsl_vector*x0, double max_linear_correction,
+	double max_angular_correction_deg, gsl_histogram*hist);
 
 void ght_one_shot(LDP laser_ref, LDP laser_sens,
-		const gsl_vector*x0, double maxLinearCorrection,
-		double maxAngularCorrectionDeg, gsl_vector*x) ;
+		const gsl_vector*x0, double max_linear_correction,
+		double max_angular_correction_deg, gsl_vector*x) ;
 	
 void sm_gpm(struct sm_params*params, struct sm_result*res) {
 	LDP laser_ref  = &(params->laser_ref);
 	LDP laser_sens = &(params->laser_sens);
 		
 	ld_compute_cartesian(laser_ref);
-	ld_simple_clustering(laser_ref, params->clusteringThreshold);
-	ld_compute_orientation(laser_ref, params->orientationNeighbourhood, params->sigma);
+	ld_simple_clustering(laser_ref, params->clustering_threshold);
+	ld_compute_orientation(laser_ref, params->orientation_neighbourhood, params->sigma);
 
 	ld_compute_cartesian(laser_sens);
-	ld_simple_clustering(laser_sens, params->clusteringThreshold);
-	ld_compute_orientation(laser_sens, params->orientationNeighbourhood, params->sigma);
+	ld_simple_clustering(laser_sens, params->clustering_threshold);
+	ld_compute_orientation(laser_sens, params->orientation_neighbourhood, params->sigma);
 	
 	journal_laser_data("laser_ref",  laser_ref );
 	journal_laser_data("laser_sens", laser_sens);
@@ -42,8 +42,8 @@ void sm_gpm(struct sm_params*params, struct sm_result*res) {
 	printf("gpm 1/2: old u = : %f %f %f\n",gvg(u,0),gvg(u,1),gvg(u,2));
 	
 	ght_find_theta_range(laser_ref, laser_sens,
-		u, params->maxLinearCorrection,
-		params->maxAngularCorrectionDeg, hist);
+		u, params->max_linear_correction,
+		params->max_angular_correction_deg, hist);
 		
 	if(jf()) gsl_histogram_fprintf(jf(), hist, "%f","%f");
 		
@@ -68,10 +68,10 @@ void sm_gpm(struct sm_params*params, struct sm_result*res) {
 	
 	gsl_vector * x_new = gsl_vector_alloc(3);
 	 ght_one_shot(laser_ref, laser_sens,
-			u, params->maxLinearCorrection*2,
+			u, params->max_linear_correction*2,
 			newRangeDeg, x_new) ;
 
-		printf("gpm : max_correction_lin %f def %f\n", params->maxLinearCorrection, 		params->maxAngularCorrectionDeg);
+		printf("gpm : max_correction_lin %f def %f\n", params->max_linear_correction, 		params->max_angular_correction_deg);
 
 		printf("gpm 1/2: new u = : %f %f %f\n",gvg(u,0),gvg(u,1),gvg(u,2));
 		printf("gpm 1/2: New range: %f to %f\n",rad2deg(min_range),rad2deg(max_range));
@@ -102,8 +102,8 @@ void sm_gpm(struct sm_params*params, struct sm_result*res) {
 }
 
 void ght_find_theta_range(LDP laser_ref, LDP laser_sens,
-	const 	gsl_vector*x0, double maxLinearCorrection,
-	double maxAngularCorrectionDeg, gsl_histogram*hist) 
+	const 	gsl_vector*x0, double max_linear_correction,
+	double max_angular_correction_deg, gsl_histogram*hist) 
 {
 	int count=0;
 	int i;
@@ -113,8 +113,8 @@ void ght_find_theta_range(LDP laser_ref, LDP laser_sens,
 		gsl_vector * p_i = laser_sens->p[i];
 
 		int from; int to; int start_cell;
-		possible_interval(p_i, laser_ref, maxAngularCorrectionDeg,
-			maxLinearCorrection, &from, &to, &start_cell);
+		possible_interval(p_i, laser_ref, max_angular_correction_deg,
+			max_linear_correction, &from, &to, &start_cell);
 
 /*		printf("i=%d alpah=%f cov=%f\n", i,laser_sens->alpha[i],laser_sens->cov_alpha[i]);*/
 		int j;
@@ -123,7 +123,7 @@ void ght_find_theta_range(LDP laser_ref, LDP laser_sens,
 			
 			double theta = angleDiff(laser_ref->alpha[j], laser_sens->alpha[i]);
 			
-			if(fabs(theta-gvg(x0,2))>deg2rad(maxAngularCorrectionDeg))
+			if(fabs(theta-gvg(x0,2))>deg2rad(max_angular_correction_deg))
 				continue;
 	
 			gsl_vector * p_j = laser_ref->p[j];
@@ -134,9 +134,9 @@ void ght_find_theta_range(LDP laser_ref, LDP laser_sens,
 			double t_dist = sqrt(square(t_x-gvg(x0,0))+square(t_y-gvg(x0,1)));
 
 		/*	if(i==3) {
-				printf(" %f,%f  %d - %d %f <> %f\n",t_x,t_y,i,j,t_dist,maxLinearCorrection);
+				printf(" %f,%f  %d - %d %f <> %f\n",t_x,t_y,i,j,t_dist,max_linear_correction);
 			}*/
-			if(t_dist > maxLinearCorrection)
+			if(t_dist > max_linear_correction)
 				continue;
 				
 			double weight = 1/(laser_sens->cov_alpha[i]+laser_ref->cov_alpha[j]);
@@ -149,8 +149,8 @@ void ght_find_theta_range(LDP laser_ref, LDP laser_sens,
 }
 
 void ght_one_shot(LDP laser_ref, LDP laser_sens,
-		const gsl_vector*x0, double maxLinearCorrection,
-	double maxAngularCorrectionDeg, gsl_vector*x) 
+		const gsl_vector*x0, double max_linear_correction,
+	double max_angular_correction_deg, gsl_vector*x) 
 {
 	double L[3][3]  = {{0,0,0},{0,0,0},{0,0,0}};
 	double z[3] = {0,0,0};
@@ -163,8 +163,8 @@ void ght_one_shot(LDP laser_ref, LDP laser_sens,
 		gsl_vector * p_i = laser_sens->p[i];
 
 		int from; int to; int start_cell;
-		possible_interval(p_i, laser_ref, maxAngularCorrectionDeg,
-			maxLinearCorrection, &from, &to, &start_cell);
+		possible_interval(p_i, laser_ref, max_angular_correction_deg,
+			max_linear_correction, &from, &to, &start_cell);
 
 		int j;
 		for(j=from;j<=to;j++) {
@@ -172,7 +172,7 @@ void ght_one_shot(LDP laser_ref, LDP laser_sens,
 			
 			double theta = angleDiff(laser_ref->alpha[j], laser_sens->alpha[i]);
 			
-			if(fabs(theta-gvg(x0,2))>deg2rad(maxAngularCorrectionDeg))
+			if(fabs(theta-gvg(x0,2))>deg2rad(max_angular_correction_deg))
 				continue;
 	
 			gsl_vector * p_j = laser_ref->p[j];
@@ -182,7 +182,7 @@ void ght_one_shot(LDP laser_ref, LDP laser_sens,
 			double t_y = gvg(p_j,1) - (s*gvg(p_i,0)+c*gvg(p_i,1));
 			double t_dist = sqrt(square(t_x-gvg(x0,0))+square(t_y-gvg(x0,1)));
 
-			if(t_dist > maxLinearCorrection)
+			if(t_dist > max_linear_correction)
 				continue;
 
 			double weight = 1/(laser_sens->cov_alpha[i]+laser_ref->cov_alpha[j]);

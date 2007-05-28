@@ -25,12 +25,12 @@ class ICP
 		laser_sens = params[:laser_sens]
 		
 		laser_ref.compute_cartesian
-		laser_ref.simple_clustering(params[:clusteringThreshold])
-		laser_ref.compute_orientation(params[:orientationNeighbourhood],params[:sigma])
+		laser_ref.simple_clustering(params[:clustering_threshold])
+		laser_ref.compute_orientation(params[:orientation_neighbourhood],params[:sigma])
 
 		laser_sens.compute_cartesian		
-		laser_sens.simple_clustering(params[:clusteringThreshold])
-		laser_sens.compute_orientation(params[:orientationNeighbourhood],params[:sigma])
+		laser_sens.simple_clustering(params[:clustering_threshold])
+		laser_sens.compute_orientation(params[:orientation_neighbourhood],params[:sigma])
 		
 		laser_ref.create_jump_tables
 		
@@ -43,11 +43,11 @@ class ICP
 		delta = Vector.alloc(0,0,0).col
 		
 		hashes = []
-		for iteration in 1..params[:maxIterations]
+		for iteration in 1..params[:max_iterations]
 			journal "iteration #{iteration}"
 			journal     "x_old #{to_j(x_old)}"
 
-			if params[:useCorrTricks] == 1
+			if params[:use_corr_tricks] == 1
 				find_correspondences_tricks(x_old)
 			else
 				find_correspondences(x_old)
@@ -89,7 +89,7 @@ class ICP
 		dx_dy2=Matrix.alloc(3,laser_sens.nrays)
 
 
-		if 1 == params[:doComputeCovariance] 
+		if 1 == params[:do_compute_covariance] 
 			dx_dy1, dx_dy2 = 
 				compute_covariance_exact(laser_ref, laser_sens,  x_new)
 

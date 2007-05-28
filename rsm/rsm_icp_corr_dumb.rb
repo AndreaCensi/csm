@@ -3,9 +3,9 @@ class ICP
 	
 	def find_correspondences(x_old)
 		correspondences = Array.new
-		maxAngularCorrectionDeg = params[:maxAngularCorrectionDeg]
-		maxLinearCorrection=params[:maxLinearCorrection]
-		maxDist = params[:maxCorrespondenceDist]
+		max_angular_correction_deg = params[:max_angular_correction_deg]
+		max_linear_correction=params[:max_linear_correction]
+		maxDist = params[:max_correspondence_dist]
 		laser_ref = params[:laser_ref];
 		laser_sens = params[:laser_sens];
 
@@ -22,7 +22,7 @@ class ICP
 		#	puts "p_i = #{p_i.trans}"
 			from, to = 
 				possible_interval(p_i_w, laser_sens, 
-					maxAngularCorrectionDeg, maxLinearCorrection)
+					max_angular_correction_deg, max_linear_correction)
 
 			## Find best correspondence by considering all points in (from, to)
 			best_j = nil;

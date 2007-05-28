@@ -44,6 +44,7 @@ end
 
 $CPPFLAGS += " -Wall -W -Wmissing-prototypes -Wconversion "
 $CPPFLAGS += " -Wunreachable-code "
+$CPPFLAGS += " -DRUBY"
 gsl_config();
 
 srcs = %w(rb_sm sm_wrap) 

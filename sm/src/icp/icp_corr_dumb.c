@@ -4,13 +4,35 @@
 #include "../journal.h"
 #include "../math_utils.h"
 
+
+
+int compatible(struct sm_params*params, int i, int j) {
+        if(!params->do_alpha_test) return 1;
+
+        double theta0 = 0; /* FIXME */
+        if((params->laser_sens.alpha_valid[i]==0) ||
+                (params->laser_ref.alpha_valid[j]==0))
+                return 1;
+
+        double alpha_i = params->laser_sens.alpha[i];
+        double alpha_j = params->laser_ref.alpha[j];
+        double tolerance = deg2rad(params->do_alpha_test_thresholdDeg);
+
+        double theta = angleDiff(alpha_j, alpha_i);
+        if(fabs(angleDiff(theta,theta0))>tolerance+deg2rad(params->max_angular_correction_deg)) {
+                return 0;
+        } else {
+                return 1;
+        }
+}
+
 void find_correspondences(struct sm_params*params, gsl_vector* x_old) {
 	LDP laser_ref  = &(params->laser_ref);
 	LDP laser_sens = &(params->laser_sens);
 
-	if(jf()) fprintf(jf(),"param maxCorrespondenceDist %f\n",params->maxCorrespondenceDist);
-	if(jf()) fprintf(jf(),"param maxLinearCorrection %f\n",params->maxLinearCorrection);
-	if(jf()) fprintf(jf(),"param maxAngularCorrectionDeg %f\n",params->maxAngularCorrectionDeg);
+	if(jf()) fprintf(jf(),"param max_correspondence_dist %f\n",params->max_correspondence_dist);
+	if(jf()) fprintf(jf(),"param max_linear_correction %f\n",params->max_linear_correction);
+	if(jf()) fprintf(jf(),"param max_angular_correction_deg %f\n",params->max_angular_correction_deg);
 	
 	gsl_vector * p_i_w = gsl_vector_alloc(3);
 	
@@ -27,15 +49,15 @@ void find_correspondences(struct sm_params*params, gsl_vector* x_old) {
 		double best_dist = 0;
 		
 		int from; int to; int start_cell;
-		possible_interval(p_i_w, laser_ref, params->maxAngularCorrectionDeg,
-			params->maxLinearCorrection, &from, &to, &start_cell);
+		possible_interval(p_i_w, laser_ref, params->max_angular_correction_deg,
+			params->max_linear_correction, &from, &to, &start_cell);
 
 		int j;
 		for(j=from;j<=to;j++) {
 			if(!ld_valid_ray(laser_ref,j)) continue;
 			
 			double dist = distance(p_i_w, laser_ref->p[j]);
-			if(dist>params->maxCorrespondenceDist) continue;
+			if(dist>params->max_correspondence_dist) continue;
 			
 			
 			if((j1==-1) || (dist<best_dist)) {

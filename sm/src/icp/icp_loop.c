@@ -36,18 +36,18 @@ void sm_icp(struct sm_params*params, struct sm_result*res) {
 	LDP laser_ref  = &(params->laser_ref);
 	LDP laser_sens = &(params->laser_sens);
 			
-	if(params->useCorrTricks)
+	if(params->use_corr_tricks)
 		ld_create_jump_tables(laser_ref);
 		
 	ld_compute_cartesian(laser_ref);
 
 	ld_compute_cartesian(laser_sens);
 
-	if(params->doAlphaTest) {
-		ld_simple_clustering(laser_ref, params->clusteringThreshold);
-		ld_compute_orientation(laser_ref, params->orientationNeighbourhood, params->sigma);
-		ld_simple_clustering(laser_sens, params->clusteringThreshold);
-		ld_compute_orientation(laser_sens, params->orientationNeighbourhood, params->sigma);
+	if(params->do_alpha_test) {
+		ld_simple_clustering(laser_ref, params->clustering_threshold);
+		ld_compute_orientation(laser_ref, params->orientation_neighbourhood, params->sigma);
+		ld_simple_clustering(laser_sens, params->clustering_threshold);
+		ld_compute_orientation(laser_sens, params->orientation_neighbourhood, params->sigma);
 	}
 	
 	journal_laser_data("laser_ref",  laser_ref );
@@ -56,7 +56,7 @@ void sm_icp(struct sm_params*params, struct sm_result*res) {
 	gsl_vector * x_new = gsl_vector_alloc(3);
 	gsl_vector * x_old = vector_from_array(3, params->odometry);
 	
-	if(params->doVisibilityTest) {
+	if(params->do_visibility_test) {
 		printf("laser_ref:\n");
 		visibilityTest(laser_ref, x_old);
 
@@ -113,7 +113,7 @@ void sm_icp(struct sm_params*params, struct sm_result*res) {
 	vector_to_array(best_x, res->x);
 	
 	
-	if(params->doComputeCovariance)  {
+	if(params->do_compute_covariance)  {
 
 		val cov0_x, dx_dy1, dx_dy2;
 		compute_covariance_exact(
@@ -166,7 +166,7 @@ void icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 	gsl_vector * delta_old = gsl_vector_alloc(3);
 	gsl_vector_set_all(delta_old,0.0);
 
-	unsigned int hashes[params->maxIterations];
+	unsigned int hashes[params->max_iterations];
 	int iteration;
 
 	printf("icp_loop: starting at x_old= %s  \n",
@@ -176,13 +176,13 @@ void icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 		printf("icp_cov next\n");
 	#endif
 	
-	for(iteration=0; iteration<params->maxIterations;iteration++) {
+	for(iteration=0; iteration<params->max_iterations;iteration++) {
 		egsl_push();
 		
 		if(jf()) fprintf(jf(), "iteration %d\n", iteration);
 		journal_pose("x_old", x_old);
 		
-		if(params->useCorrTricks)
+		if(params->use_corr_tricks)
 			find_correspondences_tricks(params, x_old);
 		else
 			find_correspondences(params, x_old);

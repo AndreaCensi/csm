@@ -57,13 +57,13 @@ def main(scans, klass)
 			sm.params[:epsilon_xy]=  0.001 / 10
 			sm.params[:epsilon_theta]= 0.001 / 10
 			
-			sm.params[:maxAngularCorrectionDeg]= rad2deg(max_displacement[i][2])*1.3
-			sm.params[:maxLinearCorrection]=  max_displacement[i][0]*1.3;
+			sm.params[:max_angular_correction_deg]= rad2deg(max_displacement[i][2])*1.3
+			sm.params[:max_linear_correction]=  max_displacement[i][0]*1.3;
 			sm.params[:laser_ref] =  scans[s]
 			sm.params[:laser_sens] =  scans[s].deep_copy
 			sm.params[:laser_sens].add_noise!(sigma, rng)
 			sm.params[:firstGuess] = disp
-			sm.params[:maxIterations] = 20
+			sm.params[:max_iterations] = 20
 			sm.params[:restart] = 0
 			sm.params[:outliers_maxPerc] = 0.999; 
 			sm.params[:outliers_adaptive_order] = 0.95; 

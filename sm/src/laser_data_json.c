@@ -21,6 +21,9 @@ JO ld_to_json(LDP ld) {
 	json_object_object_add(jo, "alpha",     json_double_array(ld->alpha, n));
 	json_object_object_add(jo, "cov_alpha",     json_double_array(ld->cov_alpha, n));
 	json_object_object_add(jo, "alpha_valid",     json_int_array(ld->alpha_valid, n));
+
+	json_object_object_add(jo, "odometry",     json_double_array(ld->odometry, 3));
+	json_object_object_add(jo, "estimate",     json_double_array(ld->estimate, 3));
 	return jo;
 /*	int *up_bigger, *up_smaller, *down_bigger, *down_smaller;
 
@@ -51,6 +54,8 @@ LDP json_to_ld(JO jo) {
 	json_read_double_array(jo, "cov_alpha", ld->cov_alpha, n, NAN);
 	json_read_int_array(jo, "alpha_valid",   ld->alpha_valid, n, 0);
 	
+	json_read_double_array(jo, "odometry", ld->odometry, 3, NAN);
+	json_read_double_array(jo, "estimate", ld->estimate, 3, NAN);	
 	
 	return ld;
 }
