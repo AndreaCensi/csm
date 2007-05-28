@@ -3,6 +3,11 @@
 
 #include <stdio.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 /**
  *  Utility functions to parse command line arguments.
  *
@@ -39,9 +44,15 @@ struct option {
 
 /** User-friendly interface */
 struct option* options_allocate(size_t n);
-void options_int    (struct option*, const char* name,  int *p,    int def_value, const char*desc);
-void options_double (struct option*, const char* name,  double *p, double def_value, const char*desc);
-void options_string (struct option*, const char* name, const char** p,const char*def_balue,const char*desc);
+
+void options_int    (struct option*, const char* name,  
+	int *p,  int def_value, const char*desc);
+
+void options_double (struct option*, const char* name,  
+	double *p, double def_value, const char*desc);
+	
+void options_string (struct option*, const char* name, 
+	const char** p,const char*def_balue,const char*desc);
 
 /** Returns 0 on error */
 int options_parse_args(struct option*ops, int argc, const char* argv[]);
@@ -72,6 +83,11 @@ int options_valid(struct option*op);
 
 #define OPTIONS_NAME_MAXSIZE 32
 #define OPTIONS_VALUE_MAXSIZE 256
+
+#ifdef __cplusplus
+}
+#endif
+
 
 
 #endif

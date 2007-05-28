@@ -31,32 +31,34 @@ struct option* options_next_empty(struct option*ops) {
 	}
 }
 
+char * strdup_(const char *s);
+
 void options_int(struct option*ops, const char* name, int *p, int def_value, const char*desc) {
 	struct option* o =  options_next_empty(ops);
-	o->name = name;
+	o->name = strdup_(name);
 	o->value_pointer = p;
 	o->set_pointer = 0;
-	o->desc = desc;
+	o->desc = strdup_(desc);
 	o->type = OPTION_INT;
 	*p = def_value;
 }
 
 void options_double (struct option*ops, const char* name, double *p, double def_value, const char*desc){
 	struct option* o =  options_next_empty(ops);
-	o->name = name;
+	o->name = strdup_(name);
 	o->value_pointer = p;
 	o->set_pointer = 0;
-	o->desc = desc;
+	o->desc = strdup_(desc);
 	o->type = OPTION_DOUBLE;
 	*p = def_value;
 }
 
 void options_string (struct option*ops, const char* name, const char** p,const char*def_value,const char*desc){
 	struct option* o =  options_next_empty(ops);
-	o->name = name;
+	o->name = strdup_(name);
 	o->value_pointer = p;
 	o->set_pointer = 0;
-	o->desc = desc;
+	o->desc = strdup_(desc);
 	o->type = OPTION_STRING;
 	*p = def_value;
 }

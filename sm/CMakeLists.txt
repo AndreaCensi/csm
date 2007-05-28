@@ -1,4 +1,4 @@
-PROJECT (scan_matching_lib C)
+#PROJECT (scan_matching_lib C)
 
 	INCLUDE (FindGSL.cmake)                                                                                         
 
@@ -97,7 +97,6 @@ PROJECT (scan_matching_lib C)
 		
 	)
 
-#	INCLUDE_DIRECTORIES(lib/JSON_checker)
 	INCLUDE_DIRECTORIES(lib/egsl)
 	INCLUDE_DIRECTORIES(lib/gpc)
 	INCLUDE_DIRECTORIES(lib)
@@ -121,8 +120,8 @@ PROJECT (scan_matching_lib C)
 		ADD_EXECUTABLE(test_math_utils src/math_utils_test.c)
 		TARGET_LINK_LIBRARIES(test_math_utils sm ${GSL_LIBRARIES})
 
-		ADD_EXECUTABLE(test_json_pipe apps/test_json_pipe.c)
-		TARGET_LINK_LIBRARIES(test_json_pipe sm ${GSL_LIBRARIES})
+		ADD_EXECUTABLE(json_pipe apps/json_pipe.c)
+		TARGET_LINK_LIBRARIES(json_pipe sm ${GSL_LIBRARIES} options)
 
 		ADD_EXECUTABLE(test_json_ld apps/test_json_ld.c)
 		TARGET_LINK_LIBRARIES(test_json_ld sm ${GSL_LIBRARIES})

@@ -20,6 +20,9 @@ JO json_tokener_parse_len(char *str, int len);
 int json_read_double_array(JO s, const char*name, double*p, int n, double when_null);
 int json_read_int_array(JO s, const char*name, int*p, int n, int when_null);
 
+int json_read_double(JO jo, const char*name, double*p) ;
+int json_read_int(JO jo, const char*name, int*p) ;
+
 JO json_double_array(const double *v, int n);
 JO json_int_array(const int *v, int n);
 

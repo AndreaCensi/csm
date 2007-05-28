@@ -201,7 +201,6 @@ static int state_transition_table[30][31] = {
 /*29*/ {29,29,-1,-1,-1,-1,-1,-1, 3,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}
 };
 
-static int the_state;
 
 
 /*
@@ -217,6 +216,7 @@ static int the_state;
 */
 #define MAX_DEPTH   20
 
+static int the_state;
 static int the_stack[MAX_DEPTH];
 static int the_top;
 
@@ -252,6 +252,17 @@ pop(int mode)
     return true;
 }
 
+int JSON_checker_push(int b);
+
+void JSON_checker_init() {
+	the_state = 0;
+   the_top = -1;
+   push(MODE_DONE);
+}
+
+int JSON_checker_finished() {
+	 return the_state == 9 && pop(MODE_DONE);
+}
 
 /*
     The JSON_checker takes a UTF-16 encoded string and determines if it is a
@@ -263,16 +274,19 @@ pop(int mode)
 int 
 JSON_checker(unsigned short p[], int length)
 {
-    int b;  /* the next character */
-    int c;  /* the next character class */
-    int s;  /* the next state */
+	JSON_checker_init();
 
-    the_state = 0;
-    the_top = -1;
-    push(MODE_DONE);
+	for (the_index = 0; the_index < length; the_index += 1) {
+		if(!(JSON_checker_push(p[the_index]))) return false;
+	}
+   
+	return JSON_checker_finished() ;
+}
 
-    for (the_index = 0; the_index < length; the_index += 1) {
-        b = p[the_index];
+
+int JSON_checker_push(int b) {
+   int c;  /* the next character class */
+   int s;  /* the next state */
         if ((b & 127) == b) {
             c = ascii_class[b];
             if (c <= S_ERR) {
@@ -388,11 +402,8 @@ JSON_checker(unsigned short p[], int length)
 */
             the_state = s;
         }
-    }
-    return the_state == 9 && pop(MODE_DONE);
+		return true;
 }
-
-
 /*
     Get the current character number.
 */

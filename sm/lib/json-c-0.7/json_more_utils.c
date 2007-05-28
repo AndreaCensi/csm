@@ -17,6 +17,7 @@ JO json_read_stream(FILE*f) {
 	
 	int count = 0;
 	
+	JSON_checker_init();
 	while(count < MAX_SIZE) {
 		char c;
 		if(1 != fread(&c,1,1,f)) {
@@ -33,10 +34,16 @@ JO json_read_stream(FILE*f) {
 			buf[count] = c;
 			bufs[count] = c;
 			count++;
+
+			if(!JSON_checker_push(c)) {
+				mc_error("Malformed JSON object: \n'%.*s'\n", count, buf);
+				return 0;
+			}
 			
-			if(JSON_checker(bufs, count)) {
+			if(JSON_checker_finished()) {
 /*				sm_de("Found object.\n"); */
 				JO jo = json_tokener_parse_len(buf, count);
+
 				return jo;
 			}
 			
@@ -65,17 +72,17 @@ struct json_object* json_tokener_parse_len(char *str, int len) {
 int json_read_double_array(JO s, const char*name, double*p, int n, double when_null) {
 	JO jo = json_object_object_get(s, (char*)name);
 	if(!jo) {
-		mc_error("Field '%s' not found.", name);
+		mc_error("Field '%s' not found.\n", name);
 		return 0;
 	}
 	
 	if(!json_object_is_type(jo, json_type_array)) {
-		mc_error("This is not an array: '%s'",json_object_to_json_string(jo));
+		mc_error("This is not an array: '%s'\n",json_object_to_json_string(jo));
 		return 0;
 	}
 	int size = json_object_array_length(jo);
 	if(size < n) {
-		mc_error("I expected at least %d elements, got %d. \nArray: '%s'",
+		mc_error("I expected at least %d elements, got %d. \nArray: '%s'\n",
 			n, size, json_object_to_json_string(jo));
 		return 0;
 	}
@@ -92,16 +99,16 @@ int json_read_double_array(JO s, const char*name, double*p, int n, double when_n
 int json_read_int_array(JO s, const char*name, int*p, int n, int when_null) {
 	JO jo = json_object_object_get(s, (char*)name);
 	if(!jo) {
-		mc_error("Field '%s' not found.", name);
+		mc_error("Field '%s' not found.\n", name);
 		return 0;
 	}
 	if(!json_object_is_type(jo, json_type_array)) {
-		mc_error("This is not an array: '%s'",json_object_to_json_string(jo));
+		mc_error("This is not an array: '%s'\n",json_object_to_json_string(jo));
 		return 0;
 	}
 	int size = json_object_array_length(jo);
 	if(size < n) {
-		mc_error("I expected at least %d elements, got %d. \nArray: '%s'",
+		mc_error("I expected at least %d elements, got %d. \nArray: '%s'\n",
 			n, size, json_object_to_json_string(jo));
 		return 0;
 	}
@@ -133,4 +140,43 @@ JO json_int_array(const int *v, int n) {
 	}
 	return array;
 }
+
+
+int json_read_int(JO jo, const char*name, int*p) {
+	JO v = json_object_object_get(jo, (char*)name);
+	
+	if(!v) {
+		mc_error("Field '%s' not found.\n", name);
+		return 0;
+	}
+	
+	if(!json_object_is_type(v, json_type_int)) {
+		mc_error("I was looking for a int, instead got '%s'.\n",
+		         json_object_to_json_string(v));
+		return 0;
+	}
+	
+	*p = json_object_get_int(v);
+	return 1;
+}
+
+double convert_to_double(JO jo) {
+	if(json_object_is_type(jo, json_type_double)) 
+		return json_object_get_double(jo);
+	else 
+		return NAN;
+}
+
+int json_read_double(JO jo, const char*name, double*p) {
+	JO v = json_object_object_get(jo, (char*)name);
+	
+	if(!v) {
+		mc_error("Field '%s' not found.\n", name);
+		return 0;
+	}
+	
+	*p = convert_to_double(v);
+	return 1;
+}
+
 

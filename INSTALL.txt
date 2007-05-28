@@ -62,5 +62,5 @@ Now you should have the "gem" command installed:
 	
 /path/to/cmake . -DCMAKE_INSTALL_PREFIX:PATH=/path/to/install/to/scribuscmake/
 
-
+export PKG_CONFIG_PATH=/Users/andrea/06MELANIA/censi-2006/Matlab-yasmine/deploy/lib/pkgconfig/ 
        

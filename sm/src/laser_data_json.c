@@ -30,43 +30,6 @@ JO ld_to_json(LDP ld) {
 */
 }
 
-int json_read_int(JO jo, const char*name, int*p) {
-	JO v = json_object_object_get(jo, (char*)name);
-	
-	if(!v) {
-		sm_error("Field '%s' not found.", name);
-		return 0;
-	}
-	
-	if(!json_object_is_type(v, json_type_int)) {
-		sm_error("I was looking for a int, instead got '%s'.",
-		         json_object_to_json_string(v));
-		return 0;
-	}
-	
-	*p = json_object_get_int(v);
-	return 1;
-}
-
-double convert_to_double(JO jo) {
-	if(json_object_is_type(jo, json_type_double)) 
-		return json_object_get_double(jo);
-	else 
-		return NAN;
-}
-
-int json_read_double(JO jo, const char*name, double*p) {
-	JO v = json_object_object_get(jo, (char*)name);
-	
-	if(!v) {
-		sm_error("Field '%s' not found.", name);
-		return 0;
-	}
-	
-	*p = convert_to_double(v);
-	return 1;
-}
-
 
 LDP json_to_ld(JO jo) {
 	int n;
@@ -101,7 +64,7 @@ LDP ld_from_json_stream(FILE*file) {
 
 	ld = json_to_ld(jo);
 	if(!ld) {
-		sm_error("Could not read laser_data:\n\n%s", json_object_to_json_string(jo));
+		sm_error("Could not read laser_data:\n\n%s\n", json_object_to_json_string(jo));
 		return 0;
 	}
 	jo_free(jo);
