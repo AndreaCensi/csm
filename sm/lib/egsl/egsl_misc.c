@@ -36,10 +36,10 @@ void egsl_print_spectrum(const char*s, val v) {
 	egsl_symm_eig(v, eval, evec);
  	size_t i,j;
 	for(j=0;j<n;j++) {
-		printf("%s | eval[%d] = %+5.5f evec[%d]= ",
+		fprintf(stderr, "%s | eval[%d] = %+5.5f evec[%d]= ",
 			s, (int)j, eval[j],(int)j);
 		for(i=0;i<n;i++) 
-			printf("%+4.4f ", egsl_atv(evec[j],i));
-		printf(" sqrt(eval[%d])=%5.5f  \n", (int)j, sqrt(eval[j]));
+			fprintf(stderr, "%+4.4f ", egsl_atv(evec[j],i));
+		fprintf(stderr, " sqrt(eval[%d])=%5.5f  \n", (int)j, sqrt(eval[j]));
 	}		
 }

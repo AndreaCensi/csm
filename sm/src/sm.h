@@ -65,7 +65,7 @@ struct sm_params {
 
 struct sm_result {
 	double x[3];
-	double x_cov[3][3];
+	double cov_x[9];
 	int iterations;
 	int nvalid;
 	double error;

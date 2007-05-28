@@ -61,12 +61,12 @@ inline void check_valid_val(val v) { int i = v.cid; v.cid=i;}
 void check_valid_val(val v) {
 	int context = its_context(v);
 	if(context>cid) {
-		printf("Val is from invalid context (%d>%d)\n",context,cid);
+		fprintf(stderr, "Val is from invalid context (%d>%d)\n",context,cid);
 		error();
 	}
 	int var_index = its_var_index(v);
 	if(var_index >= egsl_contexts[context].nvars) {
-		printf("Val is invalid  (%d>%d)\n",var_index, 
+		fprintf(stderr, "Val is invalid  (%d>%d)\n",var_index, 
 			egsl_contexts[context].nvars);		
 		error();
 	}
@@ -99,13 +99,13 @@ void egsl_pop() {
 }
 
 void egsl_print_stats() {
-	printf("egsl: total allocations: %d   cache hits: %d\n",	
+	fprintf(stderr, "egsl: total allocations: %d   cache hits: %d\n",	
 		egsl_total_allocations, egsl_cache_hits);
 /*	printf("egsl: sizeof(val) = %d\n",(int)sizeof(val)); */
 	int c; for(c=0;c<MAX_CONTEXTS;c++) {
 	/*	printf("egsl: context #%d\n ",c);
 	 	if(0==egsl_contexts[c].nallocated) break; */
-		printf("egsl: context #%d allocations: %d active: %d\n",
+		fprintf(stderr, "egsl: context #%d allocations: %d active: %d\n",
 			c,	egsl_contexts[c].nallocated, 	egsl_contexts[c].nvars);
 	}
 }
@@ -186,23 +186,23 @@ void egsl_print(const char*str, val v) {
 	size_t i,j;
 	int context = its_context(v);
 	int var_index = its_var_index(v);
-	printf("%s =  (%d x %d)  context=%d index=%d\n",
+	fprintf(stderr, "%s =  (%d x %d)  context=%d index=%d\n",
 		str,(int)m->size1,(int)m->size2,  context, var_index);
 
 	for(i=0;i<m->size1;i++) {
 		if(i==0)
-			printf(" [ ");
+			fprintf(stderr, " [ ");
 		else
-			printf("   ");
+			fprintf(stderr, "   ");
 		
 		for(j=0;j<m->size2;j++) 
-			printf("%f ", gsl_matrix_get(m,i,j));
+			fprintf(stderr, "%f ", gsl_matrix_get(m,i,j));
 		
 		
 		if(i==m->size1-1)
-		printf("] \n");
+			fprintf(stderr, "] \n");
 		else
-		printf("; \n");
+			fprintf(stderr, "; \n");
 	}	
 }
 

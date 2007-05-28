@@ -6,6 +6,20 @@
 
 #include "laser_data_json.h"
 
+JO result_to_json(struct sm_params*p, struct sm_result *r) {
+	JO jo = json_object_new_object();
+	jo_add(jo, "x",  json_double_array(r->x, 3));
+	
+	if(p->do_compute_covariance) {
+/*		double cov[9];
+		int j;for(j=0;j<9;j++) cov[j] = r->x_cov[(j-j%3)/3][j%3];*/
+		jo_add(jo, "cov_x",  json_double_array(r->cov_x, 9));
+	}
+	jo_add(jo, "iterations", jo_new_int(r->iterations));
+	jo_add(jo, "nvalid", jo_new_int(r->nvalid));
+	jo_add(jo, "error", jo_new_double(r->error));
+	return jo;
+}
 
 JO ld_to_json(LDP ld) {
 	JO jo = json_object_new_object();

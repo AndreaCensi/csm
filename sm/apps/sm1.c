@@ -64,6 +64,8 @@ int main(int argc, const char*argv[]) {
 /*			sm_gpm(&params,&result); */
 		sm_icp(&params,&result); 
 		
+		JO jo = result_to_json(&params, &result);
+		printf("%s\n", json_object_to_json_string(jo));
 	}
 	
 	return 0;

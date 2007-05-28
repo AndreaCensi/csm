@@ -121,7 +121,8 @@ void sm_icp(struct sm_params*params, struct sm_result*res) {
 			laser_ref, laser_sens, best_x,
 			&cov0_x, &dx_dy1, &dx_dy2);
 		
-/*		val cov_x = sc(params->sigma*params->sigma, cov0_x); */
+		val cov_x = sc(square(params->sigma), cov0_x); 
+		egsl_v2da(cov_x, res->cov_x);
 		
 		egsl_print("cov0_x", cov0_x);
 		egsl_print_spectrum("cov0_x", cov0_x);
