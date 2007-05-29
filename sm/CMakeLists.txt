@@ -122,6 +122,9 @@
 		ADD_EXECUTABLE(sm1 apps/sm1.c)
 		TARGET_LINK_LIBRARIES(sm1 sm ${GSL_LIBRARIES} options)
 
+		ADD_EXECUTABLE(ld_fisher apps/ld_fisher.c)
+		TARGET_LINK_LIBRARIES(ld_fisher  sm ${GSL_LIBRARIES} options)
+
 		ADD_EXECUTABLE(test_math_utils src/math_utils_test.c)
 		TARGET_LINK_LIBRARIES(test_math_utils sm ${GSL_LIBRARIES})
 

@@ -354,7 +354,7 @@ static int json_object_double_to_json_string(struct json_object* this,
 {
 /*  return sprintbuf(pb, "%lf", this->o.c_double);*/
 	if( ((int) this->o.c_double) !=  this->o.c_double)
-		return sprintbuf(pb, "%Lg", this->o.c_double);
+		return sprintbuf(pb, "%25.18Lg", this->o.c_double);
 	else
 		return sprintbuf(pb, "%d.0", (int) this->o.c_double);
 
@@ -422,7 +422,7 @@ struct json_object* json_object_new_string_len(char *s, int len)
   if(!this) return NULL;
   this->_delete = &json_object_string_delete;
   this->_to_json_string = &json_object_string_to_json_string;
-  this->o.c_string = strndup(s, len);
+  this->o.c_string = strndup(s, (size_t)len);
   return this;
 }
 
