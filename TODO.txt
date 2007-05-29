@@ -1,0 +1,35 @@
+
+
+
+
+Esperimenti da fare:
+
+* visualizzare campo I(x) (anche con probabilità variabile)
+* esperimenti di Bengtsson
+* fare scan matching di log, con statistiche tempo, evoluzione covarianza
+
+----------------- Implementato in C++
+Program: raytracer
+config: mappa
+stdin: (n) pose
+stdout: (n) laser scan
+
+Program: drawer
+description: draws one laser scan in fig format
+config: flag per disegnare normali, etc
+stdin: (1) laser\_scan
+stdout: fig
+
+----------------- Implementato in C
+
+Program: yellowpaint
+config: parametri rumore
+stdin: (1) laser scan
+stdout: (1) laser scan
+
+Program: single-matcher
+config: parametri sm
+stdin: (2) laser\_scan
+stdout: posa, covarianza stimata
+
+

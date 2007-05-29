@@ -1,4 +1,4 @@
 
 %.m: %.txt
-	../matlab_new/json2matlab.rb $* < $< > $@
+	../matlab_new/json2matlab.rb `basename $*` < $< > $@
 

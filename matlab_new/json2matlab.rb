@@ -30,8 +30,8 @@ class Array
 	end
 	
 	def is_matrix?
-		return false if not all? {|x| x.kind_of?(Array) && x.all_numbers?}
-		columns = self[0].size
+		return false if empty? or not all? {|x| x.kind_of?(Array) && x.all_numbers?}
+		columns = first.size
 		return false if not all? {|x| x.size==columns}
 		true
 	end

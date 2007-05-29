@@ -1,4 +1,4 @@
-#LyX 1.4.2 created this file. For more info see http://www.lyx.org/
+#LyX 1.4.4 created this file. For more info see http://www.lyx.org/
 \lyxformat 245
 \begin_document
 \begin_header
@@ -94,7 +94,9 @@ ld.readings(i) == nan
 \begin_layout Description
 
 \family typewriter
-ld.readings_valid(i)
+ld.readings_valid(i)\InsetSpace ~
+or\InsetSpace ~
+ld.valid(i)
 \end_layout
 
 \begin_deeper
@@ -205,15 +207,37 @@ ld.timestamp2
 \end_layout
 
 \begin_layout Section
-Generating laserdata for simulations via raytracing
+Featured functions
 \end_layout
 
-\begin_layout Subsection
-polygonal world
+\begin_layout Description
+ld_fisher This function computes Fisher's information matrix, in robot coordinat
+es.
+ 
 \end_layout
 
-\begin_layout Subsection
-any curved convex world
+\begin_deeper
+\begin_layout Standard
+Uses field 'true_alpha' (and 'theta', 'readings').
+ 
+\end_layout
+
+\begin_layout Standard
+For details about the Fisher's information matrix for localization, please
+ see this paper: http://purl.org/censi/2006/accuracy
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+Available as matlab function 
+\emph on
+ld_fisher0.m
+\emph default
+, C function ld
+\emph on
+_
+\emph default
+fisher0 and command line ld_fisher.
 \end_layout
 
 \begin_layout Section
