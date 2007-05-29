@@ -6,14 +6,44 @@
 
 #include "laser_data_json.h"
 
+JO matrix_to_json(gsl_matrix*m) {
+	JO jo = json_object_new_array();
+	if(m->size1>1) {
+		size_t i,j;
+		for(i=0;i<m->size1;i++) {
+			JO row  = json_object_new_array();
+			for(j=0;j<m->size2;j++) {
+				double v = gsl_matrix_get(m,i,j);
+				JO value = (v == v) ?  /* NAN is null */
+					json_object_new_double(v) : jo_new_null();
+				json_object_array_add(row, value);
+			}
+			json_object_array_add(jo, row);
+		}
+	} else {
+		size_t i = 1, j;
+		JO row  = jo;
+		for(j=0;j<m->size2;j++) {
+			double v = gsl_matrix_get(m,i,j);
+			JO value = (v == v) ?  /* NAN is null */
+				json_object_new_double(v) : jo_new_null();
+			json_object_array_add(row, value);
+		}
+	}
+	return jo;
+}
+
 JO result_to_json(struct sm_params*p, struct sm_result *r) {
 	JO jo = json_object_new_object();
 	jo_add(jo, "x",  json_double_array(r->x, 3));
 	
 	if(p->do_compute_covariance) {
 /*		double cov[9];
-		int j;for(j=0;j<9;j++) cov[j] = r->x_cov[(j-j%3)/3][j%3];*/
-		jo_add(jo, "cov_x",  json_double_array(r->cov_x, 9));
+		int j;for(j=0;j<9;j++) cov[j] = r->x_cov[(j-j%3)/3][j%3];
+		//jo_add(jo, "cov_x",  json_double_array(r->cov_x, 9));*/
+		jo_add(jo, "cov_x",  matrix_to_json(r->cov_x_m) );
+		jo_add(jo, "dx_dy1",  matrix_to_json(r->dx_dy1_m) );
+		jo_add(jo, "dx_dy2",  matrix_to_json(r->dx_dy2_m) );
 	}
 	jo_add(jo, "iterations", jo_new_int(r->iterations));
 	jo_add(jo, "nvalid", jo_new_int(r->nvalid));

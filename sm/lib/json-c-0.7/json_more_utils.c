@@ -88,10 +88,16 @@ int json_read_double_array(JO s, const char*name, double*p, int n, double when_n
 	}
 	int i; for(i=0;i<n;i++) {
 		JO v = json_object_array_get_idx(jo, i);
-		if(!v || !json_object_is_type(v, json_type_double))
+		if(!v)
 			p[i] = when_null;
 		else
-			p[i] = json_object_get_double(v);
+		 	if(json_object_is_type(v, json_type_double)) {
+				p[i] = json_object_get_double(v);
+			} else
+			if(json_object_is_type(v, json_type_int)) {
+				p[i] = json_object_get_int(v);
+			} else
+			p[i] = when_null;
 	}
 	return 0;
 }
@@ -126,8 +132,8 @@ int json_read_int_array(JO s, const char*name, int*p, int n, int when_null) {
 JO json_double_array(const double *v, int n) {
 	JO array = json_object_new_array();
 	int i; for(i=0;i<n;i++) {
-		JO value = v[i] == v[i] ?  /* NAN is null */
-			json_object_new_double(v[i]) : json_tokener_parse("null");
+		JO value = (v[i] == v[i]) ?  /* NAN is null */
+			json_object_new_double(v[i]) : jo_new_null() ;
 		json_object_array_add(array, value);
 	}
 	return array;

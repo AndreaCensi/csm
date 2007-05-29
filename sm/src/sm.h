@@ -65,13 +65,19 @@ struct sm_params {
 
 struct sm_result {
 	double x[3];
-	double cov_x[9];
+/*	double cov_x[9];*/
+	
 	int iterations;
 	int nvalid;
 	double error;
 	
-	double ** dx_dy1;
-	double ** dx_dy2;
+	#ifndef RUBY
+/*	double ** dx_dy1;
+	double ** dx_dy2;*/
+		gsl_matrix *cov_x_m;	
+		gsl_matrix *dx_dy1_m;
+		gsl_matrix *dx_dy2_m;
+	#endif
 };
 
 

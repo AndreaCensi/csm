@@ -122,7 +122,12 @@ void sm_icp(struct sm_params*params, struct sm_result*res) {
 			&cov0_x, &dx_dy1, &dx_dy2);
 		
 		val cov_x = sc(square(params->sigma), cov0_x); 
-		egsl_v2da(cov_x, res->cov_x);
+/*		egsl_v2da(cov_x, res->cov_x); */
+		
+		res->cov_x_m = egsl_v2gslm(cov_x);
+		res->dx_dy1_m = egsl_v2gslm(dx_dy1);
+		res->dx_dy2_m = egsl_v2gslm(dx_dy2);
+		
 		
 		egsl_print("cov0_x", cov0_x);
 		egsl_print_spectrum("cov0_x", cov0_x);

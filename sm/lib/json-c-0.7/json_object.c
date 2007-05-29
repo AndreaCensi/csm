@@ -353,7 +353,11 @@ static int json_object_double_to_json_string(struct json_object* this,
 					     struct printbuf *pb)
 {
 /*  return sprintbuf(pb, "%lf", this->o.c_double);*/
-  return sprintbuf(pb, "%Lg", this->o.c_double);
+	if( ((int) this->o.c_double) !=  this->o.c_double)
+		return sprintbuf(pb, "%Lg", this->o.c_double);
+	else
+		return sprintbuf(pb, "%d.0", (int) this->o.c_double);
+
 }
 
 struct json_object* json_object_new_double(double d)
