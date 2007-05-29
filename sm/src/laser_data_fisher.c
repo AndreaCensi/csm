@@ -4,17 +4,21 @@
 #include "laser_data.h"
 #include "math_utils.h"
 
-/* For details about the Fisher's information matrix for localization,
-// please see this paper: http://purl.org/censi/2006/accuracy
+/** 
+	This computes Fisher's information matrix, in robot coordinates.
+	Uses field 'true_alpha' (and 'theta', 'readings').  
+	
+	For details about the Fisher's information matrix for localization,
+	please see this paper: http://purl.org/censi/2006/accuracy
 */
 
 val ld_fisher0(LDP ld) {
 	val fim   = zeros(3,3);
 	int i;
-	for(i=0;i<ld->nrays;i++) {
-		if(!ld->alpha_valid[i]) continue;
+	for(i=0;i<ld->nrays;i++) {		
+		double alpha = ld->true_alpha[i];
+		if(is_nan(alpha)) continue;
 		
-		double alpha = ld->alpha[i];
 		double theta = ld->theta[i];
 		double beta  = alpha-theta;
 		

@@ -62,6 +62,10 @@ void sm_options(struct sm_params*p, struct option*ops) {
 		&(p->do_alpha_test),  0,
 		"Discard correspondences based on the angles");
 
+	options_int(ops, "use_point_to_line_distance",
+		&(p->use_point_to_line_distance),  1,
+		"Use gpc");
+
 	options_double(ops, "do_alpha_test_thresholdDeg", 
 		&(p->do_alpha_test_thresholdDeg),40.0, "");
 

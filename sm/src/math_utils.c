@@ -188,3 +188,6 @@ const char* egsl_friendly_cov(val cov) {
 	return tmp_buf;
 }
 
+int is_nan(double v) {
+	return v == v ? 0 : 1;
+}

@@ -11,23 +11,40 @@ LDP ld_alloc_new(int nrays) {
 	return ld;
 }
 
+double* alloc_double_array(int n, double def) {
+	double *v = (double*) malloc(sizeof(double)*n);
+	int i=0; for(i=0;i<n;i++) {
+		v[i] = def;
+	}
+	return v;
+}
+
+int* alloc_int_array(int n, int def) {
+	int *v = (int*) malloc(sizeof(int)*n);
+	int i=0; for(i=0;i<n;i++) {
+		v[i] = def;
+	}
+	return v;
+}
+
 void ld_alloc(LDP ld, int nrays) {
 	ld->nrays = nrays;
-	ld->valid = (int*) malloc(sizeof(int)*nrays);
-	ld->readings     = (double*) malloc(sizeof(double)*nrays);
-	ld->theta        = (double*) malloc(sizeof(double)*nrays);
+	ld->valid = alloc_int_array(nrays, 0);
+	ld->readings     = alloc_double_array(nrays, GSL_NAN);
+	ld->theta        = alloc_double_array(nrays, GSL_NAN);
 	
-	ld->cluster      = (int*) malloc(sizeof(int)   *nrays);
-	ld->alpha        = (double*) malloc(sizeof(double)*nrays);
-	ld->cov_alpha    = (double*) malloc(sizeof(double)*nrays);
-	ld->alpha_valid  = (int*) malloc(sizeof(int)   *nrays);
+	ld->cluster      = alloc_int_array(nrays, -1);
+	ld->alpha        = alloc_double_array(nrays, GSL_NAN);
+	ld->cov_alpha    = alloc_double_array(nrays, GSL_NAN);
+	ld->alpha_valid  = alloc_int_array(nrays, 0);
+
+	ld->true_alpha      = alloc_double_array(nrays, GSL_NAN);
+	ld->true_alpha_abs  = alloc_double_array(nrays, GSL_NAN);
 	
-	ld->up_bigger    =    (int*) malloc(sizeof(int)   *nrays);
-	ld->up_smaller   =    (int*) malloc(sizeof(int)   *nrays);
-	ld->down_bigger  =    (int*) malloc(sizeof(int)   *nrays);
-	ld->down_smaller =    (int*) malloc(sizeof(int)   *nrays);
-	ld->corr         = 
-		(struct correspondence*) malloc(sizeof(struct correspondence)*nrays);
+	ld->up_bigger    = alloc_int_array(nrays, 0);
+	ld->up_smaller   = alloc_int_array(nrays, 0);
+	ld->down_bigger  = alloc_int_array(nrays, 0);
+	ld->down_smaller = alloc_int_array(nrays, 0);
 	
 	ld->p = (gsl_vector**) malloc(sizeof(gsl_vector*) * nrays);
 
@@ -38,14 +55,10 @@ void ld_alloc(LDP ld, int nrays) {
 		gvs(ld->p[i], 1, GSL_NAN);
 	}
 
+	ld->corr = (struct correspondence*) 
+		malloc(sizeof(struct correspondence)*nrays);
+
 	for(i=0;i<ld->nrays;i++) {
-		ld->valid[i] = 0;
-		ld->theta[i] = GSL_NAN;
-		ld->readings[i] = GSL_NAN;
-		ld->cluster[i] = -1;
-		ld->alpha[i] = GSL_NAN;
-		ld->cov_alpha[i] = GSL_NAN;
-		ld->alpha_valid[i] = 0;
 		ld->corr[i].valid = 0;
 		ld->corr[i].j1 = 0;
 		ld->corr[i].j2 = 0;
@@ -65,6 +78,8 @@ void ld_dealloc(struct laser_data*ld){
 	free(ld->cluster);
 	free(ld->alpha);
 	free(ld->alpha_valid);
+	free(ld->true_alpha);
+	free(ld->true_alpha_abs);
 	free(ld->cov_alpha);
 	free(ld->up_bigger);
 	free(ld->up_smaller);

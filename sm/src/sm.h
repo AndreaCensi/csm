@@ -59,6 +59,7 @@ struct sm_params {
 
 	int do_visibility_test;
 
+	int use_point_to_line_distance;
 	int do_compute_covariance;
 	
 };

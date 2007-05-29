@@ -20,7 +20,7 @@ int main(int argc, const char * argv[]) {
 	options_double(ops, "sigma", &p.sigma, 0.0, 
 		"Std deviation of gaussian noise (disabled if 0)");
 	options_int(ops, "seed", &p.seed, 0, 
-		"Seed for random number generator.");
+		"Seed for random number generator (if 0, use GSL_RNG_SEED env. variable).");
 		
 	if(!options_parse_args(ops, argc, argv)) {
 		fprintf(stderr, "A simple program for adding noise to sensor scans.\n\nUsage:\n");
@@ -29,7 +29,8 @@ int main(int argc, const char * argv[]) {
 	}
 
 	gsl_rng_env_setup();
-	gsl_rng * rng = gsl_rng_alloc (gsl_rng_default);
+	gsl_rng * rng = gsl_rng_alloc (gsl_rng_ranlxs0);
+	if(p.seed != 0)
 	gsl_rng_set(rng, (unsigned int) p.seed);
 
 	LDP ld;

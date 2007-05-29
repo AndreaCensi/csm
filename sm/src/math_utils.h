@@ -60,5 +60,7 @@ const char* egsl_friendly_cov(val cov);
     it by (1/sigma^2). */
 val ld_fisher0(LDP ld);
 
+int is_nan(double v);
+
 #endif
 

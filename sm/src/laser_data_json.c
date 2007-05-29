@@ -38,9 +38,6 @@ JO result_to_json(struct sm_params*p, struct sm_result *r) {
 	jo_add(jo, "x",  json_double_array(r->x, 3));
 	
 	if(p->do_compute_covariance) {
-/*		double cov[9];
-		int j;for(j=0;j<9;j++) cov[j] = r->x_cov[(j-j%3)/3][j%3];
-		//jo_add(jo, "cov_x",  json_double_array(r->cov_x, 9));*/
 		jo_add(jo, "cov_x",  matrix_to_json(r->cov_x_m) );
 		jo_add(jo, "dx_dy1",  matrix_to_json(r->dx_dy1_m) );
 		jo_add(jo, "dx_dy2",  matrix_to_json(r->dx_dy2_m) );
@@ -49,6 +46,22 @@ JO result_to_json(struct sm_params*p, struct sm_result *r) {
 	jo_add(jo, "nvalid", jo_new_int(r->nvalid));
 	jo_add(jo, "error", jo_new_double(r->error));
 	return jo;
+}
+
+int is_all_nan(const double *v, int n ) {
+	int i; for(i=0;i<n;i++) if(v[i]==v[i]) return 0;
+	return 1;
+}
+
+/** Adds unless it's all NAN */
+void jo_add_double_array(JO jo, const char*name, const double *v, int n) {
+	if(is_all_nan(v,n)) return;
+	json_object_object_add(jo, (char*)name, json_double_array(v, n));
+}
+/** true if all values are equal to v */
+int all_is(int *a, int n, int v) {
+	int i; for(i=0;i<n;i++) if(a[i]!=v) return 0;
+	return 1;
 }
 
 JO ld_to_json(LDP ld) {
@@ -60,11 +73,15 @@ JO ld_to_json(LDP ld) {
 	json_object_object_add(jo, "theta",     json_double_array(ld->theta, n));
 	json_object_object_add(jo, "readings",  json_double_array(ld->readings, n));
 	json_object_object_add(jo, "valid",     json_int_array(ld->valid, n));
+	if(!all_is(ld->cluster, n, -1))
 	json_object_object_add(jo, "cluster",   json_int_array(ld->cluster, n));
 
-	json_object_object_add(jo, "alpha",     json_double_array(ld->alpha, n));
-	json_object_object_add(jo, "cov_alpha",     json_double_array(ld->cov_alpha, n));
-	json_object_object_add(jo, "alpha_valid",     json_int_array(ld->alpha_valid, n));
+	jo_add_double_array(jo, "alpha",        ld->alpha, n);
+	jo_add_double_array(jo, "cov_alpha",    ld->cov_alpha, n);
+	if(!all_is(ld->alpha_valid, n, 0))
+	json_object_object_add(jo, "alpha_valid",  json_int_array(ld->alpha_valid, n));
+	jo_add_double_array(jo, "true_alpha",      ld->true_alpha, n);
+	jo_add_double_array(jo, "true_alpha_abs",  ld->true_alpha_abs, n);
 
 	json_object_object_add(jo, "odometry",     json_double_array(ld->odometry, 3));
 	json_object_object_add(jo, "estimate",     json_double_array(ld->estimate, 3));
@@ -97,6 +114,9 @@ LDP json_to_ld(JO jo) {
 	json_read_double_array(jo, "alpha",     ld->alpha, n, NAN);
 	json_read_double_array(jo, "cov_alpha", ld->cov_alpha, n, NAN);
 	json_read_int_array(jo, "alpha_valid",   ld->alpha_valid, n, 0);
+
+	json_read_double_array(jo, "true_alpha",     ld->true_alpha, n, NAN);
+	json_read_double_array(jo, "true_alpha_abs", ld->true_alpha_abs, n, NAN);
 	
 	json_read_double_array(jo, "odometry", ld->odometry, 3, NAN);
 	json_read_double_array(jo, "estimate", ld->estimate, 3, NAN);	

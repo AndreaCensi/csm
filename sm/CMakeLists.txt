@@ -140,6 +140,9 @@
 		ADD_EXECUTABLE(ld_noise apps/ld_noise.c)
 		TARGET_LINK_LIBRARIES(ld_noise sm ${GSL_LIBRARIES} options)
 
+		ADD_EXECUTABLE(ld_slip apps/ld_slip.c)
+		TARGET_LINK_LIBRARIES(ld_slip sm ${GSL_LIBRARIES} options)
+
 	########### Carmen2pdf ########## 
 IF(CAIRO_FOUND)
 	ADD_EXECUTABLE(carmen2pdf apps/carmen2pdf.c)

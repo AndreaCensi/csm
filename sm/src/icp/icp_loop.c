@@ -10,26 +10,8 @@
 #include "../journal.h"
 #include "../logging.h"
 
+#include "icp.h"
 /*#define EXPERIMENT_COVARIANCE*/
-
-
-void visibilityTest(LDP ld, const gsl_vector*x_old);
-
-void compute_next_estimate(LDP laser_ref, LDP laser_sens,  gsl_vector*x_new);
-int termination_criterion(gsl_vector*delta, struct sm_params*params);
-void find_correspondences(struct sm_params*params, gsl_vector* x_old);
-void find_correspondences_tricks(struct sm_params*params, gsl_vector* x_old);
-void kill_outliers(int K, struct gpc_corr*c, const gsl_vector*x_old, int*valid);
-void icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new, 
- 	double*total_error, int*nvalid, int*iterations);
-
-void kill_outliers_trim(struct sm_params*params, const gsl_vector*x_old,
-	double*total_error);
-void kill_outliers_double(struct sm_params*params, const gsl_vector*x_old);
-	
-void compute_covariance_exact(
-	LDP laser_ref, LDP laser_sens, const gsl_vector*x,
-		val *cov0_x, val *dx_dy1, val *dx_dy2);
 
 void sm_icp(struct sm_params*params, struct sm_result*res) {
 	egsl_push();
@@ -41,7 +23,6 @@ void sm_icp(struct sm_params*params, struct sm_result*res) {
 		ld_create_jump_tables(laser_ref);
 		
 	ld_compute_cartesian(laser_ref);
-
 	ld_compute_cartesian(laser_sens);
 
 	if(params->do_alpha_test) {
@@ -128,16 +109,16 @@ void sm_icp(struct sm_params*params, struct sm_result*res) {
 		res->dx_dy1_m = egsl_v2gslm(dx_dy1);
 		res->dx_dy2_m = egsl_v2gslm(dx_dy2);
 		
+		if(0) {
+			egsl_print("cov0_x", cov0_x);
+			egsl_print_spectrum("cov0_x", cov0_x);
 		
-		egsl_print("cov0_x", cov0_x);
-		egsl_print_spectrum("cov0_x", cov0_x);
-		
-		val fim = ld_fisher0(laser_ref);
-		val ifim = inv(fim);
-		egsl_print("fim", fim);
-		egsl_print_spectrum("ifim", ifim);
+			val fim = ld_fisher0(laser_ref);
+			val ifim = inv(fim);
+			egsl_print("fim", fim);
+			egsl_print_spectrum("ifim", ifim);
+		}
 	}
-	
 	
 	
 	res->error = best_error;
@@ -217,7 +198,7 @@ void icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 			break;
 		}
 		journal_correspondences(laser_sens);
-		compute_next_estimate(laser_ref, laser_sens,	 x_new);
+		compute_next_estimate(params, laser_ref, laser_sens,	 x_new);
 		
 		pose_diff(x_new, x_old, delta);
 		
@@ -288,7 +269,7 @@ int termination_criterion(gsl_vector*delta, struct sm_params*params){
 	return (a<params->epsilon_xy) && (b<params->epsilon_theta);
 }
 
-void compute_next_estimate(LDP laser_ref, LDP laser_sens, gsl_vector*x_new) {
+void compute_next_estimate(struct sm_params*params, LDP laser_ref, LDP laser_sens, gsl_vector*x_new) {
 	struct gpc_corr c[laser_sens->nrays];
 
 	int i; int k=0;
@@ -308,22 +289,24 @@ void compute_next_estimate(LDP laser_ref, LDP laser_sens, gsl_vector*x_new) {
 			gvg(laser_ref->p[j1],1)-gvg(laser_ref->p[j2],1),
 			gvg(laser_ref->p[j1],0)-gvg(laser_ref->p[j2],0));
 
-		c[k].C[0][0] = cos(alpha)*cos(alpha);
-		c[k].C[1][0] = 
-		c[k].C[0][1] = cos(alpha)*sin(alpha);
-		c[k].C[1][1] = sin(alpha)*sin(alpha);
-
-	/*	c[k].C[0][0] = 1;
-	 	c[k].C[1][0] = 
-	 	c[k].C[0][1] = 0;
-	 	c[k].C[1][1] = 1;
-
-	 	c[k].C[0][0] += 0.02;
-		c[k].C[1][1] += 0.02; */
+		if(params->use_point_to_line_distance) {
+			c[k].C[0][0] = cos(alpha)*cos(alpha);
+			c[k].C[1][0] = 
+			c[k].C[0][1] = cos(alpha)*sin(alpha);
+			c[k].C[1][1] = sin(alpha)*sin(alpha);
+		} else {
+			c[k].C[0][0] = 1;
+		 	c[k].C[1][0] = 
+		 	c[k].C[0][1] = 0;
+		 	c[k].C[1][1] = 1;
+		 	/*c[k].C[0][0] += 0.02;
+			c[k].C[1][1] += 0.02; */
+		}
+		
 		k++;
 	}
 	
-	const double x0[3] = {0, 0, 0};
+/*	const double x0[3] = {0, 0, 0}; */
 	double std = 0.11;
 	const double inv_cov_x0[9] = 
 		{1/(std*std), 0, 0,
