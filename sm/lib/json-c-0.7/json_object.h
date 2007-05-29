@@ -116,7 +116,7 @@ extern struct lh_table* json_object_get_object(struct json_object *obj);
  * @param key the object field name (a private copy will be duplicated)
  * @param val a json_object or NULL member to associate with the given field
  */
-extern void json_object_object_add(struct json_object* obj, char *key,
+extern void json_object_object_add(struct json_object* obj, const char *key,
 				   struct json_object *val);
 
 /** Get the json_object associate with a given object field
@@ -125,7 +125,7 @@ extern void json_object_object_add(struct json_object* obj, char *key,
  * @returns the json_object associated with the given field name
  */
 extern struct json_object* json_object_object_get(struct json_object* obj,
-						  char *key);
+						  const char *key);
 
 /** Delete the given json_object field
  *
@@ -134,7 +134,7 @@ extern struct json_object* json_object_object_get(struct json_object* obj,
  * @param obj the json_object instance
  * @param key the object field name
  */
-extern void json_object_object_del(struct json_object* obj, char *key);
+extern void json_object_object_del(struct json_object* obj, const char *key);
 
 /** Iterate through all keys and values of an object
  * @param obj the json_object instance

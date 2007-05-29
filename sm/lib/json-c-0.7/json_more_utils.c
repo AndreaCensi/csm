@@ -128,13 +128,15 @@ int json_read_int_array(JO s, const char*name, int*p, int n, int when_null) {
 	return 0;
 }
 
+JO jo_double_or_null(double v) {
+	return (v == v) ?  /* NAN is null */
+		json_object_new_double(v) : jo_new_null() ;
+}
 
 JO json_double_array(const double *v, int n) {
 	JO array = json_object_new_array();
 	int i; for(i=0;i<n;i++) {
-		JO value = (v[i] == v[i]) ?  /* NAN is null */
-			json_object_new_double(v[i]) : jo_new_null() ;
-		json_object_array_add(array, value);
+		json_object_array_add(array, jo_double_or_null(v[i]));
 	}
 	return array;
 }

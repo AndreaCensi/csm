@@ -256,21 +256,21 @@ struct lh_table* json_object_get_object(struct json_object *this)
   }
 }
 
-void json_object_object_add(struct json_object* this, char *key,
+void json_object_object_add(struct json_object* this, const char *key,
 			    struct json_object *val)
 {
-  lh_table_delete(this->o.c_object, key);
+  lh_table_delete(this->o.c_object, (char*)key);
   lh_table_insert(this->o.c_object, strdup(key), val);
 }
 
-struct json_object* json_object_object_get(struct json_object* this, char *key)
+struct json_object* json_object_object_get(struct json_object* this, const char *key)
 {
-  return (struct json_object*) lh_table_lookup(this->o.c_object, key);
+  return (struct json_object*) lh_table_lookup(this->o.c_object, (char*)key);
 }
 
-void json_object_object_del(struct json_object* this, char *key)
+void json_object_object_del(struct json_object* this, const char *key)
 {
-  lh_table_delete(this->o.c_object, key);
+  lh_table_delete(this->o.c_object, (char*)key);
 }
 
 

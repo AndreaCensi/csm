@@ -14,9 +14,7 @@ JO matrix_to_json(gsl_matrix*m) {
 			JO row  = json_object_new_array();
 			for(j=0;j<m->size2;j++) {
 				double v = gsl_matrix_get(m,i,j);
-				JO value = (v == v) ?  /* NAN is null */
-					json_object_new_double(v) : jo_new_null();
-				json_object_array_add(row, value);
+				json_object_array_add(row, jo_double_or_null(v));
 			}
 			json_object_array_add(jo, row);
 		}
@@ -25,10 +23,18 @@ JO matrix_to_json(gsl_matrix*m) {
 		JO row  = jo;
 		for(j=0;j<m->size2;j++) {
 			double v = gsl_matrix_get(m,i,j);
-			JO value = (v == v) ?  /* NAN is null */
-				json_object_new_double(v) : jo_new_null();
-			json_object_array_add(row, value);
+			json_object_array_add(row, jo_double_or_null(v));
 		}
+	}
+	return jo;
+}
+
+JO vector_to_json(gsl_vector*vec) {
+	JO jo = json_object_new_array();
+	size_t j;
+	for(j=0;j<vec->size;j++) {
+		double v = gsl_vector_get(vec,j);
+		json_object_array_add(jo, jo_double_or_null(v));
 	}
 	return jo;
 }

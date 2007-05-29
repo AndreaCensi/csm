@@ -8,7 +8,7 @@
 
 void quicksort(double *array, int begin, int end);
 
-/* expects cartesian valid */
+/** expects cartesian valid */
 void visibilityTest(LDP laser_ref, const gsl_vector*u) {
 
 	double theta_from_u[laser_ref->nrays];
@@ -74,43 +74,70 @@ void kill_outliers_double(struct sm_params*params, const gsl_vector*x_old) {
 	gsl_vector_free(p_i_w);
 }
 	
-	
+/** 
+	Trims the corrispondences using an adaptive algorithm 
+
+	Assumes cartesian coordinates computed.
+	 
+	So, to disable this:
+		outliers_maxPerc = 1
+		outliers_adaptive_order = 1 
+
+*/
 void kill_outliers_trim(struct sm_params*params, const gsl_vector*x_old, 
 	double*total_error) {
 	LDP laser_ref  = &(params->laser_ref);
 	LDP laser_sens = &(params->laser_sens);
 	
+	/* dist2, indexed by k, contains the error for the k-th correspondence */
 	int k = 0; 
-	double dist[laser_sens->nrays];
 	double dist2[laser_sens->nrays];
 		
 	gsl_vector * p_i_w = gsl_vector_alloc(3);
 	int i;
+	double dist[laser_sens->nrays];
+	/* for each point in laser_sens */
 	for(i=0;i<laser_sens->nrays;i++) {
+		/* which has a valid correspondence */
 		if(!laser_sens->corr[i].valid) continue;
+		/* transform its cartesian position, according to current estimate
+		   x_old, to obtain: p_i_w, that is the point in the reference 
+		   frame of laser_ref */
 		transform(laser_sens->p[i], x_old, p_i_w);
 		int j1 = laser_sens->corr[i].j1;
 		int j2 = laser_sens->corr[i].j2;
-/*		dist[i] = distance(p_i_w, laser_ref->p[j1]); */
+		/* Compute the distance to the corresponding segment */
 		dist[i] = dist_to_segment(laser_ref->p[j1],laser_ref->p[j2],p_i_w);
+			/* dist[i] = distance(p_i_w, laser_ref->p[j1]); */
 		dist2[k] = dist[i];
 		k++;	
 	}
 	gsl_vector_free(p_i_w);
 	
+	/* The dists for the correspondence are sorted
+	   in ascending order */
 	quicksort(dist2, 0, k-1);
+	
+	/* two errors limits are defined: */
+		/* In any case, we don't want more than outliers_maxPerc% */
+		double error_limit1 = dist2[(int)floor(k*(params->outliers_maxPerc))];
+	
+		/* Then we take a order statics (o*K) */
+		/* And we say that the error must be less than alpha*dist(o*K) */
+		double error_limit2 = params->outliers_adaptive_mult*
+		dist2[(int)floor(k*params->outliers_adaptive_order)];
+	
+	double error_limit = GSL_MIN(error_limit1,error_limit2);
+	
+	
+	sm_debug("icp_outliers: maxPerc %f error_limit: fix %f adaptive %f \n",
+		params->outliers_maxPerc,error_limit1,error_limit2);
+
+	
 /*	printf("Ordered: ");
 	for(i=0;i<k;i++)
 		printf("%f ", dist2[i]);
 	printf("\n");*/
-	
-	double error_limit1 = dist2[(int)floor(k*(params->outliers_maxPerc))];
-	double error_limit2 = params->outliers_adaptive_mult*
-		dist2[(int)floor(k*params->outliers_adaptive_order)];
-	
-	double error_limit = GSL_MIN(error_limit1,error_limit2);
-	sm_debug("icp_outliers: maxPerc %f error_limit: fix %f adaptive %f \n",
-		params->outliers_maxPerc,error_limit1,error_limit2);
 	
 	*total_error = 0;
 	int nvalid = 0;
@@ -121,8 +148,7 @@ void kill_outliers_trim(struct sm_params*params, const gsl_vector*x_old,
 			laser_sens->corr[i].valid = 0;
 			laser_sens->corr[i].j1 = -1;
 			laser_sens->corr[i].j2 = -1;
-		}
-		else {
+		} else {
 			nvalid++;
 			*total_error += dist[i];
 		}

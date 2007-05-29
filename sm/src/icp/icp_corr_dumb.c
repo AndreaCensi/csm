@@ -7,23 +7,25 @@
 
 
 int compatible(struct sm_params*params, int i, int j) {
-        if(!params->do_alpha_test) return 1;
+	if(!params->do_alpha_test) return 1;
 
-        double theta0 = 0; /* FIXME */
-        if((params->laser_sens.alpha_valid[i]==0) ||
-                (params->laser_ref.alpha_valid[j]==0))
-                return 1;
+	double theta0 = 0; /* FIXME */
+	if((params->laser_sens.alpha_valid[i]==0) ||
+	 (params->laser_ref.alpha_valid[j]==0))
+	 return 1;
 
-        double alpha_i = params->laser_sens.alpha[i];
-        double alpha_j = params->laser_ref.alpha[j];
-        double tolerance = deg2rad(params->do_alpha_test_thresholdDeg);
+	double alpha_i = params->laser_sens.alpha[i];
+	double alpha_j = params->laser_ref.alpha[j];
+	double tolerance = deg2rad(params->do_alpha_test_thresholdDeg);
 
-        double theta = angleDiff(alpha_j, alpha_i);
-        if(fabs(angleDiff(theta,theta0))>tolerance+deg2rad(params->max_angular_correction_deg)) {
-                return 0;
-        } else {
-                return 1;
-        }
+	/** FIXME remove alpha test */
+	double theta = angleDiff(alpha_j, alpha_i);
+	if(fabs(angleDiff(theta,theta0))>
+		tolerance+deg2rad(params->max_angular_correction_deg)) {
+	 return 0;
+	} else {
+	 return 1;
+	}
 }
 
 void find_correspondences(struct sm_params*params, gsl_vector* x_old) {

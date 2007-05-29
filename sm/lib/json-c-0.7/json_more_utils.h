@@ -26,4 +26,7 @@ int json_read_int(JO jo, const char*name, int*p) ;
 JO json_double_array(const double *v, int n);
 JO json_int_array(const int *v, int n);
 
+/* returns 0 if NAN */
+JO jo_double_or_null(double d);
+
 #endif

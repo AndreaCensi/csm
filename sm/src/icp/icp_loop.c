@@ -9,11 +9,14 @@
 #include "../sm.h"
 #include "../journal.h"
 #include "../logging.h"
+#include "../json_journal.h"
 
 #include "icp.h"
 /*#define EXPERIMENT_COVARIANCE*/
 
 void sm_icp(struct sm_params*params, struct sm_result*res) {
+	if(JJ) jj_context_enter("sm_icp");
+	
 	egsl_push();
 	
 	LDP laser_ref  = &(params->laser_ref);
@@ -31,9 +34,14 @@ void sm_icp(struct sm_params*params, struct sm_result*res) {
 		ld_simple_clustering(laser_sens, params->clustering_threshold);
 		ld_compute_orientation(laser_sens, params->orientation_neighbourhood, params->sigma);
 	}
+
+	if(JJ) jj_add("laser_ref",  ld_to_json(laser_ref));
+	if(JJ) jj_add("laser_sens", ld_to_json(laser_sens));
 	
 	journal_laser_data("laser_ref",  laser_ref );
 	journal_laser_data("laser_sens", laser_sens);
+	
+	
 		
 	gsl_vector * x_new = gsl_vector_alloc(3);
 	gsl_vector * x_old = vector_from_array(3, params->odometry);
@@ -129,6 +137,8 @@ void sm_icp(struct sm_params*params, struct sm_result*res) {
 	gsl_vector_free(x_old);
 	gsl_vector_free(best_x);
 	egsl_pop();
+
+	if(JJ) jj_context_exit();
 }
 
 unsigned int ld_corr_hash(LDP ld){
@@ -152,7 +162,7 @@ void icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 	gsl_vector * x_old = vector_from_array(3, start->data);
 	gsl_vector * delta = gsl_vector_alloc(3);
 	gsl_vector * delta_old = gsl_vector_alloc(3);
-	gsl_vector_set_all(delta_old,0.0);
+	gsl_vector_set_all(delta_old, 0.0);
 
 	unsigned int hashes[params->max_iterations];
 	int iteration;
@@ -160,20 +170,24 @@ void icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 	sm_debug("icp_loop: starting at x_old= %s  \n",
 		gsl_friendly_pose(x_old));
 	
-	#ifdef EXPERIMENT_COVARIANCE
-		sm_debug("icp_cov next\n");
-	#endif
+	if(JJ) jj_loop_enter("iterations");
 	
 	for(iteration=0; iteration<params->max_iterations;iteration++) {
+		if(JJ) jj_loop_iteration();
+
 		egsl_push();
 		
 		if(jf()) fprintf(jf(), "iteration %d\n", iteration);
+
+		if(JJ) jj_add("x_old", vector_to_json(x_old));
+
 		journal_pose("x_old", x_old);
 		
 		if(params->use_corr_tricks)
 			find_correspondences_tricks(params, x_old);
 		else
 			find_correspondences(params, x_old);
+
 
 		int num_corr = ld_num_valid_correspondences(laser_sens);
 		if(num_corr <0.2 * laser_sens->nrays){
@@ -189,6 +203,12 @@ void icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 		kill_outliers_trim(params, x_old, &error);
 		int num_corr_after = ld_num_valid_correspondences(laser_sens);
 		
+		if(JJ) {
+			jj_add_int("num_corr0", num_corr);
+			jj_add_int("num_corr1", num_corr2);
+			jj_add_int("num_corr2", num_corr_after);
+		}
+
 		*total_error = error; 
 		*valid = num_corr_after;
 		
@@ -197,46 +217,30 @@ void icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 			egsl_pop();
 			break;
 		}
-		journal_correspondences(laser_sens);
-		compute_next_estimate(params, laser_ref, laser_sens,	 x_new);
+
 		
+		compute_next_estimate(params, laser_ref, laser_sens,	 x_new);		
 		pose_diff(x_new, x_old, delta);
 		
-		
-		sm_debug("killing %d -> %d -> %d \n", num_corr, num_corr2, num_corr_after);
-		journal_pose("x_new", x_new);
-		journal_pose("delta", delta);
-
-
+		{
+			journal_correspondences(laser_sens);
+			sm_debug("killing %d -> %d -> %d \n", num_corr, num_corr2, num_corr_after);
+			journal_pose("x_new", x_new);
+			journal_pose("delta", delta);
+			if(JJ) {
+				jj_add("x_new", vector_to_json(x_new));
+				jj_add("delta", vector_to_json(delta));
+			}
+		}
 		/** Checks for oscillations */
 		hashes[iteration] = ld_corr_hash(laser_sens);
-		sm_debug("icp_loop: it. %d  hash=%d nvalid=%d mean error = %f, x_new= %s\n", 
-			iteration, hashes[iteration], *valid, *total_error/ *valid, 
-			gsl_friendly_pose(x_new));
-
-#ifdef EXPERIMENT_COVARIANCE
-				val cov0_x, dx_dy1, dx_dy2;
-				compute_covariance_exact(
-					laser_ref, laser_sens, x_new,
-					&cov0_x, &dx_dy1, &dx_dy2);
-		/*		egsl_print_spectrum("cov0_x", cov0_x); */
-
-				val cov_x = sc(square(params->sigma), cov0_x);
-		sm_debug("icp_cov x_new %f %f %f \n",
-			gvg(x_new,0),gvg(x_new,1),gvg(x_new,2));
-			
-		sm_debug("icp_cov cov0 ");
-			size_t i,j;
-			for(i=0;i<3;i++) {
-				sm_debug("\t");
-				for(j=0;j<3;j++) {
-					sm_debug("%f ", egsl_atm(cov0_x, i, j) );
-				} 
-			}
-
-		sm_debug("\n");
 		
-#endif
+		{
+			sm_debug("icp_loop: it. %d  hash=%d nvalid=%d mean error = %f, x_new= %s\n", 
+				iteration, hashes[iteration], *valid, *total_error/ *valid, 
+				gsl_friendly_pose(x_new));
+		}
+
 		egsl_pop();
 						
 		int detected = 0;
@@ -254,6 +258,8 @@ void icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 		gsl_vector_memcpy(x_old, x_new);
 		gsl_vector_memcpy(delta_old, delta);
 	}
+
+	if(JJ) jj_loop_exit();
 	
 	/* TODO: covariance */
 	*iterations = iteration+1;
