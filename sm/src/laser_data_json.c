@@ -29,6 +29,24 @@ JO matrix_to_json(gsl_matrix*m) {
 	return jo;
 }
 
+int json_to_corr(JO array, struct correspondence*corr, int n) {
+	/** XXX : check it's array and size is good */
+	int i;
+	for(i=0;i<n;i++) {
+		JO element = json_object_array_get_idx(array, i);
+		if(element == NULL) {
+			corr[i].valid = 0;
+			corr[i].j1 = -1;
+			corr[i].j2 = -1;
+		} else {
+			corr[i].valid = 1;
+			json_read_int(element, "j1", &(corr[i].j1));
+			json_read_int(element, "j2", &(corr[i].j2));
+		}
+	}
+	return 1;
+}
+
 JO corr_to_json(struct correspondence*corr, int n) {
 	JO jo = json_object_new_array();
 	int i;

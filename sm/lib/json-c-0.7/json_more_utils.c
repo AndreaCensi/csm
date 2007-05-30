@@ -9,9 +9,10 @@
 #include "json_more_utils.h" 
 #include "json_tokener.h"
 #include "JSON_checker.h"
+#include "linkhash.h"
 
 JO json_read_stream(FILE*f) {
-	#define MAX_SIZE 100000
+	#define MAX_SIZE 500000
 	char buf[MAX_SIZE+1];
 	unsigned short bufs[MAX_SIZE+1];
 	
@@ -50,9 +51,10 @@ JO json_read_stream(FILE*f) {
 		}
 	}
 	
-	mc_error("Object is bigger than MAX_SIZE = %d\n", MAX_SIZE);	
+	mc_error("Object size = %d is bigger than MAX_SIZE = %d\n",  MAX_SIZE);	
 	return 0;
 }
+
 
 
 struct json_object* json_tokener_parse_len(char *str, int len) {
@@ -187,4 +189,14 @@ int json_read_double(JO jo, const char*name, double*p) {
 	return 1;
 }
 
+JO find_object_with_name(JO root, const char*name) {
+	json_object_object_foreach(root, key, val) {
+		if(!strcmp(key, name)) return root;
+		if(json_object_is_type(val, json_type_object)) {
+			JO jo = find_object_with_name(val, name);
+			if(jo) return jo;
+		}
+	}
+	return 0;
+}
 

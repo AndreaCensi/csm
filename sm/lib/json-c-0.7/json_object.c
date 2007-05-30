@@ -406,7 +406,7 @@ static void json_object_string_delete(struct json_object* this)
   json_object_generic_delete(this);
 }
 
-struct json_object* json_object_new_string(char *s)
+struct json_object* json_object_new_string(const char *s)
 {
   struct json_object *this = json_object_new(json_type_string);
   if(!this) return NULL;
@@ -416,7 +416,7 @@ struct json_object* json_object_new_string(char *s)
   return this;
 }
 
-struct json_object* json_object_new_string_len(char *s, int len)
+struct json_object* json_object_new_string_len(const char *s, int len)
 {
   struct json_object *this = json_object_new(json_type_string);
   if(!this) return NULL;

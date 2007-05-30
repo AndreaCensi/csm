@@ -60,7 +60,7 @@ void sm_icp(struct sm_params*params, struct sm_result*res) {
 	double error;
 	int iterations;
 	int nvalid;
-	icp_loop(params, x_old, x_new, &error, &nvalid,&iterations);
+	icp_loop(params, x_old, x_new, &error, &nvalid, &iterations);
 
 	double best_error = error;
 	gsl_vector * best_x = gsl_vector_alloc(3);

@@ -28,7 +28,7 @@ JSON2MATLAB=../matlab_new/json2matlab.rb
 dir=out/
 mkdir -p $dir
 
-num=200
+num=10
 
 fig=square.fig
 

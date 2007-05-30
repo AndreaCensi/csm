@@ -122,6 +122,23 @@ double angleDiff(double a, double b) {
 }
 
 
+/** Projects (px,py) on segment (ax,ay)-(bx,by) */
+void projection_on_line2(double ax, double ay, 
+	double bx, double by, 
+	double px, double py,
+	double *x, double *y) 
+{
+	double t0 = ax-bx;
+	double t1 = ay-by;
+
+	double alpha = atan2(t1,t0) + M_PI/2;
+	double rho = cos(alpha)*ax+sin(alpha)*ay;
+
+	double c = cos(alpha); double s = sin(alpha);
+	*x =   c*rho + s*s*px - c*s*py ;
+	*y =   s*rho - c*s*px + c*c*py ;	
+}
+
 /** Computes the projection of x onto the line which goes through a-b */
 void projection_on_line(const gsl_vector*a,const gsl_vector*b,const gsl_vector*x,
 	gsl_vector * proj) 

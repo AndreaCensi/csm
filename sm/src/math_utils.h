@@ -47,6 +47,12 @@ void projection_on_segment(
 	const gsl_vector*x,
 	      gsl_vector*proj);
 
+/** Projects (px,py) on segment (ax,ay)-(bx,by) */
+void projection_on_line2(double ax, double ay, 
+	double bx, double by, 
+	double px, double py,
+	double *x, double *y) ;
+
 /** Distance of x from its projection on segment a-b */
 double dist_to_segment(const gsl_vector*a,const gsl_vector*b,const gsl_vector*x);
 

@@ -9,11 +9,15 @@ typedef struct json_object* JO;
 #define jo_new_double json_object_new_double 
 #define jo_new_int    json_object_new_int
 #define jo_new_array  json_object_new_array
+#define jo_new_string json_object_new_string
 #define jo_new_null()   0
 #define jo_new_double_array json_double_array
 #define jo_new_int_array json_int_array
 #define jo_add        json_object_object_add
 #define jo_free       json_object_put
+#define jo_get        json_object_object_get
+#define jo_new        json_object_new_object
+#define jo_array_add  json_object_array_add
 
 JO json_read_stream(FILE*);
 
@@ -31,4 +35,6 @@ JO json_int_array(const int *v, int n);
 /* returns 0 if NAN */
 JO jo_double_or_null(double d);
 
+JO find_object_with_name(JO root, const char*name);
+	
 #endif
