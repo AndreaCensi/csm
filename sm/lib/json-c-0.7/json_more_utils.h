@@ -9,8 +9,10 @@ typedef struct json_object* JO;
 #define jo_new_double json_object_new_double 
 #define jo_new_int    json_object_new_int
 #define jo_new_array  json_object_new_array
-#define jo_add        json_object_object_add
 #define jo_new_null()   0
+#define jo_new_double_array json_double_array
+#define jo_new_int_array json_int_array
+#define jo_add        json_object_object_add
 #define jo_free       json_object_put
 
 JO json_read_stream(FILE*);

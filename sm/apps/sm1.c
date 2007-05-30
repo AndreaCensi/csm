@@ -3,22 +3,16 @@
 #include "../src/math_utils.h"
 #include "../src/sm.h"
 #include "../src/laser_data.h"
+#include "../src/utils.h"
 #include "../src/laser_data_json.h"
+#include "../src/json_journal.h"
 #include <options/options.h>
 
 struct sm1_params {
 	const char * file1;
 	const char * file2;
+	const char * file_jj;
 } p;
-
-FILE * open_file(const char*filename) {
-	FILE*file = fopen(filename,"r");
-	if(file==NULL) {
-		fprintf(stderr, "Could not open '%s'.\n", filename); 
-		return 0;
-	}
-	return file;
-}
 
 extern void sm_options(struct sm_params*p, struct option*ops);
 
@@ -33,6 +27,8 @@ int main(int argc, const char*argv[]) {
 		"File with first series of scans (at pose1)");
 	options_string(ops, "file2", &p.file2, "file2.txt",
 		"File with second series of scans (at pose2)");
+	options_string(ops, "file_jj", &p.file_jj, "",
+		"File for journaling -- if left empty, journal not open.");
 	
 	sm_options(&params, ops);
 	if(!options_parse_args(ops, argc, argv)) {
@@ -41,10 +37,16 @@ int main(int argc, const char*argv[]) {
 		return -1;
 	}
 
-	FILE * file1 = open_file(p.file1);
+	FILE * file1 = open_file_for_reading(p.file1);
 	FILE * file2 = 
-		!strcmp(p.file1, p.file2) ? file1 : open_file(p.file2);
+		!strcmp(p.file1, p.file2) ? file1 : open_file_for_reading(p.file2);
 	if(!file1 || !file2) return -1;
+	
+	if(strcmp(p.file_jj, "")) {
+		FILE * jj = open_file_for_writing(p.file_jj);
+		if(!jj) return -1;
+		jj_set_stream(jj);
+	}
 	
 	LDP ld1, ld2;
 	while(1) {

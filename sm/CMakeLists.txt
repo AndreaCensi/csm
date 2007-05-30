@@ -75,6 +75,7 @@
 		src/laser_data_json.c
 		src/json_journal.c
 		src/math_utils.c
+		src/utils.c
 		src/orientation.c
 		src/clustering.c
 		src/logging.c

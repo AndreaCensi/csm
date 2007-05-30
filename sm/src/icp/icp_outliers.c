@@ -1,5 +1,5 @@
 #include <math.h>
-
+#include "../json_journal.h"
 #include "../math_utils.h"
 #include "../laser_data.h"
 #include "../sm.h"
@@ -86,6 +86,9 @@ void kill_outliers_double(struct sm_params*params, const gsl_vector*x_old) {
 */
 void kill_outliers_trim(struct sm_params*params, const gsl_vector*x_old, 
 	double*total_error) {
+		
+	if(JJ) jj_context_enter("kill_outliers_trim");
+		
 	LDP laser_ref  = &(params->laser_ref);
 	LDP laser_sens = &(params->laser_sens);
 	
@@ -99,7 +102,7 @@ void kill_outliers_trim(struct sm_params*params, const gsl_vector*x_old,
 	/* for each point in laser_sens */
 	for(i=0;i<laser_sens->nrays;i++) {
 		/* which has a valid correspondence */
-		if(!laser_sens->corr[i].valid) continue;
+		if(!laser_sens->corr[i].valid) { dist[i]=NAN; continue; }
 		/* transform its cartesian position, according to current estimate
 		   x_old, to obtain: p_i_w, that is the point in the reference 
 		   frame of laser_ref */
@@ -114,37 +117,42 @@ void kill_outliers_trim(struct sm_params*params, const gsl_vector*x_old,
 	}
 	gsl_vector_free(p_i_w);
 	
+	if(JJ) jj_add_int("num_valid_before", k);
+	if(JJ) jj_add_double_array("dist_points", dist2, laser_sens->nrays);
+	if(JJ) jj_add_double_array("dist_corr_unsorted", dist2, k);
+	
 	/* The dists for the correspondence are sorted
 	   in ascending order */
 	quicksort(dist2, 0, k-1);
+
+	if(JJ) jj_add_double_array("dist_corr_sorted", dist2, k);
 	
 	/* two errors limits are defined: */
 		/* In any case, we don't want more than outliers_maxPerc% */
-		double error_limit1 = dist2[(int)floor(k*(params->outliers_maxPerc))];
+		int order = (int)floor(k*(params->outliers_maxPerc));
+			order = GSL_MAX(0, GSL_MIN(order, k-1));
+		double error_limit1 = dist2[order];
 	
 		/* Then we take a order statics (o*K) */
 		/* And we say that the error must be less than alpha*dist(o*K) */
-		double error_limit2 = params->outliers_adaptive_mult*
-		dist2[(int)floor(k*params->outliers_adaptive_order)];
+		int order2 = (int)floor(k*params->outliers_adaptive_order);
+			order2 = GSL_MAX(0, GSL_MIN(order2, k-1));
+		double error_limit2 = params->outliers_adaptive_mult*dist2[order2];
 	
 	double error_limit = GSL_MIN(error_limit1,error_limit2);
 	
+	if(JJ) jj_add_double("error_limit_max_perc", error_limit1);
+	if(JJ) jj_add_double("error_limit_adaptive", error_limit2);
+	if(JJ) jj_add_double("error_limit", error_limit);
 	
 	sm_debug("icp_outliers: maxPerc %f error_limit: fix %f adaptive %f \n",
 		params->outliers_maxPerc,error_limit1,error_limit2);
 
-	
-/*	printf("Ordered: ");
-	for(i=0;i<k;i++)
-		printf("%f ", dist2[i]);
-	printf("\n");*/
-	
 	*total_error = 0;
 	int nvalid = 0;
 	for(i=0;i<laser_sens->nrays;i++) {
 		if(!laser_sens->corr[i].valid) continue;
 		if(dist[i] > error_limit) {
-		/*	printf("killing %d %d (%f>%f)\n",i,laser_sens->corr[i].j1,dist[i],error_limit);*/
 			laser_sens->corr[i].valid = 0;
 			laser_sens->corr[i].j1 = -1;
 			laser_sens->corr[i].j2 = -1;
@@ -156,6 +164,12 @@ void kill_outliers_trim(struct sm_params*params, const gsl_vector*x_old,
 	
 	sm_debug("\ticp_outliers: valid %d/%d (limit: %f) mean error = %f \n",nvalid,k,error_limit,
 		*total_error/nvalid);	
+
+	if(JJ) jj_add_int("num_valid_after", nvalid);
+	if(JJ) jj_add_double("total_error", *total_error);
+	if(JJ) jj_add_double("mean_error", *total_error / nvalid);
+		
+	if(JJ) jj_context_exit();
 }
 
 

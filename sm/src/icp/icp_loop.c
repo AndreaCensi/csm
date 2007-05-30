@@ -196,13 +196,19 @@ void icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 			break;
 		}
 
+		if(JJ) jj_add("corr0", corr_to_json(laser_sens->corr, laser_sens->nrays));
+
 		kill_outliers_double(params, x_old);
 		int num_corr2 = ld_num_valid_correspondences(laser_sens);
 
+		if(JJ) jj_add("corr1", corr_to_json(laser_sens->corr, laser_sens->nrays));
+		
 		double error=0;
 		kill_outliers_trim(params, x_old, &error);
 		int num_corr_after = ld_num_valid_correspondences(laser_sens);
 		
+		if(JJ) jj_add("corr2", corr_to_json(laser_sens->corr, laser_sens->nrays));
+
 		if(JJ) {
 			jj_add_int("num_corr0", num_corr);
 			jj_add_int("num_corr1", num_corr2);

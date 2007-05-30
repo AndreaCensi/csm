@@ -5,6 +5,11 @@
 
 JO jj_stack[MAX_STACK];
 int jj_stack_index = -1;
+FILE * jj_file = 0;
+
+int jj_enabled() {
+	return jj_file != 0;
+}
 
 JO jj_stack_top() {
 	assert(jj_stack_index>=0);
@@ -17,15 +22,18 @@ void jj_stack_push(JO jo) {
 }
 
 void jj_stack_pop() {
+/*	fprintf(stderr, "jj_stack_pop  %d\n", jj_stack_index); */
 	assert(jj_stack_index>=0);
-	if(jj_stack_index == 0) {
-		fprintf(stderr, "\n-------\n", json_object_to_json_string(jj_stack_top()));
+	if(jj_stack_index == 0 && jj_file) {
+		fprintf(jj_file, "%s\n", json_object_to_json_string(jj_stack_top()));
 		jo_free(jj_stack_top());
 	}
 	jj_stack_index--;
 }
 
 void jj_context_enter(const char*context_name) {
+/*	fprintf(stderr, "jj_context_enter('%s') %d\n", context_name, jj_stack_index); */
+	
 	JO jo = json_object_new_object();
 	if(jj_stack_index>=0)
 	jo_add(jj_stack_top(), (char*)context_name, jo);
@@ -81,12 +89,21 @@ void jj_add_double(const char*name, double v) {
 	jo_add(jj_stack_top(), name, jo_double_or_null(v));
 }
 
+void jj_add_double_array(const char *name, double *v, int n) {
+	jj_add(name, jo_new_double_array(v, n));
+}
+
+void jj_add_int_array(const char*name, int* v, int n) {
+	jj_add(name, jo_new_int_array(v, n));	
+}
+
+
 void jj_add(const char*name, JO jo) {
 	jj_must_be_hash();
 	jo_add(jj_stack_top(), name, jo);
 }
 
-void jj_pop_and_flush(FILE*f) {
-	jj_must_be_hash();
-	
+void jj_set_stream(FILE* f) {
+	jj_file = f;
 }
+

@@ -30,7 +30,7 @@ function analyze_run(res)
             'Cramer-Rao bound'; 'SM C.-R. bound' };
 
 	m.format = '-depsc2';
-	m.prefix = 'aarl_square2';
+	m.prefix = 'test1';
 	m.extension = 'eps';
 	m.title = 'Residual error - ';
 	fs = plot_xyt(m);
