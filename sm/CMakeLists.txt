@@ -32,17 +32,17 @@
 
 
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused -Wall -W -Wconversion  -Wunreachable-code ")
-	#SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pg")
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb")
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fstrict-aliasing -std=c99")
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ansi")
 
 	IF(APPLE)
-		MESSAGE(STATUS "Using optimizations: ")
 		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-long-double")
+		MESSAGE(STATUS "Using optimizations: ")
 #		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mtune=7450 -mcpu=7450 -O3")
 #		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ffast-math -fomit-frame-pointer -mtune=7450 -mcpu=7450 -O3")
 	ELSE(APPLE)
+		#SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pg")
 		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2")
 
 	ENDIF(APPLE)
@@ -73,6 +73,7 @@
 		src/laser_data.c
 		src/laser_data_fisher.c
 		src/laser_data_json.c
+		src/laser_data_carmen.c
 		src/json_journal.c
 		src/math_utils.c
 		src/utils.c
@@ -132,6 +133,9 @@
 
 		ADD_EXECUTABLE(json_pipe apps/json_pipe.c)
 		TARGET_LINK_LIBRARIES(json_pipe sm ${GSL_LIBRARIES} options)
+
+		ADD_EXECUTABLE(json_extract apps/json_extract.c)
+		TARGET_LINK_LIBRARIES(json_extract json-c options)
 
 		ADD_EXECUTABLE(test_json_ld apps/test_json_ld.c)
 		TARGET_LINK_LIBRARIES(test_json_ld sm ${GSL_LIBRARIES})

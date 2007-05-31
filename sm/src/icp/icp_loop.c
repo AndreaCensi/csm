@@ -146,7 +146,7 @@ unsigned int ld_corr_hash(LDP ld){
 	unsigned int i    = 0;
 
 	for(i = 0; i < (unsigned)ld->nrays; i++) {
-		int str = ld->corr[i].valid ? ld->corr[i].j1 : -1;
+		int str = ld_valid_corr(ld, i) ? ld->corr[i].j1 : -1;
 		hash ^= ((i & 1) == 0) ? (  (hash <<  7) ^ (str) ^ (hash >> 3)) :
 		                         (~((hash << 11) ^ (str) ^ (hash >> 5)));
 	}

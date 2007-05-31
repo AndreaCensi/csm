@@ -29,7 +29,8 @@ int* alloc_int_array(int n, int def) {
 
 void ld_alloc(LDP ld, int nrays) {
 	ld->nrays = nrays;
-	ld->valid = alloc_int_array(nrays, 0);
+	
+	ld->valid        = alloc_int_array(nrays, 0);
 	ld->readings     = alloc_double_array(nrays, GSL_NAN);
 	ld->theta        = alloc_double_array(nrays, GSL_NAN);
 	
@@ -38,8 +39,7 @@ void ld_alloc(LDP ld, int nrays) {
 	ld->cov_alpha    = alloc_double_array(nrays, GSL_NAN);
 	ld->alpha_valid  = alloc_int_array(nrays, 0);
 
-	ld->true_alpha      = alloc_double_array(nrays, GSL_NAN);
-	ld->true_alpha_abs  = alloc_double_array(nrays, GSL_NAN);
+	ld->true_alpha   = alloc_double_array(nrays, GSL_NAN);
 	
 	ld->up_bigger    = alloc_int_array(nrays, 0);
 	ld->up_smaller   = alloc_int_array(nrays, 0);
@@ -64,6 +64,11 @@ void ld_alloc(LDP ld, int nrays) {
 		ld->corr[i].j2 = 0;
 	}
 	
+	for(i=0;i<3;i++) {
+		ld->odometry[i] = 
+		ld->estimate[i] = 
+		ld->true_pose[i] = GSL_NAN;
+	}
 }
 
 void ld_free(LDP ld) {
@@ -79,7 +84,6 @@ void ld_dealloc(struct laser_data*ld){
 	free(ld->alpha);
 	free(ld->alpha_valid);
 	free(ld->true_alpha);
-	free(ld->true_alpha_abs);
 	free(ld->cov_alpha);
 	free(ld->up_bigger);
 	free(ld->up_smaller);
@@ -133,18 +137,6 @@ int ld_next_valid_down(LDP ld, int i){
 
 
 
-const char * prefix = "FLASER ";
-
-/** Returns 0 on success */
-int read_next_double(const char*line, int*cur, double*d) {
-	int inc;
-	if(1 != sscanf(line+*cur, " %lf %n", d, &inc)) {
-		printf("Could not read double.\n");
-		return -1;
-	}
-	*cur += inc;
-	return 0;
-}
 
 int ld_valid_ray(struct laser_data* ld, int i) {
 	return (i>=0) && (i<ld->nrays) && (ld->valid[i]);
@@ -153,62 +145,6 @@ int ld_valid_ray(struct laser_data* ld, int i) {
 int ld_valid_corr(LDP ld, int i) {
 	return ld->corr[i].valid;
 }
-
-
-/** Read next FLASER line in file (initializes ld). Returns 0 if error or EOF. */
-int ld_read_next_laser_carmen(FILE*file, LDP ld) {
-	#define MAX_LINE_LENGTH 10000
-   char line[MAX_LINE_LENGTH];
-
-	while(fgets(line, MAX_LINE_LENGTH-1, file)) {
-		
-		if(0 != strncmp(line, prefix, strlen(prefix))) {
-			printf("Skipping line: \n-> %s\n", line);
-			continue;
-		}
-		
-		int cur = strlen(prefix); int inc;
-		
-		int nrays;
-		if(1 != sscanf(line+cur, "%d %n", &nrays, &inc)) 
-			goto error;
-		cur += inc;
-			
-		ld_alloc(ld, nrays);	
-		
-		ld->min_theta = -M_PI/2;
-		ld->max_theta = +M_PI/2;
-		
-		int i;
-		for(i=0;i<nrays;i++) {
-			double reading;
-			if(read_next_double(line,&cur,&reading)) {
-				printf("At ray #%d, ",i); 
-				goto error;
-			}
-				
-			ld->valid[i] = reading>0 && reading<80;
-			ld->readings[i] = ld->valid[i] ? reading : GSL_NAN;
-			ld->theta[i] = ld->min_theta+ i * (ld->max_theta-ld->min_theta) / (ld->nrays-1);
-		}
-		
-		if(read_next_double(line,&cur,ld->odometry+0)) goto error;
-		if(read_next_double(line,&cur,ld->odometry+1)) goto error;
-		if(read_next_double(line,&cur,ld->odometry+2)) goto error;
-		if(read_next_double(line,&cur,ld->estimate+0)) goto error;
-		if(read_next_double(line,&cur,ld->estimate+1)) goto error;
-		if(read_next_double(line,&cur,ld->estimate+2)) goto error;
-		
-		fprintf(stderr, "l");
-		return 0;
-		
-		error:
-			printf("Malformed line? \n-> %s\nat cur = %d\n\t-> %s\n", line,cur,line+cur);
-			return -1;
-	}
-	return -2;
-}
-
 
 int ld_num_valid_correspondences(LDP ld) {
 	int i; 
@@ -219,5 +155,3 @@ int ld_num_valid_correspondences(LDP ld) {
 	}
 	return num;
 }
-
-

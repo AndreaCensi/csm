@@ -34,8 +34,9 @@ void visibilityTest(LDP laser_ref, const gsl_vector*u) {
 }
 
 
-/** If multiple points in laser_sens match to the same point in laser_ref, only
-the nearest win.
+/** 
+	If multiple points in laser_sens match to the same point in laser_ref, 
+	only the nearest one wins.
 
 	Uses: laser_sens->corr, laser_sens->p
 	Modifies: laser_sens->corr
@@ -54,7 +55,7 @@ void kill_outliers_double(struct sm_params*params, const gsl_vector*x_old) {
 	gsl_vector * p_i_w = gsl_vector_alloc(3);
 	int i;
 	for(i=0;i<laser_sens->nrays;i++) {
-		if(!laser_sens->corr[i].valid) continue;
+		if(!ld_valid_corr(laser_sens, i)) continue;
 		transform(laser_sens->p[i], x_old, p_i_w);
 		int j1 = laser_sens->corr[i].j1;
 		dist_i[i] = distance(p_i_w, laser_ref->p[j1]);
@@ -63,7 +64,7 @@ void kill_outliers_double(struct sm_params*params, const gsl_vector*x_old) {
 	
 	int nkilled = 0;
 	for(i=0;i<laser_sens->nrays;i++) {
-		if(!laser_sens->corr[i].valid) continue;
+		if(!ld_valid_corr(laser_sens, i)) continue;
 		int j1 = laser_sens->corr[i].j1;
 		if(dist_i[i] > threshold*dist_j[j1]) {
 			laser_sens->corr[i].valid=0;
@@ -102,7 +103,7 @@ void kill_outliers_trim(struct sm_params*params, const gsl_vector*x_old,
 	/* for each point in laser_sens */
 	for(i=0;i<laser_sens->nrays;i++) {
 		/* which has a valid correspondence */
-		if(!laser_sens->corr[i].valid) { dist[i]=NAN; continue; }
+		if(!ld_valid_corr(laser_sens, i)) { dist[i]=NAN; continue; }
 		/* transform its cartesian position, according to current estimate
 		   x_old, to obtain: p_i_w, that is the point in the reference 
 		   frame of laser_ref */
@@ -151,7 +152,7 @@ void kill_outliers_trim(struct sm_params*params, const gsl_vector*x_old,
 	*total_error = 0;
 	int nvalid = 0;
 	for(i=0;i<laser_sens->nrays;i++) {
-		if(!laser_sens->corr[i].valid) continue;
+		if(!ld_valid_corr(laser_sens, i)) continue;
 		if(dist[i] > error_limit) {
 			laser_sens->corr[i].valid = 0;
 			laser_sens->corr[i].j1 = -1;
@@ -177,7 +178,7 @@ void swap_double(double*a,double*b) {
 	double t = *a; *a = *b; *b=t;
 }
 
-/* Code taken from Wikipedia */
+/** Code taken from Wikipedia */
 void quicksort(double *array, int begin, int end) {
 	if (end > begin) {
 	   double pivot = array[begin];

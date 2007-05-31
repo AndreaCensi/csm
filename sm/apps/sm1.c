@@ -38,8 +38,8 @@ int main(int argc, const char*argv[]) {
 	}
 
 	FILE * file1 = open_file_for_reading(p.file1);
-	FILE * file2 = 
-		!strcmp(p.file1, p.file2) ? file1 : open_file_for_reading(p.file2);
+	FILE * file2 = !strcmp(p.file1, p.file2) ? file1 
+		: open_file_for_reading(p.file2);
 	if(!file1 || !file2) return -1;
 	
 	if(strcmp(p.file_jj, "")) {
@@ -57,16 +57,23 @@ int main(int argc, const char*argv[]) {
 		params.laser_ref = *ld1;
 		params.laser_sens = *ld2;
 
+		/* Odometry gives first guess (params.odometry) */
 		gsl_vector *u = gsl_vector_alloc(3);
 		gsl_vector *x_old = vector_from_array(3, params.laser_ref.odometry);
 		gsl_vector *x_new = vector_from_array(3, params.laser_sens.odometry);
 		pose_diff(x_new,x_old,u);
 		vector_to_array(u, params.odometry);
 
-/*			sm_gpm(&params,&result); */
+/*			sm_gpm(&params, &result); */
 		sm_icp(&params,&result); 
 		
+		
 		JO jo = result_to_json(&params, &result);
+
+			double true_e[3];
+			int i=0;for(;i<3;i++) true_e[i] = result.x[i];
+			jo_add_double_array(jo, "true_e", true_e, 3);
+			
 		printf("%s\n", json_object_to_json_string(jo));
 	}
 	
@@ -76,31 +83,6 @@ int main(int argc, const char*argv[]) {
 	int num_iterations = 0;
 	clock_t start = clock();
 	
-	if(ld_read_next_laser_carmen(file, &params.laser_ref)) {
-		printf("Could not read first scan.\n");
-		return -1;
-	}
-	
-	gsl_vector *u = gsl_vector_alloc(3);
-	gsl_vector *x_old = gsl_vector_alloc(3);
-	gsl_vector *x_new = gsl_vector_alloc(3);
-	while(!ld_read_next_laser_carmen(file, &params.laser_sens)) {
-		copy_from_array(x_old, params.laser_ref.odometry);
-		copy_from_array(x_new, params.laser_sens.odometry);
-		pose_diff(x_new,x_old,u);
-		vector_to_array(u, params.odometry);
-	
-	 	sm_gpm(&params,&result);
-	 	 sm_icp(&params,&result); 
-		
-		num_matchings++;
-		num_iterations += result.iterations;
-	
-		ld_dealloc(&(params.laser_ref));
-		params.laser_ref = params.laser_sens;
-	}
-	ld_dealloc(&(params.laser_ref));
-
 	clock_t end = clock();
 	float seconds = (end-start)/((float)CLOCKS_PER_SEC);
 	

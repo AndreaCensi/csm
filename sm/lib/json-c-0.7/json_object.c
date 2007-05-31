@@ -9,6 +9,7 @@
  *
  */
 
+#include <assert.h>
 #include "config.h"
 
 #include <stdio.h>
@@ -464,6 +465,7 @@ static void json_object_array_entry_free(void *data)
 
 static void json_object_array_delete(struct json_object* this)
 {
+	assert(json_object_is_type(this, json_type_array));
   array_list_free(this->o.c_array);
   json_object_generic_delete(this);
 }
@@ -491,23 +493,27 @@ struct array_list* json_object_get_array(struct json_object *this)
 
 int json_object_array_length(struct json_object *this)
 {
-  return array_list_length(this->o.c_array);
+	assert(json_object_is_type(this, json_type_array));
+	return array_list_length(this->o.c_array);
 }
 
 int json_object_array_add(struct json_object *this,struct json_object *val)
 {
-  return array_list_add(this->o.c_array, val);
+	assert(json_object_is_type(this, json_type_array));
+	return array_list_add(this->o.c_array, val);
 }
 
 int json_object_array_put_idx(struct json_object *this, int idx,
 			      struct json_object *val)
 {
-  return array_list_put_idx(this->o.c_array, idx, val);
+	assert(json_object_is_type(this, json_type_array));
+	return array_list_put_idx(this->o.c_array, idx, val);
 }
 
 struct json_object* json_object_array_get_idx(struct json_object *this,
 					      int idx)
 {
-  return (struct json_object*)array_list_get_idx(this->o.c_array, idx);
+	assert(json_object_is_type(this, json_type_array));
+	return (struct json_object*)array_list_get_idx(this->o.c_array, idx);
 }
 

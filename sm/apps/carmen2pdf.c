@@ -29,14 +29,17 @@ void ld_getbb(struct laser_data* ld, double*x0, double*y0, double*x1, double*y1,
 
 int main(int argc, const char*argv[]) {
 	struct params p;
-	p.interval = 10;
 	
+	p.interval = 10;
 	p.input_filename = "in.log";
 	p.output_filename = "out.pdf";
 	p.use_odometry = 0;
 	p.line_threshold = 0.2;
 	p.horizon = 8;
 	p.dimension=500;
+	
+/*	options_int(ops, "interval", &p.interval, 10,
+		"File for journaling -- if left empty, journal not open.");*/
 	
 	struct option options[8] = 
 		{ {"--interval",  "how many to ignore",                   OPTION_INT,    &(p.interval), 0},

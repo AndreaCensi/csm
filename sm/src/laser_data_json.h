@@ -16,4 +16,12 @@ LDP json_to_ld(JO);
 JO result_to_json(struct sm_params*p, struct sm_result *r);
 LDP ld_from_json_stream(FILE*);
 
+/** 
+	Tries to read a laser scan from file. If error or EOF, it returns 0.
+	Whitespace is skipped. If first valid char is '{', it tries to read 
+	it as JSON. If next char is 'F' (first character of "FLASER"),
+	it tries to read in Carmen format. Else, 0 is returned. 
+*/
+LDP ld_read_smart(FILE*);
+
 #endif

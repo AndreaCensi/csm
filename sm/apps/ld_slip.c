@@ -27,11 +27,11 @@ int main(int argc, const char * argv[]) {
 		
 	if(!options_parse_args(ops, argc, argv)) {
 		fprintf(stderr, "A simple program for adding slip to odometry \n"
-			" The 'odometry' field is corrupted with noise;\n"
-			" The 'estimate' field is set to NAN. \n\nOptions:\n");
+			" The 'odometry' field is set to 'true_pose' + noise.\n");
 		options_print_help(ops, stderr);
 		return -1;
 	}
+	
 
 	gsl_rng_env_setup();
 	gsl_rng * rng = gsl_rng_alloc (gsl_rng_ranlxs0);
@@ -40,10 +40,8 @@ int main(int argc, const char * argv[]) {
 
 	LDP ld;
 	while( (ld = ld_from_json_stream(stdin))) {
-		
-		ld->estimate[0] = GSL_NAN;
-		ld->estimate[1] = GSL_NAN;
-		ld->estimate[2] = GSL_NAN;
+		int i; for(i=0;i<3;i++)
+			ld->odometry[i] = ld->true_pose[i];
 		
 		if(p.sigma_xy > 0) {
 			ld->odometry[0] += gsl_ran_gaussian(rng, p.sigma_xy);

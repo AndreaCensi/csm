@@ -131,7 +131,12 @@ ld.true_alpha_abs(i)
 
 \begin_deeper
 \begin_layout Standard
-Orientation of the surface (radians, relative to world).
+(eliminated in new version) Orientation of the surface (radians, relative
+ to 
+\series bold
+world
+\series default
+).
  It is
 \family typewriter
  nan 
@@ -178,15 +183,39 @@ True if previous field is valid.
 \begin_layout Description
 
 \family typewriter
-ld.estimate
+ld.true_pose
 \end_layout
 
+\begin_deeper
+\begin_layout Standard
+Pose of the robot (m,m,rad), in world coordinates.
+\end_layout
+
+\end_deeper
 \begin_layout Description
 
 \family typewriter
 ld.odometry
 \end_layout
 
+\begin_deeper
+\begin_layout Standard
+Corrupted true_pose.
+\end_layout
+
+\end_deeper
+\begin_layout Description
+
+\family typewriter
+ld.estimate
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+Estimate of true_pose.
+\end_layout
+
+\end_deeper
 \begin_layout Description
 
 \family typewriter

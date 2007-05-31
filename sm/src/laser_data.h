@@ -16,25 +16,24 @@ struct laser_data {
 	
 	double *theta;
 	
-	int*valid;
+	int    *valid;
 	double *readings;
 	
 	
-	int *cluster;
+	int    *cluster;
 	
 	double *alpha;
 	double *cov_alpha;
-	int *alpha_valid;
+	int    *alpha_valid;
 
 	double *true_alpha;
-	double *true_alpha_abs;
 	
 	/* Jump tables */
 	int *up_bigger, *up_smaller, *down_bigger, *down_smaller;
 	
 	struct correspondence* corr;
 
-	
+	double true_pose[3];		
 	double odometry[3];	
 	double estimate[3];	
 	
@@ -53,11 +52,11 @@ struct correspondence {
 typedef struct laser_data* LDP;
 
 LDP ld_alloc_new(int nrays);
-/** This free()s the pointer  */
+/** This DOES free()s the pointer  */
 void ld_free(LDP);
 
 void ld_alloc(LDP, int nrays);
-/** This does not free the pointer */
+/** This does NOT free the pointer */
 void ld_dealloc(LDP);
 
 void ld_compute_cartesian(LDP);
@@ -65,7 +64,6 @@ void ld_create_jump_tables(LDP);
 
 /** -1 if not found */
 int ld_next_valid(LDP ld, int i, int dir);
-
 
 int ld_valid_ray(LDP ld, int i);
 int ld_valid_corr(LDP ld, int i);
