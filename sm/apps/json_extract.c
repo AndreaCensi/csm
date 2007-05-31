@@ -2,7 +2,7 @@
 #include "../src/laser_data_json.h"
 #include <options/options.h>
 
-int main(int argc, char * argv[]) {
+int main(int argc, const char * argv[]) {
 	
 	int nth;
 	
@@ -11,7 +11,7 @@ int main(int argc, char * argv[]) {
 	
 	if(!options_parse_args(ops, argc, argv)) {
 		fprintf(stderr, "%s : extracts n-th JSON object from stream."
-			"\n\nOptions:\n", basename(argv[0]));
+			"\n\nOptions:\n", basename((char*)argv[0]));
 		options_print_help(ops, stderr);
 		return -1;
 	}

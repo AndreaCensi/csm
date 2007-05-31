@@ -10,7 +10,7 @@ int main(int argc, const char * argv[]) {
 	options_int(ops, "n", &n, 1, "Number of copies");
 	if(!options_parse_args(ops, argc, argv)) {
 		fprintf(stderr, "%s : reads a JSON stream and copies it multiplied by n."
-			"\n\nOptions:\n", basename(argv[0]));
+			"\n\nOptions:\n", basename((char*)argv[0]));
 		options_print_help(ops, stderr);
 		return -1;
 	}
