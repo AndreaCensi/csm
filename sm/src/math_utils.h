@@ -14,6 +14,10 @@
 #define M_PI           3.14159265358979323846
 #endif
 
+#ifndef NAN
+#define NAN nan("")
+#endif
+     
 void possible_interval(
 	const gsl_vector*p_i_w, struct laser_data*laser_sens, 
 	double max_angular_correction_deg, double max_linear_correction, int*from, int*to, int*start_cell);

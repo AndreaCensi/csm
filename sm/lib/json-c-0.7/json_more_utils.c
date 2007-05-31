@@ -11,6 +11,11 @@
 #include "JSON_checker.h"
 #include "linkhash.h"
 
+
+#ifndef NAN
+#define NAN nan("")
+#endif
+
 int json_stream_skip(FILE*f) {
 	JSON_checker_init();
 	int count = 0;
