@@ -33,8 +33,12 @@
 
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused -Wall -W -Wconversion  -Wunreachable-code ")
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb")
-	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fstrict-aliasing -std=c99")
-	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ansi")
+	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fstrict-aliasing")
+
+	
+	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
+	# Note: using -ansi makes the NAN unavailable on Linux (GCC 3.3.5)
+	# SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ansi")
 
 	IF(APPLE)
 		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-long-double")

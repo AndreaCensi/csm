@@ -1,8 +1,8 @@
 #include <string.h>
-#include <math.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <errno.h>
+#include <math.h>
 #include "debug.h"
 #include "bits.h"
 #include "json_object.h"

@@ -1,19 +1,18 @@
 #include <errno.h>
+#include <limits.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/param.h>
-#include <stdlib.h>
 #include <ctype.h>
 #include <sys/stat.h>
-
 #include <libgen.h>
 
 /* Cavillo (non impatta la portabilità. */
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif
-
 #include <string.h>
+
 #include "options.h"
 
 /** Our version of strdup. */

@@ -8,6 +8,12 @@
 #define gvg gsl_vector_get
 #define gvs gsl_vector_set
 
+
+/* Sometimes I really don't understand compilers.. */ 
+#ifndef M_PI
+#define M_PI           3.14159265358979323846
+#endif
+
 void possible_interval(
 	const gsl_vector*p_i_w, struct laser_data*laser_sens, 
 	double max_angular_correction_deg, double max_linear_correction, int*from, int*to, int*start_cell);

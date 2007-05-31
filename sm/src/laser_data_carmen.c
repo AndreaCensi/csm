@@ -1,7 +1,7 @@
 #include <string.h>
 #include <math.h>
+#include "math_utils.h"
 #include "laser_data.h"
-
 
 const char * carmen_prefix = "FLASER ";
 
