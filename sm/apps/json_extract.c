@@ -2,7 +2,7 @@
 #include "../src/laser_data_json.h"
 #include <options/options.h>
 
-int main(int argc, const char * argv[]) {
+int main(int argc, char * argv[]) {
 	
 	int nth;
 	
