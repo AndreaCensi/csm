@@ -67,7 +67,7 @@ struct lh_table* lh_table_new(int size, char *name,
 	t->count = 0;
 	t->size = size;
 	t->name = name;
-	t->table = calloc(size, sizeof(struct lh_entry));
+	t->table = calloc( (size_t) size,sizeof(struct lh_entry));
 	if(!t->table) lh_abort("lh_table_new: calloc failed\n");
 	t->free_fn = free_fn;
 	t->hash_fn = hash_fn;
@@ -134,7 +134,7 @@ int lh_table_insert(struct lh_table *t, void *k, void *v)
 	while( 1 ) {
 		if(t->table[n].k == LH_EMPTY || t->table[n].k == LH_FREED) break;
 		t->collisions++;
-		if(++n == t->size) n = 0;
+		if(++n ==  (size_t) t->size) n = 0;
 	}
 
 	t->table[n].k = k;
@@ -165,7 +165,7 @@ struct lh_entry* lh_table_lookup_entry(struct lh_table *t, void *k)
 		if(t->table[n].k == LH_EMPTY) return NULL;
 		if(t->table[n].k != LH_FREED &&
 		   t->equal_fn(t->table[n].k, k)) return &t->table[n];
-		if(++n == t->size) n = 0;
+		if(++n ==  (size_t) t->size) n = 0;
 	}
 	return NULL;
 }

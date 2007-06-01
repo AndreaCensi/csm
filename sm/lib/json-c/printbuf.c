@@ -32,7 +32,7 @@ struct printbuf* printbuf_new()
   if(!(p = calloc(1, sizeof(struct printbuf)))) return NULL;
   p->size = 32;
   p->bpos = 0;
-  if(!(p->buf = malloc(p->size))) {
+  if(!(p->buf = malloc( (size_t) p->size))) {
     free(p);
     return NULL;
   }
@@ -50,11 +50,11 @@ int printbuf_memappend(struct printbuf *p, char *buf, int size)
 	     "bpos=%d wrsize=%d old_size=%d new_size=%d\n",
 	     p->bpos, size, p->size, new_size);
 #endif /* PRINTBUF_DEBUG */
-    if(!(t = realloc(p->buf, new_size))) return -1;
+    if(!(t = realloc(p->buf,  (size_t) new_size))) return -1;
     p->size = new_size;
     p->buf = t;
   }
-  memcpy(p->buf + p->bpos, buf, size);
+  memcpy(p->buf + p->bpos, buf,  (size_t) size);
   p->bpos += size;
   p->buf[p->bpos]= '\0';
   return size;

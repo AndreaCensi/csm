@@ -32,7 +32,7 @@ array_list_new(array_list_free_fn *free_fn)
   this->size = ARRAY_LIST_DEFAULT_SIZE;
   this->length = 0;
   this->free_fn = free_fn;
-  if(!(this->array = calloc(sizeof(void*), this->size))) {
+  if(!(this->array = calloc(sizeof(void*), (size_t) this->size))) {
     free(this);
     return NULL;
   }

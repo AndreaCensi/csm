@@ -16,7 +16,6 @@
 	ENDIF(GSL_FOUND)
 
 	INCLUDE (FindCairo.cmake)                                                                                         
-#SET(CAIRO_FOUND no)
 
 	IF(CAIRO_FOUND)
 		MESSAGE(STATUS "Found Cairo at.")
@@ -25,9 +24,9 @@
 		MESSAGE(STATUS "   CAIRO_INCLUDE_DIR = ${CAIRO_INCLUDE_DIR}")
 		
 		INCLUDE_DIRECTORIES(${CAIRO_INCLUDE_DIR})	
-#		LINK_DIRECTORIES()		 
 	ELSE(CAIRO_FOUND)
-		MESSAGE(WARNING "Cairo not found: carmen2pdf will not be built.")
+		MESSAGE(WARNING " Cairo not found: carmen2pdf will not be built.")
+		MESSAGE(WARNING " install Cairo from http://cairographics.org ")
 	ENDIF(CAIRO_FOUND)
 	
 
