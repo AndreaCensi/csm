@@ -149,6 +149,9 @@
 		ADD_EXECUTABLE(test_json apps/test_json.c)
 		TARGET_LINK_LIBRARIES(test_json sm ${GSL_LIBRARIES})
 
+		ADD_EXECUTABLE(carmen2json apps/carmen2json.c)
+		TARGET_LINK_LIBRARIES(carmen2json sm)
+
 		ADD_EXECUTABLE(ld_noise apps/ld_noise.c)
 		TARGET_LINK_LIBRARIES(ld_noise sm ${GSL_LIBRARIES} options)
 
