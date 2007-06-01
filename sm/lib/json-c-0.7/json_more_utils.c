@@ -17,8 +17,8 @@
 #endif
 
 int json_stream_skip(FILE*f) {
-	JSON_checker_init();
 	int count = 0;
+	JSON_checker_init();
 	while(1) {
 		char c;
 		if(1 != fread(&c,1,1,f)) {
@@ -113,12 +113,17 @@ int jo_read_double_array(JO s, const char*name, double*p, int n, double when_nul
 		mc_error("This is not an array: '%s'\n",json_object_to_json_string(jo));
 		return 0;
 	}
-	int size = json_object_array_length(jo);
-	if(size < n) {
-		mc_error("I expected at least %d elements, got %d. \nArray: '%s'\n",
-			n, size, json_object_to_json_string(jo));
-		return 0;
+
+	{
+		int size = json_object_array_length(jo);
+		if(size < n) {
+			mc_error("I expected at least %d elements, got %d. \nArray: '%s'\n",
+				n, size, json_object_to_json_string(jo));
+			return 0;
+		}
 	}
+
+	{
 	int i; for(i=0;i<n;i++) {
 		JO v = json_object_array_get_idx(jo, i);
 		if(!v)
@@ -132,10 +137,12 @@ int jo_read_double_array(JO s, const char*name, double*p, int n, double when_nul
 			} else
 			p[i] = when_null;
 	}
+	}
 	return 0;
 }
 
 int jo_read_int_array(JO s, const char*name, int*p, int n, int when_null) {
+	int size, i;
 	JO jo = json_object_object_get(s, (char*)name);
 	if(!jo) {
 /*		mc_error("Field '%s' not found.\n", name); */
@@ -145,13 +152,13 @@ int jo_read_int_array(JO s, const char*name, int*p, int n, int when_null) {
 		mc_error("This is not an array: '%s'\n",json_object_to_json_string(jo));
 		return 0;
 	}
-	int size = json_object_array_length(jo);
+	size = json_object_array_length(jo);
 	if(size < n) {
 		mc_error("I expected at least %d elements, got %d. \nArray: '%s'\n",
 			n, size, json_object_to_json_string(jo));
 		return 0;
 	}
-	int i; for(i=0;i<n;i++) {
+	for(i=0;i<n;i++) {
 		JO v = json_object_array_get_idx(jo, i);
 		if(!v || !json_object_is_type(v, json_type_int))
 			p[i] = when_null;
@@ -236,6 +243,7 @@ void jo_add_double(JO root, const char*name, double v) {
 	jo_add(root, name, jo_new_double(v));
 }
 
+/*
 JO find_object_with_name(JO root, const char*name) {
 	json_object_object_foreach(root, key, val) {
 		if(!strcmp(key, name)) return root;
@@ -245,5 +253,5 @@ JO find_object_with_name(JO root, const char*name) {
 		}
 	}
 	return 0;
-}
+}*/
 

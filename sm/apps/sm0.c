@@ -60,7 +60,7 @@ int main(int argc, const char*argv[]) {
 		copy_from_array(x_old, params.laser_ref.odometry);
 		copy_from_array(x_new, params.laser_sens.odometry);
 		pose_diff(x_new,x_old,u);
-		vector_to_array(u, params.odometry);
+		vector_to_array(u, params.first_guess);
 	
 	 	sm_gpm(&params,&result);
 	 	/* sm_icp(&params,&result); */

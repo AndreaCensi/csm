@@ -109,6 +109,30 @@ void pose_diff(const gsl_vector*pose2,const gsl_vector*pose1,gsl_vector*res) {
 }
 
 
+void ominus_d(const double *x, double*res) {
+	double c = cos(x[2]);
+	double s = sin(x[2]);
+	res[0] = -c*x[0]-s*x[1];
+	res[1] =  s*x[0]-c*x[1];
+	res[2] = -x[2];
+}
+
+void oplus_d(const double*x1,const double*x2, double*res) {
+	double c = cos(x1[2]);
+	double s = sin(x1[2]);
+	res[0] = x1[0]+c*x2[0]-s*x2[1];
+	res[1] = x1[1]+s*x2[0]+c*x2[1];
+	res[2] = x1[2]+x2[2];
+}
+
+void pose_diff_d(const double*pose2, const double*pose1, double*res) {
+	double temp[3];
+	ominus_d(pose1, temp);
+	oplus_d(temp, pose2, res);
+}
+
+
+
 
 double square(double x) {
 	return x*x;

@@ -42,7 +42,7 @@ int jo_read_int_array    (JO, const char*name, int    *p, int n, int    when_nul
 /* returns 0 if NAN */
 JO jo_double_or_null(double d);
 
-JO find_object_with_name(JO root, const char*name);
+/*JO find_object_with_name(JO root, const char*name);*/
 JO json_tokener_parse_len(char *str, int len);
 	
 #endif

@@ -39,6 +39,11 @@ void copy_from_array(gsl_vector*v, double*);
 
 double minmax(int from,int to,int x);
 
+/* With doubles */
+void ominus_d(const double *x, double*res);
+void oplus_d(const double*x1, const double*x2, double*res);
+void pose_diff_d(const double*second, const double*first, double*res);
+/* With vectors */
 void oplus(const gsl_vector*x1,const gsl_vector*x2, gsl_vector*res);
 void ominus(const gsl_vector*x, gsl_vector*res);
 void pose_diff(const gsl_vector*pose2,const gsl_vector*pose1,gsl_vector*res);

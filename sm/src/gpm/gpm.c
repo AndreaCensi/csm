@@ -38,7 +38,7 @@ void sm_gpm(struct sm_params*params, struct sm_result*res) {
 	gsl_histogram*hist = gsl_histogram_alloc(nbins);
 	gsl_histogram_set_ranges_uniform(hist, -M_PI, M_PI);
 	
-	gsl_vector * u = vector_from_array(3, params->odometry);
+	gsl_vector * u = vector_from_array(3, params->first_guess);
 	printf("gpm 1/2: old u = : %f %f %f\n",gvg(u,0),gvg(u,1),gvg(u,2));
 	
 	ght_find_theta_range(laser_ref, laser_sens,

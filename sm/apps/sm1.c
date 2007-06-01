@@ -17,6 +17,8 @@ struct sm1_params {
 extern void sm_options(struct sm_params*p, struct option*ops);
 
 extern int distance_counter;
+
+
 int main(int argc, const char*argv[]) {
 	
 	struct sm_params params;
@@ -57,12 +59,9 @@ int main(int argc, const char*argv[]) {
 		params.laser_ref = *ld1;
 		params.laser_sens = *ld2;
 
-		/* Odometry gives first guess (params.odometry) */
-		gsl_vector *u = gsl_vector_alloc(3);
-		gsl_vector *x_old = vector_from_array(3, params.laser_ref.odometry);
-		gsl_vector *x_new = vector_from_array(3, params.laser_sens.odometry);
-		pose_diff(x_new,x_old,u);
-		vector_to_array(u, params.odometry);
+		pose_diff_d( params.laser_sens.odometry,  
+		/* o minus */ params.laser_ref.odometry,
+			/* = */ params.first_guess);
 
 /*			sm_gpm(&params, &result); */
 		sm_icp(&params,&result); 

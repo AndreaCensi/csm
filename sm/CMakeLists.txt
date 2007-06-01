@@ -37,8 +37,11 @@
 
 	
 	#SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
-	# Note: using -ansi makes the NAN unavailable on Linux (GCC 3.3.5)
-	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ansi")
+	#SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ansi")
+	#SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pedantic")
+
+	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unreachable-code")
+	
 
 	IF(APPLE)
 		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-long-double")
@@ -68,7 +71,7 @@
 
 	########### Options ########## 
 	SUBDIRS(lib/options)
-	SUBDIRS(lib/json-c-0.7)
+	SUBDIRS(lib/json-c)
 
 ########### SM ########## 
 
@@ -107,14 +110,12 @@
 
 	INCLUDE_DIRECTORIES(lib/egsl)
 	INCLUDE_DIRECTORIES(lib/gpc)
+	INCLUDE_DIRECTORIES(lib/json-c)
 	INCLUDE_DIRECTORIES(lib)
 
-	INCLUDE_DIRECTORIES(lib/json-c-0.7)
 	
 	TARGET_LINK_LIBRARIES(sm json-c)
 
-#	#SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Ilib/gpc")
-#	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Ilib/egsl")
 
 	TARGET_LINK_LIBRARIES(sm ${GSL_LIBRARIES})
 	INSTALL(TARGETS sm ARCHIVE DESTINATION lib)

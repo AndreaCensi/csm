@@ -44,7 +44,7 @@ void sm_icp(struct sm_params*params, struct sm_result*res) {
 	
 		
 	gsl_vector * x_new = gsl_vector_alloc(3);
-	gsl_vector * x_old = vector_from_array(3, params->odometry);
+	gsl_vector * x_old = vector_from_array(3, params->first_guess);
 	
 	if(params->do_visibility_test) {
 		sm_debug("laser_ref:\n");
