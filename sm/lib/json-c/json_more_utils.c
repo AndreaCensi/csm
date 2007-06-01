@@ -1,6 +1,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <errno.h>
 #include <math.h>
 #include "debug.h"
@@ -13,7 +14,7 @@
 
 
 #ifndef NAN
-#define NAN nan("")
+#define NAN strtod("NAN")
 #endif
 
 int json_stream_skip(FILE*f) {
