@@ -14,7 +14,7 @@
 
 
 #ifndef NAN
-#define NAN strtod("NAN")
+#define NAN strtod("NaN",0)
 #endif
 
 int json_stream_skip(FILE*f) {
