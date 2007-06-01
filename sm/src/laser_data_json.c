@@ -200,18 +200,24 @@ LDP ld_read_smart(FILE*f) {
 	int c;
 	while(1) {
 		c = fgetc(f);
-		if(feof(f)) return 0;
+		if(feof(f)) { 
+			sm_debug("eof\n");
+			return 0;
+		}
 		if(!isspace(c)) break;
 	}
 	ungetc(c, f);
 
 	switch(c) {
 		case '{': {
+/*			sm_debug("Reading JSON\n"); */
 			return ld_from_json_stream(f);
 		}
 		case 'F': {
+/*			sm_debug("Reading Carmen\n");  */
 			LDP ld = (LDP) malloc(sizeof(struct laser_data));
-			if(!ld_read_next_laser_carmen(f, ld)) {
+			if(ld_read_next_laser_carmen(f, ld)) {
+				sm_debug("bad carmen\n");
 				free(ld);
 				return 0;
 			}

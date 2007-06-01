@@ -11,24 +11,11 @@ NOISE=ld_noise
 SM1=sm1
 JSON2MATLAB=../matlab_new/json2matlab.rb
 
-#!/bin/bash
-
-export PATH=$PATH:~/icra07pis/src/libraries/fig/
-export PATH=$PATH:../sm/
-
-RAYTRACER=~/icra07pis/src/misc_apps/raytracer
-LD_DRAW=~/icra07pis/src/misc_apps/ld_draw
-FIGMERGE=figmerge
-MULTIPLY=json_pipe
-NOISE=ld_noise
-SM1=sm1
-JSON2MATLAB=../matlab_new/json2matlab.rb
-
 
 dir=out/
 mkdir -p $dir
 
-num=10
+num=100
 
 fig=square.fig
 

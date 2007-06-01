@@ -1,67 +1,72 @@
 #include <time.h>
-
+#include <string.h>
 #include <cairo.h>
 #include <cairo-pdf.h>
 
-#include "../lib/options/options.h"
+#include <options/options.h>
 
 
 #include "../src/math_utils.h"
 #include "../src/sm.h"
 #include "../src/laser_data.h"
+#include "../src/laser_data_json.h"
+#include "../src/utils.h"
+#include "../src/logging.h"
+
+enum reference { Odometry = 1, Estimate = 2, True_pose = 3 };
+const char*reference_name[4] = { "invalid","odometry","estimate","true_pose"};
 
 struct params {
 	int interval;
-	int use_odometry;
+	const char*use;
+	double padding;
 	double horizon;
 	double line_threshold;
 	double dimension;
 	const char*output_filename;
 	const char*input_filename;
 
+	/**/
 	FILE*input_file;
+	int use_reference;
 };
 
 void carmen2pdf(struct params p);
 
-void ld_getbb(struct laser_data* ld, double*x0, double*y0, double*x1, double*y1, 
-	int use_odometry, double horizon);
+void ld_getbb(LDP  ld, double*x0, double*y0, double*x1, double*y1, 
+	int use_reference, double horizon);
 
 int main(int argc, const char*argv[]) {
 	struct params p;
 	
-	p.interval = 10;
-	p.input_filename = "in.log";
-	p.output_filename = "out.pdf";
-	p.use_odometry = 0;
-	p.line_threshold = 0.2;
-	p.horizon = 8;
-	p.dimension=500;
+	struct option * ops = options_allocate(10);
+	options_int(ops, "interval", &p.interval, 10, "how many to ignore");
+	options_string(ops, "in", &p.input_filename, "<unset>", "input file (Carmen or JSON)");
+	options_string(ops, "out", &p.output_filename, "carmen2pdf.pdf", "output file (PDF)");
+	options_double(ops, "lt", &p.line_threshold, 0.2, "threshold for linking points (m)");
+	options_double(ops, "horizon", &p.horizon, 8.0, "horizon of the laser (m)");
+	options_double(ops, "padding", &p.padding, 0.2, "padding around bounding box (m)");
+	options_double(ops, "dimension", &p.dimension, 500.0, "dimension of the image (points)");
+	options_string(ops, "use", &p.use, "odometry", "One in 'odometry','estimate','true_pose'");
 	
-/*	options_int(ops, "interval", &p.interval, 10,
-		"File for journaling -- if left empty, journal not open.");*/
-	
-	struct option options[8] = 
-		{ {"--interval",  "how many to ignore",                   OPTION_INT,    &(p.interval), 0},
-		  {"--in",        "input filename (Carmen format)",       OPTION_STRING, &(p.input_filename), 0},
-		  {"--out",       "output filename (pdf)",                OPTION_STRING, &(p.output_filename), 0},
-		  {"--lt",        "threshold for linking points (m)",     OPTION_DOUBLE, &(p.line_threshold), 0},
-		  {"--horizon",   "horizon of the laser (m)",             OPTION_DOUBLE, &(p.horizon), 0},
-		  {"--dimension", "dimension of image (points)",          OPTION_DOUBLE, &(p.dimension), 0},
-		  {"--use_odometry", "if 1 uses odometry, else estimate", OPTION_INT,    &(p.use_odometry), 0},
-		  {0,0,0,0,0}};
-	
-	if(!options_parse_args(options, argc, argv)) {
-		printf("error.");
-		options_print_help(options, stderr);
+	if(!options_parse_args(ops, argc, argv)) {
+		fprintf(stderr, "error.");
+		options_print_help(ops, stderr);
 		return -1;
 	}
 	
-	p.input_file = fopen(p.input_filename,"r");
-	if(p.input_file==NULL) {
-		fprintf(stderr, "Could not open '%s'.\n", p.input_filename); 
+	p.use_reference = 0;
+	if(!strcmp(p.use, "odometry")) p.use_reference = Odometry;
+	if(!strcmp(p.use, "estimate")) p.use_reference = Estimate;
+	if(!strcmp(p.use, "true_pose")) p.use_reference = True_pose;
+	if(0 == p.use_reference) {
+		fprintf(stderr, "Invalid reference '%s'. " 
+			"Use one in 'odometry','estimate','true_pose'.\n", p.use);
 		return -1;
 	}
+	
+	p.input_file = open_file_for_reading(p.input_filename);
+	if(!p.input_file) return -1;
 	
 	carmen2pdf(p);
 	return 0;
@@ -71,7 +76,7 @@ int should_consider(struct params *p, int counter) {
 	return counter%p->interval == 0;
 }
 
-void ld_get_world(struct laser_data*ld, int i, double*x, double*y,int use_odometry);
+void ld_get_world(LDP ld, int i, double*x, double*y,int use_reference);
 
 struct bounding_box {
 	/** World frame */
@@ -86,26 +91,57 @@ void bb_w2b(struct bounding_box*bb, double wx, double wy, double*bx, double*by){
 	*by = bb->height- (wy-bb->y0) * scale;
 }
 
+/** Reads all file to find bounding box */
 void get_bb(struct params*p, struct bounding_box*bb) {
-	struct laser_data ld;	
+	LDP ld;	
 	int counter=0;
-	if(!ld_read_next_laser_carmen(p->input_file, &ld)) {
-		ld_getbb(&ld,&bb->x0,&bb->y0,&bb->x1,&bb->y1,p->use_odometry, p->horizon);
+
+	if((ld = ld_read_smart(p->input_file))) {
+		ld_getbb(ld,&bb->x0,&bb->y0,&bb->x1,&bb->y1,p->use_reference, p->horizon);
+		ld_free(ld);
 	}
-	ld_dealloc(&ld);
-	while(!ld_read_next_laser_carmen(p->input_file, &ld)) {
+	
+	while((ld = ld_read_smart(p->input_file))) {
 		if(should_consider(p, counter))  {
 			double x0,y0,x1,y1;
-			ld_getbb(&ld,&x0,&y0,&x1,&y1,p->use_odometry, p->horizon);
+			ld_getbb(ld,&x0,&y0,&x1,&y1,p->use_reference, p->horizon);
 			bb->x0 = GSL_MIN(x0, bb->x0);
 			bb->x1 = GSL_MAX(x1, bb->x1);
 			bb->y0 = GSL_MIN(y0, bb->y0);
 			bb->y1 = GSL_MAX(y1, bb->y1);
 		}
 		counter++;
-		ld_dealloc(&ld);
+		ld_free(ld);
 	}
 	rewind(p->input_file);
+	
+	bb->x0 -= p->padding;
+	bb->x1 += p->padding;
+	bb->y0 -= p->padding;
+	bb->y1 += p->padding;
+}
+
+int any_nan(double *d, int n) {
+	int i; for(i=0;i<n;i++) 
+		if(is_nan(d[i]))
+		return 1;
+	return 0;
+}
+
+double * ld_get_reference(LDP ld, int use_reference) {
+	double * pose;
+	switch(use_reference) {
+		case Odometry: pose = ld->odometry; break;
+		case Estimate: pose = ld->estimate; break;
+		case True_pose: pose = ld->true_pose; break;
+	}
+	if(any_nan(pose, 3)) {
+		sm_error("Required field '%s' not set in laser scan.\n", 
+			reference_name[use_reference] );
+		sm_error("I will abruptly exit() because of a panic attack.\n");
+		exit(-1);
+	}
+	return pose;
 }
 
 void carmen2pdf(struct params p) {
@@ -145,17 +181,16 @@ void carmen2pdf(struct params p) {
 	cairo_scale(cr, 50, 1);
 	cairo_translate(cr, 0, -0.5*bb.height); */
 	
-	struct laser_data ld;	
 	int counter=0; 
 	int first_pose=1; double old_pose_bx,old_pose_by;
-	while(!ld_read_next_laser_carmen(p.input_file, &ld)) {
+	LDP ld;
+	while((ld = ld_read_smart(p.input_file))) {
 	
 		{
 			double bx,by;
-			if(p.use_odometry)
-				bb_w2b(&bb, ld.odometry[0], ld.odometry[1], &bx,&by);
-			else
-				bb_w2b(&bb, ld.estimate[0], ld.estimate[1], &bx,&by);
+			
+			double * pose = ld_get_reference(ld, p.use_reference);
+			bb_w2b(&bb, pose[0], pose[1], &bx, &by);
 
 			if(first_pose) { first_pose = 0; 
 			} else {
@@ -172,18 +207,16 @@ void carmen2pdf(struct params p) {
 		}
 		
 		if(should_consider(&p, counter))  {
-				
-	
 			cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
 			cairo_set_line_width(cr, 0.1);
 			int first = 1;
 			double last_x,last_y;
-			int i; for(i=0;i<ld.nrays;i++) {
-				if(ld.valid[i]==0) continue;
-				if(ld.readings[i]>p.horizon) continue;
+			int i; for(i=0;i<ld->nrays;i++) {
+				if(ld->valid[i]==0) continue;
+				if(ld->readings[i]>p.horizon) continue;
 				
 				double x,y;
-				ld_get_world(&ld, i, &x, &y, p.use_odometry);
+				ld_get_world(ld, i, &x, &y, p.use_reference);
 				double bx,by;
 				bb_w2b(&bb, x,y,&bx,&by);
 				
@@ -209,7 +242,7 @@ void carmen2pdf(struct params p) {
 			cairo_stroke(cr);
 		}
 		counter++;
-		ld_dealloc(&ld);
+		ld_free(ld);
 	}
 
 	cairo_show_page (cr);
@@ -218,7 +251,7 @@ void carmen2pdf(struct params p) {
 	cairo_surface_destroy (surface);
 }
 
-void ld_get_world(struct laser_data*ld, int i, double*x, double*y, int use_odometry) {
+void ld_get_world(LDP ld, int i, double*x, double*y, int use_reference) {
 	gsl_vector * p = gsl_vector_alloc(2);
 	gsl_vector * pw = gsl_vector_alloc(2);
 	gsl_vector * pose = gsl_vector_alloc(3);
@@ -226,10 +259,7 @@ void ld_get_world(struct laser_data*ld, int i, double*x, double*y, int use_odome
 	gsl_vector_set(p, 0, cos(ld->theta[i]) * ld->readings[i]);
 	gsl_vector_set(p, 1, sin(ld->theta[i]) * ld->readings[i]);
 	
-	if(use_odometry)
-		copy_from_array(pose, ld->odometry);
-	else
-		copy_from_array(pose, ld->estimate);
+	copy_from_array(pose, ld_get_reference(ld, use_reference));
 	
 	transform(p, pose, pw);
 	
@@ -241,15 +271,15 @@ void ld_get_world(struct laser_data*ld, int i, double*x, double*y, int use_odome
 	gsl_vector_free(pose);
 }
 
-void ld_getbb(struct laser_data* ld, double*x0, double*y0, double*x1, double*y1,
- 	int use_odometry, double horizon) {
+void ld_getbb(LDP  ld, double*x0, double*y0, double*x1, double*y1,
+ 	int use_reference, double horizon) {
 	
 	int first=1;
 	int i; for(i=0;i<ld->nrays;i++) {
 		if(!ld->valid[i]) continue;
 		if(ld->readings[i]>horizon) continue;
 		double x,y;
-		ld_get_world(ld, i, &x, &y, use_odometry);
+		ld_get_world(ld, i, &x, &y, use_reference);
 		
 		if(first) {
 			*x0 = *x1 = x;

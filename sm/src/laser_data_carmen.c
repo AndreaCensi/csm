@@ -2,6 +2,7 @@
 #include <math.h>
 #include "math_utils.h"
 #include "laser_data.h"
+#include "logging.h"
 
 const char * carmen_prefix = "FLASER ";
 
@@ -16,7 +17,7 @@ int read_next_double(const char*line, int*cur, double*d) {
 	return 0;
 }
 
-/** Read next FLASER line in file (initializes ld). Returns 0 if error or EOF. */
+/** Read next FLASER line in file (initializes ld). Returns !=0 if error or EOF. */
 int ld_read_next_laser_carmen(FILE*file, LDP ld) {
 	#define MAX_LINE_LENGTH 10000
    char line[MAX_LINE_LENGTH];
@@ -24,15 +25,17 @@ int ld_read_next_laser_carmen(FILE*file, LDP ld) {
 	while(fgets(line, MAX_LINE_LENGTH-1, file)) {
 		
 		if(0 != strncmp(line, carmen_prefix, strlen(carmen_prefix))) {
-			printf("Skipping line: \n-> %s\n", line);
+			sm_debug("Skipping line: \n-> %s\n", line);
 			continue;
 		}
 		
 		int cur = strlen(carmen_prefix); int inc;
 		
 		int nrays;
-		if(1 != sscanf(line+cur, "%d %n", &nrays, &inc)) 
+		if(1 != sscanf(line+cur, "%d %n", &nrays, &inc)) {
+			sm_debug("Could not get number of rays.\n");
 			goto error;
+		}
 		cur += inc;
 			
 		ld_alloc(ld, nrays);	
@@ -44,7 +47,7 @@ int ld_read_next_laser_carmen(FILE*file, LDP ld) {
 		for(i=0;i<nrays;i++) {
 			double reading;
 			if(read_next_double(line,&cur,&reading)) {
-				printf("At ray #%d, ",i); 
+				sm_error("Could not read ray #%d, \n",i); 
 				goto error;
 			}
 				
