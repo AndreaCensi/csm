@@ -39,6 +39,8 @@ void copy_from_array(gsl_vector*v, double*);
 
 double minmax(int from,int to,int x);
 
+/** Copies n doubles from from to to */
+void copy_d(const double*from, int n, double*to);
 /* With doubles */
 void ominus_d(const double *x, double*res);
 void oplus_d(const double*x1, const double*x2, double*res);

@@ -44,20 +44,31 @@ int json_stream_skip(FILE*f) {
 }
 
 JO json_read_stream(FILE*f) {
-	#define MAX_SIZE 500000
-	char buf[MAX_SIZE+1];
-	unsigned short bufs[MAX_SIZE+1];
+	
+	size_t buf_size = 100000;
+	char * buf = (char*) malloc(buf_size);
 	
 	int count = 0;
 	
 	JSON_checker_init();
-	while(count < MAX_SIZE) {
+	while(1) {
+		if(count > buf_size - 2) {
+			buf_size *= 2;
+			char * new_buf = realloc(buf, buf_size);
+			if(!new_buf) {
+				mc_error("Having read %d bytes, cannot allocate a block of size %d.",
+					count, buf_size);
+				free(buf);
+				return 0;
+			}
+			buf = new_buf;
+		}
 		char c;
 		if(1 != fread(&c,1,1,f)) {
 			if(feof(f)) {
-				if(count==0) return 0;
+				if(count==0) { free(buf); return 0; }
 				mc_error("EOF while %d were read: \n\t'%.*s'. \n", count, count, buf);
-				return 0;
+				free(buf); return 0;
 			} 
 			mc_error("Reading error: %s\n", strerror(errno));
 			return 0;
@@ -65,26 +76,22 @@ JO json_read_stream(FILE*f) {
 			if(count==0 && isspace(c)) continue;
 			
 			buf[count] = c;
-			bufs[count] = c;
 			count++;
 
 			if(!JSON_checker_push(c)) {
 				mc_error("Malformed JSON object: \n'%.*s'\n", count, buf);
-				return 0;
+				free(buf); return 0;
 			}
 			
 			if(JSON_checker_finished()) {
 /*				sm_de("Found object.\n"); */
 				JO jo = json_tokener_parse_len(buf, count);
 
-				return jo;
+				free(buf); return jo;
 			}
 			
 		}
 	}
-	
-	mc_error("Object size = %d is bigger than MAX_SIZE = %d\n",  MAX_SIZE);	
-	return 0;
 }
 
 

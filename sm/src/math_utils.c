@@ -108,6 +108,9 @@ void pose_diff(const gsl_vector*pose2,const gsl_vector*pose1,gsl_vector*res) {
 	gsl_vector_free(temp);
 }
 
+void copy_d(const double*from, int n, double*to) {
+	int i; for(i=0;i<n;i++) to[i] = from[i];
+}
 
 void ominus_d(const double *x, double*res) {
 	double c = cos(x[2]);

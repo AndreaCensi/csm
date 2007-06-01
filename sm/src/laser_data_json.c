@@ -30,7 +30,7 @@ JO matrix_to_json(gsl_matrix*m) {
 }
 
 int json_to_corr(JO array, struct correspondence*corr, int n) {
-	/** XXX : check it's array and size is good */
+	/** XXX : check it's an array and its size is good */
 	int i;
 	for(i=0;i<n;i++) {
 		JO element = json_object_array_get_idx(array, i);
@@ -201,7 +201,7 @@ LDP ld_read_smart(FILE*f) {
 	while(1) {
 		c = fgetc(f);
 		if(feof(f)) { 
-			sm_debug("eof\n");
+			/* sm_debug("eof\n"); */
 			return 0;
 		}
 		if(!isspace(c)) break;
@@ -224,8 +224,8 @@ LDP ld_read_smart(FILE*f) {
 			return ld;
 		}
 		default:
-		sm_error("Could not read ld. First char is '%c'\n", c);
-		ungetc(c, f);
+			sm_error("Could not read ld. First char is '%c'. \n", c);
+			
 		return 0;
 	}
 }

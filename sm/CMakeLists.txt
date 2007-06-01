@@ -131,6 +131,9 @@
 
 		ADD_EXECUTABLE(sm1 apps/sm1.c)
 		TARGET_LINK_LIBRARIES(sm1 sm ${GSL_LIBRARIES} options)
+	
+		ADD_EXECUTABLE(sm2 apps/sm2.c)
+		TARGET_LINK_LIBRARIES(sm2 sm ${GSL_LIBRARIES} options)
 
 		ADD_EXECUTABLE(ld_fisher apps/ld_fisher.c)
 		TARGET_LINK_LIBRARIES(ld_fisher  sm ${GSL_LIBRARIES} options)

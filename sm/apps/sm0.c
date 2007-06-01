@@ -2,6 +2,7 @@
 #include "../src/math_utils.h"
 #include "../src/sm.h"
 #include "../src/laser_data.h"
+#include "../src/logging.h"
 
 extern int distance_counter;
 int main(int argc, const char*argv[]) {
@@ -76,15 +77,15 @@ int main(int argc, const char*argv[]) {
 	clock_t end = clock();
 	float seconds = (end-start)/((float)CLOCKS_PER_SEC);
 	
-	printf("sm0: CPU time = %f (seconds) (start=%d end=%d)\n", seconds,(int)start,(int)end);
-	printf("sm0: Total number of matchings = %d\n", num_matchings);
-	printf("sm0: Total number of iterations = %d\n", num_iterations);
-	printf("sm0: Avg. iterations per matching = %f\n", num_iterations/((float)num_matchings));
-	printf("sm0: Avg. seconds per matching = %f\n", seconds/num_matchings);
-	printf("sm0:   that is, %d matchings per second\n", (int)floor(num_matchings/seconds));
-	printf("sm0: Avg. seconds per iteration = %f (note: very imprecise)\n", seconds/num_iterations);
-	printf("sm0: Number of comparisons = %d \n", distance_counter);
-	printf("sm0: Avg. comparisons per ray = %f \n", 
+	sm_debug("sm0: CPU time = %f (seconds) (start=%d end=%d)\n", seconds,(int)start,(int)end);
+	sm_debug("sm0: Total number of matchings = %d\n", num_matchings);
+	sm_debug("sm0: Total number of iterations = %d\n", num_iterations);
+	sm_debug("sm0: Avg. iterations per matching = %f\n", num_iterations/((float)num_matchings));
+	sm_debug("sm0: Avg. seconds per matching = %f\n", seconds/num_matchings);
+	sm_debug("sm0:   that is, %d matchings per second\n", (int)floor(num_matchings/seconds));
+	sm_debug("sm0: Avg. seconds per iteration = %f (note: very imprecise)\n", seconds/num_iterations);
+	sm_debug("sm0: Number of comparisons = %d \n", distance_counter);
+	sm_debug("sm0: Avg. comparisons per ray = %f \n", 
 		(distance_counter/((float)num_iterations*params.laser_ref.nrays)));
 	
 	gsl_vector_free(u);

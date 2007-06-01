@@ -41,7 +41,7 @@ int main(int argc, const char*argv[]) {
 	
 	struct option * ops = options_allocate(10);
 	options_int(ops, "interval", &p.interval, 10, "how many to ignore");
-	options_string(ops, "in", &p.input_filename, "<unset>", "input file (Carmen or JSON)");
+	options_string(ops, "in", &p.input_filename, "stdin", "input file (Carmen or JSON)");
 	options_string(ops, "out", &p.output_filename, "carmen2pdf.pdf", "output file (PDF)");
 	options_double(ops, "lt", &p.line_threshold, 0.2, "threshold for linking points (m)");
 	options_double(ops, "horizon", &p.horizon, 8.0, "horizon of the laser (m)");
