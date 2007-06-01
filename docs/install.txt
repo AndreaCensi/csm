@@ -1,0 +1,27 @@
+
+## Required software ##
+
+This software has been tested on Mac OS X, Linux, and Windows XP (using Cygwin).
+
+The build system is based on `cmake`, which is available at
+  <http://www.cmake.org/>.
+
+The only compiler tested was GCC (3.3 or 4.x).
+
+For `carmen2pdf`, you will need the Cairo graphics library, available at
+  <http://cairographics.org>
+
+## Installation ##
+
+If you are lucky, this should be it:
+
+	$ cmake .
+	$ make
+
+If you want to install this library system-wide, you could use:
+
+	$ cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr/local .
+
+as the first step.
+
+For installing the ruby wrapper, refer to the separate instructions.
