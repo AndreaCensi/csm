@@ -3,12 +3,19 @@
 require 'tempfile'
 require 'optparse'
 require 'fileutils'
+require 'pathname'
+
 SCALE=4
 
 BBOX = /^%%BoundingBox: (\d+) (\d+) (\d+) (\d+)$/
 
-def outputOfCmd(m)
+def execute_cmd(m)
+	puts "$ " + m 
 	system m
+	if $?.exitstatus != 0
+		puts "\n\n\t command:\n\n\t#{m}\n\n\tFAILED\n\n"
+		exit($?.exitstatus)
+	end
 end
 
 def eps_get_bounds(epsfile)
@@ -151,6 +158,7 @@ end
 dir=File.dirname(input)
 
 basename=File.basename(input,".fig").sub(/^\.\//,"");
+$stderr.puts "dir #{basename}"
 $stderr.puts "basename #{basename}"
 outpng="#{dir}/#{basename}.png"
 outpdf="#{dir}/#{basename}.pdf"
@@ -162,8 +170,11 @@ slidedvi="#{dir}/#{basename}_slide.dvi"
 slideps="#{dir}/#{basename}_slide.ps"
 slidepdf="#{dir}/#{basename}_slide.pdf"
 
-outputOfCmd "fig2dev -L pstex_t  #{opt_fig2dev} -p #{basename}_tmp #{input} #{temp}.tex"
-outputOfCmd "fig2dev -L pstex    #{opt_fig2dev}    #{input} #{temp}.eps"
+abs_dir = Pathname.new("#{dir}").realpath
+absolute_img = abs_dir + "#{basename}_tmp"
+
+execute_cmd "fig2dev -L pstex_t  #{opt_fig2dev} -p #{absolute_img} #{input} #{temp}.tex"
+execute_cmd "fig2dev -L pstex    #{opt_fig2dev}    #{input} #{temp}.eps"
 
 preamble_text = opt_preamble ? "\\input{#{opt_preamble}}" : "%"
 
@@ -178,7 +189,7 @@ slidecontent=<<EOF
                 \\usepackage{ae,aecompl,aeguill}
 		#{preamble_text} 
 		\\begin{document}\\thispagestyle{empty}
-		\\input{#{basename}_tmp.tex}
+		\\input{#{abs_dir}/#{basename}_tmp.tex}
 		\\end{document}
 EOF
 
@@ -186,23 +197,23 @@ File.open(slide,"w") do |f|
 	f.puts slidecontent 
 end
 
-outputOfCmd	"latex #{slide}"
-outputOfCmd	"dvips -Ppdf -E #{slidedvi} -o #{slideps}"
+execute_cmd	"latex -output-directory=#{abs_dir} #{slide}"
+execute_cmd	"dvips -Ppdf -E #{slidedvi} -o #{slideps}"
 
 if opt_bounds then change_bounds(slideps, opt_bounds) end
 
 if opt_output then outpdf = opt_output end
 		
-outputOfCmd	"epstopdf #{slideps} --outfile=#{outpdf}"
+execute_cmd	"epstopdf #{slideps} --outfile=#{outpdf}"
 
-outputOfCmd  "rm -f #{slide} #{slidedvi} #{slideps} #{temp}.* #{slideprefix}.*"
+execute_cmd  "rm -f #{slide} #{slidedvi} #{slideps} #{temp}.* #{slideprefix}.*"
 
-#outputOfCmd	"pstoimg -antialias -aaliastext -scale #{SCALE} -out #{outpng} #{slideps}"
+#execute_cmd	"pstoimg -antialias -aaliastext -scale #{SCALE} -out #{outpng} #{slideps}"
 #	epstopdf #{figureeps} $WHERE/figure-$basename.eps
-#outputOfCmd     "convert -density 600x600 #{slidepdf} -resize 640 #{outpng}"
-#outputOfCmd "eps2eps #{basename}_tmp.eps temp.eps"
-#outputOfCmd "epstopdf  temp.eps "
-#outputOfCmd "cp  temp.pdf #{basename}_tmp.pdf "
+#execute_cmd     "convert -density 600x600 #{slidepdf} -resize 640 #{outpng}"
+#execute_cmd "eps2eps #{basename}_tmp.eps temp.eps"
+#execute_cmd "epstopdf  temp.eps "
+#execute_cmd "cp  temp.pdf #{basename}_tmp.pdf "
 end
 
 
