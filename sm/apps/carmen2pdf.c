@@ -13,7 +13,7 @@
 #include "../src/utils.h"
 #include "../src/logging.h"
 
-enum reference { Odometry = 1, Estimate = 2, True_pose = 3 };
+typedef enum { Odometry = 1, Estimate = 2, True_pose = 3 } reference;
 const char*reference_name[4] = { "invalid","odometry","estimate","true_pose"};
 
 struct params {
@@ -28,13 +28,13 @@ struct params {
 
 	/**/
 	FILE*input_file;
-	int use_reference;
+	reference use_reference;
 };
 
 void carmen2pdf(struct params p);
 
 void ld_getbb(LDP  ld, double*x0, double*y0, double*x1, double*y1, 
-	int use_reference, double horizon);
+	reference use_reference, double horizon);
 
 int main(int argc, const char*argv[]) {
 	struct params p;
@@ -76,7 +76,7 @@ int should_consider(struct params *p, int counter) {
 	return counter%p->interval == 0;
 }
 
-void ld_get_world(LDP ld, int i, double*x, double*y,int use_reference);
+void ld_get_world(LDP ld, int i, double*x, double*y, reference use_reference);
 
 struct bounding_box {
 	/** World frame */
@@ -128,7 +128,7 @@ int any_nan(double *d, int n) {
 	return 0;
 }
 
-double * ld_get_reference(LDP ld, int use_reference) {
+double * ld_get_reference(LDP ld, reference use_reference) {
 	double * pose;
 	switch(use_reference) {
 		case Odometry: pose = ld->odometry; break;
@@ -251,7 +251,7 @@ void carmen2pdf(struct params p) {
 	cairo_surface_destroy (surface);
 }
 
-void ld_get_world(LDP ld, int i, double*x, double*y, int use_reference) {
+void ld_get_world(LDP ld, int i, double*x, double*y, reference use_reference) {
 	gsl_vector * p = gsl_vector_alloc(2);
 	gsl_vector * pw = gsl_vector_alloc(2);
 	gsl_vector * pose = gsl_vector_alloc(3);
@@ -272,7 +272,7 @@ void ld_get_world(LDP ld, int i, double*x, double*y, int use_reference) {
 }
 
 void ld_getbb(LDP  ld, double*x0, double*y0, double*x1, double*y1,
- 	int use_reference, double horizon) {
+ 	reference use_reference, double horizon) {
 	
 	int first=1;
 	int i; for(i=0;i<ld->nrays;i++) {
