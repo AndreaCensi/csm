@@ -46,8 +46,8 @@ int main(int argc, const char * argv[]) {
 				*reading -= fmod(*reading , p.discretization);
 		}
 		JO jo = ld_to_json(ld);
-		printf(json_object_to_json_string(jo));
-		printf("\n");
+		puts(json_object_to_json_string(jo));
+		puts("\n");
 		jo_free(jo);
 		ld_free(ld);
 	}

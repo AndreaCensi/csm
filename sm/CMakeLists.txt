@@ -125,49 +125,34 @@
 	INSTALL(FILES src/laser_data.h  DESTINATION include)
 
 	########### SM applications ########## 
-
-		ADD_EXECUTABLE(sm0 apps/sm0.c)
-		TARGET_LINK_LIBRARIES(sm0 sm ${GSL_LIBRARIES})
-
-		ADD_EXECUTABLE(sm1 apps/sm1.c)
-		TARGET_LINK_LIBRARIES(sm1 sm ${GSL_LIBRARIES} options)
 	
-		ADD_EXECUTABLE(sm2 apps/sm2.c)
-		TARGET_LINK_LIBRARIES(sm2 sm ${GSL_LIBRARIES} options)
+	MACRO(new_executable exec)
+		ADD_EXECUTABLE(${exec} apps/${exec}.c)
+		TARGET_LINK_LIBRARIES(${exec} sm ${GSL_LIBRARIES} options)
+		INSTALL(PROGRAMS ${exec} DESTINATION bin)
+	ENDMACRO(new_executable exec)
+	
+	new_executable(sm0)
+	new_executable(sm1)
+	new_executable(sm2)
+	new_executable(sm0)
+	new_executable(json_extract)
+	new_executable(carmen2json)
+	new_executable(ld_noise)
+	new_executable(ld_slip)
+	new_executable(ld_fisher)
 
-		ADD_EXECUTABLE(ld_fisher apps/ld_fisher.c)
-		TARGET_LINK_LIBRARIES(ld_fisher  sm ${GSL_LIBRARIES} options)
+	new_executable(test_json_ld)
+	new_executable(test_json)
 
-		ADD_EXECUTABLE(test_math_utils src/math_utils_test.c)
-		TARGET_LINK_LIBRARIES(test_math_utils sm ${GSL_LIBRARIES})
+	ADD_EXECUTABLE(test_math_utils src/math_utils_test.c)
+	TARGET_LINK_LIBRARIES(test_math_utils sm ${GSL_LIBRARIES})
 
-		ADD_EXECUTABLE(json_pipe apps/json_pipe.c)
-		TARGET_LINK_LIBRARIES(json_pipe sm ${GSL_LIBRARIES} options)
 
-		ADD_EXECUTABLE(json_extract apps/json_extract.c)
-		TARGET_LINK_LIBRARIES(json_extract json-c options)
-
-		ADD_EXECUTABLE(test_json_ld apps/test_json_ld.c)
-		TARGET_LINK_LIBRARIES(test_json_ld sm ${GSL_LIBRARIES})
-
-		ADD_EXECUTABLE(test_json apps/test_json.c)
-		TARGET_LINK_LIBRARIES(test_json sm ${GSL_LIBRARIES})
-
-		ADD_EXECUTABLE(carmen2json apps/carmen2json.c)
-		TARGET_LINK_LIBRARIES(carmen2json sm)
-
-		ADD_EXECUTABLE(ld_noise apps/ld_noise.c)
-		TARGET_LINK_LIBRARIES(ld_noise sm ${GSL_LIBRARIES} options)
-
-		ADD_EXECUTABLE(ld_slip apps/ld_slip.c)
-		TARGET_LINK_LIBRARIES(ld_slip sm ${GSL_LIBRARIES} options)
-
-	########### Carmen2pdf ########## 
+########### Carmen2pdf ########## 
 IF(CAIRO_FOUND)
-	ADD_EXECUTABLE(carmen2pdf apps/carmen2pdf.c)
-	TARGET_LINK_LIBRARIES(carmen2pdf sm ${GSL_LIBRARIES})
-	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -I../deploy/include/cairo")
+	new_executable(carmen2pdf)
+	
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CAIRO_CFLAGS}")
-	TARGET_LINK_LIBRARIES(carmen2pdf options -lcairo)
-
+	TARGET_LINK_LIBRARIES(carmen2pdf -lcairo)
 ENDIF(CAIRO_FOUND)

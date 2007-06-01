@@ -19,8 +19,8 @@ int main(int argc, const char * argv[]) {
 	
 	while((jo = json_read_stream(stdin))) {
 		int i; for(i=0;i<n;i++) {
-			printf(json_object_to_json_string(jo));
-			printf("\n");
+			puts(json_object_to_json_string(jo));
+			puts("\n");
 		}
 	}
 	
