@@ -15,7 +15,7 @@
 #endif
 
 #ifndef NAN
-#define NAN nan("")
+#define NAN GSL_NAN
 #endif
      
 void possible_interval(
