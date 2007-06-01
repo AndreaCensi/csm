@@ -34,7 +34,6 @@ int gpc_solve_valid(int K, const struct gpc_corr*c, const int*valid,
 	M(temp41,  4,1); M(temp22,2,2);	M(temp22b,2,2);
 	M(temp42,  4,2); M(temp44,4,4);	M(temp21, 2,1);
 	M(temp22c, 2,2); M(temp12,1,2);
-	M(temp42b,4,2);
 	
 	gsl_matrix_set_zero(bigM);
 	gsl_matrix_set_zero(g);
@@ -53,11 +52,6 @@ int gpc_solve_valid(int K, const struct gpc_corr*c, const int*valid,
 		gms(q_k,0,0,c[k].q[0]);gms(q_k,1,0,c[k].q[1]);
 		
 		m_trans(bigM_k, bigM_k_t);
-		if(0) {
-		m_display("before t42 is ",temp42);
-		m_display("bigM_k_t",bigM_k_t);
-		m_display("C_k",C_k);
-		}
 		m_mult(bigM_k_t, C_k, temp42);
 		m_mult(temp42, bigM_k, temp44);
 		m_scale(2.0, temp44);
@@ -115,7 +109,7 @@ int gpc_solve_valid(int K, const struct gpc_corr*c, const int*valid,
 		m_display("now g is ",g);
 	}
 	
-	if(1) {
+	if(0) {
 		m_display("bigM",bigM);
 		m_display("g",g);
 	}
@@ -193,7 +187,7 @@ int gpc_solve_valid(int K, const struct gpc_corr*c, const int*valid,
 	double q[5] = {p[0]-(l[0]*l[0]), p[1]-(2*l[1]*l[0]), 
 		p[2]-(l[1]*l[1]+2*l[0]*l[2]), -(2*l[2]*l[1]), -(l[2]*l[2])};
 	
-	if(1) {
+	if(0) {
 		printf("p = %f %f %f \n", p[2], p[1], p[0]);
 		printf("l = %f %f %f \n", l[2], l[1], l[0]);
 		printf("q = %f %f %f %f %f \n", q[4],  q[3],  q[2], q[1], q[0]);
@@ -201,7 +195,7 @@ int gpc_solve_valid(int K, const struct gpc_corr*c, const int*valid,
 
 	double lambda = poly_greatest_real_root(5,q);
 	
-	if(1) {
+	if(0) {
 		printf("lambda = %f \n", lambda);
 	}	
 	
