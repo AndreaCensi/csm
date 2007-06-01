@@ -13,9 +13,9 @@ struct egsl_val {
 typedef struct egsl_val val;
 
 /* Core functions */
-void egsl_push();
-void egsl_pop();
-void egsl_free();
+void egsl_push(void);
+void egsl_pop(void);
+void egsl_free(void);
 
 double* egsl_atmp(val v, size_t i, size_t j);
 val egsl_alloc(size_t rows, size_t columns);
@@ -75,11 +75,11 @@ val egsl_rot(double theta);
 void egsl_print(const char*str, val);	
 /** Prints eigenvalues and eigenvectors of a symmetric matrix */
 void egsl_print_spectrum(const char*s, val v);
-void egsl_print_stats();
+void egsl_print_stats(void);
 
 
 	
 /** Private implementations things */
 void egsl_expect_size(val v, size_t rows, size_t cols);
-
+void egsl_error(void);
 #endif

@@ -6,10 +6,12 @@
 #include <math.h>
 
 #include "egsl.h"
+#include "egsl_imp.h"
 #define MAX_VALS 1024
 #define MAX_CONTEXTS 1024
 
 #define INVALID (val_from_context_and_index(1000,1000))
+
 
 struct egsl_variable {
 	gsl_matrix * gsl_m;
@@ -30,7 +32,7 @@ int egsl_first_time = 1;
 int egsl_total_allocations = 0;
 int egsl_cache_hits = 0;
 
-void error() {
+void egsl_error(void) {
 	/* TODO: better handling of errors */
 	
 	egsl_print_stats();
@@ -62,13 +64,13 @@ void check_valid_val(val v) {
 	int context = its_context(v);
 	if(context>cid) {
 		fprintf(stderr, "Val is from invalid context (%d>%d)\n",context,cid);
-		error();
+		egsl_error();
 	}
 	int var_index = its_var_index(v);
 	if(var_index >= egsl_contexts[context].nvars) {
 		fprintf(stderr, "Val is invalid  (%d>%d)\n",var_index, 
 			egsl_contexts[context].nvars);		
-		error();
+		egsl_error();
 	}
 }
 #endif
@@ -118,7 +120,7 @@ val egsl_alloc(size_t rows, size_t columns) {
 	
 	if(c->nvars>=MAX_VALS) {
 		fprintf(stderr,"Limit reached, in context %d, nvars is %d\n",cid,c->nvars);
-		error();
+		egsl_error();
 	}
 	int index = c->nvars;
 	if(index<c->nallocated) {
@@ -155,7 +157,7 @@ val egsl_alloc_in_context(int context, size_t rows, size_t columns) {
 /** Creates a copy of v in the previous context. */
 val egsl_promote(val v) {
 	if(cid==0) {
-		error();
+		egsl_error();
 	}
 
 	gsl_matrix * m = egsl_gslm(v);
@@ -176,7 +178,7 @@ void egsl_expect_size(val v, size_t rows, size_t cols) {
 		fprintf(stderr, "Matrix size is %d,%d while I expect %d,%d",
 			(int)m->size1,(int)m->size2,(int)rows,(int)cols);
 		
-		error();
+		egsl_error();
 	}
 }
 

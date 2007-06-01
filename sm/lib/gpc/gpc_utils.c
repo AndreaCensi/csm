@@ -80,7 +80,7 @@ void m_display(const char*str, gsl_matrix*m) {
 	for(i=0;i<m->size1;i++) {
 		printf("   ");
 		for(j=0;j<m->size2;j++)
-			printf("%f ", gmg(m,i,j));
+			printf("%e ", gmg(m,i,j));
 		printf("\n");
 	}
 }

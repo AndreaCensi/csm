@@ -29,6 +29,13 @@ void ld_create_jump_tables(struct laser_data* ld) {
 		ld->down_bigger[i] = j-i;
 	}	
 }
+extern int distance_counter;
+inline double distance2(const gsl_vector* a, const gsl_vector* b) {
+        distance_counter++;
+        double x = gvg(a,0)-gvg(b,0);
+        double y = gvg(a,1)-gvg(b,1);
+        return sqrt(x*x+y*y);
+}
 
 void find_correspondences_tricks(struct sm_params*params, gsl_vector* x_old) {
 	LDP laser_ref  = &(params->laser_ref);
@@ -107,6 +114,7 @@ void find_correspondences_tricks(struct sm_params*params, gsl_vector* x_old) {
 				
 				/* This is the distance from p_i_w to the "up" point*/
 				last_dist_up = distance(p_i_w, laser_ref->p[up]);
+				
 				/* If it is less than the best point, it is our new j1 */
 				if( (last_dist_up<params->max_correspondence_dist) && 
 					((j1==-1)||(last_dist_up < best_dist))) {
@@ -150,7 +158,7 @@ void find_correspondences_tricks(struct sm_params*params, gsl_vector* x_old) {
 				if(down < from) { down_stopped = 1; continue; }
 				if(!laser_ref->valid[down]) { --down; continue; }
 		
-				last_dist_down = distance(p_i_w, laser_ref->p[down]);
+				last_dist_down = distance2(p_i_w, laser_ref->p[down]);
 				if( (last_dist_down<params->max_correspondence_dist) && 
 				    ((j1==-1)||(last_dist_down < best_dist))) {
 						j1 = down; best_dist = last_dist_down;
@@ -195,8 +203,8 @@ void find_correspondences_tricks(struct sm_params*params, gsl_vector* x_old) {
 		}
 		if(j2up  ==-1) { j2 = j2down; } else
 		if(j2down==-1) { j2 = j2up; } else {
-			double dist_up   = distance(p_i_w, laser_ref->p[j2up  ]);
-			double dist_down = distance(p_i_w, laser_ref->p[j2down]);
+			double dist_up   = distance2(p_i_w, laser_ref->p[j2up  ]);
+			double dist_down = distance2(p_i_w, laser_ref->p[j2down]);
 			j2 = dist_up < dist_down ? j2up : j2down;
 		}
 

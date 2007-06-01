@@ -31,8 +31,8 @@
 	
 
 
-	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused -Wall -W -Wconversion  -Wunreachable-code ")
-	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb")
+	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused -Wall  -Wconversion  -Wunreachable-code ")
+#	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb")
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fstrict-aliasing")
 
 	
@@ -49,8 +49,11 @@
 #		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mtune=7450 -mcpu=7450 -O3")
 #		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ffast-math -fomit-frame-pointer -mtune=7450 -mcpu=7450 -O3")
 	ELSE(APPLE)
-		#SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pg")
-		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2")
+		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pg")
+		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3 -pipe -fomit-frame-pointer")
+
+		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=pentium3 -msse -O3 -pipe -fomit-frame-pointer")
+		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}  ")
 
 	ENDIF(APPLE)
 
@@ -164,4 +167,5 @@ IF(CAIRO_FOUND)
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -I../deploy/include/cairo")
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CAIRO_CFLAGS}")
 	TARGET_LINK_LIBRARIES(carmen2pdf options -lcairo)
+
 ENDIF(CAIRO_FOUND)
