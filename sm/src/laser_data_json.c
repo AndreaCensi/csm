@@ -3,7 +3,7 @@
 #include <math.h>
 #include <ctype.h>
 #include "logging.h"
-
+#include "math_utils.h"
 #include "laser_data_json.h"
 
 JO matrix_to_json(gsl_matrix*m) {
