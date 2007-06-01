@@ -49,11 +49,10 @@
 #		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mtune=7450 -mcpu=7450 -O3")
 #		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ffast-math -fomit-frame-pointer -mtune=7450 -mcpu=7450 -O3")
 	ELSE(APPLE)
-		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pg")
-		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3 -pipe -fomit-frame-pointer")
+		# SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pg")
+		# SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3 -pipe -fomit-frame-pointer")
 
-		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=pentium3 -msse -O3 -pipe -fomit-frame-pointer")
-		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}  ")
+		#SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=pentium3 -msse -O3 -pipe -fomit-frame-pointer")
 
 	ENDIF(APPLE)
 
