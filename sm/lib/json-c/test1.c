@@ -6,6 +6,7 @@
 
 int main(int argc, char **argv)
 {
+  argc = 0; argv = 0;
   struct json_tokener *tok;
   struct json_object *my_string, *my_int, *my_object, *my_array;
   struct json_object *new_obj;
@@ -166,7 +167,7 @@ printf("Hello\n");
 	struct json_object *my_array = json_object_new_array();
 	int i; for(i=0;i<20;i++) {
 		json_object_array_add(my_array, 
-			i%5 > 0 ? json_object_new_double(i) :
+			i%5 > 0 ? json_object_new_double((double)i) :
 				json_tokener_parse("null")
 					);
 	}
