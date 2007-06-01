@@ -56,9 +56,9 @@ int main(int argc, const char*argv[]) {
 	}
 	
 	p.use_reference = 0;
-	if(!strcmp(p.use, "odometry")) p.use_reference = Odometry;
-	if(!strcmp(p.use, "estimate")) p.use_reference = Estimate;
-	if(!strcmp(p.use, "true_pose")) p.use_reference = True_pose;
+	int i; for(i=1;i<=3;i++) 
+		if(!strcmp(p.use, reference_name[i]))
+			p.use_reference = (reference) i;
 	if(0 == p.use_reference) {
 		fprintf(stderr, "Invalid reference '%s'. " 
 			"Use one in 'odometry','estimate','true_pose'.\n", p.use);
