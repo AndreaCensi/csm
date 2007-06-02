@@ -33,7 +33,6 @@ set :raytracer_scan1, "-nrays 359 -fov_deg 360"
 set :raytracer_scan2, "-nrays 181 -fov_deg 180"
 set :sm1_config,      "sm1.config"
 
-
 	opt = OptionParser.new do |opts|
 #		opts.banner = "Usage: maruku [options] [file1.md [file2.md ..."
 #		opts.on("-v", "--[no-]verbose", "Run verbosely") do |v|
