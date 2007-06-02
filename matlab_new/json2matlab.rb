@@ -57,18 +57,54 @@ end
 
 class Object
 	def to_matlab() to_s end
+
 end
+
+class Object 
+	def recurse_json(&block) end
+end
+class Hash
+	def recurse_json(&block) 
+		each do |k, v|
+			self[k]=block.call(v, self)
+			self[k].recurse_json(&block)
+		end
+	end
+end
+
+class Array
+	def recurse_json(&block) 
+		each_index do |i|
+			self[i] = block.call(self[i], self)
+			self[i].recurse_json(&block)
+		end
+	end
+end
+
+io =  if file = ARGV[0] then File.open(file) else stdin end
 	
-	
-a = read_all_objects($stdin.read)
-$stderr.puts "found #{a.size} objects"
+a = read_all_objects(io.read)
+$stderr.puts "Found #{a.size} JSON objects."
 a = a[0] if a.size == 1 
 
-if function = ARGV[0]
-	puts "function res = #{function}"
-	puts "res = ..."
-	puts(a.to_matlab + ";")
+a.recurse_json do |child, parent| 
+	if parent.kind_of?(Array) and child.nil? then
+		(0.0/0.0) 
+	else
+		 child
+	end
+end
+
+if file = ARGV[0]
+	basename = File.basename(file).gsub(/\.\w*$/,'')
+	output_file = File.join(File.dirname(file), basename + ".m")
+	$stderr.puts "Writing to #{output_file}"
+	File.open(output_file, 'w') do |f|
+		f.puts "function res = #{basename}"
+		f.puts "res = ..."
+		f.puts(a.to_matlab + ";")
+	end
 else
-	puts(a.to_matlab + ";")	
+	$stdout.puts(a.to_matlab + ";")	
 end
 

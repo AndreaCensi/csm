@@ -2,7 +2,7 @@ def execute_cmd(m)
 	puts "$ " + m 
 	system m
 	if $?.exitstatus != 0
-		puts "\n\n\t command:\n\n\t#{m}\n\n\tFAILED\n\n"
+		$stderr.puts "\n\n\t command:\n\n\t#{m}\n\n\tFAILED\n\n"
 		exit($?.exitstatus)
 	end
 end
@@ -15,7 +15,7 @@ def search_cmd(program, additional_paths = nil)
 	for dir in path
 		p = File.join(dir, program)
 		if File.exists? p
-			$stderr.puts "Using #{p.inspect}"
+#			$stderr.puts "Using #{p.inspect}"
 			return p
 		end
 	end

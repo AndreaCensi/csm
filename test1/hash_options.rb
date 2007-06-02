@@ -7,7 +7,6 @@ class Hash
 		io.each do |line|
 			next if (line.strip.size == 0) || line =~ Comment
 			if m = Option.match(line)
-				p m.to_a
 				name = m[1]
 				value = m[2].strip
 				

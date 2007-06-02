@@ -3,6 +3,7 @@ require 'rubygems'
 require 'json'
 require 'fileutils'
 
+$LOAD_PATH << File.expand_path(File.dirname(__FILE__))
 require 'cmd_utils'
 
 FIG2PICS = find_cmd('fig2pics.rb')

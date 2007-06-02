@@ -24,10 +24,14 @@ function analyze_run(res)
 	m.covariances{3}.cov =  2 * crb;
 	m.covariances{3}.color = 'g--';
 
+	m.covariances{4}.mean = bias; %[0;0;0];
+	m.covariances{4}.cov =  res{1}.cov_x;
+	m.covariances{4}.color = 'm--';
+
 	m.legend = {  ...
 	        'Errors ';...
 	        'Errors covariance';...
-            'Cramer-Rao bound'; 'SM C.-R. bound' };
+            'Cramer-Rao bound'; 'SM C.-R. bound'; 'estimate of cov' };
 
 	m.format = '-depsc2';
 	m.prefix = 'test1';
