@@ -6,9 +6,13 @@ def read_all_objects(string)
 	a = []
 	j = JSON::Pure::Parser.new(string)
 	while true
-		j.scan(/\s/) 
+		j.scan(/\s*/) 
 		break if j.eos?
-		a.push j.parse
+		begin
+			a.push j.parse
+		rescue Exception => e
+			$stderr.write "After #{a.size} objects: #{e}" 
+		end
 	end	
 	a
 end
@@ -84,7 +88,7 @@ end
 io =  if file = ARGV[0] then File.open(file) else stdin end
 	
 a = read_all_objects(io.read)
-$stderr.puts "Found #{a.size} JSON objects."
+$stderr.write "json2matlab: Found #{a.size} JSON objects. "
 a = a[0] if a.size == 1 
 
 a.recurse_json do |child, parent| 
@@ -98,7 +102,7 @@ end
 if file = ARGV[0]
 	basename = File.basename(file).gsub(/\.\w*$/,'')
 	output_file = File.join(File.dirname(file), basename + ".m")
-	$stderr.puts "Writing to #{output_file}"
+	$stderr.puts "Writing to #{output_file.inspect}."
 	File.open(output_file, 'w') do |f|
 		f.puts "function res = #{basename}"
 		f.puts "res = ..."

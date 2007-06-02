@@ -3,7 +3,7 @@ class Hash
 	Comment = /^\s*\#/ 
 	Option  = /^\s*(\w+)\s*=?\s*(.+)$/ 
 
-	def read_conf(io)
+	def read_conf(io, dir)
 		io.each do |line|
 			next if (line.strip.size == 0) || line =~ Comment
 			if m = Option.match(line)
@@ -17,8 +17,13 @@ class Hash
 				end
 				self[name] = value
 #				$stderr.puts  "#{name} = #{value}"
+			elsif m = /^\s*<\s*(.*)$/.match(line)
+				filename = m[1]
+				filename = File.expand_path(File.join(dir, filename))
+				read_conf(File.open(filename), File.dirname(filename))
 			else
 				$stderr.puts "Line #{line.inspect} is malformed"
+				exit -1
 			end
 		end
 	end

@@ -51,7 +51,7 @@ int options_parse_args(struct option*ops, int argc, const char* argv[]) {
 		
 		if(!strcmp("config_dump", name)) {
 			options_dump(ops, stdout, 0);
-			exit(1);
+			exit(0);
 		}
 		
 		if(!strcmp("config", name)) {

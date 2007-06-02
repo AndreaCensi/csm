@@ -3,20 +3,22 @@ require 'optparse'
 require 'fileutils'
 $LOAD_PATH << File.expand_path(File.dirname(__FILE__))
 # export PATH=$PATH:~/icra07pis/src/libraries/fig/
+scripts_dir = File.expand_path File.join(File.dirname(__FILE__), '../scripts')
+$LOAD_PATH << File.expand_path(scripts_dir)
 require 'cmd_utils'
 require 'hash_options'
 
-additional_paths = ['../sm/', '../matlab_new/'].
+additional_paths = ['../sm/', '../scripts'].
 	map {|x| File.join(File.dirname($0), x) }
 
 RAYTRACER   = find_cmd('raytracer',      additional_paths)
 LD_DRAW     = find_cmd('ld_draw',        additional_paths)
-#FIGMERGE    = find_cmd('figmerge',       additional_paths)
 JSON_PIPE   = find_cmd('json_pipe',      additional_paths)
 LD_NOISE    = find_cmd('ld_noise',       additional_paths)
 LD_SLIP     = find_cmd('ld_slip',       additional_paths)
 SM1         = find_cmd('sm1',            additional_paths)
 JSON2MATLAB = find_cmd('json2matlab.rb', additional_paths)
+#FIGMERGE    = find_cmd('figmerge',       additional_paths)
 
 CONFIG = {}
 def set(name, value) CONFIG[name.to_s] = value end
@@ -54,7 +56,7 @@ set :sm1_journal,     "jj.txt"
 #		opts.on("-v", "--[no-]verbose", "Run verbosely") do |v|
 #			MaRuKu::Globals[:verbose] = v end
 		opts.on("--config CONFIG", "Options to pass to fig2dev") do |s|
-			CONFIG.read_conf(File.open(s))
+			CONFIG.read_conf(File.open(s), File.dirname(s))
 		end
 		opts.on("--config_dump", "Dumps config to stdout") do |s|
 			puts CONFIG.config_dump
@@ -71,7 +73,6 @@ set :sm1_journal,     "jj.txt"
 
 	dir = cfg :out
 	execute_cmd "mkdir -p #{dir}"
-	execute_cmd "cp #{cfg :sm1_config} #{dir}/sm1.config"
 	File.open("#{dir}/ex1.config",'w') do |f| f.puts CONFIG.config_dump end
 
 # Create perfect map
@@ -103,17 +104,20 @@ execute_cmd "#{JSON2MATLAB} #{dir}/scan2_noise.txt"
 
 do_journal = (cfg :sm1_journal).size > 0
 
+quiet = " 2> /dev/null "
 # first, localization
-journal = do_journal ?  ""  : "-file_jj #{dir}/loc_#{cfg :sm1_journal}"
+journal = do_journal ?  "-file_jj #{dir}/loc_journal.txt" : ""
 execute_cmd "#{SM1} -file1 #{dir}/scan_map_rep.txt -file2 #{dir}/scan2_noise.txt "+
-	"#{journal} -config #{cfg :sm1_config} > #{dir}/loc_results.txt "
+	"#{journal} -config #{cfg :sm1_config} #{quiet} > #{dir}/loc_results.txt "
 
 execute_cmd "#{JSON2MATLAB} #{dir}/loc_results.txt"
 
 # then, scan matching
-journal = do_journal ?  ""  : "-file_jj #{dir}/sm_#{cfg :sm1_journal}"
+journal = do_journal ?  "-file_jj #{dir}/sm_journal.txt" : ""
 execute_cmd "#{SM1} -file1 #{dir}/scan1_noise.txt -file2 #{dir}/scan2_noise.txt "+
-	"#{journal} -config #{cfg :sm1_config} > #{dir}/sm_results.txt "
+	"#{journal} -config #{cfg :sm1_config} #{quiet} > #{dir}/sm_results.txt "
+
+execute_cmd "#{SM1} -config #{cfg :sm1_config} -config_dump > #{dir}/sm1.config"
 
 execute_cmd "#{JSON2MATLAB} #{dir}/sm_results.txt"
 

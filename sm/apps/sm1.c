@@ -69,11 +69,16 @@ int main(int argc, const char*argv[]) {
 		
 		JO jo = result_to_json(&params, &result);
 
+			double true_x[3];
+			pose_diff_d(params.laser_sens.true_pose, 
+				params.laser_ref.true_pose, true_x);
 			double true_e[3];
-			int i=0;for(;i<3;i++) true_e[i] = result.x[i];
+			int i=0;for(;i<3;i++) true_e[i] = result.x[i] - true_x[i];
+			jo_add_double_array(jo, "true_x", true_x, 3);
 			jo_add_double_array(jo, "true_e", true_e, 3);
 			
-		printf("%s\n", json_object_to_json_string(jo));
+		puts(json_object_to_json_string(jo));
+		puts("\n");
 	}
 	
 	return 0;
