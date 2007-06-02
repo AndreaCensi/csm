@@ -3,31 +3,9 @@ require 'rubygems'
 require 'json'
 require 'fileutils'
 
-def execute_cmd(m)
-	puts "$ " + m 
-	system m
-	if $?.exitstatus != 0
-		puts "\n\n\t command:\n\n\t#{m}\n\n\tFAILED\n\n"
-		exit($?.exitstatus)
-	end
-end
+require 'cmd_utils'
 
-def search_cmd(program)
-	path = ENV['PATH'].split(":") 
-	path.push File.dirname($0)
-	path.push Dir.pwd
-	for dir in path
-		p = File.join(dir, program)
-		if File.exists? p
-			$stderr.puts "Using #{p.inspect}"
-			return p
-		end
-	end
-	puts "\n\n Could not find program #{program.inspect}"
-	exit -1
-end
-
-FIG2PICS = search_cmd('fig2pics.rb')
+FIG2PICS = find_cmd('fig2pics.rb')
 
 spec = ARGV[0]
 
@@ -51,8 +29,7 @@ frames.each_with_index do |depths, i |
 	opt_depths = "+" + depths.join(',')
 	filename = sprintf("#{temp_dir}/video%04d.pdf", i)
 	other = ARGV[1, ARGV.size].map{|x|x.inspect }.join(' ')
-	cmd = "#{FIG2PICS} -f '-D #{opt_depths}' -o #{filename} #{other} #{fig}"
-	execute_cmd cmd
+	execute_cmd "#{FIG2PICS} -f '-D #{opt_depths}' -o #{filename} #{other} #{fig}"
 	filenames.push filename
 end
 

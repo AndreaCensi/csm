@@ -5,18 +5,11 @@ require 'optparse'
 require 'fileutils'
 require 'pathname'
 
+require 'cmd_utils'
+
 SCALE=4
 
 BBOX = /^%%BoundingBox: (\d+) (\d+) (\d+) (\d+)$/
-
-def execute_cmd(m)
-	puts "$ " + m 
-	system m
-	if $?.exitstatus != 0
-		puts "\n\n\t command:\n\n\t#{m}\n\n\tFAILED\n\n"
-		exit($?.exitstatus)
-	end
-end
 
 def eps_get_bounds(epsfile)
 	File.open(epsfile) do |f|

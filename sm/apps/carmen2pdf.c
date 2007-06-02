@@ -47,7 +47,7 @@ int main(int argc, const char*argv[]) {
 	options_double(ops, "horizon", &p.horizon, 8.0, "horizon of the laser (m)");
 	options_double(ops, "padding", &p.padding, 0.2, "padding around bounding box (m)");
 	options_double(ops, "dimension", &p.dimension, 500.0, "dimension of the image (points)");
-	options_string(ops, "use", &p.use, "odometry", "One in 'odometry','estimate','true_pose'");
+	options_string(ops, "use", &p.use, "estimate", "One in 'odometry','estimate','true_pose'");
 	
 	if(!options_parse_args(ops, argc, argv)) {
 		fprintf(stderr, "error.");

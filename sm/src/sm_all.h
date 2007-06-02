@@ -9,6 +9,8 @@ extern "C" {
 
 #include "sm.h"
 
+#include "utils.h"
+
 #ifdef __cplusplus
 }
 #endif
