@@ -12,7 +12,7 @@
 		INCLUDE_DIRECTORIES(${GSL_INCLUDE_DIR})	
 		LINK_DIRECTORIES(${GSL_LINK_DIRECTORIES})		 
 	ELSE(GSL_FOUND)
-		MESSAGE(ERROR "GSL not found.")
+		MESSAGE(SEND_ERROR "GSL not found.")
 	ENDIF(GSL_FOUND)
 
 	INCLUDE (FindCairo.cmake)                                                                                         
