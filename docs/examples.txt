@@ -1,0 +1,30 @@
+
+## Examples ##
+
+Scan-matching:
+
+	$ sm2 < in.log > out.log
+
+where `in.log` may be in either Carmen or JSON format.
+
+Creating a pdf:
+
+	$ carmen2pdf -use odometry  -in in.log -out out.pdf
+	$ carmen2pdf -use estimate  -in in.log -out out.pdf
+	$ carmen2pdf -use true_pose -in in.log -out out.pdf
+
+## Examining one particular matching ##
+
+To zoom on one particular matching, write a journal:
+
+	$ sm2 -file_jj journal.txt < in.log > out.log
+
+Extract what you are interested in from the journal:
+
+	$ json_extract -nth 13 < journal.txt > matching13.txt
+
+Create animation:
+
+	$ sm_icp_animation -in matching13.txt -out matching13.fig
+	$ create_video.rb matching13.fig.desc
+
