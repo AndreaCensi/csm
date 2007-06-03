@@ -1,10 +1,10 @@
+#include <math.h>
+
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
 
-#include <math.h>
 #include <options/options.h>
-#include "../src/laser_data_json.h"
-#include "../src/math_utils.h"
+#include <csm/csm_all.h>
 
 struct ld_fisher_params {
 	double sigma;

@@ -5,13 +5,7 @@
 
 #include <options/options.h>
 
-
-#include "../src/math_utils.h"
-#include "../src/sm.h"
-#include "../src/laser_data.h"
-#include "../src/laser_data_json.h"
-#include "../src/utils.h"
-#include "../src/logging.h"
+#include <csm/csm_all.h>
 
 typedef enum { Odometry = 1, Estimate = 2, True_pose = 3 } reference;
 const char*reference_name[4] = { "invalid","odometry","estimate","true_pose"};
@@ -134,6 +128,7 @@ double * ld_get_reference(LDP ld, reference use_reference) {
 		case Odometry: pose = ld->odometry; break;
 		case Estimate: pose = ld->estimate; break;
 		case True_pose: pose = ld->true_pose; break;
+		default: exit(-1);
 	}
 	if(any_nan(pose, 3)) {
 		sm_error("Required field '%s' not set in laser scan.\n", 

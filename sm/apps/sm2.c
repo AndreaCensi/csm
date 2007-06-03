@@ -1,13 +1,8 @@
 #include <time.h>
 #include <string.h>
-#include "../src/math_utils.h"
-#include "../src/sm.h"
-#include "../src/laser_data.h"
-#include "../src/utils.h"
-#include "../src/laser_data_json.h"
-#include "../src/json_journal.h"
-#include "../src/logging.h"
+
 #include <options/options.h>
+#include <csm/csm_all.h>
 
 struct sm1_params {
 	const char * file_in;

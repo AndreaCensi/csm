@@ -1,6 +1,6 @@
 #include <gsl/gsl_nan.h>
 
-#include "math_utils.h"
+#include "csm_all.h"
 
 double minmax(int from,int to,int x) {
 	return GSL_MAX(GSL_MIN(x,to),from);

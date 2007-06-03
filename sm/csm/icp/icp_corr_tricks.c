@@ -1,8 +1,6 @@
 #include <gsl/gsl_vector.h>
 
-#include "../sm.h"
-#include "../journal.h"
-#include "../math_utils.h"
+#include "../csm_all.h"
 
 #define DEBUG_SEARCH(a) ;
 

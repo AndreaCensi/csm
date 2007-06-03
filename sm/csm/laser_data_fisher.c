@@ -1,8 +1,7 @@
 #include <math.h>
 #include <egsl/egsl_macros.h>
 
-#include "laser_data.h"
-#include "math_utils.h"
+#include "csm_all.h"
 
 /** 
 	This computes Fisher's information matrix, in robot coordinates.

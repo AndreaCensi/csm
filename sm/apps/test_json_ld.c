@@ -1,5 +1,4 @@
-#include "../src/laser_data_json.h"
-
+#include <csm/csm.h>
 
 int main(int argc, char * argv[]) {
 	JO jo; /* the monkey */

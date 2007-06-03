@@ -1,9 +1,9 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
-#include "laser_data.h"
-#include "math_utils.h"
-#include "journal.h"
+
+#include "csm_all.h"
+
 
 LDP ld_alloc_new(int nrays) {
 	LDP ld = malloc(sizeof(struct laser_data));

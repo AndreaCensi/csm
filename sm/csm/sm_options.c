@@ -1,6 +1,7 @@
 #include <options/options.h>
-#include "sm.h"
-#include "math_utils.h"
+
+#include "csm_all.h"
+
 
 void sm_options(struct sm_params*p, struct option*ops) {
 	

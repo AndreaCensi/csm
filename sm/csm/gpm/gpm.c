@@ -2,11 +2,10 @@
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_vector.h>
 
-#include <egsl/egsl_macros.h>
 
-#include "../sm.h"
-#include "../math_utils.h"
-#include "../journal.h"
+#include "../csm_all.h"
+
+#include <egsl/egsl_macros.h>
 
 void ght_find_theta_range(LDP laser_ref, LDP laser_sens,
 		const gsl_vector*x0, double max_linear_correction,

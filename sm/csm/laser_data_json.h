@@ -1,7 +1,9 @@
 #ifndef H_LASER_DATA_JSON
 #define H_LASER_DATA_JSON
 
-#include "sm.h"
+#include "laser_data.h"
+#include "algos.h"
+
 #include <json-c/json.h>
 
 JO matrix_to_json(gsl_matrix*m);

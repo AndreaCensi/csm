@@ -4,12 +4,7 @@
 #include <gpc/gpc.h>
 #include <egsl/egsl_macros.h>
 
-#include "../math_utils.h"
-#include "../laser_data.h"
-#include "../sm.h"
-#include "../journal.h"
-#include "../logging.h"
-#include "../json_journal.h"
+#include "../csm_all.h"
 
 #include "icp.h"
 /*#define EXPERIMENT_COVARIANCE*/

@@ -57,78 +57,31 @@
 	ENDIF(APPLE)
 
 
-	########### Easy GSL ########## 
-		ADD_LIBRARY(egsl STATIC 
-			lib/egsl/egsl.c 
-			lib/egsl/egsl_ops.c
-			lib/egsl/egsl_conversions.c
-			lib/egsl/egsl_misc.c
-		)
-
-		ADD_EXECUTABLE(test_egsl lib/egsl/egsl_test.c)
-		TARGET_LINK_LIBRARIES(test_egsl egsl  ${GSL_LIBRARIES})
-
-		ADD_EXECUTABLE(egsl_test_allocation lib/egsl/egsl_test_allocation.c)
-		TARGET_LINK_LIBRARIES(egsl_test_allocation egsl  ${GSL_LIBRARIES})
+	########### 
+	ADD_LIBRARY(gpc STATIC 
+	 lib/gpc/gpc.c
+	 lib/gpc/gpc_utils.c
+	)
+		 
 
 	########### Options ########## 
 	SUBDIRS(lib/options)
 	SUBDIRS(lib/json-c)
+	SUBDIRS(lib/egsl)
+	SUBDIRS(csm)
+
+	INCLUDE_DIRECTORIES(lib)
+	INCLUDE_DIRECTORIES(.)
 
 ########### SM ########## 
 
-	ADD_LIBRARY(sm STATIC 
-		src/journal.c
-		src/laser_data.c
-		src/laser_data_fisher.c
-		src/laser_data_json.c
-		src/laser_data_carmen.c
-		src/json_journal.c
-		src/math_utils.c
-		src/utils.c
-		src/orientation.c
-		src/clustering.c
-		src/logging.c
-		src/sm_options.c
-			
-		src/icp/icp.c
-		src/icp/icp_loop.c
-		src/icp/icp_corr_dumb.c
-		src/icp/icp_corr_tricks.c
-		src/icp/icp_outliers.c
-		src/icp/icp_covariance.c
-	
-		src/gpm/gpm.c
-	
-		lib/gpc/gpc.c
-		lib/gpc/gpc_utils.c
 
-		lib/egsl/egsl.c 
-		lib/egsl/egsl_ops.c
-		lib/egsl/egsl_conversions.c
-		lib/egsl/egsl_misc.c
-		
-	)
-
-	INCLUDE_DIRECTORIES(lib/egsl)
-	INCLUDE_DIRECTORIES(lib/gpc)
-	INCLUDE_DIRECTORIES(lib/json-c)
-	INCLUDE_DIRECTORIES(lib)
-
-	
-	TARGET_LINK_LIBRARIES(sm json-c)
-
-
-	TARGET_LINK_LIBRARIES(sm ${GSL_LIBRARIES})
-	INSTALL(TARGETS sm ARCHIVE DESTINATION lib)
-	INSTALL(FILES src/sm.h  DESTINATION include)
-	INSTALL(FILES src/laser_data.h  DESTINATION include)
 
 	########### SM applications ########## 
 	
 	MACRO(new_executable exec)
 		ADD_EXECUTABLE(${exec} apps/${exec}.c)
-		TARGET_LINK_LIBRARIES(${exec} sm ${GSL_LIBRARIES} options)
+		TARGET_LINK_LIBRARIES(${exec} csm ${GSL_LIBRARIES} options)
 		INSTALL(PROGRAMS ${exec} DESTINATION bin)
 	ENDMACRO(new_executable exec)
 	
@@ -145,8 +98,8 @@
 	new_executable(test_json_ld)
 	new_executable(test_json)
 
-	ADD_EXECUTABLE(test_math_utils src/math_utils_test.c)
-	TARGET_LINK_LIBRARIES(test_math_utils sm ${GSL_LIBRARIES})
+	ADD_EXECUTABLE(test_math_utils csm/math_utils_test.c)
+	TARGET_LINK_LIBRARIES(test_math_utils csm ${GSL_LIBRARIES})
 
 
 ########### Carmen2pdf ########## 

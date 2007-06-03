@@ -1,8 +1,7 @@
 #include <math.h>
 #include <gsl/gsl_nan.h>
 
-#include "math_utils.h"
-#include "laser_data.h"
+#include "csm_all.h"
 
 #include <egsl/egsl_macros.h>
 

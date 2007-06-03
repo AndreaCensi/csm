@@ -1,5 +1,7 @@
 #include <math.h>
-#include "laser_data.h"
+
+#include "csm_all.h"
+
 
 /*
    A very very simple clustering algorithm.

@@ -2,8 +2,9 @@
 #include <gsl/gsl_randist.h>
 
 #include <math.h>
+
 #include <options/options.h>
-#include "../src/laser_data_json.h"
+#include <csm/csm_all.h>
 
 struct ld_noise_params {
 	int seed;

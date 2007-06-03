@@ -1,6 +1,6 @@
 #include <stdio.h>
-#include "journal.h"
-#include "math_utils.h"
+
+#include "csm_all.h"
 
 FILE*f=0; 
 int journal_is_open=0;

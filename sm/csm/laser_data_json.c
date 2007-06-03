@@ -2,9 +2,8 @@
 #include <string.h>
 #include <math.h>
 #include <ctype.h>
-#include "logging.h"
-#include "math_utils.h"
-#include "laser_data_json.h"
+
+#include "csm_all.h"
 
 JO matrix_to_json(gsl_matrix*m) {
 	JO jo = jo_new_array();

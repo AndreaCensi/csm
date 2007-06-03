@@ -1,8 +1,8 @@
 #include <sys/param.h>
 #include <stdarg.h>
 #include <stdio.h>
-#include "logging.h"
 
+#include "csm_all.h"
 
 void sm_error(const char *msg, ...)
 {

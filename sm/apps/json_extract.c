@@ -1,7 +1,7 @@
 #include <libgen.h>
-#include "../src/laser_data_json.h"
-#include "../src/utils.h"
 #include <options/options.h>
+
+#include <csm/csm.h>
 
 int main(int argc, const char * argv[]) {
 	

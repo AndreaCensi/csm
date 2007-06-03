@@ -1,8 +1,6 @@
 #include <time.h>
-#include "../src/math_utils.h"
-#include "../src/sm.h"
-#include "../src/laser_data.h"
-#include "../src/logging.h"
+
+#include <csm/csm_all.h>
 
 extern int distance_counter;
 int main(int argc, const char*argv[]) {

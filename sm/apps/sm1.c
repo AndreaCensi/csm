@@ -1,11 +1,8 @@
 #include <time.h>
 #include <string.h>
-#include "../src/math_utils.h"
-#include "../src/sm.h"
-#include "../src/laser_data.h"
-#include "../src/utils.h"
-#include "../src/laser_data_json.h"
-#include "../src/json_journal.h"
+
+#include <csm/csm_all.h>
+
 #include <options/options.h>
 
 struct sm1_params {

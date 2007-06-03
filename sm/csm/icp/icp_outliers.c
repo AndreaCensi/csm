@@ -1,10 +1,6 @@
 #include <math.h>
-#include "../json_journal.h"
-#include "../math_utils.h"
-#include "../laser_data.h"
-#include "../sm.h"
-#include "../journal.h"
-#include "../logging.h"
+
+#include "../csm_all.h"
 
 void quicksort(double *array, int begin, int end);
 

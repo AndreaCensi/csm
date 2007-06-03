@@ -4,8 +4,8 @@
 
 #include <math.h>
 #include <options/options.h>
-#include "../src/laser_data_json.h"
-#include "../src/math_utils.h"
+
+#include <csm/csm_all.h>
 
 struct ld_noise_params {
 	int seed;

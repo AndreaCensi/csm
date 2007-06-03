@@ -6,10 +6,9 @@ extern "C" {
 
 #include "laser_data.h"
 #include "laser_data_json.h"
-
-#include "sm.h"
-
+#include "algos.h"
 #include "utils.h"
+
 
 #ifdef __cplusplus
 }

@@ -1,7 +1,7 @@
 #include <string.h>
 #include <errno.h>
-#include "utils.h"
-#include "logging.h"
+
+#include "csm_all.h"
 
 FILE * open_file(const char *filename, const char*mode) {
 	FILE*file = fopen(filename, mode);
