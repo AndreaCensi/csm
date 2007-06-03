@@ -14,7 +14,14 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+
+/* This is an hack for strndup */
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
+
 #include <string.h>
+#include <strings.h>
 
 #include "debug.h"
 #include "printbuf.h"
@@ -353,11 +360,15 @@ int json_object_get_int(struct json_object *this)
 static int json_object_double_to_json_string(struct json_object* this,
 					     struct printbuf *pb)
 {
-/*  return sprintbuf(pb, "%lf", this->o.c_double);*/
+#ifdef AC_BETTER_PRECISION
 	if( ((int) this->o.c_double) !=  this->o.c_double)
 		return sprintbuf(pb, "%25.18Lg", this->o.c_double);
 	else
 		return sprintbuf(pb, "%d.0", (int) this->o.c_double);
+#else
+  return sprintbuf(pb, "%lf", this->o.c_double);
+
+#endif
 
 }
 

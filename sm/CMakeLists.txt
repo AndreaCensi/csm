@@ -32,12 +32,12 @@
 
 
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused -Wall  -Wconversion  -Wunreachable-code ")
-#	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb")
+	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb")
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fstrict-aliasing")
 
 	
 	#SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
-	#SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ansi")
+	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ansi")
 	#SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pedantic")
 
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unreachable-code")

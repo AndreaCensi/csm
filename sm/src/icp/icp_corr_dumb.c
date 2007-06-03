@@ -96,6 +96,7 @@ void find_correspondences(struct sm_params*params, gsl_vector* x_old) {
 		
 		ld_set_correspondence(laser_sens, i, j1, j2);
 	}
+	gsl_vector_free(p_i_w);
 	
 }
 

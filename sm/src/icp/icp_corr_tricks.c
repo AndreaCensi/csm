@@ -29,8 +29,9 @@ void ld_create_jump_tables(struct laser_data* ld) {
 		ld->down_bigger[i] = j-i;
 	}	
 }
+
 extern int distance_counter;
-inline double distance2(const gsl_vector* a, const gsl_vector* b) {
+/*inline*/ double distance2(const gsl_vector* a, const gsl_vector* b) {
 	distance_counter++;
 	double x = gvg(a,0)-gvg(b,0);
 	double y = gvg(a,1)-gvg(b,1);
