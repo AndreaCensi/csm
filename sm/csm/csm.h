@@ -1,6 +1,7 @@
 #ifndef H_SM_ALL
 #define H_SM_ALL
 #ifdef __cplusplus
+namespace CSM {
 extern "C" {
 #endif
 
@@ -11,6 +12,6 @@ extern "C" {
 
 
 #ifdef __cplusplus
-}
+}}
 #endif
 #endif

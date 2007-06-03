@@ -4,6 +4,7 @@
 #include "csm.h"
 
 #ifdef __cplusplus
+namespace CSM {
 extern "C" {
 #endif
 
@@ -14,7 +15,7 @@ extern "C" {
 #include "math_utils.h"
 
 #ifdef __cplusplus
-}
+}}
 #endif
 
 #endif
