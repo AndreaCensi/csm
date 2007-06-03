@@ -12,6 +12,13 @@ module GSL
 	#			puts "i=#{i.class} a(i) = #{a[i].class}"
 			}
 		end
+		
+		def any_nan?
+			for i in 0..size-1
+				return true if self[i].nan?
+			end
+			false
+		end
 	end
 end
 

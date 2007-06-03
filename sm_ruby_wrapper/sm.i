@@ -5,6 +5,9 @@
 %}
 
 struct sm_params {
+	LDP laser_ref;
+	LDP laser_sens;
+
 	double max_angular_correction_deg;
 	double max_linear_correction;
 	int max_iterations;
@@ -36,6 +39,8 @@ struct sm_params {
 };
 
 struct sm_result {
+	int valid;
+	
 	double x[3];
 	int iterations;
 	double error;
@@ -43,18 +48,28 @@ struct sm_result {
 };
 
 
+JO ld_to_json(LDP);
+LDP json_to_ld(JO);
+
+const char *rb_result_to_json();
+
+
+void ld_free(LDP);
+void jo_free(JO);
+
+JO json_parse(const char*str);
+const char* json_write(JO jo);
+
+
+
 void rb_sm_init_journal(const char*journal_file);
 
-void rb_sm_l_nrays(int laser, int nrays);
-void rb_sm_l_min_theta(int laser, double);
-void rb_sm_l_max_theta(int laser, double);
-void rb_sm_l_ray(int laser, int ray, int valid, double theta, double reading);
 
 void rb_sm_odometry(double x, double y, double theta);
 void rb_sm_odometry_cov(double cov_x, double cov_y, double cov_theta);
 
-void rb_sm_icp();
-void rb_sm_gpm();
+int rb_sm_icp();
+int rb_sm_gpm();
 
 void rb_sm_cleanup();
 

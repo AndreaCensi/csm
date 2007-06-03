@@ -20,5 +20,13 @@ require 'rsm_sm_loop'
 	output = File.open ARGV[3], "w"
 
 	params = standard_parameters
-	scan_matching(scan_matcher,scan_list,input,output,params)
+	
+#	begin
+		scan_matching(scan_matcher,scan_list,input,output,params)
+	# rescue => ex
+	# 	puts "bam"
+	# 	puts ex, ex.backtrace
+	# end
+	
+	
 

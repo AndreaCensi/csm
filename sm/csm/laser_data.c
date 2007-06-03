@@ -34,6 +34,9 @@ void ld_alloc(LDP ld, int nrays) {
 	ld->readings     = alloc_double_array(nrays, GSL_NAN);
 	ld->theta        = alloc_double_array(nrays, GSL_NAN);
 	
+	ld->min_theta = GSL_NAN;
+	ld->max_theta = GSL_NAN;
+	
 	ld->cluster      = alloc_int_array(nrays, -1);
 	ld->alpha        = alloc_double_array(nrays, GSL_NAN);
 	ld->cov_alpha    = alloc_double_array(nrays, GSL_NAN);

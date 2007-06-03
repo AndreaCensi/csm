@@ -9,37 +9,6 @@ void rb_sm_init_journal(const char*journal_file){
 	sm_journal_open(journal_file);
 }
 
-struct laser_data * get_ld(int index) {
-	return index==0 ? &(rb_sm_params.laser_ref) : &(rb_sm_params.laser_sens); 
-}
-
-void rb_sm_l_nrays(int laser, int nrays){
-	struct laser_data * ld = get_ld(laser);
-	ld_alloc(ld, nrays);	
-}
-
-void rb_sm_l_min_theta(int laser, double min_theta){
-	get_ld(laser)->min_theta = min_theta;
-}
-
-void rb_sm_l_max_theta(int laser, double max_theta){
-	get_ld(laser)->max_theta = max_theta;	
-}
-
-void rb_sm_l_ray(int laser, int ray, int valid, double theta, double reading){
-	struct laser_data * ld = get_ld(laser);
-//	printf("l%d i=%d valid=%d theta=%f reading=%f\n",laser,ray,valid,theta,reading);
-	if(valid) {
-		ld->valid[ray] = 1;
-		ld->readings[ray] = reading;
-		ld->   theta[ray] = theta;
-	} else {
-		ld->valid[ray] = 0;
-		ld->readings[ray] = GSL_NAN;
-		ld->   theta[ray] = theta;
-	}
-}
-
 void rb_sm_odometry(double x, double y, double theta){
 	rb_sm_params.first_guess[0]=x;
 	rb_sm_params.first_guess[1]=y;
@@ -51,17 +20,27 @@ void rb_sm_odometry_cov(double cov_x, double cov_y, double cov_theta){
 	
 }
 
-void rb_sm_icp() {
-	sm_icp(&rb_sm_params, &rb_sm_result);
+const char *rb_result_to_json() {
+	static char buf[5000];
+	JO jo = result_to_json(&rb_sm_params, &rb_sm_result);
+	strcpy(buf, jo_to_string(jo));
+	jo_free(jo);
+	return buf;
 }
 
-void rb_sm_gpm() {
+int rb_sm_icp() {
+	sm_icp(&rb_sm_params, &rb_sm_result);
+	return rb_sm_result.valid;
+}
+
+int rb_sm_gpm() {	
 	sm_gpm(&rb_sm_params, &rb_sm_result);
+	return rb_sm_result.valid;
 }
 
 void rb_sm_cleanup() {
-	ld_free(&(rb_sm_params.laser_ref));
-	ld_free(&(rb_sm_params.laser_sens));
+/*	ld_free(&(rb_sm_params.laser_ref));
+	ld_free(&(rb_sm_params.laser_sens));*/
 }
 
 void rb_sm_get_x(double *x,double*y,double*theta) {

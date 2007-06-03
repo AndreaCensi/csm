@@ -40,8 +40,8 @@ void visibilityTest(LDP laser_ref, const gsl_vector*u) {
 void kill_outliers_double(struct sm_params*params, const gsl_vector*x_old) {
 	double threshold = 3;
 
-	LDP laser_ref  = &(params->laser_ref);
-	LDP laser_sens = &(params->laser_sens);
+	LDP laser_ref  = params->laser_ref;
+	LDP laser_sens = params->laser_sens;
 
 	double dist_i[laser_sens->nrays];
 	double dist_j[laser_ref->nrays];
@@ -86,8 +86,8 @@ void kill_outliers_trim(struct sm_params*params, const gsl_vector*x_old,
 		
 	if(JJ) jj_context_enter("kill_outliers_trim");
 		
-	LDP laser_ref  = &(params->laser_ref);
-	LDP laser_sens = &(params->laser_sens);
+	LDP laser_ref  = params->laser_ref;
+	LDP laser_sens = params->laser_sens;
 	
 	/* dist2, indexed by k, contains the error for the k-th correspondence */
 	int k = 0; 

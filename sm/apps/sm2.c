@@ -79,9 +79,9 @@ int main(int argc, const char*argv[]) {
 		LDP laser_sens = ld_read_smart(file_in);
 		if(!laser_sens) break;
 		
-		params.laser_ref  = *laser_ref;
-		params.laser_sens = *laser_sens;
-		pose_diff_d( params.laser_sens.odometry, params.laser_ref.odometry,
+		params.laser_ref  = laser_ref;
+		params.laser_sens = laser_sens;
+		pose_diff_d(laser_sens->odometry, laser_ref->odometry,
 			/* = */ params.first_guess);
 
 /*			sm_gpm(&params, &result); */

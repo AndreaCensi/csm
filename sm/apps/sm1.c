@@ -53,11 +53,11 @@ int main(int argc, const char*argv[]) {
 		ld2 = ld_from_json_stream(file2);
 		if(!ld1 || !ld2) break;
 		
-		params.laser_ref = *ld1;
-		params.laser_sens = *ld2;
+		params.laser_ref = ld1;
+		params.laser_sens = ld2;
 
-		pose_diff_d( params.laser_sens.odometry,  
-		/* o minus */ params.laser_ref.odometry,
+		pose_diff_d( params.laser_sens->odometry,  
+		/* o minus */ params.laser_ref->odometry,
 			/* = */ params.first_guess);
 
 /*			sm_gpm(&params, &result); */
@@ -67,8 +67,8 @@ int main(int argc, const char*argv[]) {
 		JO jo = result_to_json(&params, &result);
 
 			double true_x[3];
-			pose_diff_d(params.laser_sens.true_pose, 
-				params.laser_ref.true_pose, true_x);
+			pose_diff_d(params.laser_sens->true_pose, 
+				params.laser_ref->true_pose, true_x);
 			double true_e[3];
 			int i=0;for(;i<3;i++) true_e[i] = result.x[i] - true_x[i];
 			jo_add_double_array(jo, "true_x", true_x, 3);

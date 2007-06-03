@@ -102,8 +102,12 @@ struct json_object* json_tokener_parse_len(char *str, int len) {
 
   tok = json_tokener_new();
   obj = json_tokener_parse_ex(tok, str, len);
-  if(tok->err != json_tokener_success)
+  if(tok->err != json_tokener_success) {
     obj = error_ptr(-tok->err);
+    json_tokener_free(tok);
+	mc_error("Malformed JSON object: \n'%.*s'\n", len, str);
+	 return 0;
+  }
   json_tokener_free(tok);
   return obj;
 }
@@ -248,7 +252,15 @@ void jo_add_int(JO root, const char*name, int v) {
 }
 
 void jo_add_double(JO root, const char*name, double v) {
-	jo_add(root, name, jo_new_double(v));
+	jo_add(root, name, jo_double_or_null(v));
+}
+
+JO json_parse(const char*str) {
+	return json_tokener_parse_len((char*)str, (int)strlen(str));
+}
+
+const char* json_write(JO jo) {
+	return json_object_to_json_string(jo);
 }
 
 /*

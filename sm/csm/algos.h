@@ -5,9 +5,9 @@
 
 struct sm_params {
 	/** First scan (REFerence scan) */
-	struct laser_data laser_ref;
+	LDP laser_ref;
 	/** Second scan */
-	struct laser_data laser_sens;
+	LDP laser_sens;
 
 	/** Where to start */
  	double first_guess[3]; 
@@ -66,6 +66,8 @@ struct sm_params {
 };
 
 struct sm_result {
+	int valid;
+	
 	double x[3];
 	
 	int iterations;

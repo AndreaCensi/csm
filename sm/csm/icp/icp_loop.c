@@ -10,12 +10,15 @@
 /*#define EXPERIMENT_COVARIANCE*/
 
 void sm_icp(struct sm_params*params, struct sm_result*res) {
+	
+	res->valid = 0;
+	
 	if(JJ) jj_context_enter("sm_icp");
 	
 	egsl_push();
 	
-	LDP laser_ref  = &(params->laser_ref);
-	LDP laser_sens = &(params->laser_sens);
+	LDP laser_ref  = params->laser_ref;
+	LDP laser_sens = params->laser_sens;
 			
 	if(params->use_corr_tricks)
 		ld_create_jump_tables(laser_ref);
@@ -36,8 +39,6 @@ void sm_icp(struct sm_params*params, struct sm_result*res) {
 	journal_laser_data("laser_ref",  laser_ref );
 	journal_laser_data("laser_sens", laser_sens);
 	
-	
-		
 	gsl_vector * x_new = gsl_vector_alloc(3);
 	gsl_vector * x_old = vector_from_array(3, params->first_guess);
 	
@@ -55,7 +56,10 @@ void sm_icp(struct sm_params*params, struct sm_result*res) {
 	double error;
 	int iterations;
 	int nvalid;
-	icp_loop(params, x_old, x_new, &error, &nvalid, &iterations);
+	if(!icp_loop(params, x_old, x_new, &error, &nvalid, &iterations)) {
+		sm_error("ICP not complete. \n");
+		return;
+	}
 
 	double best_error = error;
 	gsl_vector * best_x = gsl_vector_alloc(3);
@@ -83,7 +87,10 @@ void sm_icp(struct sm_params*params, struct sm_result*res) {
 				gvs(start, 2, gvg(x_new,2)+perturb[a][2]);
 			gsl_vector * x_a = gsl_vector_alloc(3);
 			double my_error; int my_valid; int my_iterations;
-			icp_loop(&my_params, start, x_a, &my_error, &my_valid, &my_iterations);
+			if(!icp_loop(&my_params, start, x_a, &my_error, &my_valid, &my_iterations)){
+				sm_error("Error during restart #%d/%d. \n", a, 6);
+				break;
+			}
 			iterations+=my_iterations;
 		
 			if(my_error < best_error) {
@@ -95,8 +102,10 @@ void sm_icp(struct sm_params*params, struct sm_result*res) {
 		}
 	}
 	
-	vector_to_array(best_x, res->x);
 	
+	/* At last, we did it. */
+	res->valid = 1;
+	vector_to_array(best_x, res->x);
 	
 	if(params->do_compute_covariance)  {
 
@@ -149,10 +158,10 @@ unsigned int ld_corr_hash(LDP ld){
 	return (hash & 0x7FFFFFFF);
 }
 
-void icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new, 
+int icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new, 
 	double*total_error, int*valid, int*iterations) {
-	LDP laser_ref  = &(params->laser_ref);
-	LDP laser_sens = &(params->laser_sens);
+	LDP laser_ref  = params->laser_ref;
+	LDP laser_sens = params->laser_sens;
 	
 	gsl_vector * x_old = vector_from_array(3, start->data);
 	gsl_vector * delta = gsl_vector_alloc(3);
@@ -188,7 +197,7 @@ void icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 		if(num_corr <0.2 * laser_sens->nrays){
 			egsl_pop();
 			sm_error("Failed: before trimming, only %d correspondences.\n",num_corr);
-			break;
+			return 0;
 		}
 
 		if(JJ) jj_add("corr0", corr_to_json(laser_sens->corr, laser_sens->nrays));
@@ -216,7 +225,7 @@ void icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 		if(num_corr_after <0.2 * laser_sens->nrays){
 			sm_error("Failed: after trimming, only %d correspondences.\n",num_corr_after);
 			egsl_pop();
-			break;
+			return 0;
 		}
 
 		
@@ -268,6 +277,8 @@ void icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 	gsl_vector_free(x_old);
 	gsl_vector_free(delta);
 	gsl_vector_free(delta_old);
+
+	return 1;
 }
 
 int termination_criterion(gsl_vector*delta, struct sm_params*params){

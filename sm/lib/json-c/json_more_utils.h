@@ -44,5 +44,8 @@ JO jo_double_or_null(double d);
 
 /*JO find_object_with_name(JO root, const char*name);*/
 JO json_tokener_parse_len(char *str, int len);
-	
+JO json_parse(const char*str);
+const char* json_write(JO jo);
+#define jo_to_string json_write
+
 #endif

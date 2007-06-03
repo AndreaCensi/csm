@@ -47,7 +47,7 @@ int main(int argc, const char*argv[]) {
 	int num_iterations = 0;
 	clock_t start = clock();
 	
-	if(ld_read_next_laser_carmen(file, &params.laser_ref)) {
+	if(!(params.laser_ref = ld_read_smart(file)) ) {
 		printf("Could not read first scan.\n");
 		return -1;
 	}
@@ -55,9 +55,9 @@ int main(int argc, const char*argv[]) {
 	gsl_vector *u = gsl_vector_alloc(3);
 	gsl_vector *x_old = gsl_vector_alloc(3);
 	gsl_vector *x_new = gsl_vector_alloc(3);
-	while(!ld_read_next_laser_carmen(file, &params.laser_sens)) {
-		copy_from_array(x_old, params.laser_ref.odometry);
-		copy_from_array(x_new, params.laser_sens.odometry);
+	while(! (params.laser_sens = ld_read_smart(file)) ) {
+		copy_from_array(x_old, params.laser_ref->odometry);
+		copy_from_array(x_new, params.laser_sens->odometry);
 		pose_diff(x_new,x_old,u);
 		vector_to_array(u, params.first_guess);
 	
@@ -67,10 +67,9 @@ int main(int argc, const char*argv[]) {
 		num_matchings++;
 		num_iterations += result.iterations;
 	
-		ld_dealloc(&(params.laser_ref));
+		ld_free(params.laser_ref);
 		params.laser_ref = params.laser_sens;
 	}
-	ld_dealloc(&(params.laser_ref));
 
 	clock_t end = clock();
 	float seconds = (end-start)/((float)CLOCKS_PER_SEC);
@@ -84,7 +83,9 @@ int main(int argc, const char*argv[]) {
 	sm_debug("sm0: Avg. seconds per iteration = %f (note: very imprecise)\n", seconds/num_iterations);
 	sm_debug("sm0: Number of comparisons = %d \n", distance_counter);
 	sm_debug("sm0: Avg. comparisons per ray = %f \n", 
-		(distance_counter/((float)num_iterations*params.laser_ref.nrays)));
+		(distance_counter/((float)num_iterations*params.laser_ref->nrays)));
+
+	ld_free(params.laser_ref);
 	
 	gsl_vector_free(u);
 	gsl_vector_free(x_old);

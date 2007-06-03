@@ -75,16 +75,21 @@ JO vector_to_json(gsl_vector*vec) {
 
 JO result_to_json(struct sm_params*p, struct sm_result *r) {
 	JO jo = json_object_new_object();
-	jo_add_double_array(jo, "x",  r->x, 3);
+	jo_add_int(jo, "valid",  r->valid);
 	
-	if(p->do_compute_covariance) {
-		jo_add(jo, "cov_x",   matrix_to_json(r->cov_x_m ) );
-		jo_add(jo, "dx_dy1",  matrix_to_json(r->dx_dy1_m) );
-		jo_add(jo, "dx_dy2",  matrix_to_json(r->dx_dy2_m) );
+	if(r->valid) {
+		jo_add_double_array(jo, "x",  r->x, 3);
+	
+		if(p->do_compute_covariance) {
+			jo_add(jo, "cov_x",   matrix_to_json(r->cov_x_m ) );
+			jo_add(jo, "dx_dy1",  matrix_to_json(r->dx_dy1_m) );
+			jo_add(jo, "dx_dy2",  matrix_to_json(r->dx_dy2_m) );
+		}
 	}
-	jo_add_int(jo, "iterations", r->iterations);
-	jo_add_int(jo, "nvalid", r->nvalid);
-	jo_add_double(jo, "error", r->error);
+		jo_add_int(jo, "iterations", r->iterations);
+		jo_add_int(jo, "nvalid", r->nvalid);
+		jo_add_double(jo, "error", r->error);
+	
 	return jo;
 }
 

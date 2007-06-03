@@ -1,7 +1,5 @@
 require 'rsm_mathutils'
 
-
-
 class Correspondence
 	attr_accessor :valid
 	attr_accessor :j1
@@ -31,6 +29,7 @@ class LaserData
 
 	attr_accessor :odometry
 	attr_accessor :estimate
+	attr_accessor :true_pose
 
 	attr_accessor :timestamp
 	attr_accessor :ipc_timestamp
@@ -55,6 +54,8 @@ class LaserData
 		
 		@odometry    = Vector[GSL::NAN,GSL::NAN,GSL::NAN].col
 		@estimate    = Vector[GSL::NAN,GSL::NAN,GSL::NAN].col
+		@true_pose   = Vector[GSL::NAN,GSL::NAN,GSL::NAN].col
+		
 		@p = []; @corr = [];
 		for i in 0..nrays-1
 			@p[i] = Vector[GSL::NAN,GSL::NAN].col
@@ -133,3 +134,4 @@ end
 
 require 'rsm_laserdata_ops'
 require 'rsm_laserdata_carmen'
+require 'rsm_laserdata_json'

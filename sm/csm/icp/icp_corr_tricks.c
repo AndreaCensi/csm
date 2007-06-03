@@ -37,8 +37,8 @@ extern int distance_counter;
 }
 
 void find_correspondences_tricks(struct sm_params*params, gsl_vector* x_old) {
-	LDP laser_ref  = &(params->laser_ref);
-	LDP laser_sens = &(params->laser_sens);
+	LDP laser_ref  = params->laser_ref;
+	LDP laser_sens = params->laser_sens;
 	
 	gsl_vector * p_i_w = gsl_vector_alloc(3);
 

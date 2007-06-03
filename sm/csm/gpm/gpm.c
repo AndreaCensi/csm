@@ -16,8 +16,8 @@ void ght_one_shot(LDP laser_ref, LDP laser_sens,
 		double max_angular_correction_deg, gsl_vector*x) ;
 	
 void sm_gpm(struct sm_params*params, struct sm_result*res) {
-	LDP laser_ref  = &(params->laser_ref);
-	LDP laser_sens = &(params->laser_sens);
+	LDP laser_ref  = params->laser_ref;
+	LDP laser_sens = params->laser_sens;
 		
 	ld_compute_cartesian(laser_ref);
 	ld_simple_clustering(laser_ref, params->clustering_threshold);

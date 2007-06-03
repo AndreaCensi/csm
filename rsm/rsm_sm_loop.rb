@@ -60,7 +60,14 @@ def scan_matching(klass,scan_list,input,output,params)
 		res[:time] = realtime
 		results.push res
 		
+		if not res[:valid]
+			break
+		end	
+		
 		x = res[:x]
+		if x.any_nan? 
+			$stderr.puts "Found nans in answer x = #{x.inspect}"
+		end
 		error = res[:error]
 		iterations = res[:iterations]
 		
