@@ -144,9 +144,9 @@ ADD_LIBRARY(csm-static STATIC
 ./lib/options/options.c
 ./lib/options/options_interface.c
 )
-ADD_EXECUTABLE(test-static test.c)
-TARGET_LINK_LIBRARIES(test-static csm-static)
 TARGET_LINK_LIBRARIES(csm-static ${GSL_LIBRARIES})
+#ADD_EXECUTABLE(test-static test.c)
+#TARGET_LINK_LIBRARIES(test-static csm-static)
 
 INSTALL(TARGETS csm-static
 	ARCHIVE DESTINATION lib)
