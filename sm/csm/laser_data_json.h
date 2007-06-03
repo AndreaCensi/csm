@@ -3,6 +3,8 @@
 
 #include "laser_data.h"
 #include "algos.h"
+#include <gsl/gsl_matrix.h>
+#include <gsl/gsl_vector.h>
 
 #include <json-c/json.h>
 #include <json-c/json_more_utils.h>

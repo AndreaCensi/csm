@@ -35,11 +35,11 @@ def crash(str)
 end
 
 
-if (not have_library('sm')) #or (not find_header('icp.h','/usr/local/include'))
-	puts "Error: not having library 'sm'"
+if (not have_library('csm-static')) #or (not find_header('icp.h','/usr/local/include'))
+	$stderr.puts "Error: not having library 'csm'"
 	exit
 else
-	$LOCAL_LIBS += ' -lsm'
+	$LOCAL_LIBS += ' -lcsm-static'
 end
 
 $CPPFLAGS += " -Wall -W -Wmissing-prototypes -Wconversion "

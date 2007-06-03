@@ -276,7 +276,7 @@ void options_print_help(struct option * options, FILE*f) {
 	options_dump(options, f, 1);
 }
 
-char options_value_as_string_buf[1000];
+static char options_value_as_string_buf[1000];
 const char*options_value_as_string(struct option*o) {
 	if(!o->value_pointer) {
 		return "NULL";

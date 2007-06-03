@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <gsl/gsl_nan.h>
 #include "rb_sm.h"
-#include <sm.h>
 
 struct sm_params rb_sm_params; 
 struct sm_result rb_sm_result;
@@ -42,9 +41,9 @@ void rb_sm_l_ray(int laser, int ray, int valid, double theta, double reading){
 }
 
 void rb_sm_odometry(double x, double y, double theta){
-	rb_sm_params.odometry[0]=x;
-	rb_sm_params.odometry[1]=y;
-	rb_sm_params.odometry[2]=theta;
+	rb_sm_params.first_guess[0]=x;
+	rb_sm_params.first_guess[1]=y;
+	rb_sm_params.first_guess[2]=theta;
 }
 
 void rb_sm_odometry_cov(double cov_x, double cov_y, double cov_theta){

@@ -22,7 +22,7 @@ void rb_sm_get_x(double *x,double*y,double*theta);
 void rb_sm_cleanup();
 
 
-#include <sm.h>
+#include <csm/csm.h>
 
 extern struct sm_params rb_sm_params;
 extern struct sm_result rb_sm_result;

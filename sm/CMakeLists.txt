@@ -57,18 +57,13 @@
 	ENDIF(APPLE)
 
 
-	########### 
-	ADD_LIBRARY(gpc STATIC 
-	 lib/gpc/gpc.c
-	 lib/gpc/gpc_utils.c
-	)
-		 
-
 	########### Options ########## 
 	SUBDIRS(lib/options)
 	SUBDIRS(lib/json-c)
 	SUBDIRS(lib/egsl)
+	SUBDIRS(lib/gpc)
 	SUBDIRS(csm)
+
 
 	INCLUDE_DIRECTORIES(lib)
 	INCLUDE_DIRECTORIES(.)
@@ -81,7 +76,7 @@
 	
 	MACRO(new_executable exec)
 		ADD_EXECUTABLE(${exec} apps/${exec}.c)
-		TARGET_LINK_LIBRARIES(${exec} csm ${GSL_LIBRARIES} options)
+		TARGET_LINK_LIBRARIES(${exec} csm ${GSL_LIBRARIES} gpc json-c egsl options)
 		INSTALL(PROGRAMS ${exec} DESTINATION bin)
 	ENDMACRO(new_executable exec)
 	
@@ -109,3 +104,49 @@ IF(CAIRO_FOUND)
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CAIRO_CFLAGS}")
 	TARGET_LINK_LIBRARIES(carmen2pdf -lcairo)
 ENDIF(CAIRO_FOUND)
+
+
+ADD_LIBRARY(csm-static STATIC
+./csm/clustering.c
+./csm/gpm/gpm.c
+./csm/icp/icp.c
+./csm/icp/icp_corr_dumb.c
+./csm/icp/icp_corr_tricks.c
+./csm/icp/icp_covariance.c
+./csm/icp/icp_loop.c
+./csm/icp/icp_outliers.c
+./csm/journal.c
+./csm/json_journal.c
+./csm/laser_data.c
+./csm/laser_data_carmen.c
+./csm/laser_data_fisher.c
+./csm/laser_data_json.c
+./csm/logging.c
+./csm/math_utils.c
+./csm/orientation.c
+./csm/sm_options.c
+./csm/utils.c
+./lib/egsl/egsl.c
+./lib/egsl/egsl_conversions.c
+./lib/egsl/egsl_misc.c
+./lib/egsl/egsl_ops.c
+./lib/gpc/gpc.c
+./lib/gpc/gpc_utils.c
+./lib/json-c/arraylist.c
+./lib/json-c/debug.c
+./lib/json-c/JSON_checker.c
+./lib/json-c/json_more_utils.c
+./lib/json-c/json_object.c
+./lib/json-c/json_tokener.c
+./lib/json-c/json_util.c
+./lib/json-c/linkhash.c
+./lib/json-c/printbuf.c
+./lib/options/options.c
+./lib/options/options_interface.c
+)
+ADD_EXECUTABLE(test-static test.c)
+TARGET_LINK_LIBRARIES(test-static csm-static)
+TARGET_LINK_LIBRARIES(csm-static ${GSL_LIBRARIES})
+
+INSTALL(TARGETS csm-static
+	ARCHIVE DESTINATION lib)

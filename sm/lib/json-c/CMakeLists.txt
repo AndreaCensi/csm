@@ -2,7 +2,7 @@
 #SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
 #SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pedantic")
 
-ADD_LIBRARY(json-c STATIC
+SET(json-c_sources
 	arraylist.c
 	debug.c
 	json_object.c
@@ -14,11 +14,18 @@ ADD_LIBRARY(json-c STATIC
 	json_more_utils.c
 )
 
+ADD_LIBRARY(json-c STATIC ${json-c_sources})
+
 ADD_EXECUTABLE(test1 test1.c)
 ADD_EXECUTABLE(test2 test2.c)
 
 TARGET_LINK_LIBRARIES(test1 json-c)
 TARGET_LINK_LIBRARIES(test2 json-c)
+
+
+FILE(GLOB json_headers "*.h")
+INSTALL(FILES ${json_headers} DESTINATION include/json-c)
+
 
 INCLUDE(CheckIncludeFile)
 

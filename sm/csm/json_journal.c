@@ -5,9 +5,9 @@
 
 #define MAX_STACK 1000
 
-JO jj_stack[MAX_STACK];
-int jj_stack_index = -1;
-FILE * jj_file = 0;
+static JO jj_stack[MAX_STACK];
+static int jj_stack_index = -1;
+static FILE * jj_file = 0;
 
 int jj_enabled() {
 	return jj_file != 0;

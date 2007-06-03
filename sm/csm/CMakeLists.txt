@@ -1,4 +1,5 @@
-ADD_LIBRARY(csm STATIC 
+SET(csm_sources
+
 	journal.c
 	laser_data.c
 	laser_data_fisher.c
@@ -11,7 +12,7 @@ ADD_LIBRARY(csm STATIC
 	clustering.c
 	logging.c
 	sm_options.c
-		
+	
 	icp/icp.c
 	icp/icp_loop.c
 	icp/icp_corr_dumb.c
@@ -22,9 +23,17 @@ ADD_LIBRARY(csm STATIC
 	gpm/gpm.c
 )
 
-TARGET_LINK_LIBRARIES(csm json-c egsl gpc)
+ADD_LIBRARY(csm SHARED  ${csm_sources})
+
+# SET_TARGET_PROPERTIES(csm PROPERTIES STATIC_LIBRARY_FLAGS  " -static ")
+TARGET_LINK_LIBRARIES(csm json-c egsl gpc options)
 TARGET_LINK_LIBRARIES(csm ${GSL_LIBRARIES})
 
-INSTALL(TARGETS csm ARCHIVE DESTINATION lib)
-INSTALL(FILES csm.h  DESTINATION include/csm)
-INSTALL(FILES laser_data.h  DESTINATION include/csm)
+INSTALL(TARGETS csm 
+	ARCHIVE DESTINATION lib
+	LIBRARY DESTINATION lib)
+
+FILE(GLOB csm_headers "*.h")
+foreach(header ${csm_headers})
+	INSTALL(FILES ${header} DESTINATION include/csm)
+endforeach(header ${csm_headers})

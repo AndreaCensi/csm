@@ -1,14 +1,14 @@
 
 Installing with cmake:
 
-$ cmake . -DCMAKE_INSTALL_PREFIX:PATH=/usr/local
+	$ cmake . -DCMAKE_INSTALL_PREFIX:PATH=/usr/local
 
 
 First, set up some directories
  
 	$ export SMLIB=
-    $ cd $SMLIB
-    $ ls 
+	$ cd $SMLIB
+	$ ls 
 	...................
 
 Create installation directory:

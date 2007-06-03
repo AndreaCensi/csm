@@ -11,6 +11,8 @@ The only compiler tested was GCC (3.3 or 4.x).
 For `carmen2pdf`, you will need the Cairo graphics library, available at
   <http://cairographics.org>
 
+
+
 ## Installation ##
 
 If you are lucky, this should be it:
@@ -25,3 +27,20 @@ If you want to install this library system-wide, you could use:
 as the first step.
 
 For installing the ruby wrapper, refer to the separate instructions.
+
+
+
+## Getting started ##
+
+You might get started by doing this:
+
+	$ sm2 < laserazosSM3.log > out.log
+
+If you installed the Cairo library, you can see the result with:
+
+	$ carmen2pdf -use odometry -in out.log -out out-odometry.pdf
+	$ carmen2pdf -use estimate -in out.log -out out-estimate.pdf
+
+
+
+

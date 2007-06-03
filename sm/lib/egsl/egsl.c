@@ -24,7 +24,7 @@ struct egsl_context {
 };
 
 int cid=0;
-struct egsl_context egsl_contexts[MAX_CONTEXTS];
+static struct egsl_context egsl_contexts[MAX_CONTEXTS];
 
 
 int egsl_first_time = 1;

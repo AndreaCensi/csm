@@ -4,7 +4,6 @@
 	#include "rb_sm.h"
 %}
 
-
 struct sm_params {
 	double max_angular_correction_deg;
 	double max_linear_correction;

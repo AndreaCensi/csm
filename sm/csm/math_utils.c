@@ -204,7 +204,7 @@ double dist_to_segment(const gsl_vector*a,const gsl_vector*b,const gsl_vector*x)
 	return dist;
 }
 
-char tmp_buf[100];
+static char tmp_buf[100];
 const char* gsl_friendly_pose(gsl_vector*v) {
 	sprintf(tmp_buf, "(%4.2f mm, %4.2f mm, %4.4f deg)",
 		1000*gvg(v,0),1000*gvg(v,1),rad2deg(gvg(v,2)));
