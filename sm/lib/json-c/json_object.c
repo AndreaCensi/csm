@@ -24,9 +24,9 @@
 #include "json_object_private.h"
 #include "json_tokener.h"
 
-#if !HAVE_STRNDUP
-  char* strndup(const char* str, size_t n);
-#endif /* !HAVE_STRNDUP */
+/*#if !HAVE_STRNDUP*/
+  char* json_c_strndup(const char* str, size_t n);
+/*#endif  !HAVE_STRNDUP */
 
 /* #define REFCOUNT_DEBUG 1 */
 
@@ -423,7 +423,7 @@ struct json_object* json_object_new_string_len(const char *s, int len)
   if(!this) return NULL;
   this->_delete = &json_object_string_delete;
   this->_to_json_string = &json_object_string_to_json_string;
-  this->o.c_string = strndup(s, (size_t)len);
+  this->o.c_string = json_c_strndup(s, (size_t)len);
   return this;
 }
 

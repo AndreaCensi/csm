@@ -102,9 +102,9 @@ struct json_object* json_tokener_parse(char *str)
 }
 
 
-#if !HAVE_STRNDUP
+/*#if !HAVE_STRNDUP*/
 /* CAW: compliant version of strndup() */
-char* strndup(const char* str, size_t n)
+char* json_c_strndup(const char* str, size_t n)
 {
   if(str) {
     size_t len = strlen(str);
@@ -121,7 +121,7 @@ char* strndup(const char* str, size_t n)
 
   return NULL;
 }
-#endif
+/*#endif*/
 
 
 #define state  tok->stack[tok->depth].state
