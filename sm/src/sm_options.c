@@ -1,5 +1,6 @@
 #include <options/options.h>
 #include "sm.h"
+#include "math_utils.h"
 
 void sm_options(struct sm_params*p, struct option*ops) {
 	
@@ -15,15 +16,15 @@ void sm_options(struct sm_params*p, struct option*ops) {
 		"When we had enough");
 
 	options_double(ops, "epsilon_xy", 
-		&(p->epsilon_xy), 0.00001,
+		&(p->epsilon_xy), 0.0001,
 		"A threshold for stopping");
 
 	options_double(ops, "epsilon_theta",
-		&(p->epsilon_theta),  0.0000001,
+		&(p->epsilon_theta),  0.0001, /* = 0.005 deg */
 		"A threshold for stopping");
 
 	options_double(ops, "max_correspondence_dist", 
-		&(p->max_correspondence_dist), 10.0,
+		&(p->max_correspondence_dist), 2.0,
 		"dubious parameter");
 		
 	options_double(ops, "sigma", 
@@ -31,11 +32,11 @@ void sm_options(struct sm_params*p, struct option*ops) {
 		"Noise in the scan");
 
 	options_int(ops, "use_corr_tricks", 
-		&(p->use_corr_tricks), 0,
+		&(p->use_corr_tricks), 1,
 		"Use smart tricks for finding correspondences.");
 
 	options_int(ops, "restart", 
-		&(p->restart), 0,
+		&(p->restart), 1,
 		"Restart: Restart if error is over threshold");
 
 	options_double(ops, "restart_threshold_mean_error",
@@ -47,7 +48,7 @@ void sm_options(struct sm_params*p, struct option*ops) {
 		"Restart: displacement for restarting.");
 
 	options_double(ops, "restart_dtheta",
-		&(p->restart_dtheta),  0.01,
+		&(p->restart_dtheta),  deg2rad(1.5),
 		"Restart: displacement for restarting.");
 
 	options_double(ops, "clustering_threshold",
@@ -67,10 +68,10 @@ void sm_options(struct sm_params*p, struct option*ops) {
 		"Use gpc");
 
 	options_double(ops, "do_alpha_test_thresholdDeg", 
-		&(p->do_alpha_test_thresholdDeg),40.0, "");
+		&(p->do_alpha_test_thresholdDeg), 20.0, "");
 
 	options_double(ops, "outliers_maxPerc", 
-		&(p->outliers_maxPerc), 0.7, "");
+		&(p->outliers_maxPerc), 0.95, "");
 
 	options_double(ops, "outliers_adaptive_order", 
 		&(p->outliers_adaptive_order), 0.7, "");
@@ -78,7 +79,7 @@ void sm_options(struct sm_params*p, struct option*ops) {
 		&(p->outliers_adaptive_mult), 2.0, "");
 
 	options_int(ops, "do_visibility_test", 
-		&(p->do_visibility_test), 1,
+		&(p->do_visibility_test), 0,
 		" ... ");
 
 	options_int(ops, "do_compute_covariance", 

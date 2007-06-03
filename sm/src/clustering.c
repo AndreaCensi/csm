@@ -2,12 +2,15 @@
 #include "laser_data.h"
 
 /*
-/// A very very simple clustering algorithm.
-/// Try threshold = 5*sigma */
+   A very very simple clustering algorithm.
+   Try threshold = 5*sigma 
+*/
 
 void ld_simple_clustering(LDP ld, double threshold) {	
 	int cluster = -1;
-	double last_reading;
+	double last_reading = 0; /* I have to initialize it 
+	  explicitely or else gcc complains it might be uninitialized.
+	  Stupid compiler, it cannot even solve the halting problem. */
 	
 	int i;
 	for(i=0;i<ld->nrays;i++) {
@@ -27,5 +30,7 @@ void ld_simple_clustering(LDP ld, double threshold) {
 		ld->cluster[i] = cluster;
 		last_reading = ld->readings[i];
 	}
+	
+	/* TODO: set to -1 the one-point clusters */
 }
 

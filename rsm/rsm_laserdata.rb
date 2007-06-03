@@ -69,6 +69,8 @@ class LaserData
 		@up_smaller = [nil]*nrays
 		@down_bigger = [nil]*nrays
 		@down_smaller = [nil]*nrays
+		
+		# min_theta ? 
 	end	
 	
 	def alpha_valid?(i); i>=0 && i<nrays && @alpha_valid[i] end
@@ -100,7 +102,6 @@ class LaserData
 end
 
 def standard_parameters
-	#include MathUtils
 	p = Hash.new
 	p[:max_angular_correction_deg]= 30
 	p[:max_linear_correction]=    0.5
