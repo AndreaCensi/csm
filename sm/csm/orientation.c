@@ -4,7 +4,7 @@
 #include "math_utils.h"
 #include "laser_data.h"
 
-#include <egsl_macros.h>
+#include <egsl/egsl_macros.h>
 
 
 void find_neighbours(LDP ld, int i, int max_num, int*indexes, size_t*num_found);

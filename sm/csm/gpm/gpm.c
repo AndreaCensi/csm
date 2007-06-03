@@ -2,7 +2,7 @@
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_vector.h>
 
-#include <egsl_macros.h>
+#include <egsl/egsl_macros.h>
 
 #include "../sm.h"
 #include "../math_utils.h"

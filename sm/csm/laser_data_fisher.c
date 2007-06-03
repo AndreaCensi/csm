@@ -1,5 +1,5 @@
 #include <math.h>
-#include <egsl_macros.h>
+#include <egsl/egsl_macros.h>
 
 #include "laser_data.h"
 #include "math_utils.h"

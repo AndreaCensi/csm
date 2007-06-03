@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 #ifndef RUBY
-#include <egsl.h>
+#include <egsl/egsl.h>
 #endif
 
 struct correspondence;

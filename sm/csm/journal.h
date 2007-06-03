@@ -3,7 +3,7 @@
 
 #include "laser_data.h"
 
-#include <egsl.h>
+#include <egsl/egsl.h>
 
 void journal_open(const char*);
 

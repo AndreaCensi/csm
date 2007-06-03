@@ -2,7 +2,7 @@
 #define H_LASER_DATA_JSON
 
 #include "sm.h"
-#include <json.h>
+#include <json-c/json.h>
 
 JO matrix_to_json(gsl_matrix*m);
 JO vector_to_json(gsl_vector*v);

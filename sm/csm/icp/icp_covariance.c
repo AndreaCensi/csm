@@ -1,7 +1,7 @@
 #include <math.h>
-#include "../laser_data.h"
 #include <gsl/gsl_math.h>
-#include <egsl_macros.h>
+#include <egsl/egsl_macros.h>
+#include "../laser_data.h"
 
 val compute_C_k(val p_j1, val p_j2);
 val dC_drho(val p1, val p2);

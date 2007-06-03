@@ -1,8 +1,8 @@
 #include <math.h>
 #include <gsl/gsl_matrix.h>
 
-#include <gpc.h>
-#include <egsl_macros.h>
+#include <gpc/gpc.h>
+#include <egsl/egsl_macros.h>
 
 #include "../math_utils.h"
 #include "../laser_data.h"

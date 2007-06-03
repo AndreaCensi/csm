@@ -1,7 +1,7 @@
 #ifndef H_MATH_UTILS
 #define H_MATH_UTILS
 
-#include <egsl.h>
+#include <egsl/egsl.h>
 #include <gsl/gsl_math.h>
 #include "laser_data.h"
 
