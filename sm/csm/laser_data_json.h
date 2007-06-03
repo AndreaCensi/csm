@@ -5,6 +5,7 @@
 #include "algos.h"
 
 #include <json-c/json.h>
+#include <json-c/json_more_utils.h>
 
 JO matrix_to_json(gsl_matrix*m);
 JO vector_to_json(gsl_vector*v);
