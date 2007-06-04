@@ -21,13 +21,16 @@ class LaserData
 	def to_json(*a)
 		puts "Estimate #{@estimate.inspect} #{@estimate.to_a.inspect}"
 		h = {
-			'nrays' => @nrays,
-			'min_theta' => @min_theta,
-			'max_theta' => @max_theta,
+			'nrays'       => @nrays,
+			'min_theta'   => @min_theta,
+			'max_theta'   => @max_theta,
+
+			'valid'       => @valid.map{|x| x ? 1 : 0},
 			'readings'    => @readings.clone.nan_to_nil!,
-			'theta'       => @theta.clone.nan_to_nil!,
-			'odometry'    => @odometry.to_a.nan_to_nil!,
-			'estimate'    => @estimate.to_a.nan_to_nil!,
+			'theta'       => @theta   .clone.nan_to_nil!,
+
+			'odometry'    => @odometry .to_a.nan_to_nil!,
+			'estimate'    => @estimate .to_a.nan_to_nil!,
 			'true_pose'   => @true_pose.to_a.nan_to_nil!,
 		}
 		h['cluster']     = @cluster unless @cluster.all?{|x| x == -1}

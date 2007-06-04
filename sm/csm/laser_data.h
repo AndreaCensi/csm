@@ -76,6 +76,7 @@ void ld_set_null_correspondence(LDP, int i);
 int ld_next_valid_up(LDP, int i);
 int ld_next_valid_down(LDP, int i);
 
+int ld_valid_fields(LDP);
 
 void ld_simple_clustering(LDP ld, double threshold);
 void ld_compute_orientation(LDP ld, int size_neighbourhood, double sigma);

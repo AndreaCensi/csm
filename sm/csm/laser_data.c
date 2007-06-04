@@ -138,9 +138,6 @@ int ld_next_valid_down(LDP ld, int i){
 	return ld_next_valid(ld, i, -1);
 }
 
-
-
-
 int ld_valid_ray(struct laser_data* ld, int i) {
 	return (i>=0) && (i<ld->nrays) && (ld->valid[i]);
 }
@@ -158,3 +155,74 @@ int ld_num_valid_correspondences(LDP ld) {
 	}
 	return num;
 }
+
+int count_equal(const int*v, int n, int value) {
+	int num = 0, i;
+	for(i=0;i<n;i++) if(value == v[i]) num++;
+	return num;
+}
+
+int ld_valid_fields(LDP ld)  {
+	if(!ld) {
+		sm_error("Invalid pointer\n");	
+		return 0;
+	}
+	int min_nrays = 10;
+	int max_nrays = 10000;
+	if(ld->nrays < min_nrays || ld->nrays > max_nrays) {
+		sm_error("Invalid number of rays: %d\n", ld->nrays);
+		return 0;
+	}
+	if(is_nan(ld->min_theta) || is_nan(ld->max_theta)) {
+		sm_error("Invalid min / max theta: min_theta = %f max_theta = %f\n",
+			ld->min_theta, ld->max_theta);
+		return 0;
+	}
+	double min_fov = deg2rad(20.0); 
+	double max_fov = 2 * M_PI;
+	double fov = ld->max_theta - ld->min_theta;
+	if( fov < min_fov || fov > max_fov) {
+		sm_error("Strange FOV: %f rad = %f deg \n", fov, rad2deg(fov));
+		return 0;
+	}
+	if(ld->min_theta != ld->theta[0]) {
+		sm_error("Min_theta (%f) should be theta[0] (%f)\n",
+			ld->min_theta, ld->theta[0]);
+		return 0;
+	}
+	if(ld->max_theta != ld->theta[ld->nrays-1]) {
+		sm_error("Min_theta (%f) should be theta[0] (%f)\n",
+			ld->max_theta, ld->theta[ld->nrays-1]);
+		return 0;
+	}
+	/* Check that there are valid rays */
+	double min_reading = 0;
+	double max_reading = 100;
+	int i; for(i=0;i<ld->nrays;i++) {
+		if(ld->valid[i]) {
+			double r = ld->readings[i];
+			double th = ld->theta[i];
+			if(is_nan(r) || is_nan(th)) {
+				sm_error("Ray #%d: r = %f  theta = %f but valid is %d\n",
+					i, r, th, ld->valid[i]);
+				return 0;
+			}
+			if( !( min_reading < r && r < max_reading ) ) {
+				sm_error("Ray #%d: %f is not in interval (%f, %f) \n",
+					i, r, min_reading, max_reading);
+				return 0;
+			}
+			
+		}
+	}
+	/* Checks that there is at least 10% valid rays */
+	int num_valid   = count_equal(ld->valid, ld->nrays, 1);
+	int num_invalid = count_equal(ld->valid, ld->nrays, 0);
+	if (num_valid < ld->nrays * 0.10) {
+		sm_error("Valid: %d/%d invalid: %d.\n", num_valid, ld->nrays, num_invalid);
+		return 0;
+	}
+
+	return 1;
+}
+

@@ -10,8 +10,13 @@
 /*#define EXPERIMENT_COVARIANCE*/
 
 void sm_icp(struct sm_params*params, struct sm_result*res) {
-	
 	res->valid = 0;
+	
+	if(!ld_valid_fields(params->laser_ref) || 
+	   !ld_valid_fields(params->laser_sens)) {
+		return;
+	}
+		
 	
 	if(JJ) jj_context_enter("sm_icp");
 	

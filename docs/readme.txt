@@ -1,6 +1,10 @@
 
+The Canonical Scan Matcher v.1.0
+================================
 
-## Content of this packate ##
+
+
+## Content of this package ##
 
 This package contains a lot of software, but only some of that
 is in a complete and usable state.
@@ -8,13 +12,16 @@ is in a complete and usable state.
 -	The directory `sm` contains a scan matcher written in C, plus 
 	associated tools and apps. This is stable and might be used.
 	
+	The actual scan matcher code is in `sm/csm`.
+	
 	There are many libraries in the `sm/lib` directory:
 	
 	-	Directory `gpc`: a library for solving point-to-line correspondence
 		problems. This is documented in another file.
 	
 	-	Directory `egsl`: a light wrapper for GSL that makes manipulating
-		matrices easy and efficient. This is documented in another file.
+		matrices easy and efficient. This is documented in another file:
+		see `sm/lib/egsl/docs`.
 
 	-	Directory `options`: for processing command-line arguments and 
 		configuration files.
@@ -87,3 +94,4 @@ Plus, there are the `test*` directories.
 [octave]: http://www.octave.org
 [cairo]: http://cairographics.org
 [json-c]: http://www.json.org
+
