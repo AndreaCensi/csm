@@ -36,13 +36,14 @@ int main(int argc, const char*argv[]) {
 	
 	struct option* ops = options_allocate(30);
 	options_string(ops, "in", &p.file_in, "stdin",
-		"File with first series of scans (at pose1)");
+		"Input file ");
 	options_string(ops, "out", &p.file_out, "stdout",
-		"File with second series of scans (at pose2)");
+		"Output file ");
 	options_string(ops, "file_jj", &p.file_jj, "",
 		"File for journaling -- if left empty, journal not open.");
-	options_int(ops, "format", &p.format, 0,
-		"Output format (0: json, 1: carmen, ... )");
+	p.format = 0;
+/*	options_int(ops, "format", &p.format, 0,
+		"Output format (0: json, 1: carmen, ... )"); */
 	
 	sm_options(&params, ops);
 	if(!options_parse_args(ops, argc, argv)) {

@@ -1,5 +1,23 @@
 
-## Required software ##
+Installation
+------------
+
+### Downloading ###
+
+Download with SVN, using the following:
+
+	$ svn checkout --username ANTANI svn://net143-184.mclink.it/csm
+
+where `ANTANI` is your surname (you should have received a password). 
+
+This will checkout both the source code
+and some files used for experiments, that might be slightly slow to download.
+If you are only interested in  the source code, use:
+
+	$ svn checkout --username ANTANI svn://net143-184.mclink.it/csm/csm
+
+
+### Required software ###
 
 This software has been tested on Mac OS X, Linux, and Windows XP (using Cygwin).
 
@@ -12,8 +30,7 @@ For `carmen2pdf`, you will need the Cairo graphics library, available at
   <http://cairographics.org>
 
 
-
-## Installation ##
+### Compiling ###
 
 If you are lucky, this should be it:
 
@@ -23,18 +40,39 @@ If you are lucky, this should be it:
 If you want to install this library system-wide, you could use:
 
 	$ cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr/local .
+	$ make 
+	$ make install
 
 as the first step.
 
-For installing the ruby wrapper, refer to the separate instructions.
+
+For installing the Ruby wrapper, refer to the separate instructions.
+If you want to use the Ruby wrapper, I suggest to install the source
+code in a `deploy` sub-directory of `csm`:
+
+	csm/
+		docs/
+		csm/
+		rsm/
+		deploy/     <---  here
+
+To do this, use:
+
+	$ cmake -DCMAKE_INSTALL_PREFIX:PATH=`pwd`/deploy .
+	$ make 
+	$ make install
+
+(you have to give a complete path to `-DCMAKE_INSTALL_PREFIX:PATH`).
 
 
-
-## Getting started ##
+### Getting started ###
 
 You might get started by doing this:
 
-	$ sm2 < laserazosSM3.log > out.log
+	$ sm2 < in.log > out.log
+
+where `in.log` is a Carmen-format log file. You can find one
+in the top-level `experiments` directory: it is called `laserazosSM3.log`.
 
 If you installed the Cairo library, you can see the result with:
 

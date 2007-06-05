@@ -2,63 +2,70 @@
 The Canonical Scan Matcher v.1.0
 ================================
 
-
+* TOC
+{:toc}
 
 ## Content of this package ##
 
 This package contains a lot of software, but only some of that
 is in a complete and usable state.
 
--	The directory `sm` contains a scan matcher written in C, plus 
-	associated tools and apps. This is stable and might be used.
-	
-	The actual scan matcher code is in `sm/csm`.
-	
-	There are many libraries in the `sm/lib` directory:
-	
-	-	Directory `gpc`: a library for solving point-to-line correspondence
-		problems. This is documented in another file.
-	
-	-	Directory `egsl`: a light wrapper for GSL that makes manipulating
-		matrices easy and efficient. This is documented in another file:
-		see `sm/lib/egsl/docs`.
 
-	-	Directory `options`: for processing command-line arguments and 
-		configuration files.
+### Stable things: C scan matching library ###
 
-	-	Directory `json-c`: a library for JSON input/output. This is a 
-		slightly modified version of the original [`json-c`][json-c] 
-		library released under the [MIT license].
+The directory `sm/csm` contains a scan matcher written in C, plus 
+associated tools and apps. This is stable and might be used.
 
-	There are many applications in the `sm/apps` directory:
-	
-	-	Application `carmen2pdf`: converts a laser log to a PDF map.
-		To build this application, it is needed to install the [Cairo] graphics
-		library.
+There are many libraries in the `sm/lib` directory:
 
-	-	Application `carmen2json`: 
+-	Directory `gpc`: a library for solving point-to-line correspondence
+	problems. This is documented in another file.
 
-	-	Application `json_extract`:
+-	Directory `egsl`: a light wrapper for GSL that makes manipulating
+	matrices easy and efficient. This is documented in another file:
+	see `sm/lib/egsl/docs`.
 
-	-	Application `json_pipe`:
-	
-	-	Application `ld_fisher`:
+-	Directory `options`: for processing command-line arguments and 
+	configuration files.
 
-	-	Application `ld_noise`:
+-	Directory `json-c`: a library for JSON input/output. This is a 
+	slightly modified version of the original [`json-c`][json-c] 
+	library released under the [MIT license].
 
-	-	Application `ld_slip`:
+### Stable things: applications ###
 
-	-	Application `sm0`: old test.
-	
-	-	Application `sm1`: useful for running experiments. Reads scans
-		from two different files, and outputs statistics.
+There are many applications in the `sm/apps` directory:
 
-	-	Application `sm2`: standard scan-matching.
-		
+-	Application `carmen2pdf`: converts a laser log to a PDF map.
+	To build this application, it is needed to install the [Cairo] graphics
+	library.
+
+-	Application `carmen2json`: 
+
+-	Application `json_extract`:
+
+-	Application `json_pipe`:
+
+-	Application `ld_fisher`:
+
+-	Application `ld_noise`:
+
+-	Application `ld_slip`:
+
+-	Application `sm0`: old test.
+
+-	Application `sm1`: useful for running experiments. Reads scans
+	from two different files, and outputs statistics.
+
+-	Application `sm2`: standard scan-matching.
+
+
+### Unstable things: scripts ###
+
 In the `scripts/` directory you can find:
 
 -	Script `fig2pics.rb`: used for converting FIG files to PDF.
-	It has many more options than [`fig2dev`][fig2dev] (that is being used), 
+	It has many more options than [`fig2dev`][fig2dev] (that is being used internally), 
 	including the ability to use a LaTeX preamble and to change
 	the resulting bounding box.
 	
@@ -71,6 +78,9 @@ In the `scripts/` directory you can find:
 
 -	Script `create_video.rb`: displays the scan-matching process.
 	This reads the journal files written by applications `sm1` and `sm2`.
+
+
+### Unstable things: Ruby and Matlab implementations ###
 
 Unstable things include:
 
@@ -86,12 +96,10 @@ Unstable things include:
 	Also, I occasionally tried to make sure that the scripts run fine
 	in [Octave]. They do, except for the plotting.
 
-Plus, there are the `test*` directories.
-
-**(TODO: describe tests directories)**
-
 
 [octave]: http://www.octave.org
 [cairo]: http://cairographics.org
 [json-c]: http://www.json.org
+[fig2dev]: http://www.xfig.org
+[MIT license]: http://en.wikipedia.org/wiki/MIT_License
 

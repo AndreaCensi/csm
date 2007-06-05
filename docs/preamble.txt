@@ -1,0 +1,6 @@
+CSS: style.css
+Use numbered headers: true
+HTML use syntax: true
+LaTeX use listings: true
+LaTeX CJK: false
+LaTeX preamble: preamble.tex

@@ -1,0 +1,52 @@
+Misc documentation
+------------------
+
+**Do not believe anything you read here**
+
+### Featured functions ###
+
+`ld_fisher `
+:	This function computes Fisher's information 
+	matrix, in robot coordinates. 
+
+	It uses field `true_alpha` (and `theta`, `readings`). 
+
+	For details about the Fisher's information matrix for 
+	localization, please see this paper: 
+	
+	<http://purl.org/censi/2006/accuracy>
+
+	Available as matlab function `ld_fisher0.m`, C function 
+	`ld_fisher0` and command line `ld_fisher`.
+
+
+Parameters and configuration
+----------------------------
+
+Default parameters for command-line program `sm2`:
+
+	in                            stdin      Input file                                                  
+	out                           stdout     Output file                                                 
+	file_jj                                  File for journaling -- if left empty, journal not open.     
+	max_angular_correction_deg    90         Maximum angular displacement between scans                  
+	max_linear_correction         2          Maximum translation between scans (m)                       
+	max_iterations                1000       When we had enough                                          
+	epsilon_xy                    0.0001     A threshold for stopping                                    
+	epsilon_theta                 0.0001     A threshold for stopping                                    
+	max_correspondence_dist       2          dubious parameter                                           
+	sigma                         0.01       Noise in the scan                                           
+	use_corr_tricks               1          Use smart tricks for finding correspondences.               
+	restart                       1          Restart: Restart if error is over threshold                 
+	restart_threshold_mean_error  0.01       Restart: Threshold for restarting.                          
+	restart_dt                    0.01       Restart: displacement for restarting.                       
+	restart_dtheta                0.0261799  Restart: displacement for restarting.                       
+	clustering_threshold          0.05       Max distance for staying in the same clustering             
+	orientation_neighbourhood     3          Number of neighbour rays used to estimate the orientation.  
+	do_alpha_test                 0          Discard correspondences based on the angles                 
+	use_point_to_line_distance    1          Use gpc                                                     
+	do_alpha_test_thresholdDeg    20                                                                     
+	outliers_maxPerc              0.95                                                                   
+	outliers_adaptive_order       0.7                                                                    
+	outliers_adaptive_mult        2                                                                      
+	do_visibility_test            0           ...                                                        
+	do_compute_covariance         0           ...

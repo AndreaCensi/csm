@@ -1,0 +1,27 @@
+Input and output formats
+------------------------
+
+### The Carmen log format ###
+
+### The JSON log format ###
+
+See this site: <http://www.json.org> for general information about JSON.
+
+This is a sample laser data structure. It has only 5 rays (which all
+happen to be invalid), and it has no `alpha`, `true_alpha`, `cluster` fields:
+
+	{ 
+	  "nrays": 5, 
+	  "min_theta": null, 
+	  "max_theta": null, 
+	  "theta":    [ null, null, null, null, null ],   
+	  "readings": [ null, null, null, null, null], 
+	  "valid":    [ 0, 0, 0, 0, 0],
+
+	  "odometry": [ null, null, null ], 
+	  "estimate": [ null, null, null ], 
+	  "true_pose": [ null, null, null ] 
+	}
+
+Note that `NAN` is represented with `null` in the JSON format.
+
