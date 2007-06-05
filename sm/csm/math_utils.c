@@ -37,6 +37,13 @@ void transform(const gsl_vector* p, const gsl_vector* x, gsl_vector*res) {
 	gsl_vector_set(res, 1, s * gvg(p,0) +c*gvg(p,1) + gvg(x,1));
 }
 
+void transform_d(const double* point2d, const double* pose, double* result2d) {
+	double theta = pose[2];
+	double c = cos(theta); double s = sin(theta);
+	result2d[0] = pose[0] + c * point2d[0] - s * point2d[1];
+	result2d[1] = pose[1] + s * point2d[0] + c * point2d[1];
+}
+
 void gsl_vector_set_nan(gsl_vector*v) {
 	gvs(v,0,GSL_NAN);
 	gvs(v,1,GSL_NAN);

@@ -2,25 +2,12 @@
 
 require 'rsm_sm_loop'
 
-def get_empty_panorama(estimate)
-	ld = LaserData.new(721)
-	ld.min_theta = -Math::PI
-	ld.max_theta = +Math::PI
-	for i in 0..ld.nrays-1
-		ld.theta[i] = ld.min_theta + (ld.max_theta-ld.min_theta) *
-		 	i / (ld.nrays-1);
-	end
-	ld.estimate = estimate.clone
-	ld.odometry = estimate.clone
-	ld.cov_readings = [GSL::NAN]*ld.nrays
-	ld
-end
 
-class LaserData
+class Panorama < LaserData
 	SIGMA = 0.005
 	COMP_THRESHOLD = SIGMA * 5
+	SCALE = 1
 	
-	attr_accessor :cov_readings
 	
 	def angle2ray(phi)
 		i = (phi-@min_theta) / (@max_theta-@min_theta) * @nrays
@@ -28,6 +15,19 @@ class LaserData
 		i < 0 || i >= @nrays ? nil : i
 	end
 	
+	def initialize(estimate, odometry)
+		super(721)
+		
+		@min_theta = -Math::PI
+		@max_theta = +Math::PI
+		for i in 0..@nrays-1
+			@theta[i] = @min_theta + (@max_theta-@min_theta) *
+			 	i / (@nrays-1);
+		end
+		@estimate = estimate.clone
+		@odometry = odometry.clone
+	end
+
 	def merge(ld)
 		count = 0
 		ld.compute_cartesian
@@ -60,12 +60,16 @@ class LaserData
 				
 				compatible = (rho-old_rho).abs < COMP_THRESHOLD
 				if compatible
-					old_cov = @cov_readings[j]
-					new_cov = 1 /( 1 / old_cov + 1 / (SIGMA**2))
-					new_rho = new_cov * (old_rho / old_cov + rho / (SIGMA**2));
+					
+					dist = sin( (phi-@theta[j]).abs ) * rho
+					
+					cov_rho = (SIGMA**2) + (dist**2) / SCALE
+					cov_old_rho = @cov_readings[j]
+					cov_new_rho = 1 /( 1 / cov_old_rho + 1 / cov_rho)
+					new_rho = cov_new_rho * (old_rho / cov_old_rho + rho / cov_rho);
 
 					@readings[j] = new_rho
-					@cov_readings[j] = new_cov
+					@cov_readings[j] = cov_new_rho
 					count += 1
 				end
 #				$stderr.puts "#{i} #{j}, #{old_rho} => #{new_rho}"
@@ -100,7 +104,7 @@ def go_mt
 
 	first = LogReader.shift_laser(input)
 	first.estimate = first.odometry
-	panorama = get_empty_panorama(first.estimate)
+	panorama = Panorama.new(first.estimate, first.odometry)
 	panorama.merge(first)
 	laser_ref = first
 
@@ -170,13 +174,12 @@ def go_mt
 			laser_sens.estimate = oplus(laser_ref.estimate, res[:x])
 #		end
 	
-		n = panorama.merge (laser_sens)
+		n = panorama.merge(laser_sens)
 
 #		if Vector[res_pan[:x][0],res_pan[:x][1]].nrm2 > 0.5
 		if n < 200
 			output.puts panorama.to_json
-			panorama = get_empty_panorama(laser_sens.estimate)
-			panorama.odometry = laser_sens.odometry.clone
+			panorama = Panorama.new(laser_sens.estimate, laser_sens.odometry)
 			panorama.merge(laser_sens)
 			count = 0
 			puts "mt: new panorama ##{count}: error #{error}"

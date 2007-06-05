@@ -23,6 +23,7 @@ void possible_interval(
 	double max_angular_correction_deg, double max_linear_correction, int*from, int*to, int*start_cell);
 
 void transform(const gsl_vector* point2d, const gsl_vector* pose, gsl_vector*result2d);
+void transform_d(const double* point2d, const double* pose, double* result2d);
 
 void gsl_vector_set_nan(gsl_vector*v);
 

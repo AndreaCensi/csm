@@ -26,6 +26,7 @@ class LaserData
 	attr_accessor :cluster
 	attr_accessor :p
 	
+	attr_accessor :cov_readings
 
 	attr_accessor :odometry
 	attr_accessor :estimate
@@ -51,6 +52,7 @@ class LaserData
 		@alpha       = [GSL::NAN] * nrays
 		@cov_alpha   = [GSL::NAN] * nrays
 		@cluster     = [-1] * nrays
+		@cov_readings = [GSL::NAN]* nrays
 		
 		@odometry    = Vector[GSL::NAN,GSL::NAN,GSL::NAN].col
 		@estimate    = Vector[GSL::NAN,GSL::NAN,GSL::NAN].col

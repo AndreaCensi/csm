@@ -36,6 +36,7 @@ class LaserData
 		h['alpha_valid'] = @alpha_valid unless @alpha_valid.all?{|x| not x}
 		h['alpha'] = @alpha.clone.nan_to_nil! unless @alpha.all_nan?
 		h['cov_alpha'] = @cov_alpha.clone.nan_to_nil! unless @cov_alpha.all_nan?
+		h['cov_readings'] = @cov_readings.clone.nan_to_nil! unless @cov_readings.all_nan?
 		
 #		corrd = corr.map{|x| x.valid ? [x.j1, x.j2] : nil }
 #		h['corresponde] = c

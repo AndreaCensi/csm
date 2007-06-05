@@ -26,6 +26,8 @@ struct laser_data {
 	double *cov_alpha;
 	int    *alpha_valid;
 
+	double *cov_readings;
+
 	double *true_alpha;
 	
 	/* Jump tables */

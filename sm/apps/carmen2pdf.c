@@ -17,6 +17,10 @@ struct params {
 	double horizon;
 	double line_threshold;
 	double dimension;
+	
+	int draw_confidence;
+	double confidence_mult;
+	
 	const char*output_filename;
 	const char*input_filename;
 
@@ -41,6 +45,9 @@ int main(int argc, const char*argv[]) {
 	options_double(ops, "horizon", &p.horizon, 8.0, "horizon of the laser (m)");
 	options_double(ops, "padding", &p.padding, 0.2, "padding around bounding box (m)");
 	options_double(ops, "dimension", &p.dimension, 500.0, "dimension of the image (points)");
+	options_int(ops, "draw_confidence", &p.draw_confidence, 0, " Draws confidence (cov_readings[i]) ");
+	options_double(ops, "confidence_mult", &p.confidence_mult, 3.0, " 3-sigma ");
+
 	options_string(ops, "use", &p.use, "estimate", "One in 'odometry','estimate','true_pose'");
 	
 	if(!options_parse_args(ops, argc, argv)) {
@@ -84,6 +91,11 @@ void bb_w2b(struct bounding_box*bb, double wx, double wy, double*bx, double*by){
 	*bx = (wx-bb->x0) * scale;
 	*by = bb->height- (wy-bb->y0) * scale;
 }
+
+void ld_get_buffer_polar(double phi, double rho, const double*pose, 
+	double*x, double*y,
+	struct bounding_box*bb, double*bx,double *by);
+
 
 /** Reads all file to find bounding box */
 void get_bb(struct params*p, struct bounding_box*bb) {
@@ -141,6 +153,10 @@ double * ld_get_reference(LDP ld, reference use_reference) {
 	return pose;
 }
 
+double distance_squared(const double *a2d, const double*b2d) {
+	return square(a2d[0]-b2d[0]) + square(a2d[1]-b2d[1]) ;
+}
+
 void carmen2pdf(struct params p) {
 	
 	struct bounding_box bb;
@@ -174,18 +190,19 @@ void carmen2pdf(struct params p) {
 	
 	
 	int counter=0; 
-	int first_pose=1; double old_pose_bx,old_pose_by;
+	int first_pose=1; double old_pose_bx=0,old_pose_by=0;
 	LDP ld;
 	while((ld = ld_read_smart(p.input_file))) {
 	
+		double *pose = ld_get_reference(ld, p.use_reference);
+
 		/* Draw pose */
 		{
 			double bx,by;
-			
-			double * pose = ld_get_reference(ld, p.use_reference);
 			bb_w2b(&bb, pose[0], pose[1], &bx, &by);
 
-			if(first_pose) { first_pose = 0; 
+			if(first_pose) { 
+				first_pose = 0; 
 			} else {
 				cairo_set_line_width(cr, 0.5);
 				cairo_set_source_rgb (cr, 1.0, 0.0, 0.0);
@@ -199,41 +216,100 @@ void carmen2pdf(struct params p) {
 			old_pose_by = by;
 		}
 		
+
 		/* If should we draw this sensor scan */
 		if(should_consider(&p, counter))  {
+
+			/* Firstly, find buffer coordinates and whether to cut the stroke */
+			struct {
+				double w[2]; /* world coordinates */
+				double b[2]; /* buffer coordinates */
+				int begin_new_stroke;
+				int end_stroke;
+				int valid;
+				} draw_info[ld->nrays];
+			
+			{
+				int last_valid = -1; int first = 1;
+				int i; for(i=0;i<ld->nrays;i++) {
+
+					if( (!ld->valid[i]) || ld->readings[i]>p.horizon) {
+						draw_info[i].valid = 0;
+						continue;
+					}
+					draw_info[i].valid = 1;
+
+					ld_get_buffer_polar(ld->theta[i], ld->readings[i], 
+						pose, &(draw_info[i].w[0]), &(draw_info[i].w[1]), 
+						&bb,  &(draw_info[i].b[0]), &(draw_info[i].b[1]));
+
+					if(first) { 
+						first = 0; 
+						draw_info[i].begin_new_stroke = 1;
+						draw_info[i].end_stroke = 0;
+					} else {
+						int near = square(p.line_threshold) > 
+							distance_squared(draw_info[last_valid].w, draw_info[i].w);
+						draw_info[i].begin_new_stroke = near ? 0 : 1;
+						draw_info[i].end_stroke = 0;
+						draw_info[last_valid].end_stroke = draw_info[i].begin_new_stroke;
+					}
+					last_valid = i;
+				} /*for */
+				if(last_valid >= 0)
+					draw_info[last_valid].end_stroke = 1;
+			} /* find buff .. */
+			
+
+			if(p.draw_confidence) { 
+				int i;
+				/* Compute interval */
+				double interval[ld->nrays];
+				double big_interval = 0.3;
+				for(i=0;i<ld->nrays;i++) { if(draw_info[i].valid==0) continue;
+					double cov = ld->cov_readings[i];
+					if(!is_nan(cov)) {
+						interval[i] = p.confidence_mult * sqrt(cov);
+					} else interval[i] = big_interval;
+				}
+
+				cairo_set_source_rgb(cr, 1.0, 0.5, 0.5);
+				cairo_set_line_width(cr, 0.1);
+				/* draw one */
+				int j=0; for(j=0;j<2;j++)
+				for(i=0;i<ld->nrays;i++) { if(draw_info[i].valid==0) continue;
+					double b[2];
+					ld_get_buffer_polar(ld->theta[i], 
+						ld->readings[i] + (j ? interval[i] : -interval[i]), 
+						pose, 0, 0, &bb,  &(b[0]), &(b[1]));
+
+					if(draw_info[i].begin_new_stroke)
+						cairo_move_to(cr, b[0], b[1]);
+					else
+						cairo_line_to(cr, b[0], b[1]);
+					if(draw_info[i].end_stroke)
+						cairo_stroke(cr);
+				}
+			} /* draw confidence */
+			
+			/* draw contour: begin_new_stroke and end_stroke tell 
+			when to interrupt the stroke */
+			int i; 
 			cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
 			cairo_set_line_width(cr, 0.1);
-			int first = 1;
-			double last_x,last_y;
-			int i; for(i=0;i<ld->nrays;i++) {
-				if(ld->valid[i]==0) continue;
-				if(ld->readings[i]>p.horizon) continue;
-				
-				double x,y;
-				ld_get_world(ld, i, &x, &y, p.use_reference);
-				double bx,by;
-				bb_w2b(&bb, x,y,&bx,&by);
-				
-				if(first) { first = 0;
-					cairo_move_to(cr, bx, by);
-					last_x=x; last_y=y;
-				} else {
-					int near = square(p.line_threshold) > 
-						square(x-last_x)+square(y-last_y);
-					
-					if(near) {
-						cairo_line_to(cr, bx, by);
-					} else {
-					/*	cairo_close_path(cr); */
-						cairo_stroke(cr);
-						cairo_move_to(cr, bx, by);
-						last_x=x; last_y=y;
-					}
-				}
-				
+			for(i=0;i<ld->nrays;i++) {
+				if(draw_info[i].valid==0) continue;
+				double *b = draw_info[i].b;
+				if(draw_info[i].begin_new_stroke)
+					cairo_move_to(cr, b[0], b[1]);
+				else
+					cairo_line_to(cr, b[0], b[1]);
+				if(draw_info[i].end_stroke)
+					cairo_stroke(cr);
 			}
-			cairo_close_path(cr);
-			cairo_stroke(cr);
+
+			
+			
 		}
 		counter++;
 		ld_free(ld);
@@ -245,35 +321,35 @@ void carmen2pdf(struct params p) {
 	cairo_surface_destroy (surface);
 }
 
-void ld_get_world(LDP ld, int i, double*x, double*y, reference use_reference) {
-	gsl_vector * p = gsl_vector_alloc(2);
-	gsl_vector * pw = gsl_vector_alloc(2);
-	gsl_vector * pose = gsl_vector_alloc(3);
+void ld_get_buffer_polar(double phi, double rho, const double*pose, 
+	double*x, double*y,
+	struct bounding_box*bb, double*bx,double *by) {
 	
-	gsl_vector_set(p, 0, cos(ld->theta[i]) * ld->readings[i]);
-	gsl_vector_set(p, 1, sin(ld->theta[i]) * ld->readings[i]);
-	
-	copy_from_array(pose, ld_get_reference(ld, use_reference));
-	
-	transform(p, pose, pw);
-	
-	*x = gsl_vector_get(pw, 0);
-	*y = gsl_vector_get(pw, 1);
+	double point[2];
+	point[0] = cos(phi) * rho;
+	point[1] = sin(phi) * rho;
 
-	gsl_vector_free(p);
-	gsl_vector_free(pw);
-	gsl_vector_free(pose);
+	double pw[2];
+	transform_d(point, pose, pw);
+	
+	if( (bb!=0) & (bx!=0) & (by!=0) )
+	bb_w2b(bb, pw[0], pw[1],  bx, by);
+	
+	if((x!=0) && (y!=0)) {
+		*x = pw[0]; *y = pw[1];
+	}
 }
 
 void ld_getbb(LDP  ld, double*x0, double*y0, double*x1, double*y1,
  	reference use_reference, double horizon) {
+	double *pose = ld_get_reference(ld, use_reference);
 	
 	int first=1;
 	int i; for(i=0;i<ld->nrays;i++) {
 		if(!ld->valid[i]) continue;
 		if(ld->readings[i]>horizon) continue;
 		double x,y;
-		ld_get_world(ld, i, &x, &y, use_reference);
+		ld_get_buffer_polar(ld->theta[i], ld->readings[i], pose, &x, &y, 0, 0,0);
 		
 		if(first) {
 			*x0 = *x1 = x;

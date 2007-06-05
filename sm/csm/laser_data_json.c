@@ -124,6 +124,7 @@ JO ld_to_json(LDP ld) {
 
 	jo_add_double_array(jo, "theta",     ld->theta, n);
 	jo_add_double_array(jo, "readings",   ld->readings, n);
+	jo_add_double_array_if_not_nan(jo, "cov_readings", ld->cov_readings, n);
 
 	jo_add_int_array(jo, "valid",   ld->valid, n);
 
@@ -161,6 +162,7 @@ LDP json_to_ld(JO jo) {
 	jo_read_double(jo, "max_theta", &ld->max_theta);	
 	jo_read_double_array(jo, "theta", ld->theta, n, NAN);	
 	jo_read_double_array(jo, "readings", ld->readings, n, NAN);	
+	jo_read_double_array(jo, "cov_readings", ld->cov_readings, n, NAN);	
 
 	jo_read_int_array(jo, "valid",     ld->valid, n, 0);
 	jo_read_int_array(jo, "cluster",   ld->cluster, n, -1);
