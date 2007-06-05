@@ -19,6 +19,7 @@ module GSL
 			end
 			false
 		end
+		
 	end
 end
 
@@ -61,6 +62,7 @@ module MathUtils
 		t = x[0,1]; theta = x[2];
 		rot(theta)*point + t
 	end
+
 	
 	def pose_diff(to,from)
 		oplus(ominus(from), to)

@@ -16,7 +16,7 @@ class LaserData
 	def compute_cartesian
 		for i in 0..nrays-1
 			next if not valid? i
-			p[i] = v(i) * readings[i]
+			@p[i] = v(i) * readings[i]
 		end
 	end
 end
