@@ -3,6 +3,15 @@ Input and output formats
 
 ### The Carmen log format ###
 
+	estimate.x estimate.y estimate.theta ....
+	odometry.x odometry.y odometry.theta 
+
+diego:
+	quindi tu alla fine
+	leggi il secondo campo
+	e scrivi il secondo campo
+	(e scrivi, per sicurezza, il primo campo)
+	
 ### The JSON log format ###
 
 See this site: <http://www.json.org> for general information about JSON.

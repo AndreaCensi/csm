@@ -6,7 +6,7 @@ def scan_matching(klass,scan_list,input,output,params)
 	
 	laser_ref = LogReader.shift_laser(input)
 	laser_ref.estimate = Vector[0,0,0].col
-	output.puts laser_ref.to_carmen
+	output.puts laser_ref.to_json
 	
 	results = []
 	count = 0
@@ -66,16 +66,17 @@ def scan_matching(klass,scan_list,input,output,params)
 		
 		x = res[:x]
 		if x.any_nan? 
-			$stderr.puts "Found nans in answer x = #{x.inspect}"
+			raise "Found nans in answer x = #{x.inspect}"
 		end
 		error = res[:error]
 		iterations = res[:iterations]
 		
-		puts "rsm_sm.rb: #{count} time=#{realtime} error = #{error} it = #{iterations} x = #{pv(x)} u = #{pv(u)}"
-		
-		laser_sens.estimate = oplus(laser_ref.estimate,x)
-		output.puts laser_sens.to_carmen
+		laser_sens.estimate = oplus(laser_ref.estimate, x)
+		output.puts laser_sens.to_json
 
+		q = laser_sens.estimate
+		$stderr.puts "rsm_sm.rb: #{count} time=#{realtime} error = #{error} it = #{iterations} x = #{pv(x)} u = #{pv(u)} q = #{pv(q)}"
+		
 		
 		laser_ref = laser_sens;
 		count += 1

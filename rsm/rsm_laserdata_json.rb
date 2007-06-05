@@ -19,7 +19,6 @@ end
 class LaserData
 	
 	def to_json(*a)
-		puts "Estimate #{@estimate.inspect} #{@estimate.to_a.inspect}"
 		h = {
 			'nrays'       => @nrays,
 			'min_theta'   => @min_theta,

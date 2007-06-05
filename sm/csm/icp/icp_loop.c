@@ -7,7 +7,6 @@
 #include "../csm_all.h"
 
 #include "icp.h"
-/*#define EXPERIMENT_COVARIANCE*/
 
 void sm_icp(struct sm_params*params, struct sm_result*res) {
 	res->valid = 0;
@@ -111,6 +110,8 @@ void sm_icp(struct sm_params*params, struct sm_result*res) {
 	/* At last, we did it. */
 	res->valid = 1;
 	vector_to_array(best_x, res->x);
+	fprintf(stderr, "icp: final x =  %s  \n", gsl_friendly_pose(best_x));
+	
 	
 	if(params->do_compute_covariance)  {
 
@@ -150,6 +151,7 @@ void sm_icp(struct sm_params*params, struct sm_result*res) {
 	if(JJ) jj_context_exit();
 }
 
+/** Computes an hash of the correspondences */
 unsigned int ld_corr_hash(LDP ld){
 	unsigned int hash = 0;
 	unsigned int i    = 0;
@@ -169,6 +171,9 @@ int icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 	LDP laser_sens = params->laser_sens;
 	
 	gsl_vector * x_old = vector_from_array(3, start->data);
+	
+	fprintf(stderr, "icp: starting at  x' =  %s  \n", gsl_friendly_pose(x_old));
+	
 	gsl_vector * delta = gsl_vector_alloc(3);
 	gsl_vector * delta_old = gsl_vector_alloc(3);
 	gsl_vector_set_all(delta_old, 0.0);

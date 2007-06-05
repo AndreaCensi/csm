@@ -55,12 +55,12 @@ int ld_read_next_laser_carmen(FILE*file, LDP ld) {
 			ld->theta[i] = ld->min_theta+ i * (ld->max_theta-ld->min_theta) / (ld->nrays-1);
 		}
 		
-		if(read_next_double(line,&cur,ld->odometry+0)) goto error;
-		if(read_next_double(line,&cur,ld->odometry+1)) goto error;
-		if(read_next_double(line,&cur,ld->odometry+2)) goto error;
 		if(read_next_double(line,&cur,ld->estimate+0)) goto error;
 		if(read_next_double(line,&cur,ld->estimate+1)) goto error;
 		if(read_next_double(line,&cur,ld->estimate+2)) goto error;
+		if(read_next_double(line,&cur,ld->odometry+0)) goto error;
+		if(read_next_double(line,&cur,ld->odometry+1)) goto error;
+		if(read_next_double(line,&cur,ld->odometry+2)) goto error;
 		
 		fprintf(stderr, "l");
 		return 0;

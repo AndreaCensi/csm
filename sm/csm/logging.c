@@ -18,12 +18,9 @@ void sm_error(const char *msg, ...)
 
 void sm_debug(const char *msg, ...)
 {
-  va_list ap;
-  va_start(ap, msg);
-#if HAVE_VSYSLOG
-    if(_syslog) {
-		vsyslog(LOG_ERR, msg, ap);
-	} else
-#endif
+	va_list ap;
+	va_start(ap, msg);
+	#ifdef CSM_DEBUG
 	vfprintf(stderr, msg, ap);
+	#endif
 }

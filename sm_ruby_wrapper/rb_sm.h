@@ -4,6 +4,8 @@
 
 /** Interface for Ruby: there are no pointers around. */
 
+int rb_sm_set_configuration(const char*name, const char*value);
+
 void rb_sm_init_journal(const char*journal_file);
 
 void rb_sm_odometry(double x, double y, double theta);
@@ -14,7 +16,6 @@ int rb_sm_gpm();
 
 const char *rb_result_to_json();
 
-void rb_sm_get_x(double *x,double*y,double*theta);
 
 void rb_sm_cleanup();
 

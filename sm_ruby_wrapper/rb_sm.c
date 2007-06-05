@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <gsl/gsl_nan.h>
+#include <options/options.h>
 #include "rb_sm.h"
 
 struct sm_params rb_sm_params; 
@@ -17,8 +18,23 @@ void rb_sm_odometry(double x, double y, double theta){
 
 void rb_sm_odometry_cov(double cov_x, double cov_y, double cov_theta){
 	
-	
 }
+
+struct option* ops = 0;
+
+int rb_sm_set_configuration(const char*name, const char*value) {
+	if(!ops) { 
+		ops = options_allocate(30);
+		sm_options(&rb_sm_params, ops);
+	}
+	
+	if(!options_try_pair(ops, name, value)) {
+
+		return 0;
+	} else
+	return 1;
+}
+
 
 const char *rb_result_to_json() {
 	static char buf[5000];
@@ -43,8 +59,3 @@ void rb_sm_cleanup() {
 	ld_free(&(rb_sm_params.laser_sens));*/
 }
 
-void rb_sm_get_x(double *x,double*y,double*theta) {
-	*x = rb_sm_result.x[0];
-	*y = rb_sm_result.x[1];
-	*theta = rb_sm_result.x[2];
-}

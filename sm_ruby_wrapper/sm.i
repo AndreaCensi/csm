@@ -61,7 +61,7 @@ JO json_parse(const char*str);
 const char* json_write(JO jo);
 
 
-
+int rb_sm_set_configuration(const char*name, const char*value);
 void rb_sm_init_journal(const char*journal_file);
 
 
@@ -72,9 +72,6 @@ int rb_sm_icp();
 int rb_sm_gpm();
 
 void rb_sm_cleanup();
-
-
-void rb_sm_get_x(double *OUTPUT,double*OUTPUT,double*OUTPUT);
 
 %inline {
 extern struct sm_params rb_sm_params;

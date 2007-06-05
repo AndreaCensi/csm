@@ -104,6 +104,37 @@ end
 
 def standard_parameters
 	p = Hash.new
+	p[:max_angular_correction_deg]= 90
+	p[:max_linear_correction]=    2
+	p[:max_correspondence_dist]=   2
+	p[:max_iterations]=           40
+	p[:epsilon_xy]=  0.0001
+	p[:epsilon_theta]=   0.0001
+	p[:sigma]=           0.01
+	p[:restart]=         1
+	p[:restart_threshold_mean_error] = 3.0 / 300.0
+	p[:restart_dt]=      0.1
+	p[:restart_dtheta]=  0.026;#  1.5 * 3.14 /180
+	
+	p[:clustering_threshold] = 0.05
+	p[:orientation_neighbourhood] = 3
+	p[:use_corr_tricks] = 1;
+	p[:do_compute_covariance] = 0;
+		
+	p[:do_alpha_test] = 0
+	p[:do_alpha_test_thresholdDeg]=20
+	
+	p[:outliers_maxPerc] = 0.95;
+	p[:outliers_adaptive_order] = 0.7; 
+	p[:outliers_adaptive_mult] = 2; 
+	
+	p[:do_visibility_test] = 0
+	p
+end
+
+
+def tro_parameters
+	p = Hash.new
 	p[:max_angular_correction_deg]= 30
 	p[:max_linear_correction]=    0.5
 	p[:max_correspondence_dist]=   2
@@ -113,8 +144,8 @@ def standard_parameters
 	p[:sigma]=           0.01
 	p[:restart]=         1
 	p[:restart_threshold_mean_error] = 3.0 / 300.0
-	p[:restart_dt]=      0.1
-	p[:restart_dtheta]=    1.5 * 3.14 /180
+	p[:restart_dt]=      0.01
+	p[:restart_dtheta]=   1.5 * 3.14 /180
 	
 	p[:clustering_threshold] = 0.05
 	p[:orientation_neighbourhood] = 3
