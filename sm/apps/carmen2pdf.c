@@ -88,7 +88,7 @@ void bb_w2b(struct bounding_box*bb, double wx, double wy, double*bx, double*by){
 /** Reads all file to find bounding box */
 void get_bb(struct params*p, struct bounding_box*bb) {
 	LDP ld;	
-	int counter=0;
+	int counter=0, considered = 0;
 
 	if((ld = ld_read_smart(p->input_file))) {
 		ld_getbb(ld,&bb->x0,&bb->y0,&bb->x1,&bb->y1,p->use_reference, p->horizon);
@@ -103,10 +103,12 @@ void get_bb(struct params*p, struct bounding_box*bb) {
 			bb->x1 = GSL_MAX(x1, bb->x1);
 			bb->y0 = GSL_MIN(y0, bb->y0);
 			bb->y1 = GSL_MAX(y1, bb->y1);
+			considered++;
 		}
 		counter++;
 		ld_free(ld);
 	}
+	fprintf(stderr, "Considering %d of %d scans. ", considered, counter);
 	rewind(p->input_file);
 	
 	bb->x0 -= p->padding;
@@ -170,17 +172,13 @@ void carmen2pdf(struct params p) {
 		return;
 	}
 	
-
-/*	double scale = GSL_MIN(bb.width / (bb.x1-bb.x0), bb.height / (bb.y1-bb.y0));
-
-	cairo_scale(cr, 50, 1);
-	cairo_translate(cr, 0, -0.5*bb.height); */
 	
 	int counter=0; 
 	int first_pose=1; double old_pose_bx,old_pose_by;
 	LDP ld;
 	while((ld = ld_read_smart(p.input_file))) {
 	
+		/* Draw pose */
 		{
 			double bx,by;
 			
@@ -201,6 +199,7 @@ void carmen2pdf(struct params p) {
 			old_pose_by = by;
 		}
 		
+		/* If should we draw this sensor scan */
 		if(should_consider(&p, counter))  {
 			cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
 			cairo_set_line_width(cr, 0.1);
@@ -225,7 +224,7 @@ void carmen2pdf(struct params p) {
 					if(near) {
 						cairo_line_to(cr, bx, by);
 					} else {
-						cairo_close_path(cr);
+					/*	cairo_close_path(cr); */
 						cairo_stroke(cr);
 						cairo_move_to(cr, bx, by);
 						last_x=x; last_y=y;
