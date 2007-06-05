@@ -72,7 +72,6 @@ to any cluster.
 
 <!--
   ld.hostname
-
   ld.timestamp1, ld.timestamp2
 -->
 
