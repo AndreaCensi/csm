@@ -59,3 +59,14 @@ void rb_sm_cleanup() {
 	ld_free(&(rb_sm_params.laser_sens));*/
 }
 
+LDP string_to_ld(const char*s) {
+	JO jo = json_parse(s);
+	if(!jo) {
+		fprintf(stderr, "String passed from Ruby is invalid JSON: \n\n%s\n", s);
+		return 0;
+	}
+	LDP ld = json_to_ld(jo);
+	jo_free(jo);
+	return ld;
+}
+

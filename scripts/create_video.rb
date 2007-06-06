@@ -7,6 +7,8 @@ $LOAD_PATH << File.expand_path(File.dirname(__FILE__))
 require 'cmd_utils'
 
 FIG2PICS = find_cmd('fig2pics.rb')
+PDF2SWF = find_cmd('pdf2swf')
+GS = find_cmd('gs')
 
 spec = ARGV[0]
 
@@ -36,10 +38,10 @@ end
 
 
 filenames = filenames.join(' ')
-cmd = "gs -dNOPAUSE -sDEVICE=pdfwrite -sOUTPUTFILE=#{output_pdf} -dBATCH #{filenames}"
+cmd = "#{GS} -dNOPAUSE -sDEVICE=pdfwrite -sOUTPUTFILE=#{output_pdf} -dBATCH #{filenames}"
 execute_cmd cmd
 
-cmd = "pdf2swf -L /usr/local/share/swftools/swfs/swft_loader.swf "+
+cmd = "#{PDF2SWF} -L /usr/local/share/swftools/swfs/swft_loader.swf "+
       " -B /usr/local/share/swftools/swfs/keyboard_viewer.swf " +
       " #{output_pdf} -o #{output_swf}"
 execute_cmd cmd

@@ -53,7 +53,7 @@ LDP json_to_ld(JO);
 
 const char *rb_result_to_json();
 
-
+LDP string_to_ld(const char*s);
 void ld_free(LDP);
 void jo_free(JO);
 

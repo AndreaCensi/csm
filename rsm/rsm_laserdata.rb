@@ -54,9 +54,9 @@ class LaserData
 		@cluster     = [-1] * nrays
 		@cov_readings = [GSL::NAN]* nrays
 		
-		@odometry    = Vector[GSL::NAN,GSL::NAN,GSL::NAN].col
-		@estimate    = Vector[GSL::NAN,GSL::NAN,GSL::NAN].col
-		@true_pose   = Vector[GSL::NAN,GSL::NAN,GSL::NAN].col
+		@odometry    = [GSL::NAN,GSL::NAN,GSL::NAN].to_gv.col
+		@estimate    = [GSL::NAN,GSL::NAN,GSL::NAN].to_gv.col
+		@true_pose   = [GSL::NAN,GSL::NAN,GSL::NAN].to_gv.col
 		
 		@p = []; @corr = [];
 		for i in 0..nrays-1
@@ -147,7 +147,7 @@ def tro_parameters
 	p[:restart]=         1
 	p[:restart_threshold_mean_error] = 3.0 / 300.0
 	p[:restart_dt]=      0.01
-	p[:restart_dtheta]=   1.5 * 3.14 /180
+	p[:restart_dtheta]=  0.027 #1.5 * 3.14 /180
 	
 	p[:clustering_threshold] = 0.05
 	p[:orientation_neighbourhood] = 3

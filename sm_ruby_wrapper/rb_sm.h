@@ -1,6 +1,7 @@
-#ifndef H_SM_RUBY
-#define H_SM_RUBY
+#ifndef H_SM_RUBY_WRAPPER
+#define H_SM_RUBY_WRAPPER
 
+#include <csm/csm.h>
 
 /** Interface for Ruby: there are no pointers around. */
 
@@ -16,6 +17,7 @@ int rb_sm_gpm();
 
 const char *rb_result_to_json();
 
+LDP string_to_ld(const char*s);
 
 void rb_sm_cleanup();
 

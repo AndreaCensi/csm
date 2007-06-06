@@ -3,7 +3,7 @@ require 'json/pure'
 
 class Array
 	def nan_to_nil!
-		each_index do |i|
+		for i in 0..size-1
 			v = self[i]
 			self[i] = nil if v.kind_of? Float and v.nan?
 			self[i] = self[i].to_f  if self[i]
@@ -16,9 +16,23 @@ class Array
 	end
 end
 
+class GSL::Vector
+	def to_json(*a)
+		v = clone
+#		puts self.class
+#		puts self.size
+#		a = []
+
+#		p self
+#		self.to_a.nan_to_nil!.to_json(*a)
+		v.to_a.nan_to_nil!.to_json(*a)
+	end
+end
+
 class LaserData
 	
 	def to_json(*a)
+#		puts @odometry.to_s
 		h = {
 			'nrays'       => @nrays,
 			'min_theta'   => @min_theta,
@@ -28,10 +42,11 @@ class LaserData
 			'readings'    => @readings.clone.nan_to_nil!,
 			'theta'       => @theta   .clone.nan_to_nil!,
 
-			'odometry'    => @odometry .to_a.nan_to_nil!,
-			'estimate'    => @estimate .to_a.nan_to_nil!,
-			'true_pose'   => @true_pose.to_a.nan_to_nil!,
+			'odometry'    => @odometry.to_a,
+			'estimate'    => @estimate.clone,
+			'true_pose'   => @true_pose.clone
 		}
+		
 		h['cluster']     = @cluster unless @cluster.all?{|x| x == -1}
 		h['alpha_valid'] = @alpha_valid unless @alpha_valid.all?{|x| not x}
 		h['alpha'] = @alpha.clone.nan_to_nil! unless @alpha.all_nan?

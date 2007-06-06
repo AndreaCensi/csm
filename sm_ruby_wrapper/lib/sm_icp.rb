@@ -33,13 +33,9 @@ def Sm.put_params_in_c_structures(params)
 	laser_ref  = params[:laser_ref]
 	laser_sens = params[:laser_sens]
 
-	c_jo = json_parse(laser_ref.to_json)
-	c_ld = json_to_ld(c_jo); jo_free(c_jo);
-	rb_sm_params.laser_ref = c_ld;
+	rb_sm_params.laser_ref = string_to_ld(laser_ref.to_json)
 	
-	c_jo = json_parse(laser_sens.to_json)
-	c_ld = json_to_ld(c_jo); jo_free(c_jo);
-	rb_sm_params.laser_sens = c_ld;
+	rb_sm_params.laser_sens = string_to_ld(laser_sens.to_json)
 
 #	ld_free(c_ld);
 #	ld_free(c_ld);
