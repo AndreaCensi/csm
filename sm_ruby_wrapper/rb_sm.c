@@ -1,7 +1,7 @@
+#include "rb_sm.h"
 #include <stdio.h>
 #include <gsl/gsl_nan.h>
 #include <options/options.h>
-#include "rb_sm.h"
 
 struct sm_params rb_sm_params; 
 struct sm_result rb_sm_result;
@@ -54,6 +54,16 @@ int rb_sm_gpm() {
 	return rb_sm_result.valid;
 }
 
+void rb_set_laser_ref(const char*s) {
+	rb_sm_params.laser_ref = string_to_ld(s);
+	fprintf(stderr, "Set laser_ref to %p\n ", rb_sm_params.laser_ref );
+}
+
+void rb_set_laser_sens(const char*s) {
+	rb_sm_params.laser_sens = string_to_ld(s);
+	fprintf(stderr, "Set laser_sens to %p\n ", rb_sm_params.laser_sens );
+}
+
 void rb_sm_cleanup() {
 /*	ld_free(&(rb_sm_params.laser_ref));
 	ld_free(&(rb_sm_params.laser_sens));*/
@@ -66,6 +76,11 @@ LDP string_to_ld(const char*s) {
 		return 0;
 	}
 	LDP ld = json_to_ld(jo);
+	if(!ld) {
+		fprintf(stderr, "String passed from Ruby is valid JSON, "
+			"but can't load laser_data. \n\n%s\n", s);
+		return 0;
+	}
 	jo_free(jo);
 	return ld;
 }

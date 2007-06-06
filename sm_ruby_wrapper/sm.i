@@ -65,6 +65,9 @@ int rb_sm_set_configuration(const char*name, const char*value);
 void rb_sm_init_journal(const char*journal_file);
 
 
+void rb_set_laser_ref(const char*);
+void rb_set_laser_sens(const char*);
+
 void rb_sm_odometry(double x, double y, double theta);
 void rb_sm_odometry_cov(double cov_x, double cov_y, double cov_theta);
 

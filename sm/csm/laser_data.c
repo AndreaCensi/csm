@@ -166,9 +166,10 @@ int count_equal(const int*v, int n, int value) {
 
 int ld_valid_fields(LDP ld)  {
 	if(!ld) {
-		sm_error("Invalid pointer\n");	
+		sm_error("NULL pointer given as laser_data*.\n");	
 		return 0;
 	}
+	
 	int min_nrays = 10;
 	int max_nrays = 10000;
 	if(ld->nrays < min_nrays || ld->nrays > max_nrays) {

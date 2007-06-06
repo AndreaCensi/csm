@@ -19,6 +19,10 @@ const char *rb_result_to_json();
 
 LDP string_to_ld(const char*s);
 
+
+void rb_set_laser_ref(const char*s);
+void rb_set_laser_sens(const char*s);
+
 void rb_sm_cleanup();
 
 

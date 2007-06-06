@@ -9,8 +9,15 @@ class LaserData
 		}
 	end
 	
+	def LaserData.from_json(json_string)
+		h = JSON.parse(json_string)
+		ld = LaserData.new(h['nrays'])
+		ld.from_hash(h)
+		ld
+	end
+	
 	def deep_copy
-		Marshal.load(Marshal.dump(self))
+		LaserData.from_json(self.to_json)
 	end
 	
 	def compute_cartesian

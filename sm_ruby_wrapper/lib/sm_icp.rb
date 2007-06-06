@@ -30,17 +30,14 @@ end
 
 def Sm.put_params_in_c_structures(params)
 # pass all parameters to extension library
-	laser_ref  = params[:laser_ref]
-	laser_sens = params[:laser_sens]
 
-	rb_sm_params.laser_ref = string_to_ld(laser_ref.to_json)
+	s = params[:laser_ref].to_json
+	rb_set_laser_ref(s);
 	
-	rb_sm_params.laser_sens = string_to_ld(laser_sens.to_json)
+	s = params[:laser_sens].to_json
+	rb_set_laser_sens(s);
 
-#	ld_free(c_ld);
-#	ld_free(c_ld);
-	
-	u=params[:firstGuess];
+	u = params[:firstGuess];
 	rb_sm_odometry(u[0],u[1],u[2]);
 
 	remove = [:laser_ref, :firstGuess, :laser_sens]
@@ -50,8 +47,8 @@ end
 
 def Sm.get_result_from_c_structures()
 	
-	ld_free(rb_sm_params.laser_sens);
-	ld_free(rb_sm_params.laser_ref);
+#	ld_free(rb_sm_params.laser_sens);
+#	ld_free(rb_sm_params.laser_ref);
 	
 	
 	res = JSON.parse(rb_result_to_json)
@@ -69,13 +66,6 @@ def Sm.get_result_from_c_structures()
 		res[:avg_error] = res[:error] / res[:nvalid]
 	end
 	res
-	# res = Hash.new 
-	# x = rb_sm_get_x();
-	# res[:x] = Vector[x[0],x[1],x[2]]
-	# res[:iterations] = Sm::rb_sm_result.iterations;
-	# res[:error] = Sm::rb_sm_result.error
-	# res[:nvalid] = Sm::rb_sm_result.nvalid
-	# res
 	
 end
 
