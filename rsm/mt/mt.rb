@@ -8,6 +8,7 @@ class Panorama < LaserData
 	COMP_THRESHOLD = SIGMA * 5
 	SCALE = 1
 	
+	attr_accessor :parent
 	
 	def angle2ray(phi)
 		i = (phi-@min_theta) / (@max_theta-@min_theta) * @nrays
@@ -83,6 +84,18 @@ class Panorama < LaserData
 end
 
 
+
+def quick_match(scan_matcher_klass, params, ref, sens, guess)
+	sm = scan_matcher_klass.new
+	sm.params = params
+	sm.params = params 
+	sm.params[:laser_ref] = ref;
+	sm.params[:laser_sens] = sens;
+	sm.params[:firstGuess] = guess
+	res = sm.scan_matching
+	res
+end
+
 def go_mt
 	if ARGV.size < 3
 		puts "sm <SCANMATCHER> '[]' <input> <output> "
@@ -112,75 +125,40 @@ def go_mt
 	count = 0
 	
 	until input.eof?
-
 		laser_sens = LogReader.shift_laser(input)
-		min_step = -0
-		min_theta_step_deg = -5;
-
-		u =  pose_diff(laser_sens.odometry, panorama.odometry)
-
-		if (u[0,1]).nrm2 <= min_step && (u[2].abs <deg2rad(min_theta_step_deg))
-
-			# todo: merge readings
-			#puts "Skipping (same odometry)"
-			next
-		end
-
-#		puts "Ref: #{pv(laser_ref.odometry)}"
-#		puts "New: #{pv(laser_sens.odometry)}"
-
-		if (not scan_list.empty?) && (not scan_list.include? count)
-			break if count > scan_list.max
-			count+=1
-			laser_ref = laser_sens;
-			next
-		end
-
-		sm = scan_matcher_klass.new
-		# Write log of the icp operation
-
-		if scan_list.include? count
-			sm.journal_open("rsm_sm.#{sm.name}.#{count}.txt")
-		end
-
-		sm.params = params 
-		sm.params[:laser_ref] = laser_ref;
-		sm.params[:laser_sens] = laser_sens;
-		sm.params[:firstGuess] = pose_diff(laser_sens.odometry, laser_ref.odometry)
-		res = sm.scan_matching
+		
+		res = quick_match(scan_matcher_klass, params, laser_ref, laser_sens, 
+			pose_diff(laser_sens.odometry, laser_ref.odometry))
 		break if not res[:valid]
-		x = res[:x]
 		error = res[:error]
-		iterations = res[:iterations]
+		
+		puts "mt: match laser_ref #{res[:nvalid]} #{res[:avg_error] }   #{pv(res[:x])} "
 
-		# sm.params = params 
-		# sm.params[:laser_ref] = panorama;
-		# sm.params[:laser_sens] = laser_sens;
-		# sm.params[:firstGuess] = pose_diff(laser_sens.odometry, panorama.odometry)
-		# res_pan = sm.scan_matching
-		# res_pan[:error] = res_pan[:error] / res_pan[:nvalid]
-		# res[:error] = res[:error] / res[:nvalid]
-		# break if not res_pan[:valid]
-
-		puts "mt: match laser_ref #{res[:error] }   #{pv(res[:x])} #{res[:nvalid]}"
-#		puts "mt: match       pan #{res_pan[:error]}   #{pv(res_pan[:x])}"
-
-		# use_pan = res_pan[:error] < res[:error]
-		# use_pan = false
-		# if use_pan
-		# 	puts "mt: Using pan!"
-		# 	laser_sens.estimate = oplus(panorama.estimate, res_pan[:x])
-		# else
-			laser_sens.estimate = oplus(laser_ref.estimate, res[:x])
-#		end
+		laser_sens.estimate = oplus(laser_ref.estimate, res[:x])
 	
 		n = panorama.merge(laser_sens)
 
-#		if Vector[res_pan[:x][0],res_pan[:x][1]].nrm2 > 0.5
 		if n < 200
+			if parent = panorama.parent
+				guess = pose_diff(panorama.estimate, parent.estimate);
+				res = quick_match(scan_matcher_klass, params, parent, panorama, 
+					guess)
+				if res[:valid]
+					delta = pose_diff(res[:x], guess)
+					puts "mt: Match with parent: #{res[:avg_error]} #{res[:nvalid]} #{pv(delta)}"
+					if (res[:avg_error] < 1) && (res[:nvalid] > 150)
+						puts "mt: parent-correct!"
+						panorama.estimate = oplus(panorama.estimate, delta)
+						laser_sens.estimate = oplus(laser_sens.estimate, delta)
+					end
+				end
+			end
+			
 			output.puts panorama.to_json
-			panorama = Panorama.new(laser_sens.estimate, laser_sens.odometry)
-			panorama.merge(laser_sens)
+			new_panorama = Panorama.new(laser_sens.estimate, laser_sens.odometry)
+			new_panorama.parent = panorama
+			new_panorama.merge(laser_sens)
+			panorama = new_panorama
 			count = 0
 			puts "mt: new panorama ##{count}: error #{error}"
 		else
@@ -189,9 +167,6 @@ def go_mt
 		output_scans.puts laser_sens.to_json
 		
 		puts "mt: merged #{n}"
-
-#		q = laser_sens.estimate
-		#$stderr.puts "rsm_sm.rb: #{count} time=#{realtime} error = #{error} it = #{iterations} x = #{pv(x)} u = #{pv(u)} q = #{pv(q)}"
 
 		laser_ref = laser_sens
 		count += 1

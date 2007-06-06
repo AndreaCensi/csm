@@ -66,10 +66,11 @@ def Sm.get_result_from_c_structures()
 	end
 	res = res2
 	
-	p res
+#	p res
 	res[:valid] = res[:valid] == 1
 	if res[:valid]
 		res[:x] = Vector[*res[:x]].col
+		res[:avg_error] = res[:error] / res[:nvalid]
 	end
 	res
 	# res = Hash.new 
