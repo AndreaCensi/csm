@@ -63,6 +63,7 @@ const char* json_write(JO jo);
 
 int rb_sm_set_configuration(const char*name, const char*value);
 void rb_sm_init_journal(const char*journal_file);
+void rb_sm_close_journal();
 
 
 void rb_set_laser_ref(const char*);

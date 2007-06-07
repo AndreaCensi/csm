@@ -6,8 +6,16 @@
 struct sm_params rb_sm_params; 
 struct sm_result rb_sm_result;
 
-void rb_sm_init_journal(const char*journal_file){
-	sm_journal_open(journal_file);
+void rb_sm_init_journal(const char*journal_file) {
+	jj_set_stream(open_file_for_writing(journal_file));
+/*	sm_journal_open(journal_file);*/
+}
+
+void rb_sm_close_journal() {
+	FILE * s = jj_get_stream();
+	if(s) fclose(s);
+	
+	jj_set_stream(0);
 }
 
 void rb_sm_odometry(double x, double y, double theta){
@@ -35,7 +43,6 @@ int rb_sm_set_configuration(const char*name, const char*value) {
 	return 1;
 }
 
-
 const char *rb_result_to_json() {
 	static char buf[5000];
 	JO jo = result_to_json(&rb_sm_params, &rb_sm_result);
@@ -56,17 +63,19 @@ int rb_sm_gpm() {
 
 void rb_set_laser_ref(const char*s) {
 	rb_sm_params.laser_ref = string_to_ld(s);
-	fprintf(stderr, "Set laser_ref to %p\n ", rb_sm_params.laser_ref );
+/*	fprintf(stderr, "Set laser_ref to %p\n ", rb_sm_params.laser_ref );*/
 }
 
 void rb_set_laser_sens(const char*s) {
 	rb_sm_params.laser_sens = string_to_ld(s);
-	fprintf(stderr, "Set laser_sens to %p\n ", rb_sm_params.laser_sens );
+/*	fprintf(stderr, "Set laser_sens to %p\n ", rb_sm_params.laser_sens );*/
 }
 
 void rb_sm_cleanup() {
-/*	ld_free(&(rb_sm_params.laser_ref));
-	ld_free(&(rb_sm_params.laser_sens));*/
+	if(rb_sm_params.laser_ref)
+	ld_free(rb_sm_params.laser_ref);
+	if(rb_sm_params.laser_sens)
+	ld_free(rb_sm_params.laser_sens);
 }
 
 LDP string_to_ld(const char*s) {

@@ -1,4 +1,9 @@
-#require 'rubygems'
+begin
+require 'rubygems'
+rescue => ex
+	$stderr.puts  "Rubygems not available"
+end
+
 require 'json/pure'
 
 class Array

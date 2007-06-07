@@ -23,5 +23,6 @@ void jj_add_int_array(const char*name, int*,int);
 void jj_add(const char*name, JO);
 
 void jj_set_stream(FILE*);
+FILE*  jj_get_stream();
 
 #endif

@@ -1,5 +1,6 @@
 
 require 'ostruct'
+require 'optparse'
 
 class Options
 	Option = Struct.new(:name, :default, :description, :value)
@@ -95,6 +96,19 @@ class Options
 			end
 		end
 	end
+	
+	def parse_cmd_line!
+		opt = OptionParser.new do |opts|
+			self.populate(opts)
+		end
 
+		begin  opt.parse!
+		rescue OptionParser::InvalidOption=>e
+			$stderr.puts e
+			$stderr.puts opt
+			exit -1
+		end
+	end
+	
 
 end

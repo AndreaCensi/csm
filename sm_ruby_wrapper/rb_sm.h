@@ -7,7 +7,6 @@
 
 int rb_sm_set_configuration(const char*name, const char*value);
 
-void rb_sm_init_journal(const char*journal_file);
 
 void rb_sm_odometry(double x, double y, double theta);
 void rb_sm_odometry_cov(double cov_x, double cov_y, double cov_theta);
@@ -25,6 +24,10 @@ void rb_set_laser_sens(const char*s);
 
 void rb_sm_cleanup();
 
+
+
+void rb_sm_init_journal(const char*journal_file);
+void rb_sm_close_journal();
 
 #include <csm/csm.h>
 

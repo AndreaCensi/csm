@@ -109,3 +109,6 @@ void jj_set_stream(FILE* f) {
 	jj_file = f;
 }
 
+FILE * jj_get_stream() {
+	return jj_file;
+}
