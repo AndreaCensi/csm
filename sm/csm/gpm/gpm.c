@@ -16,6 +16,13 @@ void ght_one_shot(LDP laser_ref, LDP laser_sens,
 		double max_angular_correction_deg, gsl_vector*x) ;
 	
 void sm_gpm(struct sm_params*params, struct sm_result*res) {
+	res->valid = 0;
+	
+	if(!ld_valid_fields(params->laser_ref) || 
+	   !ld_valid_fields(params->laser_sens)) {
+		return;
+	}
+	
 	LDP laser_ref  = params->laser_ref;
 	LDP laser_sens = params->laser_sens;
 		
@@ -30,6 +37,7 @@ void sm_gpm(struct sm_params*params, struct sm_result*res) {
 	journal_laser_data("laser_ref",  laser_ref );
 	journal_laser_data("laser_sens", laser_sens);
 
+	/* TODO: add in configuration */
 	double theta_bin_size = deg2rad(5.0);
 	double extend_range = deg2rad(15.0);
 	
@@ -66,27 +74,26 @@ void sm_gpm(struct sm_params*params, struct sm_result*res) {
 	double newRangeDeg = rad2deg((max_range-min_range)/2);
 	
 	gsl_vector * x_new = gsl_vector_alloc(3);
-	 ght_one_shot(laser_ref, laser_sens,
+	
+	ght_one_shot(laser_ref, laser_sens,
 			u, params->max_linear_correction*2,
 			newRangeDeg, x_new) ;
 
-		printf("gpm : max_correction_lin %f def %f\n", params->max_linear_correction, 		params->max_angular_correction_deg);
+		sm_debug("gpm : max_correction_lin %f def %f\n", params->max_linear_correction, 		params->max_angular_correction_deg);
 
-		printf("gpm 1/2: new u = : %f %f %f\n",gvg(u,0),gvg(u,1),gvg(u,2));
-		printf("gpm 1/2: New range: %f to %f\n",rad2deg(min_range),rad2deg(max_range));
+		sm_debug("gpm 1/2: new u = : %f %f %f\n",gvg(u,0),gvg(u,1),gvg(u,2));
+		sm_debug("gpm 1/2: New range: %f to %f\n",rad2deg(min_range),rad2deg(max_range));
 
-		printf("gpm 2/2: Solution: %f %f %f\n",gvg(x_new,0),gvg(x_new,1),gvg(x_new,2));
+		sm_debug("gpm 2/2: Solution: %f %f %f\n",gvg(x_new,0),gvg(x_new,1),gvg(x_new,2));
 	
-	
+
 	if(jf()) fprintf(jf(), "iteration 2\n");
-	journal_pose("x_old", x_new);
+	journal_pose("x_old", x_new);	
 	
 	
-	
-	
-	gsl_vector * x_old = gsl_vector_alloc(3);
-	gsl_vector * delta = gsl_vector_alloc(3);
+		gsl_vector * x_old = gsl_vector_alloc(3);
 
+	res->valid = 1;
 	res->x[0] = gvg(x_new,0);
 	res->x[1] = gvg(x_new,1);
 	res->x[2] = gvg(x_new,2);
@@ -96,7 +103,6 @@ void sm_gpm(struct sm_params*params, struct sm_result*res) {
 	gsl_vector_free(x_old);
 	gsl_vector_free(u);
 	gsl_vector_free(x_new);
-	gsl_vector_free(delta);
 	gsl_histogram_free(hist);
 }
 
@@ -144,7 +150,7 @@ void ght_find_theta_range(LDP laser_ref, LDP laser_sens,
 			count ++;
 		}
 	}
-	printf(" correspondences = %d\n",count);
+	sm_debug(" correspondences = %d\n",count);
 }
 
 void ght_one_shot(LDP laser_ref, LDP laser_sens,
@@ -206,7 +212,7 @@ void ght_one_shot(LDP laser_ref, LDP laser_sens,
 		}
 	}
 	
-	printf("gpm: second step: found %d correspondences\n",count);
+	sm_debug("gpm: second step: found %d correspondences\n",count);
 	
 	egsl_push();
 		val eL = egsl_alloc(3,3);
@@ -215,16 +221,16 @@ void ght_one_shot(LDP laser_ref, LDP laser_sens,
 			for(b=0;b<3;b++) 
 				*egsl_atmp(eL,a,b) = L[a][b];
 
-		egsl_print("eL", eL);
+/*		egsl_print("eL", eL);*/
 		val ez = egsl_vFa(3,z);
 		
 		val ex = m(inv(eL), ez);
 		
 		egsl_v2vec(ex, x);
 
-		egsl_print("eL", eL);
+/*		egsl_print("eL", eL);
 		egsl_print("ez", ez);
-		egsl_print("ex", ex);
+		egsl_print("ex", ex); */
 
 	egsl_pop();
 	

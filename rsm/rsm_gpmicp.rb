@@ -24,8 +24,15 @@ class GPM_then_ICP
 			gpm.journal_open(@journal+"_gpm")
 		end
 		
-		gpm_x = (gpm.scan_matching)[:x]
+		res_gpm =gpm.scan_matching 
+		
+		if not res_gpm[:valid]
+			$stderr.puts "GPM was not successful"
+			return res_gpm
+		end
+		gpm_x = res_gpm[:x]
 			
+		p res_gpm
 		puts "GPM_then_ICP: gpm res is #{pv(gpm_x)}"
 		icpc = Sm::ICPC.new
 		icpc.params = params;
@@ -37,42 +44,7 @@ class GPM_then_ICP
 		end
 		
 		res = icpc.scan_matching;
-=begin		
-		pt = 0.01; pth = deg2rad(1.5);
-		perturb = [
-			Vector[+pt,0,0],
-			Vector[-pt,0,0],
-			Vector[0,+pt,0],
-			Vector[0,-pt,0],
-			Vector[0,0,+pth],
-			Vector[0,0,-pth],
-		];
-		
-		params[:max_linear_correction] = pt*5;
-		params[:max_angular_correction_deg] = pth*5;
-		
-		total_iterations = res[:iterations]
-		results = perturb.map { |p| 
-			icpc.params[:firstGuess] = res[:x] + p;
-			puts "icp, restarting with perturb " + pv(p)
-			r = icpc.scan_matching
-			total_iterations += r[:iterations]
-			r
-		}
-		results.push res
-		results.sort!{|x,y| x[:error]<=> y[:error]}
 
-		
- 		puts "Choose:"
- 		puts "  -- x0 = #{pv(res[:x])}, error = #{res[:error]}"
-
-		results.each do |r|
-	 		puts "  -- x = #{pv(r[:x])}, error = #{r[:error]}"
-		end
-		
-		results[0][:iterations] = total_iterations
-		results[0]
-=end		
 		res
 	end
 end

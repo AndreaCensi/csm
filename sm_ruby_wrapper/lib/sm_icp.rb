@@ -41,8 +41,8 @@ def Sm.put_params_in_c_structures(params)
 	rb_sm_odometry(u[0],u[1],u[2]);
 
 	remove = [:laser_ref, :firstGuess, :laser_sens]
-	filtered = params.delete_if {|k,v| remove.include? k }
-	Sm.params2method(params, Sm::rb_sm_params)
+	filtered = params.clone.delete_if {|k,v| remove.include? k }
+	Sm.params2method(filtered, Sm::rb_sm_params)
 end
 
 def Sm.get_result_from_c_structures()
