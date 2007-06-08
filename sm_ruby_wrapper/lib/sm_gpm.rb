@@ -29,7 +29,6 @@ module Sm
 		
 			Sm::rb_sm_cleanup()
 		
-			puts "gpm_res: #{res[:x]}"
 			res
 		end
 	

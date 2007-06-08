@@ -35,7 +35,8 @@ class Options
 			opts.on("--#{o.name} VALUE", "#{s} #{o.description}") do |s|
 				value = s
 				begin value = eval(s) 
-				rescue 
+				rescue SyntaxError => ex
+				rescue => ex
 					end
 				
 				@hash[o.name].value = value
