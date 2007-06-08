@@ -4,6 +4,18 @@ require 'json/pure'
 
 # This allows to parse multiple objects from the same stream.
 
+class Float
+
+   def to_json(*) 
+		return 'null' if nan?
+		if not inf = infinite?
+			return to_s
+		else
+			return to_s.to_json
+		end
+	end
+end
+
 module JSON
   module Pure
 
