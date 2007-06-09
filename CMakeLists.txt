@@ -1,10 +1,19 @@
 PROJECT (libsm C)
 
-#SET(LIBRARY_OUTPUT_PATH deploy/lib)
-#SET(EXECUTABLE_OUTPUT_PATH deploy/bin)
 
-#STRING(REGEX REPLACE "/src$" "/lib" LIBRARY_OUTPUT_PATH ${rdk2_SOURCE_DIR})
-#STRING(REGEX REPLACE "/src$" "/bin" EXECUTABLE_OUTPUT_PATH ${rdk2_SOURCE_DIR})
-#STRING(REGEX REPLACE "/src$" "" RDK2_ROOT ${rdk2_SOURCE_DIR})
+FIND_PROGRAM(HOSTNAME hostname PATHS $ENV{PATH})
+
+IF(HOSTNAME)
+	EXEC_PROGRAM(${HOSTNAME} ARGS -s OUTPUT_VARIABLE host)
+	SET(local "local-${host}.cmake")
+	IF(EXISTS ${local})
+		MESSAGE(STATUS "Including local configuration ${local}.")
+		INCLUDE(${local})
+	ELSE(EXISTS ${local})
+		MESSAGE(STATUS "Create a file ${local} if you want to add options.")
+	ENDIF(EXISTS ${local})
+ELSE(HOSTNAME)
+	MESSAGE(STATUS "Program `hostname` not found. (don't worry)")
+ENDIF(HOSTNAME)
 
 SUBDIRS(sm)

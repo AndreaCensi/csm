@@ -34,30 +34,19 @@
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused -Wall  -Wconversion  -Wunreachable-code ")
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb")
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fstrict-aliasing")
+	#	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -W -Wmissing-prototypes  -Wconversion -Wshadow  -Wpointer-arith -Wcast-qual -Wcast-align -Wwrite-strings -Wnested-externs -fshort-enums -fno-common" )
+	# -Wstrict-prototypes  -Wtraditional
 
+	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unreachable-code")
 	
 	#SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ansi")
 	#SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pedantic")
 
-	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unreachable-code")
-	
-#	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -W -Wmissing-prototypes  -Wconversion -Wshadow  -Wpointer-arith -Wcast-qual -Wcast-align -Wwrite-strings -Wnested-externs -fshort-enums -fno-common" )
-	
-	# -Wstrict-prototypes  -Wtraditional
-# -Dinline= -g -O4
-	IF(APPLE)
-		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-long-double")
-		MESSAGE(STATUS "Using optimizations: ")
-		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mtune=7450 -mcpu=7450  -fomit-frame-pointer -O3")
-#		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ffast-math -fomit-frame-pointer -mtune=7450 -mcpu=7450 -O3")
-	ELSE(APPLE)
-		# SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pg")
-		# SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3 -pipe -fomit-frame-pointer")
+	# SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pg")
+	# SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3 -pipe -fomit-frame-pointer")
 
-		#SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=pentium3 -msse -O3 -pipe -fomit-frame-pointer")
-
-	ENDIF(APPLE)
+	#SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=pentium3 -msse -O3 -pipe -fomit-frame-pointer")
 
 
 	########### Options ########## 

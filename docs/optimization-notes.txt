@@ -1,0 +1,130 @@
+2007-06-08
+
+
+Prima di ottimizzare, compilato con -O3 -fomit-frame-pointer -mcpu
+
+ time = 23.719999 (seconds) (start=104 end=2476)
+sm0: Total number of matchings = 777
+sm0: Total number of iterations = 5774
+sm0: Avg. iterations per matching = 7.431146
+sm0: Avg. seconds per matching = 0.030528
+sm0:   that is, 32 matchings per second
+sm0: Avg. seconds per iteration = 0.004108 (note: very imprecise)
+sm0: Number of comparisons = 15708338 
+sm0: Avg. comparisons per ray = 7.536093 
+
+dopo aver cambiato outliers, togliendo i gsl_vector (ma tenendo sqrt)
+
+sm0: CPU time = 16.620001 (seconds) (start=103 end=1765)
+sm0: Total number of matchings = 777
+sm0: Total number of iterations = 5774
+sm0: Avg. iterations per matching = 7.431146
+sm0: Avg. seconds per matching = 0.021390
+sm0:   that is, 46 matchings per second
+sm0: Avg. seconds per iteration = 0.002878 (note: very imprecise)
+sm0: Number of comparisons = 15708328 
+sm0: Avg. comparisons per ray = 7.536088
+
+in tricks: dopo aver tolto gsl_vector_get da distance in tricks:
+
+sm0: CPU time = 14.390000 (seconds) (start=103 end=1542)
+sm0: Total number of matchings = 777
+sm0: Total number of iterations = 5774
+sm0: Avg. iterations per matching = 7.431146
+sm0: Avg. seconds per matching = 0.018520
+sm0:   that is, 53 matchings per second
+sm0: Avg. seconds per iteration = 0.002492 (note: very imprecise)
+sm0: Number of comparisons = 15708328 
+sm0: Avg. comparisons per ray = 7.536088
+
+1.0%	46.8%	sm3	compute_next_estimate	
+6.4%	26.1%	sm3	find_correspondences_tricks	
+0.5%	13.2%	sm3	kill_outliers_trim	
+0.6%	10.2%	sm3	kill_outliers_double	
+
+Dopo aver cambiato distance_d, distance_squared in kill_outliers_double:
+
+sm0: CPU time = 13.310000 (seconds) (start=105 end=1436)
+sm0: Total number of matchings = 777
+sm0: Total number of iterations = 5774
+sm0: Avg. iterations per matching = 7.431146
+sm0: Avg. seconds per matching = 0.017130
+sm0:   that is, 58 matchings per second
+sm0: Avg. seconds per iteration = 0.002305 (note: very imprecise)
+sm0: Number of comparisons = 15708328 
+sm0: Avg. comparisons per ray = 7.536088
+
+1.0%	50.6%	sm3	compute_next_estimate	
+6.8%	28.3%	sm3	find_correspondences_tricks	
+0.6%	14.3%	sm3	kill_outliers_trim	
+0.6%	3.4%	sm3	kill_outliers_double	
+
+Dopo aver tolto cos(alpha)*cos(alpha):
+
+sm0: CPU time = 12.590000 (seconds) (start=104 end=1363)
+sm0: Total number of matchings = 777
+sm0: Total number of iterations = 5774
+sm0: Avg. iterations per matching = 7.431146
+sm0: Avg. seconds per matching = 0.016203
+sm0:   that is, 61 matchings per second
+sm0: Avg. seconds per iteration = 0.002180 (note: very imprecise)
+sm0: Number of comparisons = 15708328 
+sm0: Avg. comparisons per ray = 7.536088
+
+0.7%	48.4%	sm3	compute_next_estimate	
+7.4%	29.8%	sm3	find_correspondences_tricks	
+0.5%	14.7%	sm3	kill_outliers_trim	
+0.7%	3.8%	sm3	kill_outliers_double	
+
+Dopo aver linkato a GSL 1.9 con 03 e mtune:
+
+sm0: CPU time = 10.270000 (seconds) (start=104 end=1131)
+sm0: Total number of matchings = 777
+sm0: Total number of iterations = 5774
+sm0: Avg. iterations per matching = 7.431146
+sm0: Avg. seconds per matching = 0.013218
+sm0:   that is, 75 matchings per second
+sm0: Avg. seconds per iteration = 0.001779 (note: very imprecise)
+sm0: Number of comparisons = 15706493 
+sm0: Avg. comparisons per ray = 7.535208
+
+1.1%	49.2%	sm3	compute_next_estimate	
+9.9%	23.4%	sm3	find_correspondences_tricks	
+0.8%	19.3%	sm3	kill_outliers_trim	
+0.9%	4.6%	sm3	kill_outliers_double	
+
+Dopo aver messo le costanti C0,C1 in tricks:
+
+sm0: CPU time = 9.530000 (seconds) (start=105 end=1058)
+sm0: Total number of matchings = 777
+sm0: Total number of iterations = 5822
+sm0: Avg. iterations per matching = 7.492921
+sm0: Avg. seconds per matching = 0.012265
+sm0:   that is, 81 matchings per second
+sm0: Avg. seconds per iteration = 0.001637 (note: very imprecise)
+sm0: Number of comparisons = 15837504 
+sm0: Avg. comparisons per ray = 7.535418
+
+1.6%	48.0%	sm3	compute_next_estimate	
+8.4%	22.3%	sm3	find_correspondences_tricks	
+0.8%	20.9%	sm3	kill_outliers_trim	
+0.9%	5.0%	sm3	kill_outliers_double	
+
+Dopo aver tolto gsl_matrix in GPC:
+
+sm0: CPU time = 6.740000 (seconds) (start=104 end=778)
+sm0: Total number of matchings = 777
+sm0: Total number of iterations = 5822
+sm0: Avg. iterations per matching = 7.492921
+sm0: Avg. seconds per matching = 0.008674
+sm0:   that is, 115 matchings per second
+sm0: Avg. seconds per iteration = 0.001158 (note: very imprecise)
+sm0: Number of comparisons = 15837504 
+sm0: Avg. comparisons per ray = 7.535418
+
+11.8%	31.9%	sm3	find_correspondences_tricks	
+1.2%	30.6%	sm3	kill_outliers_trim	
+2.3%	24.8%	sm3	compute_next_estimate	
+1.4%	7.4%	sm3	kill_outliers_double	
+
+
