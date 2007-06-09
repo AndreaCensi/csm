@@ -23,13 +23,17 @@
 #  MESSAGE(SEND_ERROR "FindGSL.cmake: gnu scientific library GSL not (yet) supported on WIN32")
   
 #ELSE(WIN32)
+   MESSAGE("gsl home: $ENV{GSL_HOME}")
 #  IF(UNIX) 
-  SET(GSL_CONFIG_PREFER_PATH "$ENV{GSL_HOME}/bin" CACHE STRING "preferred path to OpenSG (osg-config)")
-    FIND_PROGRAM(GSL_CONFIG gsl-config
+  SET(GSL_CONFIG_PREFER_PATH "$ENV{GSL_HOME}/bin" CACHE STRING "preferred path to GSL (gsl-config)")
+  IF(NOT GSL_CONFIG) 
+   FIND_PROGRAM(GSL_CONFIG gsl-config
       ${GSL_CONFIG_PREFER_PATH}
       /usr/bin/
       )
-    # MESSAGE("DBG GSL_CONFIG ${GSL_CONFIG}")
+   ENDIF(NOT GSL_CONFIG)
+
+   MESSAGE("DBG GSL_CONFIG ${GSL_CONFIG}")
     
     IF (GSL_CONFIG) 
       # set CXXFLAGS to be fed into CXX_FLAGS by the user:
