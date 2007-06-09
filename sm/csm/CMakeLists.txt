@@ -5,6 +5,7 @@ SET(csm_sources
 	laser_data_fisher.c
 	laser_data_json.c
 	laser_data_carmen.c
+	laser_data_load.c
 	json_journal.c
 	math_utils.c
 	utils.c
@@ -19,6 +20,7 @@ SET(csm_sources
 	icp/icp_corr_tricks.c
 	icp/icp_outliers.c
 	icp/icp_covariance.c
+	icp/icp_debug.c
 
 	gpm/gpm.c
 )

@@ -153,9 +153,6 @@ double * ld_get_reference(LDP ld, reference use_reference) {
 	return pose;
 }
 
-double distance_squared(const double *a2d, const double*b2d) {
-	return square(a2d[0]-b2d[0]) + square(a2d[1]-b2d[1]) ;
-}
 
 void carmen2pdf(struct params p) {
 	
@@ -249,7 +246,7 @@ void carmen2pdf(struct params p) {
 						draw_info[i].end_stroke = 0;
 					} else {
 						int near = square(p.line_threshold) > 
-							distance_squared(draw_info[last_valid].w, draw_info[i].w);
+							distance_squared_d(draw_info[last_valid].w, draw_info[i].w);
 						draw_info[i].begin_new_stroke = near ? 0 : 1;
 						draw_info[i].end_stroke = 0;
 						draw_info[last_valid].end_stroke = draw_info[i].begin_new_stroke;

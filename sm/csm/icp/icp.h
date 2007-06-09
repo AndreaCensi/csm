@@ -1,6 +1,8 @@
 #ifndef _H_ICP_
 #define _H_ICP_
 
+#include "../csm_all.h"
+
 void visibilityTest(LDP ld, const gsl_vector*x_old);
 
 void compute_next_estimate(struct sm_params*params, LDP laser_ref, LDP laser_sens,  gsl_vector*x_new);
@@ -18,5 +20,9 @@ void kill_outliers_double(struct sm_params*params, const gsl_vector*x_old);
 void compute_covariance_exact(
 	LDP laser_ref, LDP laser_sens, const gsl_vector*x,
 		val *cov0_x, val *dx_dy1, val *dx_dy2);
+
+	/** Checks that find_correspondences_tricks and find_correspondences behave the same.
+	 	Exit(-1) on error. */
+	void debug_correspondences(struct sm_params * params, gsl_vector * x_old);
 
 #endif

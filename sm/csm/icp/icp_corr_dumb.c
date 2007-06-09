@@ -56,8 +56,8 @@ void find_correspondences(struct sm_params*params, gsl_vector* x_old) {
 		for(j=from;j<=to;j++) {
 			if(!ld_valid_ray(laser_ref,j)) continue;
 			
-			double dist = distance(p_i_w, laser_ref->p[j]);
-			if(dist>params->max_correspondence_dist) continue;
+			double dist = distance_squared(p_i_w, laser_ref->p[j]);
+			if(dist>square(params->max_correspondence_dist)) continue;
 			
 			
 			if((j1==-1) || (dist<best_dist)) {
@@ -87,8 +87,8 @@ void find_correspondences(struct sm_params*params, gsl_vector* x_old) {
 		}
 		if(j2up  ==-1) { j2 = j2down; } else
 		if(j2down==-1) { j2 = j2up; } else {
-			double dist_up   = distance(p_i_w, laser_ref->p[j2up  ]);
-			double dist_down = distance(p_i_w, laser_ref->p[j2down]);
+			double dist_up   = distance_squared(p_i_w, laser_ref->p[j2up  ]);
+			double dist_down = distance_squared(p_i_w, laser_ref->p[j2down]);
 			j2 = dist_up < dist_down ? j2up : j2down;
 		}
 		

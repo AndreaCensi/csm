@@ -57,6 +57,20 @@ double distance(const gsl_vector* a, const gsl_vector* b) {
 	return sqrt(x*x+y*y);
 }
 
+double distance_squared(const gsl_vector* a, const gsl_vector* b) {
+	distance_counter++;
+	double x = gvg(a,0)-gvg(b,0);
+	double y = gvg(a,1)-gvg(b,1);
+	return x*x+y*y;
+}
+
+double distance_squared_d(const double *a, const double *b) {
+	distance_counter++;
+	double x = a[0]-b[0];
+	double y = a[1]-b[1];
+	return x*x + y*y;
+}
+
 double norm(const gsl_vector*a){
 	double x = gvg(a,0);
 	double y = gvg(a,1);
@@ -173,6 +187,22 @@ void projection_on_line2(double ax, double ay,
 	*y =   s*rho - c*s*px + c*c*py ;	
 }
 
+void projection_on_line_d(const double *a,
+	const double *b,
+	const double *p,
+	double *res)
+{
+	double t0 = a[0]-b[0];
+	double t1 = a[1]-b[1];
+
+	double alpha = atan2(t1,t0) + M_PI/2;
+	double c = cos(alpha); double s = sin(alpha);
+	double rho = c*a[0]+s*a[1];
+
+	res[0] =   c*rho + s*s*p[0] - c*s*p[1] ;
+	res[1] =   s*rho - c*s*p[0] + c*c*p[1] ;	
+}
+
 /** Computes the projection of x onto the line which goes through a-b */
 void projection_on_line(const gsl_vector*a,const gsl_vector*b,const gsl_vector*x,
 	gsl_vector * proj) 
@@ -203,6 +233,20 @@ void projection_on_segment(const gsl_vector*a,const gsl_vector*b,const gsl_vecto
 			gsl_vector_memcpy(proj,b);
 }
 
+void projection_on_segment_d(const double*a,const double*b,const double*x,
+	double * proj) {
+	projection_on_line_d(a,b,x,proj);
+	if ((proj[0]-a[0])*(proj[0]-b[0]) +
+	    (proj[1]-a[1])*(proj[1]-b[1]) < 0 ) {
+		/* the projection is inside the segment */
+	} else 
+		if(distance_squared_d(a,x) < distance_squared_d(b,x)) 
+			copy_d(a,2,proj);
+		else
+			copy_d(b,2,proj);
+}
+
+
 double dist_to_segment(const gsl_vector*a,const gsl_vector*b,const gsl_vector*x) {
 	gsl_vector * projection = gsl_vector_alloc(2);
 	projection_on_segment(a,b,x,projection);
@@ -210,6 +254,14 @@ double dist_to_segment(const gsl_vector*a,const gsl_vector*b,const gsl_vector*x)
 	gsl_vector_free(projection);
 	return dist;
 }
+
+double dist_to_segment_squared_d(const double*a, const double*b, const double*x) {
+	double projection[2];
+	projection_on_segment_d(a, b, x, projection);
+	double distance_sq_d = distance_squared_d(projection, x);
+	return distance_sq_d;
+}
+
 
 static char tmp_buf[100];
 const char* gsl_friendly_pose(gsl_vector*v) {

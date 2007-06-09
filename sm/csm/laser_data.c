@@ -64,8 +64,8 @@ void ld_alloc(LDP ld, int nrays) {
 
 	for(i=0;i<ld->nrays;i++) {
 		ld->corr[i].valid = 0;
-		ld->corr[i].j1 = 0;
-		ld->corr[i].j2 = 0;
+		ld->corr[i].j1 = -1;
+		ld->corr[i].j2 = -1;
 	}
 	
 	for(i=0;i<3;i++) {
@@ -104,6 +104,8 @@ void ld_dealloc(struct laser_data*ld){
 
 void ld_set_null_correspondence(struct laser_data*ld, int i) {
 	ld->corr[i].valid = 0;
+	ld->corr[i].j1 = -1;	
+	ld->corr[i].j2 = -1;	
 }
 
 void ld_set_correspondence(LDP ld, int i, int j1, int j2) {
@@ -117,16 +119,16 @@ void ld_compute_cartesian(LDP ld) {
 	for(i=0;i<ld->nrays;i++) {
 		if(!ld_valid_ray(ld,i)){
 			gsl_vector_set_nan(ld->p[i]);
+		} else {
+			gsl_vector_set(ld->p[i], 0, cos(ld->theta[i])*ld->readings[i]);
+			gsl_vector_set(ld->p[i], 1, sin(ld->theta[i])*ld->readings[i]);
 		}
-		gsl_vector_set(ld->p[i], 0, cos(ld->theta[i])*ld->readings[i]);
-		gsl_vector_set(ld->p[i], 1, sin(ld->theta[i])*ld->readings[i]);
-
 	}
 }
 
 /** -1 if not found */
 
-int ld_next_valid(LDP ld, int i, int dir){
+int ld_next_valid(LDP ld, int i, int dir) {
 	int j;
 	for(j=i+dir;(j<ld->nrays)&&(j>=0)&&!ld_valid_ray(ld,j);j+=dir);
 	return ld_valid_ray(ld,j) ? j : -1;
@@ -229,3 +231,17 @@ int ld_valid_fields(LDP ld)  {
 	return 1;
 }
 
+
+/** Computes an hash of the correspondences */
+unsigned int ld_corr_hash(LDP ld){
+	unsigned int hash = 0;
+	unsigned int i    = 0;
+
+	for(i = 0; i < (unsigned)ld->nrays; i++) {
+		int str = ld_valid_corr(ld, (int)i) ? (ld->corr[i].j1 + 1000*ld->corr[i].j2) : -1;
+		hash ^= ((i & 1) == 0) ? (  (hash <<  7) ^ (str) ^ (hash >> 3)) :
+		                         (~((hash << 11) ^ (str) ^ (hash >> 5)));
+	}
+
+	return (hash & 0x7FFFFFFF);
+}

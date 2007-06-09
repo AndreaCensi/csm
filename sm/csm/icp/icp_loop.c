@@ -1,4 +1,6 @@
 #include <math.h>
+#include <string.h>
+
 #include <gsl/gsl_matrix.h>
 
 #include <gpc/gpc.h>
@@ -110,7 +112,7 @@ void sm_icp(struct sm_params*params, struct sm_result*res) {
 	/* At last, we did it. */
 	res->valid = 1;
 	vector_to_array(best_x, res->x);
-	fprintf(stderr, "icp: final x =  %s  \n", gsl_friendly_pose(best_x));
+	sm_debug("icp: final x =  %s  \n", gsl_friendly_pose(best_x));
 	
 	
 	if(params->do_compute_covariance)  {
@@ -151,19 +153,6 @@ void sm_icp(struct sm_params*params, struct sm_result*res) {
 	if(JJ) jj_context_exit();
 }
 
-/** Computes an hash of the correspondences */
-unsigned int ld_corr_hash(LDP ld){
-	unsigned int hash = 0;
-	unsigned int i    = 0;
-
-	for(i = 0; i < (unsigned)ld->nrays; i++) {
-		int str = ld_valid_corr(ld, (int)i) ? ld->corr[i].j1 : -1;
-		hash ^= ((i & 1) == 0) ? (  (hash <<  7) ^ (str) ^ (hash >> 3)) :
-		                         (~((hash << 11) ^ (str) ^ (hash >> 5)));
-	}
-
-	return (hash & 0x7FFFFFFF);
-}
 
 int icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new, 
 	double*total_error, int*valid, int*iterations) {
@@ -172,7 +161,7 @@ int icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 	
 	gsl_vector * x_old = vector_from_array(3, start->data);
 	
-	fprintf(stderr, "icp: starting at  x' =  %s  \n", gsl_friendly_pose(x_old));
+	sm_debug("icp: starting at  x' =  %s  \n", gsl_friendly_pose(x_old));
 	
 	gsl_vector * delta = gsl_vector_alloc(3);
 	gsl_vector * delta_old = gsl_vector_alloc(3);
@@ -202,6 +191,8 @@ int icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 		else
 			find_correspondences(params, x_old);
 
+		if(0)
+			debug_correspondences(params, x_old);
 
 		int num_corr = ld_num_valid_correspondences(laser_sens);
 		if(num_corr <0.2 * laser_sens->nrays){
@@ -313,15 +304,27 @@ void compute_next_estimate(struct sm_params*params, LDP laser_ref, LDP laser_sen
 		c[k].q[1] = gvg(laser_ref->p[j1],1);
 		
 		int j2 = laser_sens->corr[i].j2;
-		double alpha = M_PI/2 + atan2( 
+		
+		double diff[2];
+		diff[0] = gvg(laser_ref->p[j1],0)-gvg(laser_ref->p[j2],0);
+		diff[1] = gvg(laser_ref->p[j1],1)-gvg(laser_ref->p[j2],1);
+		double one_on_norm = 1 / sqrt(diff[0]*diff[0]+diff[1]*diff[1]);
+		double normal[2];
+		normal[0] = +diff[1] * one_on_norm;
+		normal[1] = -diff[0] * one_on_norm;
+		
+/*		double alpha = M_PI/2 + atan2( 
 			gvg(laser_ref->p[j1],1)-gvg(laser_ref->p[j2],1),
-			gvg(laser_ref->p[j1],0)-gvg(laser_ref->p[j2],0));
+			gvg(laser_ref->p[j1],0)-gvg(laser_ref->p[j2],0));*/
 
 		if(params->use_point_to_line_distance) {
-			c[k].C[0][0] = cos(alpha)*cos(alpha);
+			double cos_alpha = normal[0];
+			double sin_alpha = normal[1];
+			
+			c[k].C[0][0] = cos_alpha*cos_alpha;
 			c[k].C[1][0] = 
-			c[k].C[0][1] = cos(alpha)*sin(alpha);
-			c[k].C[1][1] = sin(alpha)*sin(alpha);
+			c[k].C[0][1] = cos_alpha*sin_alpha;
+			c[k].C[1][1] = sin_alpha*sin_alpha;
 		} else {
 			c[k].C[0][0] = 1;
 		 	c[k].C[1][0] = 

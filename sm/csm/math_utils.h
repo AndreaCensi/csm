@@ -28,7 +28,10 @@ void transform_d(const double* point2d, const double* pose, double* result2d);
 void gsl_vector_set_nan(gsl_vector*v);
 
 double distance(const gsl_vector* a,const gsl_vector* b);
+double distance_squared(const gsl_vector* a,const gsl_vector* b);
 double norm(const gsl_vector*);
+double distance_squared_d(const double *a, const double *b);
+
 
 double angleDiff(double a, double b);
 double square(double x);
@@ -70,9 +73,24 @@ void projection_on_line2(double ax, double ay,
 	double bx, double by, 
 	double px, double py,
 	double *x, double *y) ;
+	
+/** Same thing, with double arguments */
+void projection_on_line_d(const double *a,
+	const double *b,
+	const double *p,
+	double *res);
+	
 
 /** Distance of x from its projection on segment a-b */
 double dist_to_segment(const gsl_vector*a,const gsl_vector*b,const gsl_vector*x);
+
+double dist_to_segment_squared_d(const double*a, const double*b, const double*x);
+
+void projection_on_segment_d(
+	const double*a,
+	const double*b,
+	const double*x,
+	      double*proj);
 
 /** Some functions to print poses and covariances in a friendly way */
 const char* gsl_friendly_pose(gsl_vector*v);

@@ -42,11 +42,14 @@
 
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unreachable-code")
 	
-
+#	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -W -Wmissing-prototypes  -Wconversion -Wshadow  -Wpointer-arith -Wcast-qual -Wcast-align -Wwrite-strings -Wnested-externs -fshort-enums -fno-common" )
+	
+	# -Wstrict-prototypes  -Wtraditional
+# -Dinline= -g -O4
 	IF(APPLE)
 		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-long-double")
 		MESSAGE(STATUS "Using optimizations: ")
-		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mtune=7450 -mcpu=7450 -O3")
+		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mtune=7450 -mcpu=7450  -fomit-frame-pointer -O3")
 #		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ffast-math -fomit-frame-pointer -mtune=7450 -mcpu=7450 -O3")
 	ELSE(APPLE)
 		# SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pg")
@@ -76,14 +79,14 @@
 	
 	MACRO(new_executable exec)
 		ADD_EXECUTABLE(${exec} apps/${exec}.c)
-		TARGET_LINK_LIBRARIES(${exec} csm ${GSL_LIBRARIES} gpc json-c egsl options)
+		TARGET_LINK_LIBRARIES(${exec} csm-static ${GSL_LIBRARIES} gpc json-c egsl options)
 		INSTALL(PROGRAMS ${exec} DESTINATION bin)
 	ENDMACRO(new_executable exec)
 	
 	new_executable(sm0)
 	new_executable(sm1)
 	new_executable(sm2)
-	new_executable(sm0)
+	new_executable(sm3)
 	new_executable(json_extract)
 	new_executable(carmen2json)
 	new_executable(ld_noise)
@@ -115,12 +118,14 @@ ADD_LIBRARY(csm-static STATIC
 ./csm/icp/icp_covariance.c
 ./csm/icp/icp_loop.c
 ./csm/icp/icp_outliers.c
+./csm/icp/icp_debug.c
 ./csm/journal.c
 ./csm/json_journal.c
 ./csm/laser_data.c
 ./csm/laser_data_carmen.c
 ./csm/laser_data_fisher.c
 ./csm/laser_data_json.c
+./csm/laser_data_load.c
 ./csm/logging.c
 ./csm/math_utils.c
 ./csm/orientation.c

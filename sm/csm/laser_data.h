@@ -64,13 +64,16 @@ void ld_dealloc(LDP);
 void ld_compute_cartesian(LDP);
 void ld_create_jump_tables(LDP);
 
+/** Computes an hash of the correspondences */
+unsigned int ld_corr_hash(LDP);
+
 /** -1 if not found */
 int ld_next_valid(LDP ld, int i, int dir);
 
 int ld_valid_ray(LDP ld, int i);
 int ld_valid_corr(LDP ld, int i);
 
-int ld_num_valid_correspondences(LDP ld);
+int ld_num_valid_correspondences(LDP);
 
 void ld_set_correspondence(LDP, int i, int j1, int j2);
 void ld_set_null_correspondence(LDP, int i);
@@ -86,6 +89,8 @@ void ld_compute_orientation(LDP ld, int size_neighbourhood, double sigma);
 /** Read next FLASER line in file (initializes ld). 
 	Returns 0 on success, -1 if error, -2 eof. */
 int ld_read_next_laser_carmen(FILE*, LDP ld);
+
+int ld_read_all(FILE*file, LDP **array, int*num);
 
 #endif
 

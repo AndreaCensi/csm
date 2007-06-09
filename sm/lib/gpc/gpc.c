@@ -39,51 +39,84 @@ int gpc_solve_valid(int K, const struct gpc_corr*c, const int*valid,
 	gsl_matrix_set_zero(g);
 	gsl_matrix_set_zero(temp42);
 	
+	double d_bigM[4][4] = { {0,0,0,0}, {0,0,0,0}, {0,0,0,0}, {0,0,0,0}};
+	double d_g[4] = {0, 0, 0, 0};
 	int k;
 	for(k=0;k<K;k++) {
 		if(valid && !valid[k]) continue;
 		
-		gms(bigM_k,0,0,1.0); gms(bigM_k,0,1,0.0); gms(bigM_k,0,2, c[k].p[0]);
-		gms(bigM_k,0,3,-c[k].p[1]);
-		gms(bigM_k,1,0,0.0); gms(bigM_k,1,1,1.0); gms(bigM_k,1,2,c[k].p[1]);
-		gms(bigM_k,1,3,c[k].p[0]);
-		gms(C_k,0,0,c[k].C[0][0]); gms(C_k,0,1,c[k].C[0][1]);
-		gms(C_k,1,1,c[k].C[1][1]); gms(C_k,1,0,c[k].C[1][0]);
-		gms(q_k,0,0,c[k].q[0]);gms(q_k,1,0,c[k].q[1]);
+		double C00 = c[k].C[0][0];
+		double C01 = c[k].C[0][1];
+		double C10 = c[k].C[1][0];
+		double C11 = c[k].C[1][1];
+		double qx = c[k].q[0];
+		double qy = c[k].q[1];
+		double px = c[k].p[0];
+		double py = c[k].p[1];
 		
-		m_trans(bigM_k, bigM_k_t);
-		m_mult(bigM_k_t, C_k, temp42);
-		m_mult(temp42, bigM_k, temp44);
-		m_scale(2.0, temp44);
-		m_add_to(temp44, bigM);
+		/* [ C00,  c01,  px C00 + c01 py , c01 px - py C00 ] */
+		d_bigM[0][0] += C00;
+		d_bigM[0][1] += C01;
+		d_bigM[0][2] += +px * C00 + py * C01;
+		d_bigM[0][3] += -py * C00 + px * C01;
+	
+		/*  [ C10 ,  C11 , py C11 + px C10 , px C11 - py C10 ] */
+		d_bigM[1][0] += C10;
+		d_bigM[1][1] += C11;
+		d_bigM[1][2] += +px * C10 + py * C11;
+		d_bigM[1][3] += +px * C11 - py * C10;
 		
-		m_mult(C_k, q_k, temp21);
-		m_mult(bigM_k_t, temp21, temp41);
-		m_scale(-2.0, temp41);
-		m_add_to(temp41, g);	
+		/*Col 1 = [ py C10 + px C00 ] 
+		 Col 2 = [ py C11 + c01 px ]
+		 Col 3 = [ py (py C11 + px C10) + px (px C00 + c01 py) ]
+		 Col 4 = [ py (px C11 - py C10) + px (c01 px - py C00) ]
+		*/
+		d_bigM[2][0] += px * C00 + py * C10;
+		d_bigM[2][1] += px * C01 + py * C11;
+		d_bigM[2][2] += (px*px)*(+C00) + (px*py)*(+C10+C01) + (py*py)*(+C11);
+		d_bigM[2][3] += (px*px)*(+C01) + (px*py)*(-C00+C11) + (py*py)*(-C10);
 
-		if(0) {
-			printf("C[k].p = %f %f \n", c[k].p[0], c[k].p[1]);
-			printf("C[k].q = %f %f \n", c[k].q[0], c[k].q[1]);
-			m_display("bigM_k",bigM_k);
-			m_display("bigM_k_t",bigM_k_t);
-			m_display("C_k",C_k);
-			m_display("temp42",temp42);
-			m_display("temp44",temp44);
-			m_display("q_k",q_k);
-			m_display("now M is ",bigM);
-			m_display("now g is ",g);
+		/*Col 1 = [ px C10 - py C00 ] 
+		  Col 2 = [ px C11 - c01 py ]
+		 Col 3 = [ px (py C11 + px C10) - py (px C00 + c01 py) ]
+		 Col 4 = [ px (px C11 - py C10) - py (c01 px - py C00) ]*/
+		d_bigM[3][0] += -py * C00 + px * C10;
+		d_bigM[3][1] += -py * C01 + px * C11;
+		d_bigM[3][2] += (px*px)*(+C10) + (px*py)*(-C00+C11) + (py*py)*(-C01);
+		d_bigM[3][3] += (px*px)*(+C11) + (px*py)*(-C10-C01) + (py*py)*(+C00);
+		
+		d_g[0] += C00*qx+C10*qy;
+		d_g[1] += C01*qx+C11*qy;
+		d_g[2] += qx * (C00*px+C01*py) + qy * (C10*px+C11*py);
+		d_g[3] += qx * (C00*(-py)+C01*px) + qy * (C10*(-py)+C11*px);
+
+	}
+
+	int a,b;
+	 for(a=0;a<4;a++) 
+			*gsl_matrix_ptr(g, a, 0) = -2 * d_g[a];
+	 for(a=0;a<4;a++) 
+		for(b=0;b<4;b++)
+		gsl_matrix_set(bigM, a, b,  2 * d_bigM[a][b]);
+
+/*	for(a=0;a<4;a++) {
+		if ( fabs(d_g[a] - gmg(g, a, 0)) > 1e-10 ) {
+			printf("G: %d: %g %g\n", a, d_g[a], gmg(g, a, 0));
 		}
 	}
 	
+	 for(a=0;a<4;a++) 
+	 for(b=0;b<4;b++) {
+		if ( fabs(d_bigM[a][b] - gmg(bigM, a, b)) > 1e-10 ) {
+			printf("M[%d][%d]: %g  != %g\n", a, b,  d_bigM[a][b], gmg(bigM, a, b));
+		}
+	}
 	if(x0) {
 		m_display("bigM_k",bigM_k);
 		m_display("q_k",q_k);
 		m_display("C_k",C_k);
 		m_display("now M is ",bigM);
 		m_display("now g is ",g);
-		/* M_k = 1 0 0 0 
-		         0 1 0 0 */
 		gms(bigM_k,0,0,1.0); gms(bigM_k,0,1,0.0); gms(bigM_k,0,2, c[k].p[0]);
 		gms(bigM_k,0,3,0.0);
 		gms(bigM_k,1,0,0.0); gms(bigM_k,1,1,1.0); gms(bigM_k,1,2,c[k].p[1]);
@@ -112,7 +145,7 @@ int gpc_solve_valid(int K, const struct gpc_corr*c, const int*valid,
 	if(0) {
 		m_display("bigM",bigM);
 		m_display("g",g);
-	}
+	}*/
 	
 	M(mA,2,2); gms(mA,0,0, gmg(bigM,0,0)); gms(mA,0,1, gmg(bigM,0,1));
 	           gms(mA,1,0, gmg(bigM,1,0)); gms(mA,1,1, gmg(bigM,1,1));
@@ -240,5 +273,31 @@ double gpc_error(const struct gpc_corr*co, const double*x) {
 	return e[0]*e[0]*co->C[0][0]+2*e[0]*e[1]*co->C[0][1]+e[1]*e[1]*co->C[1][1];
 }
 
+/*
+               [       C00       ]         [       c01       ]
+                [                 ]         [                 ]
+                [       C10       ]         [       C11       ]
+(%o10)  Col 1 = [                 ] Col 2 = [                 ]
+                [ py C10 + px C00 ]         [ py C11 + c01 px ]
+                [                 ]         [                 ]
+                [ px C10 - py C00 ]         [ px C11 - c01 py ]
+         [              px C00 + c01 py              ]
+         [                                           ]
+         [              py C11 + px C10              ]
+         [                                           ]
+ Col 3 = [   2                     2                 ]
+         [ py  C11 + px py C10 + px  C00 + c01 px py ]
+         [                                           ]
+         [               2                         2 ]
+         [ px py C11 + px  C10 - px py C00 - c01 py  ]
+         [              c01 px - py C00              ]
+         [                                           ]
+         [              px C11 - py C10              ]
+         [                                           ]
+ Col 4 = [               2                         2 ]
+         [ px py C11 - py  C10 - px py C00 + c01 px  ]
+         [                                           ]
+         [   2                     2                 ]
+         [ px  C11 - px py C10 + py  C00 - c01 px py ]*/
 
 
