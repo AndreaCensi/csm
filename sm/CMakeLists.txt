@@ -39,8 +39,8 @@
 
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unreachable-code")
 	
-	#SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
-	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ansi")
+	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
+#	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ansi")
 	#SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pedantic")
 
 	# SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pg")
@@ -81,6 +81,8 @@
 	new_executable(ld_noise)
 	new_executable(ld_slip)
 	new_executable(ld_fisher)
+	new_executable(ld_stats)
+	new_executable(ld_correct)
 
 	new_executable(test_json_ld)
 	new_executable(test_json)
@@ -108,7 +110,6 @@ ADD_LIBRARY(csm-static STATIC
 ./csm/icp/icp_loop.c
 ./csm/icp/icp_outliers.c
 ./csm/icp/icp_debug.c
-./csm/journal.c
 ./csm/json_journal.c
 ./csm/laser_data.c
 ./csm/laser_data_carmen.c

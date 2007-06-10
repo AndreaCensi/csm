@@ -1,6 +1,7 @@
 #ifndef _H_ICP_
 #define _H_ICP_
 
+#include <gpc/gpc.h>
 #include "../csm_all.h"
 
 void visibilityTest(LDP ld, const gsl_vector*x_old);

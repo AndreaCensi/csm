@@ -62,7 +62,9 @@ struct sm_params {
 
 	int use_point_to_line_distance;
 	int do_compute_covariance;
-	
+
+	/** Checks that find_correspondences_tricks give the right answer */
+	int debug_verify_tricks;
 };
 
 struct sm_result {

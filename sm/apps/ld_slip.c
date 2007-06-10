@@ -27,7 +27,9 @@ int main(int argc, const char * argv[]) {
 		
 	if(!options_parse_args(ops, argc, argv)) {
 		fprintf(stderr, "A simple program for adding slip to odometry \n"
-			" The 'odometry' field is set to 'true_pose' + noise.\n");
+			" The 'odometry' field is set to 'true_pose' + noise.\n"
+			" Note: this is not applicable to a log, as each scan "
+			" in the file is considered separately.\n");
 		options_print_help(ops, stderr);
 		return -1;
 	}

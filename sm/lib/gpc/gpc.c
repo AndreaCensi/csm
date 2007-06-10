@@ -92,60 +92,15 @@ int gpc_solve_valid(int K, const struct gpc_corr*c, const int*valid,
 
 	}
 
-	int a,b;
+	{
+	unsigned int a,b;
 	 for(a=0;a<4;a++) 
 			*gsl_matrix_ptr(g, a, 0) = -2 * d_g[a];
 	 for(a=0;a<4;a++) 
 		for(b=0;b<4;b++)
 		gsl_matrix_set(bigM, a, b,  2 * d_bigM[a][b]);
+	}
 
-/*	for(a=0;a<4;a++) {
-		if ( fabs(d_g[a] - gmg(g, a, 0)) > 1e-10 ) {
-			printf("G: %d: %g %g\n", a, d_g[a], gmg(g, a, 0));
-		}
-	}
-	
-	 for(a=0;a<4;a++) 
-	 for(b=0;b<4;b++) {
-		if ( fabs(d_bigM[a][b] - gmg(bigM, a, b)) > 1e-10 ) {
-			printf("M[%d][%d]: %g  != %g\n", a, b,  d_bigM[a][b], gmg(bigM, a, b));
-		}
-	}
-	if(x0) {
-		m_display("bigM_k",bigM_k);
-		m_display("q_k",q_k);
-		m_display("C_k",C_k);
-		m_display("now M is ",bigM);
-		m_display("now g is ",g);
-		gms(bigM_k,0,0,1.0); gms(bigM_k,0,1,0.0); gms(bigM_k,0,2, c[k].p[0]);
-		gms(bigM_k,0,3,0.0);
-		gms(bigM_k,1,0,0.0); gms(bigM_k,1,1,1.0); gms(bigM_k,1,2,c[k].p[1]);
-		gms(bigM_k,1,3,0.0);
-		gms(C_k,0,0,cov_x0[0]); gms(C_k,0,1,cov_x0[1]);
-		gms(C_k,1,0,cov_x0[3]); gms(C_k,1,1,cov_x0[4]);
-		gms(q_k,0,0,x0[0]);
-		gms(q_k,1,0,x0[0]);
-		m_trans(bigM_k, bigM_k_t);
-		m_mult(bigM_k_t, C_k, temp42);
-		m_mult(temp42, bigM_k, temp44);
-		m_scale(2.0, temp44);
-		m_add_to(temp44, bigM);
-		
-		m_mult(C_k, q_k, temp21);
-		m_mult(bigM_k_t, temp21, temp41);
-		m_scale(-2.0, temp41);
-		m_add_to(temp41, g);	
-		m_display("bigM_k",bigM_k);
-		m_display("q_k",q_k);
-		m_display("C_k",C_k);
-		m_display("now M is ",bigM);
-		m_display("now g is ",g);
-	}
-	
-	if(0) {
-		m_display("bigM",bigM);
-		m_display("g",g);
-	}*/
 	
 	M(mA,2,2); gms(mA,0,0, gmg(bigM,0,0)); gms(mA,0,1, gmg(bigM,0,1));
 	           gms(mA,1,0, gmg(bigM,1,0)); gms(mA,1,1, gmg(bigM,1,1));

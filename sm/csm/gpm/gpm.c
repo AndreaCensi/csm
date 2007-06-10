@@ -34,8 +34,8 @@ void sm_gpm(struct sm_params*params, struct sm_result*res) {
 	ld_simple_clustering(laser_sens, params->clustering_threshold);
 	ld_compute_orientation(laser_sens, params->orientation_neighbourhood, params->sigma);
 	
-	journal_laser_data("laser_ref",  laser_ref );
-	journal_laser_data("laser_sens", laser_sens);
+/*	journal_laser_data("laser_ref",  laser_ref );
+	journal_laser_data("laser_sens", laser_sens);*/
 
 	/* TODO: add in configuration */
 	double theta_bin_size = deg2rad(5.0);
@@ -52,7 +52,7 @@ void sm_gpm(struct sm_params*params, struct sm_result*res) {
 		u, params->max_linear_correction,
 		params->max_angular_correction_deg, hist);
 		
-	if(jf()) gsl_histogram_fprintf(jf(), hist, "%f","%f");
+/*	if(jf()) gsl_histogram_fprintf(jf(), hist, "%f","%f");*/
 		
 	size_t max_bin = gsl_histogram_max_bin(hist);
 	
@@ -62,13 +62,13 @@ void sm_gpm(struct sm_params*params, struct sm_result*res) {
 	min_range += -extend_range;
 	max_range += +extend_range;
 
-	if(jf()) fprintf(jf(), "iteration 0\n");
-	journal_pose("x_old", u);
+/*	if(jf()) fprintf(jf(), "iteration 0\n");
+	journal_pose("x_old", u);*/
 
 	gvs(u,2, (max_range+min_range)/2);
 
-	if(jf()) fprintf(jf(), "iteration 1\n");
-	journal_pose("x_old", u);
+/*	if(jf()) fprintf(jf(), "iteration 1\n");
+	journal_pose("x_old", u);*/
 
 
 	double newRangeDeg = rad2deg((max_range-min_range)/2);
@@ -87,8 +87,8 @@ void sm_gpm(struct sm_params*params, struct sm_result*res) {
 		sm_debug("gpm 2/2: Solution: %f %f %f\n",gvg(x_new,0),gvg(x_new,1),gvg(x_new,2));
 	
 
-	if(jf()) fprintf(jf(), "iteration 2\n");
-	journal_pose("x_old", x_new);	
+/*	if(jf()) fprintf(jf(), "iteration 2\n");
+	journal_pose("x_old", x_new);	*/
 	
 	
 		gsl_vector * x_old = gsl_vector_alloc(3);

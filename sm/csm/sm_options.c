@@ -86,5 +86,9 @@ void sm_options(struct sm_params*p, struct option*ops) {
 	options_int(ops, "do_compute_covariance", 
 		&(p->do_compute_covariance), 0,
 		" ... ");
-	
+
+	options_int(ops, "debug_verify_tricks", 
+		&(p->debug_verify_tricks), 0,
+		"Checks that find_correspondences_tricks give the right answer.");
+
 }

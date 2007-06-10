@@ -30,9 +30,9 @@ void find_correspondences(struct sm_params*params, gsl_vector* x_old) {
 	LDP laser_ref  = params->laser_ref;
 	LDP laser_sens = params->laser_sens;
 
-	if(jf()) fprintf(jf(),"param max_correspondence_dist %f\n",params->max_correspondence_dist);
+/*	if(jf()) fprintf(jf(),"param max_correspondence_dist %f\n",params->max_correspondence_dist);
 	if(jf()) fprintf(jf(),"param max_linear_correction %f\n",params->max_linear_correction);
-	if(jf()) fprintf(jf(),"param max_angular_correction_deg %f\n",params->max_angular_correction_deg);
+	if(jf()) fprintf(jf(),"param max_angular_correction_deg %f\n",params->max_angular_correction_deg);*/
 	
 	gsl_vector * p_i_w = gsl_vector_alloc(3);
 	

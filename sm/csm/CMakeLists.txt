@@ -1,6 +1,4 @@
 SET(csm_sources
-
-	journal.c
 	laser_data.c
 	laser_data_fisher.c
 	laser_data_json.c

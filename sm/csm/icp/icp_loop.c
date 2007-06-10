@@ -42,8 +42,8 @@ void sm_icp(struct sm_params*params, struct sm_result*res) {
 	if(JJ) jj_add("laser_ref",  ld_to_json(laser_ref));
 	if(JJ) jj_add("laser_sens", ld_to_json(laser_sens));
 	
-	journal_laser_data("laser_ref",  laser_ref );
-	journal_laser_data("laser_sens", laser_sens);
+	/*journal_laser_data("laser_ref",  laser_ref );
+	journal_laser_data("laser_sens", laser_sens);*/
 	
 	gsl_vector * x_new = gsl_vector_alloc(3);
 	gsl_vector * x_old = vector_from_array(3, params->first_guess);
@@ -180,18 +180,16 @@ int icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 
 		egsl_push();
 		
-		if(jf()) fprintf(jf(), "iteration %d\n", iteration);
+/*		if(jf()) fprintf(jf(), "iteration %d\n", iteration);*/
 
 		if(JJ) jj_add("x_old", vector_to_json(x_old));
-
-		journal_pose("x_old", x_old);
 		
 		if(params->use_corr_tricks)
 			find_correspondences_tricks(params, x_old);
 		else
 			find_correspondences(params, x_old);
 
-		if(0)
+		if(params->debug_verify_tricks)
 			debug_correspondences(params, x_old);
 
 		int num_corr = ld_num_valid_correspondences(laser_sens);
@@ -234,10 +232,10 @@ int icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 		pose_diff(x_new, x_old, delta);
 		
 		{
-			journal_correspondences(laser_sens);
+			/*journal_correspondences(laser_sens);*/
 			sm_debug("killing %d -> %d -> %d \n", num_corr, num_corr2, num_corr_after);
-			journal_pose("x_new", x_new);
-			journal_pose("delta", delta);
+			/*journal_pose("x_new", x_new);
+			journal_pose("delta", delta);*/
 			if(JJ) {
 				jj_add("x_new", vector_to_json(x_new));
 				jj_add("delta", vector_to_json(delta));

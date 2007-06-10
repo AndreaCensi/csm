@@ -141,18 +141,25 @@ void ominus_d(const double *x, double*res) {
 	res[2] = -x[2];
 }
 
+/** safe if res == x1 */
 void oplus_d(const double*x1,const double*x2, double*res) {
 	double c = cos(x1[2]);
 	double s = sin(x1[2]);
-	res[0] = x1[0]+c*x2[0]-s*x2[1];
-	res[1] = x1[1]+s*x2[0]+c*x2[1];
-	res[2] = x1[2]+x2[2];
+	double x = x1[0]+c*x2[0]-s*x2[1];
+	double y = x1[1]+s*x2[0]+c*x2[1];
+ 	double theta = x1[2]+x2[2];
+	res[0]=x;
+	res[1]=y;
+	res[2]=theta;
 }
 
 void pose_diff_d(const double*pose2, const double*pose1, double*res) {
 	double temp[3];
 	ominus_d(pose1, temp);
 	oplus_d(temp, pose2, res);
+	
+	while(res[2] > +M_PI) res[2] -= 2*M_PI;
+	while(res[2] < -M_PI) res[2] += 2*M_PI;
 }
 
 

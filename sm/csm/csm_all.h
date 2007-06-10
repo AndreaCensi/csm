@@ -8,7 +8,6 @@ namespace CSM {
 extern "C" {
 #endif
 
-#include "journal.h"
 #include "laser_data.h"
 #include "json_journal.h"
 #include "logging.h"
