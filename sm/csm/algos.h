@@ -4,7 +4,7 @@
 #include <gsl/gsl_vector.h>
 
 struct sm_params {
-	/** First scan (REFerence scan) */
+	/** First scan (/ref/erence scan) */
 	LDP laser_ref;
 	/** Second scan */
 	LDP laser_sens;
@@ -65,6 +65,10 @@ struct sm_params {
 
 	/** Checks that find_correspondences_tricks give the right answer */
 	int debug_verify_tricks;
+	
+	double gpm_theta_bin_size_deg;
+	double gpm_extend_range_deg; 
+	
 };
 
 struct sm_result {
@@ -90,6 +94,3 @@ void sm_gpm(struct sm_params*input, struct sm_result*output);
 void sm_journal_open(const char* file);
 
 #endif
-
-
-

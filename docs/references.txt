@@ -1,0 +1,3 @@
+Fast atan2:
+
+http://lists.apple.com/archives/PerfOptimization-dev/2005/Jan/threads.html#00032

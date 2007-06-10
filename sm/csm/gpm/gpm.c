@@ -17,7 +17,7 @@ void ght_one_shot(LDP laser_ref, LDP laser_sens,
 	
 void sm_gpm(struct sm_params*params, struct sm_result*res) {
 	res->valid = 0;
-	
+	/* Check for well-formedness of the input data */
 	if(!ld_valid_fields(params->laser_ref) || 
 	   !ld_valid_fields(params->laser_sens)) {
 		return;
@@ -25,26 +25,25 @@ void sm_gpm(struct sm_params*params, struct sm_result*res) {
 	
 	LDP laser_ref  = params->laser_ref;
 	LDP laser_sens = params->laser_sens;
-		
+	
+	/* We need to compute cartesian points */
 	ld_compute_cartesian(laser_ref);
+	/* ... and orientation */
 	ld_simple_clustering(laser_ref, params->clustering_threshold);
 	ld_compute_orientation(laser_ref, params->orientation_neighbourhood, params->sigma);
-
+	/* ... for both scans. */
 	ld_compute_cartesian(laser_sens);
 	ld_simple_clustering(laser_sens, params->clustering_threshold);
 	ld_compute_orientation(laser_sens, params->orientation_neighbourhood, params->sigma);
-	
-/*	journal_laser_data("laser_ref",  laser_ref );
-	journal_laser_data("laser_sens", laser_sens);*/
 
-	/* TODO: add in configuration */
-	double theta_bin_size = deg2rad(5.0);
-	double extend_range = deg2rad(15.0);
-	
+	/* Create an histogram whose bin is large `theta_bin_size` */
+	double theta_bin_size = deg2rad(params->gpm_theta_bin_size_deg);
 	size_t nbins = ceil(2*M_PI/theta_bin_size);
 	gsl_histogram*hist = gsl_histogram_alloc(nbins);
 	gsl_histogram_set_ranges_uniform(hist, -M_PI, M_PI);
 	
+	
+	/* Fill the histogram with samples */
 	gsl_vector * u = vector_from_array(3, params->first_guess);
 	printf("gpm 1/2: old u = : %f %f %f\n",gvg(u,0),gvg(u,1),gvg(u,2));
 	
@@ -52,46 +51,49 @@ void sm_gpm(struct sm_params*params, struct sm_result*res) {
 		u, params->max_linear_correction,
 		params->max_angular_correction_deg, hist);
 		
-/*	if(jf()) gsl_histogram_fprintf(jf(), hist, "%f","%f");*/
-		
+	/* Find the bin with most samples */
 	size_t max_bin = gsl_histogram_max_bin(hist);
 	
+	/* Around that value will be the range admissible for theta */
 	double min_range, max_range;
 	gsl_histogram_get_range(hist,max_bin,&min_range,&max_range);
 	
+	/* Extend the range of the search */
+	double extend_range = deg2rad(params->gpm_extend_range_deg);
 	min_range += -extend_range;
 	max_range += +extend_range;
 
-/*	if(jf()) fprintf(jf(), "iteration 0\n");
-	journal_pose("x_old", u);*/
 
-	gvs(u,2, (max_range+min_range)/2);
-
-/*	if(jf()) fprintf(jf(), "iteration 1\n");
+	/*	if(jf()) fprintf(jf(), "iteration 0\n");
 	journal_pose("x_old", u);*/
 
 
-	double newRangeDeg = rad2deg((max_range-min_range)/2);
+	/*	if(jf()) fprintf(jf(), "iteration 1\n");
+	journal_pose("x_old", u);*/
+
+
+	/* Now repeat the samples generation with a smaller domain */
+	gvs(u, 2, (max_range+min_range)/2);
+	double new_range_deg = rad2deg((max_range-min_range)/2);
 	
 	gsl_vector * x_new = gsl_vector_alloc(3);
-	
 	ght_one_shot(laser_ref, laser_sens,
 			u, params->max_linear_correction*2,
-			newRangeDeg, x_new) ;
+			new_range_deg, x_new) ;
+	/* Et voila, in x_new we have the answer */
 
+	{
 		sm_debug("gpm : max_correction_lin %f def %f\n", params->max_linear_correction, 		params->max_angular_correction_deg);
 
 		sm_debug("gpm 1/2: new u = : %f %f %f\n",gvg(u,0),gvg(u,1),gvg(u,2));
 		sm_debug("gpm 1/2: New range: %f to %f\n",rad2deg(min_range),rad2deg(max_range));
 
 		sm_debug("gpm 2/2: Solution: %f %f %f\n",gvg(x_new,0),gvg(x_new,1),gvg(x_new,2));
-	
+	/*	if(jf()) fprintf(jf(), "iteration 2\n");
+		journal_pose("x_old", x_new);	*/
+	}
 
-/*	if(jf()) fprintf(jf(), "iteration 2\n");
-	journal_pose("x_old", x_new);	*/
-	
-	
-		gsl_vector * x_old = gsl_vector_alloc(3);
+	/* Administrivia */
 
 	res->valid = 1;
 	res->x[0] = gvg(x_new,0);
@@ -100,7 +102,6 @@ void sm_gpm(struct sm_params*params, struct sm_result*res) {
 	
 	res->iterations = 0;
 	
-	gsl_vector_free(x_old);
 	gsl_vector_free(u);
 	gsl_vector_free(x_new);
 	gsl_histogram_free(hist);
@@ -110,7 +111,7 @@ void ght_find_theta_range(LDP laser_ref, LDP laser_sens,
 	const 	gsl_vector*x0, double max_linear_correction,
 	double max_angular_correction_deg, gsl_histogram*hist) 
 {
-	int count=0;
+	int count = 0;
 	int i;
 	for(i=0;i<laser_sens->nrays;i++) {
 		if(!laser_sens->alpha_valid[i]) continue;

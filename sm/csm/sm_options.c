@@ -91,4 +91,8 @@ void sm_options(struct sm_params*p, struct option*ops) {
 		&(p->debug_verify_tricks), 0,
 		"Checks that find_correspondences_tricks give the right answer.");
 
+	options_double(ops, "gpm_theta_bin_size_deg", &(p->gpm_theta_bin_size_deg), 5.0, 
+		"GPM: Dimension of bins for theta");
+	options_double(ops, "gpm_extend_range_deg", &(p->gpm_extend_range_deg), 15.0, 
+		"GPM: Area around maximum");
 }

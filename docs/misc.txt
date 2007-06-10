@@ -1,0 +1,3 @@
+Installing GSL:
+
+	export CFLAGS="-Wno-long-double -mtune=7450 -mcpu=7450  -fomit-frame-pointer -O3";     ./configure --disable-shared --prefix=/Volumes/Alter/07repo/csm/csm/deploy

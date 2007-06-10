@@ -1,0 +1,14 @@
+
+Optimizations
+-------------
+
+The ICP code is reasonably optimized (the correspondence search in particular).
+But only algorithmic optimization were used. In particular, the following were *not* used:
+
+- look-up tables
+- fixed-point math
+- chipset-specific extensions for vectorizations (altivec, etc)
+- optimizations that would give an approximation to the answer
+- assembler in general
+
+All computations done in *double* precision (*float* would be more than enough).
