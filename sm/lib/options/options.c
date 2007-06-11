@@ -148,8 +148,8 @@ int options_parse_file(struct option*ops, const char*pwd, const char*filename) {
 	strcpy(concat, pwd);
 	strcat(concat, "/");
 	strcat(concat, filename);
-	char *resolved[PATH_MAX+1];
-	if(!realpath(concat, resolved)) {
+	char *resolved;
+	if(! (resolved = realpath(concat, NULL))) {
 		fprintf(stderr, "Could not resolve '%s' ('%s').\n", concat, resolved); 
 		return 0;
 	}
@@ -157,6 +157,7 @@ int options_parse_file(struct option*ops, const char*pwd, const char*filename) {
 	const char * newdir = dirname(resolved);
 	if(!newdir) {
 		fprintf(stderr, "Could not get dirname for '%s'.\n",  resolved); 
+		free(resolved);
 		return 0;
 	}
 	
@@ -164,9 +165,11 @@ int options_parse_file(struct option*ops, const char*pwd, const char*filename) {
 	file = fopen(resolved,"r");
 	if(file==NULL) {
 		fprintf(stderr, "Could not open '%s': %s.\n", resolved, strerror(errno)); 
+		free(resolved);
 		return 0;
 	}
 	
+	free(resolved);
 	return options_parse_stream(ops, newdir, file);
 }
 
