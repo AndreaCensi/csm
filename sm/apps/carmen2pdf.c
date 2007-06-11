@@ -27,17 +27,20 @@ struct params {
 	/**/
 	FILE*input_file;
 	reference use_reference;
+
+	double offset_theta_deg;
 };
 
 void carmen2pdf(struct params p);
 
+double offset_theta = 0;
 void ld_getbb(LDP  ld, double*x0, double*y0, double*x1, double*y1, 
 	reference use_reference, double horizon);
 
 int main(int argc, const char*argv[]) {
 	struct params p;
 	
-	struct option * ops = options_allocate(10);
+	struct option * ops = options_allocate(12);
 	options_int(ops, "interval", &p.interval, 10, "how many to ignore");
 	options_string(ops, "in", &p.input_filename, "stdin", "input file (Carmen or JSON)");
 	options_string(ops, "out", &p.output_filename, "carmen2pdf.pdf", "output file (PDF)");
@@ -47,6 +50,7 @@ int main(int argc, const char*argv[]) {
 	options_double(ops, "dimension", &p.dimension, 500.0, "dimension of the image (points)");
 	options_int(ops, "draw_confidence", &p.draw_confidence, 0, " Draws confidence (cov_readings[i]) ");
 	options_double(ops, "confidence_mult", &p.confidence_mult, 3.0, " 3-sigma ");
+	options_double(ops, "offset_theta_deg", &p.offset_theta_deg, 0.0, " rotate entire map by this angle (deg) ");
 
 	options_string(ops, "use", &p.use, "estimate", "One in 'odometry','estimate','true_pose'");
 	
@@ -55,6 +59,7 @@ int main(int argc, const char*argv[]) {
 		options_print_help(ops, stderr);
 		return -1;
 	}
+	
 	
 	p.use_reference = 0;
 	int i; for(i=1;i<=3;i++) 
@@ -156,6 +161,8 @@ double * ld_get_reference(LDP ld, reference use_reference) {
 
 void carmen2pdf(struct params p) {
 	
+	offset_theta += deg2rad(p.offset_theta_deg);
+
 	struct bounding_box bb;
 	get_bb(&p, &bb);
 
@@ -196,8 +203,7 @@ void carmen2pdf(struct params p) {
 		/* Draw pose */
 		{
 			double bx,by;
-			bb_w2b(&bb, pose[0], pose[1], &bx, &by);
-
+			ld_get_buffer_polar(0.0,0.0,pose, 0,0, &bb, &bx, &by);
 			if(first_pose) { 
 				first_pose = 0; 
 			} else {
@@ -326,8 +332,11 @@ void ld_get_buffer_polar(double phi, double rho, const double*pose,
 	point[0] = cos(phi) * rho;
 	point[1] = sin(phi) * rho;
 
+	double frame[3] = { 0, 0, offset_theta};
+	double pose2[3];
+	oplus_d(frame, pose, pose2);
 	double pw[2];
-	transform_d(point, pose, pw);
+	transform_d(point, pose2, pw);
 	
 	if( (bb!=0) & (bx!=0) & (by!=0) )
 	bb_w2b(bb, pw[0], pw[1],  bx, by);
