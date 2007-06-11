@@ -27,5 +27,7 @@ void sm_debug(const char *msg, ...)
 		fputs(": ", stderr);
 	}
 	vfprintf(stderr, msg, ap);
+	#else
+	msg = 0;
 	#endif
 }
