@@ -4,16 +4,10 @@
 
 
 #include "../csm_all.h"
+#include "gpm.h"
 
 #include <egsl/egsl_macros.h>
 
-void ght_find_theta_range(LDP laser_ref, LDP laser_sens,
-		const gsl_vector*x0, double max_linear_correction,
-	double max_angular_correction_deg, gsl_histogram*hist);
-
-void ght_one_shot(LDP laser_ref, LDP laser_sens,
-		const gsl_vector*x0, double max_linear_correction,
-		double max_angular_correction_deg, gsl_vector*x) ;
 	
 void sm_gpm(struct sm_params*params, struct sm_result*res) {
 	res->valid = 0;
@@ -38,7 +32,7 @@ void sm_gpm(struct sm_params*params, struct sm_result*res) {
 
 	/* Create an histogram whose bin is large `theta_bin_size` */
 	double theta_bin_size = deg2rad(params->gpm_theta_bin_size_deg);
-	size_t nbins = ceil(2*M_PI/theta_bin_size);
+	size_t nbins = (size_t) ceil(2*M_PI/theta_bin_size);
 	gsl_histogram*hist = gsl_histogram_alloc(nbins);
 	gsl_histogram_set_ranges_uniform(hist, -M_PI, M_PI);
 	

@@ -1,3 +1,16 @@
+#ifdef LINUX
+
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
+
+/* for realpath() */
+#ifndef __USE_BSD
+#define __USE_BSD
+#endif
+
+#endif /* LINUX */
+
 #include <errno.h>
 #include <limits.h>
 #include <stdlib.h>
@@ -5,18 +18,9 @@
 #include <sys/param.h>
 #include <ctype.h>
 #include <sys/stat.h>
+#include <unistd.h>
 #include <libgen.h>
 
-/* Cavillo (non impatta la portabilità. */
-#ifdef LINUX
-#warning "Compiling on linux"
-#ifndef _GNU_SOURCE
-#define _GNU_SOURCE
-#endif
-
-/* for realpath() */
-#define __USE_BSD
-#endif
 
 #include <string.h>
 
@@ -232,7 +236,7 @@ int options_set(struct option*o, const char*value) {
 		
 		default: {
 			/* XXX ERROR */
-			fprintf(stderr, "Could not parse type %d: '%s' = '%s'.\n", o->type, o->name, value);
+			fprintf(stderr, "Could not parse type %d: '%s' = '%s'.\n", (int) o->type, o->name, value);
 			return 0;
 		}
 	}

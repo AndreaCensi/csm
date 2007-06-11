@@ -61,7 +61,7 @@ int main(int argc, const char*argv[]) {
 		num_matchings++;
 		num_iterations += result.iterations;
 		
-		fprintf(stderr, ".");
+		fprintf(stderr, "."); 
 	}
 	
 	clock_t end = clock();
