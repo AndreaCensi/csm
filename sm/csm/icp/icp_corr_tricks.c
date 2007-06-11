@@ -39,6 +39,7 @@ INLINE double local_distance_squared_d(const double* a, const double* b)  {
 	return x*x + y*y;
 }
 
+#if 0
 /** This is an approximation to sin(x), such that 
     mysin(x) >= sin(x) for 0 < x < 2 */
 INLINE double mysin2(double x) {
@@ -54,7 +55,7 @@ INLINE double mysin2(double x) {
 	const double b = -1.0/120.0;
 	double x2 = x*x;
 	return x * (1 + x2 * ( a + b * x2));
-}
+} 
 
 INLINE double mysin(double x) {
 	if(x > 2) return sin(x);
@@ -62,7 +63,8 @@ INLINE double mysin(double x) {
 	const double b = -1.0/120.0;
 	double x2 = x*x;
 	return x * (.99 + x2 * ( a + b * x2));
-}
+} 
+#endif
 
 #define SQUARE(a) ((a)*(a))
 
@@ -95,7 +97,6 @@ void find_correspondences_tricks(struct sm_params*params, gsl_vector* x_old) {
 	}
 	
 	/* Handy constants */
-/*	double C0 = M_PI/laser_ref->nrays;*/
 	double C1 =  (double)laser_ref->nrays / (laser_ref->max_theta-laser_ref->min_theta) ;
 	double max_correspondence_dist2 = square(params->max_correspondence_dist);
 	/* Last match */
@@ -113,7 +114,7 @@ void find_correspondences_tricks(struct sm_params*params, gsl_vector* x_old) {
 		/** Search domain for j1 */
 		int from = 0; 
 		int to = laser_ref->nrays-1; 
-/*		int start_cell = (int) ((p_i_w_phi - laser_ref->min_theta) * C1); */
+		int start_cell = (int) ((p_i_w_phi - laser_ref->min_theta) * C1); 
 
 		/** Current best match */
 		int j1 = -1;
@@ -123,7 +124,7 @@ void find_correspondences_tricks(struct sm_params*params, gsl_vector* x_old) {
 		/** If last match was succesful, then start at that index + 1 */
 		int we_start_at; 
 		if (last_best==-1) {
-			we_start_at = (int) ((p_i_w_phi - laser_ref->min_theta) * C1); 
+			we_start_at = start_cell;
 	 	} else {
 			we_start_at = last_best + 1;
 		}
@@ -168,12 +169,11 @@ void find_correspondences_tricks(struct sm_params*params, gsl_vector* x_old) {
 				
 				double delta_theta = (laser_ref->theta[up] - p_i_w_phi);
 				/* If we are moving away from start_cell */
-				if (delta_theta > 0) {
+				if (up > start_cell) {
 					/* We can compute a bound for early stopping. Currently
 					   our best point has distance best_dist; we can compute
 					   min_dist_up, which is the minimum distance that can have
 					   points for j>up (see figure)*/
-					/*double delta_theta = (up-start_cell) * C0; /*C0 = (M_PI/laser_ref->nrays);*/
 					double min_dist_up = sin(delta_theta) * p_i_w_nrm2;
 					/* If going up we can't make better than best_dist, then
 					    we stop searching in the "up" direction */
@@ -211,10 +211,8 @@ void find_correspondences_tricks(struct sm_params*params, gsl_vector* x_old) {
 				}
 
 				double delta_theta = (p_i_w_phi - laser_ref->theta[down]);
-/*				if (down < start_cell) {*/
-				if(laser_ref->theta[down] + M_PI/180 < p_i_w_phi) {
-				/*	double min_dist_down = table[start_cell-down] * p_i_w_nrm2;*/
-				/*	double delta_theta = (start_cell-down) * C0; /* C0 = (M_PI/laser_ref->nrays) */
+				if (down < start_cell) {
+/*				if(laser_ref->theta[down] + M_PI/180 < p_i_w_phi) {*/
 					double min_dist_down = sin(delta_theta) * p_i_w_nrm2;
 					if( SQUARE(min_dist_down) > best_dist) { 
 						down_stopped = 1; continue;

@@ -2,7 +2,7 @@
 
 #include "csm_all.h"
 
-double minmax(int from,int to,int x) {
+int minmax(int from,int to,int x) {
 	return GSL_MAX(GSL_MIN(x,to),from);
 }
 
@@ -84,11 +84,11 @@ double norm(const gsl_vector*a){
 }
 
 double deg2rad(double deg) {
-	return deg * M_PI / 180;
+	return deg * (M_PI / 180);
 }
 
 double rad2deg(double rad) {
-	return rad / M_PI * 180;	
+	return rad * (180 / M_PI);	
 }
 
 gsl_vector * vector_from_array(unsigned int n, double *x) {

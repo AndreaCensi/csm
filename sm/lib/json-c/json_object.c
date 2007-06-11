@@ -424,7 +424,7 @@ struct json_object* json_object_new_string(const char *s)
   if(!this) return NULL;
   this->_delete = &json_object_string_delete;
   this->_to_json_string = &json_object_string_to_json_string;
-  this->o.c_string = strdup(s);
+  this->o.c_string = json_c_strndup(s, strlen(s));
   return this;
 }
 

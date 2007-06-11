@@ -4,23 +4,28 @@
 
 #include "csm_all.h"
 
+char * sm_program_name = 0;
+
 void sm_error(const char *msg, ...)
 {
-  va_list ap;
-  va_start(ap, msg);
-#if HAVE_VSYSLOG
-    if(_syslog) {
-		vsyslog(LOG_ERR, msg, ap);
-	} else
-#endif
+	va_list ap;
+	va_start(ap, msg);
+	if(sm_program_name) {
+		fputs(sm_program_name, stderr);
+		fputs(": ", stderr);
+	}
 	vfprintf(stderr, msg, ap);
 }
 
 void sm_debug(const char *msg, ...)
 {
+	#ifdef CSM_DEBUG
 	va_list ap;
 	va_start(ap, msg);
-	#ifdef CSM_DEBUG
+	if(sm_program_name) {
+		fputs(sm_program_name, stderr);
+		fputs(": ", stderr);
+	}
 	vfprintf(stderr, msg, ap);
 	#endif
 }

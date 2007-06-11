@@ -7,7 +7,7 @@
 
 #include <csm/csm_all.h>
 
-typedef enum { Odometry = 1, Estimate = 2, True_pose = 3 } reference;
+typedef enum { Invalid = 0, Odometry = 1, Estimate = 2, True_pose = 3 } reference;
 const char*reference_name[4] = { "invalid","odometry","estimate","true_pose"};
 
 struct params {
@@ -61,11 +61,11 @@ int main(int argc, const char*argv[]) {
 	}
 	
 	
-	p.use_reference = 0;
+	p.use_reference = Invalid;
 	int i; for(i=1;i<=3;i++) 
 		if(!strcmp(p.use, reference_name[i]))
 			p.use_reference = (reference) i;
-	if(0 == p.use_reference) {
+	if(Invalid == p.use_reference) {
 		fprintf(stderr, "Invalid reference '%s'. " 
 			"Use one in 'odometry','estimate','true_pose'.\n", p.use);
 		return -1;

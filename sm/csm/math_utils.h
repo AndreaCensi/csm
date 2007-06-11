@@ -41,7 +41,7 @@ gsl_vector * vector_from_array(unsigned int n, double *x);
 void vector_to_array(const gsl_vector*v, double*);
 void copy_from_array(gsl_vector*v, double*);
 
-double minmax(int from,int to,int x);
+int minmax(int from,int to,int x);
 
 /** Copies n doubles from from to to */
 void copy_d(const double*from, int n, double*to);

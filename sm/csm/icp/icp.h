@@ -16,7 +16,7 @@ int icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 
 void kill_outliers_trim(struct sm_params*params, const gsl_vector*x_old,
 	double*total_error);
-void kill_outliers_double(struct sm_params*params, const gsl_vector*x_old);
+void kill_outliers_double(struct sm_params*params);
 	
 void compute_covariance_exact(
 	LDP laser_ref, LDP laser_sens, const gsl_vector*x,

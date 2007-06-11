@@ -1,10 +1,11 @@
 #ifndef SM_LOGGING_H
 #define SM_LOGGING_H
 
+extern char * sm_program_name;
 
-extern void sm_abort(const char *msg, ...);
-extern void sm_debug(const char *msg, ...);
-extern void sm_error(const char *msg, ...);
-extern void sm_info(const char *msg, ...);
+void sm_abort(const char *msg, ...);
+void sm_debug(const char *msg, ...);
+void sm_error(const char *msg, ...);
+void sm_info(const char *msg, ...);
 
 #endif

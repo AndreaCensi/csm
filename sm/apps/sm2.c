@@ -30,6 +30,7 @@ void spit(LDP ld, FILE * stream) {
 }
 
 int main(int argc, const char*argv[]) {
+	sm_program_name = "sm2";
 	
 	struct sm_params params;
 	struct sm_result result;

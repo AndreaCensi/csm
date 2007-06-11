@@ -15,7 +15,7 @@ struct option* options_allocate(size_t n) {
 	struct option* ops = malloc(sizeof(struct option)*n);
 	size_t i; for(i=0;i<n;i++) {
 		ops[i].name = 0;
-		ops[i].type = 0xbeef;
+		ops[i].type = (enum option_type) 0xbeef;
 		ops[i].desc = 0;
 		ops[i].value_pointer = 0;
 		ops[i].set_pointer = 0;

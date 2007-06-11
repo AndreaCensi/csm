@@ -201,7 +201,7 @@ int icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 
 		if(JJ) jj_add("corr0", corr_to_json(laser_sens->corr, laser_sens->nrays));
 
-		kill_outliers_double(params, x_old);
+		kill_outliers_double(params);
 		int num_corr2 = ld_num_valid_correspondences(laser_sens);
 
 		if(JJ) jj_add("corr1", corr_to_json(laser_sens->corr, laser_sens->nrays));
