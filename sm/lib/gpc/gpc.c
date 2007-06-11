@@ -25,6 +25,10 @@ int gpc_solve(int K, const struct gpc_corr*c, double *x) {
 	return gpc_solve_valid(K,c,0,0,0,x);
 }
 
+#define M(matrix, rows, col) static gsl_matrix*matrix=0; if(!matrix) matrix = gsl_matrix_alloc(rows,col);
+/*#define MF(matrix) gsl_matrix_free(matrix)*/
+#define MF(matrix) /*gsl_matrix_free(matrix)*/
+
 int gpc_solve_valid(int K, const struct gpc_corr*c, const int*valid, 
 	const double*x0, const double *cov_x0,
 	double *x_out) 

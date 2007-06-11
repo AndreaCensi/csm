@@ -43,32 +43,31 @@ void kill_outliers_double(struct sm_params*params, const gsl_vector*x_old) {
 	LDP laser_ref  = params->laser_ref;
 	LDP laser_sens = params->laser_sens;
 
-	double dist_i[laser_sens->nrays];
-	double dist_j[laser_ref->nrays];
+	double dist2_i[laser_sens->nrays];
+	double dist2_j[laser_ref->nrays];
 	int j; for(j=0;j<laser_ref->nrays;j++) 
-		dist_j[j]= 1000000;
+		dist2_j[j]= 1000000;
 	
-	gsl_vector * p_i_w = gsl_vector_alloc(2);
 	int i;
 	for(i=0;i<laser_sens->nrays;i++) {
 		if(!ld_valid_corr(laser_sens, i)) continue;
-		transform_d(laser_sens->p[i]->data, x_old->data, p_i_w->data);
+/*		transform_d(laser_sens->p[i]->data, x_old->data, p_i_w->data);*/
 		int j1 = laser_sens->corr[i].j1;
-		dist_i[i] = distance_squared_d(p_i_w->data, laser_ref->p[j1]->data);
-		dist_j[j1] = GSL_MIN(dist_j[j1], dist_i[i]);
+/*		dist_i[i] = distance_squared_d(p_i_w->data, laser_ref->p[j1]->data);*/
+		dist2_i[i] = laser_sens->corr[i].dist2_j1;
+		dist2_j[j1] = GSL_MIN(dist2_j[j1], dist2_i[i]);
 	}
 	
 	int nkilled = 0;
 	for(i=0;i<laser_sens->nrays;i++) {
 		if(!ld_valid_corr(laser_sens, i)) continue;
 		int j1 = laser_sens->corr[i].j1;
-		if(dist_i[i] > (threshold*threshold)*dist_j[j1]) {
+		if(dist2_i[i] > (threshold*threshold)*dist2_j[j1]) {
 			laser_sens->corr[i].valid=0;
 			nkilled ++;
 		}
 	}
 	sm_debug("kill_outliers_double: killed %d correspondences\n",nkilled);
-	gsl_vector_free(p_i_w);
 }
 	
 /** 
@@ -107,11 +106,8 @@ void kill_outliers_trim(struct sm_params*params, const gsl_vector*x_old,
 		int j1 = laser_sens->corr[i].j1;
 		int j2 = laser_sens->corr[i].j2;
 		/* Compute the distance to the corresponding segment */
-		dist[i]=  dist_to_segment_squared_d(laser_ref->p[j1]->data,
+		dist[i]=  dist_to_segment_d(laser_ref->p[j1]->data,
 			laser_ref->p[j2]->data,p_i_w);
-		dist[i] = sqrt(dist[i]);
-/*		dist[i] = dist_to_segment(laser_ref->p[j1],laser_ref->p[j2],p_i_w);*/
-			/* dist[i] = distance(p_i_w, laser_ref->p[j1]); */
 		dist2[k] = dist[i];
 		k++;	
 	}

@@ -19,7 +19,6 @@ struct laser_data {
 	int    *valid;
 	double *readings;
 	
-	
 	int    *cluster;
 	
 	double *alpha;
@@ -52,6 +51,8 @@ struct correspondence {
 	int j1; 
 	/** Second closest point in the other scan.  */
 	int j2;
+	/** Squared distance from p(i) to point j1 */
+	double dist2_j1; 
 };
 
 typedef struct laser_data* LDP;

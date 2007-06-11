@@ -54,36 +54,17 @@ void oplus(const gsl_vector*x1,const gsl_vector*x2, gsl_vector*res);
 void ominus(const gsl_vector*x, gsl_vector*res);
 void pose_diff(const gsl_vector*pose2,const gsl_vector*pose1,gsl_vector*res);
 
-/** Projects x on the LINE going through a and b */
-void projection_on_line(
-	const gsl_vector*a,
-	const gsl_vector*b,
-	const gsl_vector*x,
-	      gsl_vector*proj);
 	
-/** Projects x on the SEGMENT a-b */
-void projection_on_segment(
-	const gsl_vector*a,
-	const gsl_vector*b,
-	const gsl_vector*x,
-	      gsl_vector*proj);
-
-/** Projects (px,py) on segment (ax,ay)-(bx,by) */
-void projection_on_line2(double ax, double ay, 
-	double bx, double by, 
-	double px, double py,
-	double *x, double *y) ;
-	
-/** Same thing, with double arguments */
+/** Projects (p[0],p[1]) on the LINE passing through (ax,ay)-(bx,by). If distance!=0, distance is set
+to the distance from the point to the segment */
 void projection_on_line_d(const double *a,
 	const double *b,
 	const double *p,
-	double *res);
+	double *res,
+	double *distance);
 	
-
 /** Distance of x from its projection on segment a-b */
-double dist_to_segment(const gsl_vector*a,const gsl_vector*b,const gsl_vector*x);
-
+double dist_to_segment_d(const double*a, const double*b, const double*x);
 double dist_to_segment_squared_d(const double*a, const double*b, const double*x);
 
 void projection_on_segment_d(

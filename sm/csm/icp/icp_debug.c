@@ -16,10 +16,10 @@ void debug_correspondences(struct sm_params * params, gsl_vector * x_old) {
 		int i = 0; for(i=0;i<laser_sens->nrays;i++) {
 			if( (c1[i].valid != c2[i].valid) ||
 				(c1[i].j1 != c2[i].j1) || (c1[i].j2 != c2[i].j2) ) {
-					sm_error("\tc1[%d].valid = %d j1 = %d  j2 = %d\n",
-						i, c1[i].valid, c1[i].j1, c1[i].j2);
-					sm_error("\tc2[%d].valid = %d j1 = %d  j2 = %d\n",
-						i, c2[i].valid, c2[i].j1, c2[i].j2);
+					sm_error("\tc1[%d].valid = %d j1 = %d  j2 = %d  dist2_j1 = %f\n",
+						i, c1[i].valid, c1[i].j1, c1[i].j2, c1[i].dist2_j1);
+					sm_error("\tc2[%d].valid = %d j1 = %d  j2 = %d  dist2_j1 = %f\n",
+						i, c2[i].valid, c2[i].j1, c2[i].j2, c2[i].dist2_j1);
 				}
 		}
 		if(1) exit(-1);

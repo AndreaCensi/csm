@@ -18,7 +18,7 @@ int main() {
 	for(i=0;i<5;i++){
 		gsl_vector * X = vector_from_array(2,x[i]);
 		
-		projection_on_segment(A,B,X,res);
+/*		projection_on_segment(A,B,X,res);*/
 		
 		printf("Projection of %f %f is %f %f \n", gvg(X,0),gvg(X,1),
 			gvg(res,0),gvg(res,1));

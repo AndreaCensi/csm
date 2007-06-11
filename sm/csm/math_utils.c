@@ -71,6 +71,12 @@ double distance_squared_d(const double *a, const double *b) {
 	return x*x + y*y;
 }
 
+
+int is_nan(double v) {
+	return v == v ? 0 : 1;
+}
+
+
 double norm(const gsl_vector*a){
 	double x = gvg(a,0);
 	double y = gvg(a,1);
@@ -178,7 +184,7 @@ double angleDiff(double a, double b) {
 
 
 /** Projects (px,py) on segment (ax,ay)-(bx,by) */
-void projection_on_line2(double ax, double ay, 
+/*void projection_on_line2(double ax, double ay, 
 	double bx, double by, 
 	double px, double py,
 	double *x, double *y) 
@@ -192,57 +198,32 @@ void projection_on_line2(double ax, double ay,
 	double c = cos(alpha); double s = sin(alpha);
 	*x =   c*rho + s*s*px - c*s*py ;
 	*y =   s*rho - c*s*px + c*c*py ;	
-}
+} */
 
 void projection_on_line_d(const double *a,
 	const double *b,
 	const double *p,
-	double *res)
+	double *res, double *distance)
 {
 	double t0 = a[0]-b[0];
 	double t1 = a[1]-b[1];
-
-	double alpha = atan2(t1,t0) + M_PI/2;
-	double c = cos(alpha); double s = sin(alpha);
+	double one_on_r = 1 / sqrt(t0*t0+t1*t1);
+	/* normal */
+	double nx = t1  * one_on_r ;
+	double ny = -t0 * one_on_r ;
+	double c= nx, s = ny; 
 	double rho = c*a[0]+s*a[1];
 
 	res[0] =   c*rho + s*s*p[0] - c*s*p[1] ;
 	res[1] =   s*rho - c*s*p[0] + c*c*p[1] ;	
-}
-
-/** Computes the projection of x onto the line which goes through a-b */
-void projection_on_line(const gsl_vector*a,const gsl_vector*b,const gsl_vector*x,
-	gsl_vector * proj) 
-{
-	double t0 = gvg(a,0)-gvg(b,0);
-	double t1 = gvg(a,1)-gvg(b,1);
 	
-	double alpha = atan2(t1,t0) + M_PI/2;
-	double rho = cos(alpha)*gvg(a,0)+sin(alpha)*gvg(a,1);
-	
-	double c = cos(alpha); double s = sin(alpha);
-	double px =  gvg(x,0); double py = gvg(x,1);
-	gvs(proj, 0, c*rho + s*s*px - c*s*py );
-	gvs(proj, 1, s*rho - c*s*px + c*c*py );	
-}
-
-/** Computes the projection of x onto the segment a-b */
-void projection_on_segment(const gsl_vector*a,const gsl_vector*b,const gsl_vector*x,
-	gsl_vector * proj ) {
-	projection_on_line(a,b,x,proj);
-	if ((gvg(proj,0)-gvg(a,0))*(gvg(proj,0)-gvg(b,0)) +
-	    (gvg(proj,1)-gvg(a,1))*(gvg(proj,1)-gvg(b,1)) < 0 ) {
-		/* the projection is inside the segment */
-	} else 
-		if(distance(a,x)<distance(b,x)) 
-			gsl_vector_memcpy(proj,a);
-		else
-			gsl_vector_memcpy(proj,b);
+	if(distance)
+		*distance = fabs(rho-(c*p[0]+s*p[1]));
 }
 
 void projection_on_segment_d(const double*a,const double*b,const double*x,
 	double * proj) {
-	projection_on_line_d(a,b,x,proj);
+	projection_on_line_d(a,b,x,proj,0);
 	if ((proj[0]-a[0])*(proj[0]-b[0]) +
 	    (proj[1]-a[1])*(proj[1]-b[1]) < 0 ) {
 		/* the projection is inside the segment */
@@ -254,20 +235,24 @@ void projection_on_segment_d(const double*a,const double*b,const double*x,
 }
 
 
-double dist_to_segment(const gsl_vector*a,const gsl_vector*b,const gsl_vector*x) {
-	gsl_vector * projection = gsl_vector_alloc(2);
-	projection_on_segment(a,b,x,projection);
-	double dist = distance(projection, x);
-	gsl_vector_free(projection);
-	return dist;
-}
-
 double dist_to_segment_squared_d(const double*a, const double*b, const double*x) {
 	double projection[2];
 	projection_on_segment_d(a, b, x, projection);
 	double distance_sq_d = distance_squared_d(projection, x);
 	return distance_sq_d;
 }
+
+double dist_to_segment_d(const double*a, const double*b, const double*x) {
+	double proj[2]; double distance;
+	projection_on_line_d(a,b,x,proj, &distance);
+	if ((proj[0]-a[0])*(proj[0]-b[0]) +
+	    (proj[1]-a[1])*(proj[1]-b[1]) < 0 ) {
+		/* the projection is inside the segment */
+		return distance;
+	} else 
+		return sqrt(GSL_MIN( distance_squared_d(a,x), distance_squared_d(b,x)));
+}
+
 
 
 static char tmp_buf[100];
@@ -296,8 +281,4 @@ const char* egsl_friendly_cov(val cov) {
 		1000*limit_y,
 		rad2deg(limit_th));
 	return tmp_buf;
-}
-
-int is_nan(double v) {
-	return v == v ? 0 : 1;
 }
