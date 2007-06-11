@@ -9,6 +9,7 @@
 
 /* Cavillo (non impatta la portabilità. */
 #ifdef LINUX
+#warning "Compiling on linux"
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif
