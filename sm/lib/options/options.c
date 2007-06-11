@@ -8,10 +8,17 @@
 #include <libgen.h>
 
 /* Cavillo (non impatta la portabilità. */
+#ifdef LINUX
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif
+
+/* for realpath() */
+#define __USE_BSD
+#endif
+
 #include <string.h>
+
 
 #include "options.h"
 
@@ -140,7 +147,7 @@ int options_parse_file(struct option*ops, const char*pwd, const char*filename) {
 	strcpy(concat, pwd);
 	strcat(concat, "/");
 	strcat(concat, filename);
-	char resolved[PATH_MAX+1];
+	char *resolved[PATH_MAX+1];
 	if(!realpath(concat, resolved)) {
 		fprintf(stderr, "Could not resolve '%s' ('%s').\n", concat, resolved); 
 		return 0;
