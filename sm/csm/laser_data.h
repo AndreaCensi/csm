@@ -9,6 +9,12 @@
 
 struct correspondence;
 
+typedef struct {
+	double p[2];
+	double rho, phi;
+} point2d;
+
+
 struct laser_data {
 	int nrays;
 	double  min_theta;
@@ -40,8 +46,13 @@ struct laser_data {
 	
 #ifndef RUBY
 	/* Cartesian points */
-	gsl_vector**p;
+/*	gsl_vector**p;*/
 #endif
+
+	/** Cartesian representation */
+	point2d * points;
+	/** Cartesian representation, in "world" (laser_ref) coordinates. */
+	point2d * points_w;
 
 };
 
@@ -69,8 +80,11 @@ void ld_alloc(LDP, int nrays);
 /** This does NOT free the pointer. Don't use -- use ld_alloc_new()/ld_free() instead. */
 void ld_dealloc(LDP);
 
-/** Fills the "p" field */
+/** Fills the "points" field */
 void ld_compute_cartesian(LDP);
+
+/** Computes the "points_w" coordinates by roto-translating "points" */
+void ld_compute_world_coords(LDP, const double *pose);
 
 /** Fills the fields: *up_bigger, *up_smaller, *down_bigger, *down_smaller.*/
 void ld_create_jump_tables(LDP);

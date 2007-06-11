@@ -2,6 +2,7 @@
 #include <gsl/gsl_math.h>
 #include <egsl/egsl_macros.h>
 
+#include "icp.h"
 #include "../csm_all.h"
 
 
@@ -34,9 +35,9 @@ void compute_covariance_exact(
 		int j1 = laser_sens->corr[i].j1;
 		int j2 = laser_sens->corr[i].j2;
 
-		val p_i  = egsl_vFgslv(laser_sens->p[i]);
-		val p_j1 = egsl_vFgslv(laser_ref ->p[j1]);
-		val p_j2 = egsl_vFgslv(laser_ref ->p[j2]);
+		val p_i  = egsl_vFa(2, laser_sens->points[i].p);
+		val p_j1 = egsl_vFa(2, laser_ref ->points[j1].p);
+		val p_j2 = egsl_vFa(2, laser_ref ->points[j2].p);
 		
 		/* v1 := rot(theta+M_PI/2)*p_i */
 		val v1 = m(rot(theta+M_PI/2), p_i);		

@@ -1,8 +1,7 @@
 #include <gsl/gsl_vector.h>
 
+#include "icp.h"
 #include "../csm_all.h"
-
-
 
 int compatible(struct sm_params*params, int i, int j) {
 	if(!params->do_alpha_test) return 1;
@@ -27,42 +26,44 @@ int compatible(struct sm_params*params, int i, int j) {
 }
 
 void find_correspondences(struct sm_params*params, gsl_vector* x_old) {
-	LDP laser_ref  = params->laser_ref;
-	LDP laser_sens = params->laser_sens;
+	const LDP laser_ref  = params->laser_ref;
+	const LDP laser_sens = params->laser_sens;
 
 /*	if(jf()) fprintf(jf(),"param max_correspondence_dist %f\n",params->max_correspondence_dist);
 	if(jf()) fprintf(jf(),"param max_linear_correction %f\n",params->max_linear_correction);
 	if(jf()) fprintf(jf(),"param max_angular_correction_deg %f\n",params->max_angular_correction_deg);*/
 	
-	gsl_vector * p_i_w = gsl_vector_alloc(3);
-	
 	int i;
 	for(i=0;i<laser_sens->nrays;i++) {
 		if(!ld_valid_ray(laser_sens,i)) {
-			ld_set_null_correspondence(laser_sens,i);
+/*			sm_debug("dumb: i %d is invalid \n", i);*/
+			ld_set_null_correspondence(laser_sens, i);
 			continue; 
 		}
 
-		transform(laser_sens->p[i], x_old, p_i_w);
+		double *p_i_w = laser_sens->points_w[i].p;
 		
 		int j1 = -1;
-		double best_dist = 0;
+		double best_dist = 10000;
 		
 		int from; int to; int start_cell;
 		possible_interval(p_i_w, laser_ref, params->max_angular_correction_deg,
 			params->max_linear_correction, &from, &to, &start_cell);
 
+/*		sm_debug("dumb: i %d from  %d to %d \n", i, from, to); */
 		int j;
 		for(j=from;j<=to;j++) {
-			if(!ld_valid_ray(laser_ref,j)) continue;
-			
-			double dist = distance_squared(p_i_w, laser_ref->p[j]);
+			if(!ld_valid_ray(laser_ref,j)) {
+/*				sm_debug("dumb: i %d      j %d invalid\n", i, j);*/
+				continue;
+			}
+			double dist = distance_squared_d(p_i_w, laser_ref->points[j].p);
+/*			sm_debug("dumb: i %d j1 %d j %d d %f\n", i,j1,j,dist);*/
 			if(dist>square(params->max_correspondence_dist)) continue;
 			
-			
-			if((j1==-1) || (dist<best_dist)) {
+			if( (-1 == j1) || (dist < best_dist) ) {
 				if(compatible(params, i, j)) {
-					j1 =j; 
+					j1 = j; 
 					best_dist = dist;
 				}
 			} 
@@ -87,15 +88,14 @@ void find_correspondences(struct sm_params*params, gsl_vector* x_old) {
 		}
 		if(j2up  ==-1) { j2 = j2down; } else
 		if(j2down==-1) { j2 = j2up; } else {
-			double dist_up   = distance_squared(p_i_w, laser_ref->p[j2up  ]);
-			double dist_down = distance_squared(p_i_w, laser_ref->p[j2down]);
+			double dist_up   = distance_squared_d(p_i_w, laser_ref->points[j2up  ].p);
+			double dist_down = distance_squared_d(p_i_w, laser_ref->points[j2down].p);
 			j2 = dist_up < dist_down ? j2up : j2down;
 		}
 		
 		ld_set_correspondence(laser_sens, i, j1, j2);
 		laser_sens->corr[i].dist2_j1 = best_dist;
 	}
-	gsl_vector_free(p_i_w);
 	
 }
 

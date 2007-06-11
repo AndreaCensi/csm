@@ -102,7 +102,7 @@ void sm_gpm(struct sm_params*params, struct sm_result*res) {
 }
 
 void ght_find_theta_range(LDP laser_ref, LDP laser_sens,
-	const 	gsl_vector*x0, double max_linear_correction,
+	const gsl_vector*x0, double max_linear_correction,
 	double max_angular_correction_deg, gsl_histogram*hist) 
 {
 	int count = 0;
@@ -110,8 +110,7 @@ void ght_find_theta_range(LDP laser_ref, LDP laser_sens,
 	for(i=0;i<laser_sens->nrays;i++) {
 		if(!laser_sens->alpha_valid[i]) continue;
 		
-		gsl_vector * p_i = laser_sens->p[i];
-
+		const double * p_i = laser_sens->points[i].p;
 		int from; int to; int start_cell;
 		possible_interval(p_i, laser_ref, max_angular_correction_deg,
 			max_linear_correction, &from, &to, &start_cell);
@@ -126,21 +125,18 @@ void ght_find_theta_range(LDP laser_ref, LDP laser_sens,
 			if(fabs(theta-gvg(x0,2))>deg2rad(max_angular_correction_deg))
 				continue;
 	
-			gsl_vector * p_j = laser_ref->p[j];
+			const double * p_j = laser_ref->points[j].p;
 			
 			double c = cos(theta); double s = sin(theta);
-			double t_x = gvg(p_j,0) - (c*gvg(p_i,0)-s*gvg(p_i,1));
-			double t_y = gvg(p_j,1) - (s*gvg(p_i,0)+c*gvg(p_i,1));
+			double t_x = p_j[0] - (c*p_i[0]-s*p_i[1]);
+			double t_y = p_j[1] - (s*p_i[0]+c*p_i[1]);
 			double t_dist = sqrt(square(t_x-gvg(x0,0))+square(t_y-gvg(x0,1)));
 
-		/*	if(i==3) {
-				printf(" %f,%f  %d - %d %f <> %f\n",t_x,t_y,i,j,t_dist,max_linear_correction);
-			}*/
 			if(t_dist > max_linear_correction)
 				continue;
 				
-			double weight = 1/(laser_sens->cov_alpha[i]+laser_ref->cov_alpha[j]);
-			weight = 1;
+			/*double weight = 1/(laser_sens->cov_alpha[i]+laser_ref->cov_alpha[j]);*/
+			double weight = 1;
 			gsl_histogram_accumulate(hist,theta, weight);
 			count ++;
 		}
@@ -160,7 +156,7 @@ void ght_one_shot(LDP laser_ref, LDP laser_sens,
 	for(i=0;i<laser_sens->nrays;i++) {
 		if(!laser_sens->alpha_valid[i]) continue;
 		
-		gsl_vector * p_i = laser_sens->p[i];
+		const double  * p_i = laser_sens->points[i].p;
 
 		int from; int to; int start_cell;
 		possible_interval(p_i, laser_ref, max_angular_correction_deg,
@@ -175,11 +171,11 @@ void ght_one_shot(LDP laser_ref, LDP laser_sens,
 			if(fabs(theta-gvg(x0,2))>deg2rad(max_angular_correction_deg))
 				continue;
 	
-			gsl_vector * p_j = laser_ref->p[j];
+			const double * p_j = laser_ref->points[j].p;
 			
 			double c = cos(theta); double s = sin(theta);
-			double t_x = gvg(p_j,0) - (c*gvg(p_i,0)-s*gvg(p_i,1));
-			double t_y = gvg(p_j,1) - (s*gvg(p_i,0)+c*gvg(p_i,1));
+			double t_x = p_j[0] - (c*p_i[0]-s*p_i[1]);
+			double t_y = p_j[1] - (s*p_i[0]+c*p_i[1]);
 			double t_dist = sqrt(square(t_x-gvg(x0,0))+square(t_y-gvg(x0,1)));
 
 			if(t_dist > max_linear_correction)

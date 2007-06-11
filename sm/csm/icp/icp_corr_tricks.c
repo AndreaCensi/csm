@@ -1,5 +1,6 @@
 #include <gsl/gsl_vector.h>
 
+#include "icp.h"
 #include "../csm_all.h"
 
 #define DEBUG_SEARCH(a) ;
@@ -68,48 +69,27 @@ INLINE double mysin(double x) {
 
 #define SQUARE(a) ((a)*(a))
 
+/* Assumes that points_w is filled.  */
 void find_correspondences_tricks(struct sm_params*params, gsl_vector* x_old) {
-	LDP laser_ref  = params->laser_ref;
-	LDP laser_sens = params->laser_sens;
-	
-	/* First of all, compute points in laser_ref reference;
-	   we will also need the polar coordinates */
-	struct {
-		double p_w[2];
-		double rho, phi;
-	} points[laser_sens->nrays];
-	
-	double pose_x = gvg(x_old, 0);
-	double pose_y = gvg(x_old, 1);
-	double pose_theta = gvg(x_old, 2);
-	double cos_theta = cos(pose_theta); 
-	double sin_theta = sin(pose_theta);
-	const int nrays = laser_sens->nrays ;
-	int i; for(i=0;i<nrays;i++) {
-		double *p_i = laser_sens->p[i]->data;
-		double x = cos_theta * p_i[0] -sin_theta*p_i[1] + pose_x;
-		double y = sin_theta * p_i[0] +cos_theta*p_i[1] + pose_y;
-		/* polar coordinates */
-		points[i].rho = sqrt(x*x+y*y);
-		points[i].phi = atan2(y,x);
-		points[i].p_w[0] = x;
-		points[i].p_w[1] = y;
-	}
+	const LDP laser_ref  = params->laser_ref;
+	const LDP laser_sens = params->laser_sens;
+	int i;
 	
 	/* Handy constants */
 	double C1 =  (double)laser_ref->nrays / (laser_ref->max_theta-laser_ref->min_theta) ;
 	double max_correspondence_dist2 = square(params->max_correspondence_dist);
 	/* Last match */
 	int last_best = -1;
+	const point2d * points_w = laser_sens->points_w;
 	for(i=0;i<laser_sens->nrays;i++) {
 		if(!ld_valid_ray(laser_sens,i)) {
 			ld_set_null_correspondence(laser_sens,i);
 			continue; 
 		}
 		
-		double *p_i_w = points[i].p_w;
-		double p_i_w_nrm2 = points[i].rho;
-		double p_i_w_phi = points[i].phi;
+		double *p_i_w = points_w[i].p;
+		double p_i_w_nrm2 = points_w[i].rho;
+		double p_i_w_phi = points_w[i].phi;
 		
 		/** Search domain for j1 */
 		int from = 0; 
@@ -159,7 +139,7 @@ void find_correspondences_tricks(struct sm_params*params, gsl_vector* x_old) {
 				if(!laser_ref->valid[up]) { ++up; continue; }
 				
 				/* This is the distance from p_i_w to the "up" point*/
-				last_dist_up = local_distance_squared_d(p_i_w, laser_ref->p[up]->data);
+				last_dist_up = local_distance_squared_d(p_i_w, laser_ref->points[up].p);
 				
 				/* If it is less than the best point, it is our new j1 */
 				if( (last_dist_up<max_correspondence_dist2) && 
@@ -204,7 +184,7 @@ void find_correspondences_tricks(struct sm_params*params, gsl_vector* x_old) {
 				if(down < from) { down_stopped = 1; continue; }
 				if(!laser_ref->valid[down]) { --down; continue; }
 		
-				last_dist_down = local_distance_squared_d(p_i_w, laser_ref->p[down]->data);
+				last_dist_down = local_distance_squared_d(p_i_w, laser_ref->points[down].p);
 				if( (last_dist_down<max_correspondence_dist2) && 
 				    ((j1==-1)||(last_dist_down < best_dist))) {
 						j1 = down; best_dist = last_dist_down;
@@ -249,8 +229,8 @@ void find_correspondences_tricks(struct sm_params*params, gsl_vector* x_old) {
 		}
 		if(j2up  ==-1) { j2 = j2down; } else
 		if(j2down==-1) { j2 = j2up; } else {
-			double dist_up   = local_distance_squared_d(p_i_w, laser_ref->p[j2up  ]->data);
-			double dist_down = local_distance_squared_d(p_i_w, laser_ref->p[j2down]->data);
+			double dist_up   = local_distance_squared_d(p_i_w, laser_ref->points[j2up  ].p);
+			double dist_down = local_distance_squared_d(p_i_w, laser_ref->points[j2down].p);
 			j2 = dist_up < dist_down ? j2up : j2down;
 		}
 

@@ -19,7 +19,7 @@
 #endif
      
 void possible_interval(
-	const gsl_vector*p_i_w, struct laser_data*laser_sens, 
+	const double *p_i_w, struct laser_data*laser_sens, 
 	double max_angular_correction_deg, double max_linear_correction, int*from, int*to, int*start_cell);
 
 void transform(const gsl_vector* point2d, const gsl_vector* pose, gsl_vector*result2d);
@@ -30,6 +30,8 @@ void gsl_vector_set_nan(gsl_vector*v);
 double distance(const gsl_vector* a,const gsl_vector* b);
 double distance_squared(const gsl_vector* a,const gsl_vector* b);
 double norm(const gsl_vector*);
+
+double norm_d(const double*);
 double distance_squared_d(const double *a, const double *b);
 
 

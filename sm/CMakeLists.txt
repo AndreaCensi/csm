@@ -34,14 +34,14 @@
 #	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused -Wall   -Wunreachable-code ")
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb")
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fstrict-aliasing")
-	#	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -W -Wmissing-prototypes  -Wconversion -Wshadow  -Wpointer-arith -Wcast-qual -Wcast-align -Wwrite-strings -Wnested-externs -fshort-enums -fno-common" )
+	#	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -W -Wmissing-prototypes  -Wpointer-arith -Wcast-qual -Wcast-align -Wwrite-strings -Wnested-externs -fshort-enums -fno-common" )
 	# -Wstrict-prototypes  -Wtraditional
 
 #	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unreachable-code")
 	
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
 #	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ansi")
-	#SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pedantic")
+	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pedantic")
 
 	# for realpath
 	IF("${CMAKE_SYSTEM}" MATCHES "Linux")

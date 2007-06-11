@@ -13,7 +13,8 @@ void visibilityTest(LDP laser_ref, const gsl_vector*u) {
 	for(j=0;j<laser_ref->nrays;j++) {
 		if(!ld_valid_ray(laser_ref,j)) continue;
 		theta_from_u[j] = 
-			atan2(gvg(u,1)-gvg(laser_ref->p[j],1),gvg(u,0)-gvg(laser_ref->p[j],0));
+			atan2(gvg(u,1)-laser_ref->points[j].p[1],
+			      gvg(u,0)-laser_ref->points[j].p[0]);
 	}
 	
 	sm_debug("visibility: Found outliers: ");
@@ -73,15 +74,14 @@ void kill_outliers_double(struct sm_params*params) {
 /** 
 	Trims the corrispondences using an adaptive algorithm 
 
-	Assumes cartesian coordinates computed.
+	Assumes cartesian coordinates computed. (points and points_w)
 	 
 	So, to disable this:
 		outliers_maxPerc = 1
 		outliers_adaptive_order = 1 
 
 */
-void kill_outliers_trim(struct sm_params*params, const gsl_vector*x_old, 
-	double*total_error) {
+void kill_outliers_trim(struct sm_params*params, const gsl_vector*x_old, double*total_error) {
 		
 	if(JJ) jj_context_enter("kill_outliers_trim");
 		
@@ -101,13 +101,13 @@ void kill_outliers_trim(struct sm_params*params, const gsl_vector*x_old,
 		/* transform its cartesian position, according to current estimate
 		   x_old, to obtain: p_i_w, that is the point in the reference 
 		   frame of laser_ref */
-		double p_i_w[2];
-		transform_d(laser_sens->p[i]->data, x_old->data, p_i_w);
+		double *p_i_w = laser_sens->points_w[i].p;
+		
 		int j1 = laser_sens->corr[i].j1;
 		int j2 = laser_sens->corr[i].j2;
 		/* Compute the distance to the corresponding segment */
-		dist[i]=  dist_to_segment_d(laser_ref->p[j1]->data,
-			laser_ref->p[j2]->data,p_i_w);
+		dist[i]=  dist_to_segment_d(
+			laser_ref->points[j1].p, laser_ref->points[j2].p, p_i_w);
 		dist2[k] = dist[i];
 		k++;	
 	}

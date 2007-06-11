@@ -6,6 +6,8 @@
 
 char * sm_program_name = 0;
 
+/*#define CSM_DEBUG */
+
 void sm_error(const char *msg, ...)
 {
 	va_list ap;

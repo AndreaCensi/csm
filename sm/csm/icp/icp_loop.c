@@ -26,7 +26,7 @@ void sm_icp(struct sm_params*params, struct sm_result*res) {
 	LDP laser_ref  = params->laser_ref;
 	LDP laser_sens = params->laser_sens;
 			
-	if(params->use_corr_tricks)
+	if(params->use_corr_tricks || params->debug_verify_tricks)
 		ld_create_jump_tables(laser_ref);
 		
 	ld_compute_cartesian(laser_ref);
@@ -41,9 +41,6 @@ void sm_icp(struct sm_params*params, struct sm_result*res) {
 
 	if(JJ) jj_add("laser_ref",  ld_to_json(laser_ref));
 	if(JJ) jj_add("laser_sens", ld_to_json(laser_sens));
-	
-	/*journal_laser_data("laser_ref",  laser_ref );
-	journal_laser_data("laser_sens", laser_sens);*/
 	
 	gsl_vector * x_new = gsl_vector_alloc(3);
 	gsl_vector * x_old = vector_from_array(3, params->first_guess);
@@ -180,10 +177,10 @@ int icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 
 		egsl_push();
 		
-/*		if(jf()) fprintf(jf(), "iteration %d\n", iteration);*/
-
 		if(JJ) jj_add("x_old", vector_to_json(x_old));
 		
+		ld_compute_world_coords(laser_sens, x_old->data);
+			
 		if(params->use_corr_tricks)
 			find_correspondences_tricks(params, x_old);
 		else
@@ -220,6 +217,8 @@ int icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 
 		*total_error = error; 
 		*valid = num_corr_after;
+
+		sm_debug("Total error: %f  valid %d   mean = %f\n", *total_error, *valid, *total_error/ *valid);
 		
 		if(num_corr_after <0.2 * laser_sens->nrays){
 			sm_error("Failed: after trimming, only %d correspondences.\n",num_corr_after);
@@ -232,10 +231,7 @@ int icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 		pose_diff(x_new, x_old, delta);
 		
 		{
-			/*journal_correspondences(laser_sens);*/
 			sm_debug("killing %d -> %d -> %d \n", num_corr, num_corr2, num_corr_after);
-			/*journal_pose("x_new", x_new);
-			journal_pose("delta", delta);*/
 			if(JJ) {
 				jj_add("x_new", vector_to_json(x_new));
 				jj_add("delta", vector_to_json(delta));
@@ -270,7 +266,6 @@ int icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 
 	if(JJ) jj_loop_exit();
 	
-	/* TODO: covariance */
 	*iterations = iteration+1;
 	
 	gsl_vector_free(x_old);
@@ -294,26 +289,24 @@ void compute_next_estimate(struct sm_params*params, LDP laser_ref, LDP laser_sen
 		if(!ld_valid_corr(laser_sens,i))
 			continue;
 		
-		c[k].p[0] = gvg(laser_sens->p[i],0);
-		c[k].p[1] = gvg(laser_sens->p[i],1);
+		/* Note that these are NOT the current points_w */
+		c[k].p[0] = laser_sens->points[i].p[0];
+		c[k].p[1] = laser_sens->points[i].p[1];
 
 		int j1 = laser_sens->corr[i].j1;
-		c[k].q[0] = gvg(laser_ref->p[j1],0);
-		c[k].q[1] = gvg(laser_ref->p[j1],1);
+		c[k].q[0] = laser_ref->points[j1].p[0];
+		c[k].q[1] = laser_ref->points[j1].p[1];
 		
 		int j2 = laser_sens->corr[i].j2;
 		
 		double diff[2];
-		diff[0] = gvg(laser_ref->p[j1],0)-gvg(laser_ref->p[j2],0);
-		diff[1] = gvg(laser_ref->p[j1],1)-gvg(laser_ref->p[j2],1);
+		diff[0] = laser_ref->points[j1].p[0]-laser_ref->points[j2].p[0];
+		diff[1] = laser_ref->points[j1].p[1]-laser_ref->points[j2].p[1];
 		double one_on_norm = 1 / sqrt(diff[0]*diff[0]+diff[1]*diff[1]);
 		double normal[2];
 		normal[0] = +diff[1] * one_on_norm;
 		normal[1] = -diff[0] * one_on_norm;
 		
-/*		double alpha = M_PI/2 + atan2( 
-			gvg(laser_ref->p[j1],1)-gvg(laser_ref->p[j2],1),
-			gvg(laser_ref->p[j1],0)-gvg(laser_ref->p[j2],0));*/
 
 		if(params->use_point_to_line_distance) {
 			double cos_alpha = normal[0];
@@ -328,14 +321,11 @@ void compute_next_estimate(struct sm_params*params, LDP laser_ref, LDP laser_sen
 		 	c[k].C[1][0] = 
 		 	c[k].C[0][1] = 0;
 		 	c[k].C[1][1] = 1;
-		 	/*c[k].C[0][0] += 0.02;
-			c[k].C[1][1] += 0.02; */
 		}
 		
 		k++;
 	}
 	
-/*	const double x0[3] = {0, 0, 0}; */
 	double std = 0.11;
 	const double inv_cov_x0[9] = 
 		{1/(std*std), 0, 0,

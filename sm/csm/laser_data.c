@@ -50,18 +50,19 @@ void ld_alloc(LDP ld, int nrays) {
 	ld->down_bigger  = alloc_int_array(nrays, 0);
 	ld->down_smaller = alloc_int_array(nrays, 0);
 	
-	ld->p = (gsl_vector**) malloc(sizeof(gsl_vector*) * nrays);
-
+/*	ld->p = (gsl_vector**) malloc(sizeof(gsl_vector*) * nrays);*/
+/*
 	int i;
 	for(i=0;i<nrays;i++) {
 		ld->p[i] = gsl_vector_alloc(2);
 		gvs(ld->p[i], 0, GSL_NAN);
 		gvs(ld->p[i], 1, GSL_NAN);
 	}
-
+*/
 	ld->corr = (struct correspondence*) 
 		malloc(sizeof(struct correspondence)*nrays);
 
+	int i;
 	for(i=0;i<ld->nrays;i++) {
 		ld->corr[i].valid = 0;
 		ld->corr[i].j1 = -1;
@@ -72,6 +73,17 @@ void ld_alloc(LDP ld, int nrays) {
 		ld->odometry[i] = 
 		ld->estimate[i] = 
 		ld->true_pose[i] = GSL_NAN;
+	}
+	
+	ld->points = (point2d*) malloc(nrays * sizeof(point2d));
+	ld->points_w = (point2d*) malloc(nrays * sizeof(point2d));
+	
+	for(i=0;i<nrays;i++) {
+		ld->points[i].p[0] = 
+		ld->points[i].p[1] = 
+		ld->points[i].rho = 
+		ld->points[i].phi = GSL_NAN;
+		ld->points_w[i] = ld->points[i];
 	}
 }
 
@@ -96,16 +108,20 @@ void ld_dealloc(struct laser_data*ld){
 	free(ld->down_smaller);
 	free(ld->corr);
 	
-	int i;
+/*	int i;
 	for(i=0;i<ld->nrays;i++)
 		gsl_vector_free(ld->p[i]);
-	free(ld->p);
+	free(ld->p);*/
+
+	free(ld->points);
+	free(ld->points_w);
 }
 
 void ld_set_null_correspondence(struct laser_data*ld, int i) {
 	ld->corr[i].valid = 0;
 	ld->corr[i].j1 = -1;	
 	ld->corr[i].j2 = -1;	
+	ld->corr[i].dist2_j1 = GSL_NAN;	
 }
 
 void ld_set_correspondence(LDP ld, int i, int j1, int j2) {
@@ -117,14 +133,41 @@ void ld_set_correspondence(LDP ld, int i, int j1, int j2) {
 void ld_compute_cartesian(LDP ld) {
 	int i;
 	for(i=0;i<ld->nrays;i++) {
-		if(!ld_valid_ray(ld,i)){
-			gsl_vector_set_nan(ld->p[i]);
-		} else {
-			gsl_vector_set(ld->p[i], 0, cos(ld->theta[i])*ld->readings[i]);
-			gsl_vector_set(ld->p[i], 1, sin(ld->theta[i])*ld->readings[i]);
-		}
+		if(!ld_valid_ray(ld,i)) continue;
+		double x = cos(ld->theta[i])*ld->readings[i];
+		double y = sin(ld->theta[i])*ld->readings[i];
+		
+		ld->points[i].p[0] = x, 
+		ld->points[i].p[1] = y;
+		ld->points[i].rho = GSL_NAN;
+		ld->points[i].phi = GSL_NAN;
 	}
 }
+	
+void ld_compute_world_coords(LDP ld, const double *pose) {
+	double pose_x = pose[0];
+	double pose_y = pose[1];
+	double pose_theta = pose[2];
+	double cos_theta = cos(pose_theta); 
+	double sin_theta = sin(pose_theta);
+	const int nrays = ld->nrays ;
+
+	point2d * points = ld->points;
+	point2d * points_w = ld->points_w;
+	int i; for(i=0;i<nrays;i++) {
+		if(!ld_valid_ray(ld,i)) continue;
+		double x0 = points[i].p[0], y0 = points[i].p[1]; 
+		double x = cos_theta * x0 -sin_theta*y0 + pose_x;
+		double y = sin_theta * x0 +cos_theta*y0 + pose_y;
+		/* polar coordinates */
+		points_w[i].p[0] = x;
+		points_w[i].p[1] = y;
+		points_w[i].rho = sqrt(x*x+y*y);
+		points_w[i].phi = atan2(y,x);
+	}
+	
+}
+
 
 /** -1 if not found */
 
@@ -190,12 +233,12 @@ int ld_valid_fields(LDP ld)  {
 		sm_error("Strange FOV: %f rad = %f deg \n", fov, rad2deg(fov));
 		return 0;
 	}
-	if(fabs(ld->min_theta - ld->theta[0]) < 1e-8) {
+	if(fabs(ld->min_theta - ld->theta[0]) > 1e-8) {
 		sm_error("Min_theta (%f) should be theta[0] (%f)\n",
 			ld->min_theta, ld->theta[0]);
 		return 0;
 	}
-	if(fabs(ld->max_theta - ld->theta[ld->nrays-1]) < 1e-8) {
+	if(fabs(ld->max_theta - ld->theta[ld->nrays-1]) > 1e-8) {
 		sm_error("Min_theta (%f) should be theta[0] (%f)\n",
 			ld->max_theta, ld->theta[ld->nrays-1]);
 		return 0;

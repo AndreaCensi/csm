@@ -7,20 +7,20 @@ int minmax(int from,int to,int x) {
 }
 
 void possible_interval(
-	const gsl_vector*p_i_w, LDP ld, 
+	const double *p_i_w, LDP ld, 
 	double max_angular_correction_deg, double max_linear_correction, int*from, int*to, int*start_cell) 
 {
 	double angleRes = (ld->max_theta-ld->min_theta)/ld->nrays;
 
 	/* Delta for the angle */
 	double delta = fabs(deg2rad(max_angular_correction_deg)) +
-	        fabs(atan(max_linear_correction/norm(p_i_w)));
+	        fabs(atan(max_linear_correction/norm_d(p_i_w)));
 
 	/* Dimension of the cell range */
 	int range = (int) ceil(delta/angleRes);
 
 	/* To be turned into an interval of cells */
-	double start_theta = atan2(gvg(p_i_w,1),gvg(p_i_w,0));
+	double start_theta = atan2(p_i_w[1], p_i_w[0]);
 	
 	*start_cell  = (int)
 		((start_theta - ld->min_theta) / (ld->max_theta-ld->min_theta) * ld->nrays);
@@ -74,6 +74,10 @@ double distance_squared_d(const double *a, const double *b) {
 
 int is_nan(double v) {
 	return v == v ? 0 : 1;
+}
+
+double norm_d(const double*p) {
+	return sqrt(p[0]*p[0]+p[1]*p[1]);
 }
 
 
