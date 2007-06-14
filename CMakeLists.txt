@@ -7,7 +7,7 @@ IF(HOSTNAME)
 	EXEC_PROGRAM(${HOSTNAME} ARGS -s OUTPUT_VARIABLE host)
 	SET(local "local-${host}.cmake")
 	
-	SET(extension "$ENV{CC}")
+	SET(extension "$ENV{CSM_CONF}")
 	IF(extension)
 		SET(local "local-${host}-${extension}.cmake")
 	ENDIF(extension)
