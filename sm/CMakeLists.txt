@@ -41,7 +41,7 @@
 	
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
 #	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ansi")
-	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pedantic")
+#	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pedantic")
 
 	# for realpath
 	IF("${CMAKE_SYSTEM}" MATCHES "Linux")
