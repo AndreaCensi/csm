@@ -20,25 +20,28 @@ struct laser_data {
 	double  min_theta;
 	double  max_theta;
 	
-	double *theta;
+	double * restrict theta;
 	
-	int    *valid;
-	double *readings;
+	int    * restrict valid;
+	double * restrict readings;
 	
-	int    *cluster;
+	int    * restrict cluster;
 	
-	double *alpha;
-	double *cov_alpha;
-	int    *alpha_valid;
+	double * restrict alpha;
+	double * restrict cov_alpha;
+	int    * restrict alpha_valid;
 
-	double *cov_readings;
+	double * restrict cov_readings;
 
-	double *true_alpha;
+	double * restrict true_alpha;
 	
 	/* Jump tables needed by find_correspondences_tricks(). */
-	int *up_bigger, *up_smaller, *down_bigger, *down_smaller;
+	int * restrict up_bigger, 
+	    * restrict up_smaller, 
+	    * restrict down_bigger, 
+	    * restrict down_smaller;
 	
-	struct correspondence* corr;
+	struct correspondence*  restrict corr;
 
 	double true_pose[3];		
 	double odometry[3];	
@@ -50,9 +53,9 @@ struct laser_data {
 #endif
 
 	/** Cartesian representation */
-	point2d * points;
+	point2d *  restrict points;
 	/** Cartesian representation, in "world" (laser_ref) coordinates. */
-	point2d * points_w;
+	point2d *  restrict points_w;
 
 };
 
