@@ -7,9 +7,10 @@ IF(HOSTNAME)
 	EXEC_PROGRAM(${HOSTNAME} ARGS -s OUTPUT_VARIABLE host)
 	SET(local "local-${host}.cmake")
 	
-	IF($ENV{CC})
-		SET(local "local-${host}-$ENV{CC}.cmake")
-	ENDIF($ENV{CC})
+	SET(extension "$ENV{CC}")
+	IF(extension)
+		SET(local "local-${host}-${extension}.cmake")
+	ENDIF(extension)
 	
 	IF(EXISTS ${local})
 		MESSAGE(STATUS "Including local configuration ${local}.")
