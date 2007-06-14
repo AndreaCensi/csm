@@ -6,6 +6,11 @@ FIND_PROGRAM(HOSTNAME hostname PATHS $ENV{PATH})
 IF(HOSTNAME)
 	EXEC_PROGRAM(${HOSTNAME} ARGS -s OUTPUT_VARIABLE host)
 	SET(local "local-${host}.cmake")
+	
+	IF($ENV{CC})
+		SET(local "local-${host}-$ENV{CC}.cmake")
+	ENDIF($ENV{CC})
+	
 	IF(EXISTS ${local})
 		MESSAGE(STATUS "Including local configuration ${local}.")
 		INCLUDE(${local})
