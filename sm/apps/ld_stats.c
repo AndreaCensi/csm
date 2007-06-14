@@ -19,7 +19,7 @@ int main(int argc, const char * argv[]) {
 	
 	if(!options_parse_args(ops, argc, argv)) {
 		fprintf(stderr, "%s : computes odometry statistics."
-			"\n\nOptions:\n", basename((char*)argv[0]));
+			"\n\nOptions:\n", basename((char*)(void*)argv[0]));
 		options_print_help(ops, stderr);
 		return -1;
 	}

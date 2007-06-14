@@ -4,7 +4,7 @@
 
 #include "csm_all.h"
 
-char * sm_program_name = 0;
+const char * sm_program_name = 0;
 
 /*#define CSM_DEBUG */
 

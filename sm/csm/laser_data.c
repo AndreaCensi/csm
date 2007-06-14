@@ -133,7 +133,7 @@ void ld_set_correspondence(LDP ld, int i, int j1, int j2) {
 void ld_compute_cartesian(LDP ld) {
 	int i;
 	for(i=0;i<ld->nrays;i++) {
-		if(!ld_valid_ray(ld,i)) continue;
+/*		if(!ld_valid_ray(ld,i)) continue;*/
 		double x = cos(ld->theta[i])*ld->readings[i];
 		double y = sin(ld->theta[i])*ld->readings[i];
 		
@@ -155,15 +155,17 @@ void ld_compute_world_coords(LDP ld, const double *pose) {
 	point2d * points = ld->points;
 	point2d * points_w = ld->points_w;
 	int i; for(i=0;i<nrays;i++) {
-		if(!ld_valid_ray(ld,i)) continue;
+/*		if(!ld_valid_ray(ld,i)) continue;*/
 		double x0 = points[i].p[0], y0 = points[i].p[1]; 
-		double x = cos_theta * x0 -sin_theta*y0 + pose_x;
-		double y = sin_theta * x0 +cos_theta*y0 + pose_y;
+		points_w[i].p[0] = cos_theta * x0 -sin_theta*y0 + pose_x;
+		points_w[i].p[1] = sin_theta * x0 +cos_theta*y0 + pose_y;
 		/* polar coordinates */
-		points_w[i].p[0] = x;
-		points_w[i].p[1] = y;
-		points_w[i].rho = sqrt(x*x+y*y);
-		points_w[i].phi = atan2(y,x);
+	}
+	for(i=0;i<nrays;i++) {
+		double x = points_w[i].p[0];
+		double y = points_w[i].p[1];
+		points_w[i].rho = sqrt( x*x+y*y);
+		points_w[i].phi = atan2(y, x);
 	}
 	
 }

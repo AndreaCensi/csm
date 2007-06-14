@@ -40,32 +40,6 @@ INLINE double local_distance_squared_d(const double* a, const double* b)  {
 	return x*x + y*y;
 }
 
-#if 0
-/** This is an approximation to sin(x), such that 
-    mysin(x) >= sin(x) for 0 < x < 2 */
-INLINE double mysin2(double x) {
-	if(x < 0 || x > 2.5){
-		static int once = 1;
-		if(once) sm_error("mysin(): Requested x = %f\n", x);
-		once = 0;
-		return sin(x);
-	}
-	
-	/* taylor: x - (1/6)*x^3 + (1/120)*x^5 + o(x^7) */
-	const double a = 1.0/6.0;
-	const double b = -1.0/120.0;
-	double x2 = x*x;
-	return x * (1 + x2 * ( a + b * x2));
-} 
-
-INLINE double mysin(double x) {
-	if(x > 2) return sin(x);
-	const double a = 1.0/6.0;
-	const double b = -1.0/120.0;
-	double x2 = x*x;
-	return x * (.99 + x2 * ( a + b * x2));
-} 
-#endif
 
 #define SQUARE(a) ((a)*(a))
 
@@ -87,7 +61,7 @@ void find_correspondences_tricks(struct sm_params*params, gsl_vector* x_old) {
 			continue; 
 		}
 		
-		double *p_i_w = points_w[i].p;
+		const double *p_i_w = points_w[i].p;
 		double p_i_w_nrm2 = points_w[i].rho;
 		double p_i_w_phi = points_w[i].phi;
 		
@@ -143,9 +117,8 @@ void find_correspondences_tricks(struct sm_params*params, gsl_vector* x_old) {
 				
 				/* If it is less than the best point, it is our new j1 */
 				if( (last_dist_up<max_correspondence_dist2) && 
-					((j1==-1)||(last_dist_up < best_dist))) {
-						j1 = up; best_dist = last_dist_up;
-				}
+					((j1==-1)||(last_dist_up < best_dist)))
+						j1 = up, best_dist = last_dist_up;
 				
 				double delta_theta = (laser_ref->theta[up] - p_i_w_phi);
 				/* If we are moving away from start_cell */
