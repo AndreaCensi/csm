@@ -75,7 +75,7 @@ int main(int argc, const char*argv[]) {
 	printf("sm3:   that is, %d matchings per second\n", (int)floor(num_matchings/seconds));
 	printf("sm3: Avg. seconds per iteration = %f (note: very imprecise)\n", seconds/num_iterations);
 	printf("sm3: Number of comparisons = %d \n", distance_counter);
-	printf("sm3: Avg. comparisons per ray = %f \n", 
+	printf("sm3: Avg. comparisons per ray per iteration = %f \n", 
 		(distance_counter/((float)num_iterations*params.laser_ref->nrays)));
 	
 	return 0;
