@@ -3,6 +3,7 @@
 #include "../csm_all.h"
 
 void quicksort(double *array, int begin, int end);
+double hoare_selection(double *data, int start, int end, int k);
 
 /** expects cartesian valid */
 void visibilityTest(LDP laser_ref, const gsl_vector*u) {
@@ -112,21 +113,25 @@ void kill_outliers_trim(struct sm_params*params, const gsl_vector*x_old, double*
 		k++;	
 	}
 	
+	
 	if(JJ) jj_add_int("num_valid_before", k);
 	if(JJ) jj_add_double_array("dist_points", dist2, laser_sens->nrays);
 	if(JJ) jj_add_double_array("dist_corr_unsorted", dist2, k);
-	
-	/* The dists for the correspondence are sorted
-	   in ascending order */
-	quicksort(dist2, 0, k-1);
 
-	if(JJ) jj_add_double_array("dist_corr_sorted", dist2, k);
-	
+#if 0	
+	double dist2_copy[k]; for(i=0;i<k;i++) dist2_copy[i] = dist2[i];
+#endif 
+
 	/* two errors limits are defined: */
 		/* In any case, we don't want more than outliers_maxPerc% */
 		int order = (int)floor(k*(params->outliers_maxPerc));
 			order = GSL_MAX(0, GSL_MIN(order, k-1));
+
+	/* The dists for the correspondence are sorted
+	   in ascending order */
+		quicksort(dist2, 0, k-1);
 		double error_limit1 = dist2[order];
+		if(JJ) jj_add_double_array("dist_corr_sorted", dist2, k);
 	
 		/* Then we take a order statics (o*K) */
 		/* And we say that the error must be less than alpha*dist(o*K) */
@@ -136,6 +141,16 @@ void kill_outliers_trim(struct sm_params*params, const gsl_vector*x_old, double*
 	
 	double error_limit = GSL_MIN(error_limit1, error_limit2);
 	
+#if 0
+	double error_limit1_ho = hoare_selection(dist2_copy, 0, k-1, order);
+	double error_limit2_ho = error_limit2;
+	if((error_limit1_ho != error_limit1) || (error_limit2_ho != error_limit2)) {
+		printf("%f == %f    %f  == %f\n",
+			error_limit1_ho, error_limit1, error_limit2_ho, error_limit2);
+	}
+#endif
+
+	if(JJ) jj_add_double_array("dist_corr_sorted", dist2, k);
 	if(JJ) jj_add_double("error_limit_max_perc", error_limit1);
 	if(JJ) jj_add_double("error_limit_adaptive", error_limit2);
 	if(JJ) jj_add_double("error_limit", error_limit);
@@ -175,24 +190,58 @@ void swap_double(double*a,double*b) {
 /** Code taken from Wikipedia */
 void quicksort(double *array, int begin, int end) {
 	if (end > begin) {
-	   double pivot = array[begin];
-	   int l = begin + 1;
-	   int r = end+1;
-	   while(l < r) {
-	      if (array[l] < pivot) {
-	         l++;
-	      } else {
-	         r--;
-	         swap_double(array+l, array+r); 
-	      }
-	   }
-	   l--;
-	   swap_double(array+begin, array+l);
-	  quicksort(array, begin, l);
-	  quicksort(array, r, end);
+		double pivot = array[begin];
+		int l = begin + 1;
+		int r = end+1;
+		while(l < r) {
+			if (array[l] < pivot) {
+				l++;
+			} else {
+				r--;
+				swap_double(array+l, array+r); 
+			}
+		}
+		l--;
+		swap_double(array+begin, array+l);
+		if(l>begin)
+		quicksort(array, begin, l);
+		if(end>r)
+		quicksort(array, r, end);
 	}
 }
 
+double hoare_selection(double *data, int start, int end, int k)
+{
+  int pivotIndex, i, j;
+  float pivotValue, tmp;
 
+  while(start < end) {
+	  //select a random pivot
+	pivotIndex = start + (end-start)/2;
+	 pivotValue = data[pivotIndex];
+				 //sort the array into two sub arrays around the pivot value
+	 i = start;
+	 j = end;
+	 while(i <= j) {
+		while(data[i] < pivotValue)
+		  i++;
+		while(data[j] > pivotValue)
+		  j--;
+		if(i<=j) {
+		  tmp = data[i];
+		  data[i] = data[j];
+		  data[j] = tmp;
+		  i++;
+		  j--;
+		}
+	 }
+			 //continue search in left sub array
+	 if(j < k)
+		start = i;
+	 if(k < i) //continue search in right sub array
+		end = j;
+  }
+  return(data[k]);
+}
 
 

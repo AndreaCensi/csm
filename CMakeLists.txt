@@ -22,4 +22,5 @@ ELSE(HOSTNAME)
 	MESSAGE(STATUS "Program `hostname` not found. (don't worry)")
 ENDIF(HOSTNAME)
 
+ENABLE_TESTING()
 SUBDIRS(sm)

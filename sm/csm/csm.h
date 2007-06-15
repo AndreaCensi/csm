@@ -1,8 +1,13 @@
-#ifndef H_SM_ALL
-#define H_SM_ALL
+#ifndef H_CSM_H
+#define H_CSM_H
+
+#define INLINE static inline
+#define INLINE_DECL static inline
+
 #ifdef __cplusplus
-namespace CSM {
-extern "C" {
+	#define restrict /* nothing */
+	namespace CSM {
+	extern "C" {
 #endif
 
 #include "laser_data.h"
@@ -12,6 +17,7 @@ extern "C" {
 
 
 #ifdef __cplusplus
-}}
+	}}
 #endif
+
 #endif

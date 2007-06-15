@@ -198,7 +198,7 @@ struct json_object* json_tokener_parse_ex(struct json_tokener *tok,
 	printbuf_reset(tok->pb);
 	tok->st_pos = 0;
 	goto redo_char;
-#if defined(__GNUC__)
+#if 0 /*defined(__GNUC__)*/
 	  case '0' ... '9':
 #else
 	  case '0':

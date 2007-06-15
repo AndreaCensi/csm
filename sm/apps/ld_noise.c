@@ -38,7 +38,7 @@ int main(int argc, const char * argv[]) {
 	while( (ld = ld_from_json_stream(stdin))) {
 		int i;
 		for(i=0;i<ld->nrays;i++) {
-			if(!ld_valid_ray(ld, i)) continue;
+			if(!ld->valid[i]) continue;
 			
 			double * reading = ld->readings + i;
 			if(p.sigma > 0)

@@ -117,18 +117,6 @@ void ld_dealloc(struct laser_data*ld){
 	free(ld->points_w);
 }
 
-void ld_set_null_correspondence(struct laser_data*ld, int i) {
-	ld->corr[i].valid = 0;
-	ld->corr[i].j1 = -1;	
-	ld->corr[i].j2 = -1;	
-	ld->corr[i].dist2_j1 = GSL_NAN;	
-}
-
-void ld_set_correspondence(LDP ld, int i, int j1, int j2) {
-	ld->corr[i].valid = 1;
-	ld->corr[i].j1 = j1;	
-	ld->corr[i].j2 = j2;	
-}
 
 void ld_compute_cartesian(LDP ld) {
 	int i;
@@ -171,29 +159,6 @@ void ld_compute_world_coords(LDP ld, const double *pose) {
 }
 
 
-/** -1 if not found */
-
-int ld_next_valid(LDP ld, int i, int dir) {
-	int j;
-	for(j=i+dir;(j<ld->nrays)&&(j>=0)&&!ld_valid_ray(ld,j);j+=dir);
-	return ld_valid_ray(ld,j) ? j : -1;
-}
-
-int ld_next_valid_up(LDP ld, int i){
-	return ld_next_valid(ld, i, +1);
-}
-
-int ld_next_valid_down(LDP ld, int i){
-	return ld_next_valid(ld, i, -1);
-}
-
-int ld_valid_ray(struct laser_data* ld, int i) {
-	return (i>=0) && (i<ld->nrays) && (ld->valid[i]);
-}
-
-int ld_valid_corr(LDP ld, int i) {
-	return ld->corr[i].valid;
-}
 
 int ld_num_valid_correspondences(LDP ld) {
 	int i; 

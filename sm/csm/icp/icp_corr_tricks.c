@@ -3,6 +3,7 @@
 #include "icp.h"
 #include "../csm_all.h"
 
+
 #define DEBUG_SEARCH(a) ;
 
 
@@ -31,14 +32,14 @@ void ld_create_jump_tables(struct laser_data* ld) {
 
 extern int distance_counter;
 
-#define INLINE static inline
-
 INLINE double local_distance_squared_d(const double* a, const double* b)  {
 	distance_counter++;
 	double x = a[0] - b[0];
 	double y = a[1] - b[1];
 	return x*x + y*y;
 }
+
+#include "fast_math.h"
 
 
 #define SQUARE(a) ((a)*(a))
@@ -49,7 +50,7 @@ void find_correspondences_tricks(struct sm_params*params, gsl_vector* x_old) {
 	const LDP laser_sens = params->laser_sens;
 	int i;
 	
-	/* Handy constants */
+	/* Handy constant */
 	double C1 =  (double)laser_ref->nrays / (laser_ref->max_theta-laser_ref->min_theta) ;
 	double max_correspondence_dist2 = square(params->max_correspondence_dist);
 	/* Last match */
@@ -127,7 +128,8 @@ void find_correspondences_tricks(struct sm_params*params, gsl_vector* x_old) {
 					   our best point has distance best_dist; we can compute
 					   min_dist_up, which is the minimum distance that can have
 					   points for j>up (see figure)*/
-					double min_dist_up = sin(delta_theta) * p_i_w_nrm2;
+					double min_dist_up = p_i_w_nrm2 * 
+						((delta_theta > M_PI*0.5) ? 1 : mysin(delta_theta));
 					/* If going up we can't make better than best_dist, then
 					    we stop searching in the "up" direction */
 					if(SQUARE(min_dist_up) > best_dist) { 
@@ -163,10 +165,11 @@ void find_correspondences_tricks(struct sm_params*params, gsl_vector* x_old) {
 						j1 = down; best_dist = last_dist_down;
 				}
 
-				double delta_theta = (p_i_w_phi - laser_ref->theta[down]);
 				if (down < start_cell) {
 /*				if(laser_ref->theta[down] + M_PI/180 < p_i_w_phi) {*/
-					double min_dist_down = sin(delta_theta) * p_i_w_nrm2;
+					double delta_theta = (p_i_w_phi - laser_ref->theta[down]);
+					double min_dist_down = p_i_w_nrm2 * 
+						((delta_theta > M_PI*0.5) ? 1 : mysin(delta_theta));
 					if( SQUARE(min_dist_down) > best_dist) { 
 						down_stopped = 1; continue;
 					}
@@ -215,8 +218,10 @@ void find_correspondences_tricks(struct sm_params*params, gsl_vector* x_old) {
 		laser_sens->corr[i].dist2_j1 = best_dist;
 		
 	}
-
 }
+
+
+
 
 
 

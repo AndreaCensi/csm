@@ -1,4 +1,5 @@
-#PROJECT (scan_matching_lib C)
+	INCLUDE_DIRECTORIES(lib)
+	INCLUDE_DIRECTORIES(.)
 
 	INCLUDE (FindGSL.cmake)                                                                                         
 
@@ -57,8 +58,6 @@
 	SUBDIRS(csm)
 
 
-	INCLUDE_DIRECTORIES(lib)
-	INCLUDE_DIRECTORIES(.)
 
 ########### SM ########## 
 
@@ -90,6 +89,8 @@
 	ADD_EXECUTABLE(test_math_utils csm/math_utils_test.c)
 	TARGET_LINK_LIBRARIES(test_math_utils csm ${GSL_LIBRARIES})
 
+	ENABLE_TESTING()
+	ADD_TEST(test_math_utils test_math_utils)
 
 ########### Carmen2pdf ########## 
 IF(CAIRO_FOUND)

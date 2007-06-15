@@ -1,4 +1,5 @@
 #include "csm_all.h"
+#include "math_utils.h"
 
 int main() {
 	double a[2] = {0, 0};
@@ -15,6 +16,7 @@ int main() {
 	gsl_vector * res = gsl_vector_alloc(2);
 	
 	int i;
+	#if 0
 	for(i=0;i<5;i++){
 		gsl_vector * X = vector_from_array(2,x[i]);
 		
@@ -23,6 +25,20 @@ int main() {
 		printf("Projection of %f %f is %f %f \n", gvg(X,0),gvg(X,1),
 			gvg(res,0),gvg(res,1));
 	}
+	#endif
 	
-	return 0;
+	int errors = 0;
+	double should_be_nan[2] = { 0.0 / 0.0, GSL_NAN };
+	for(i=0;i<2;i++) {
+		if(!isnan(should_be_nan[i])) {
+			printf("#%d: isnan(%f) failed \n", should_be_nan[i]);
+			errors++;
+		}
+		if(!is_nan(should_be_nan[i])) {
+			printf("#%d: is_nan(%f) failed \n", should_be_nan[i]);
+			errors++;
+		}
+	}
+	
+	return errors;
 }
