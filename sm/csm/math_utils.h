@@ -29,9 +29,12 @@ void gsl_vector_set_nan(gsl_vector*v);
 
 double distance(const gsl_vector* a,const gsl_vector* b);
 double distance_squared(const gsl_vector* a,const gsl_vector* b);
-double norm(const gsl_vector*);
 
-double norm_d(const double*);
+/** Returns norm of 2D point p */
+double norm(const gsl_vector*p);
+/** Returns norm of 2D point p */
+double norm_d(const double*p);
+
 double distance_squared_d(const double *a, const double *b);
 
 
@@ -76,6 +79,7 @@ void projection_on_segment_d(
 	      double*proj);
 
 /** Some functions to print poses and covariances in a friendly way */
+const char* friendly_pose(double*pose);
 const char* gsl_friendly_pose(gsl_vector*v);
 const char* egsl_friendly_pose(val pose);
 const char* egsl_friendly_cov(val cov);

@@ -1,15 +1,15 @@
 #include <string.h>
 #include "icp.h"
 
-void debug_correspondences(struct sm_params * params, gsl_vector * x_old) {
+void debug_correspondences(struct sm_params * params) {
 	LDP laser_sens = params->laser_sens;
 	/** Do the test */
-	find_correspondences_tricks(params, x_old);
+	find_correspondences_tricks(params);
 	struct correspondence c1[laser_sens->nrays];
 	struct correspondence * c2 = laser_sens->corr;
 	memcpy(c1, c2, sizeof(struct correspondence) * laser_sens->nrays);
 	long hash1 = ld_corr_hash(laser_sens);
-	find_correspondences(params, x_old);
+	find_correspondences(params);
 	long hash2 = ld_corr_hash(laser_sens);
 	if(hash1 != hash2) {
 		sm_error("find_correspondences_tricks might be buggy\n");

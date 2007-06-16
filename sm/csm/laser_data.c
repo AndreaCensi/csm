@@ -131,7 +131,8 @@ void ld_compute_cartesian(LDP ld) {
 		ld->points[i].phi = GSL_NAN;
 	}
 }
-	
+
+
 void ld_compute_world_coords(LDP ld, const double *pose) {
 	double pose_x = pose[0];
 	double pose_y = pose[1];

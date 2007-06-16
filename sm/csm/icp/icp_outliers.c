@@ -53,9 +53,7 @@ void kill_outliers_double(struct sm_params*params) {
 	int i;
 	for(i=0;i<laser_sens->nrays;i++) {
 		if(!ld_valid_corr(laser_sens, i)) continue;
-/*		transform_d(laser_sens->p[i]->data, x_old->data, p_i_w->data);*/
 		int j1 = laser_sens->corr[i].j1;
-/*		dist_i[i] = distance_squared_d(p_i_w->data, laser_ref->p[j1]->data);*/
 		dist2_i[i] = laser_sens->corr[i].dist2_j1;
 		dist2_j[j1] = GSL_MIN(dist2_j[j1], dist2_i[i]);
 	}
@@ -82,7 +80,7 @@ void kill_outliers_double(struct sm_params*params) {
 		outliers_adaptive_order = 1 
 
 */
-void kill_outliers_trim(struct sm_params*params, const gsl_vector*x_old, double*total_error) {
+void kill_outliers_trim(struct sm_params*params,  double*total_error) {
 		
 	if(JJ) jj_context_enter("kill_outliers_trim");
 		
@@ -99,9 +97,6 @@ void kill_outliers_trim(struct sm_params*params, const gsl_vector*x_old, double*
 	for(i=0;i<laser_sens->nrays;i++) {
 		/* which has a valid correspondence */
 		if(!ld_valid_corr(laser_sens, i)) { dist[i]=NAN; continue; }
-		/* transform its cartesian position, according to current estimate
-		   x_old, to obtain: p_i_w, that is the point in the reference 
-		   frame of laser_ref */
 		double *p_i_w = laser_sens->points_w[i].p;
 		
 		int j1 = laser_sens->corr[i].j1;

@@ -3,6 +3,8 @@
 #include "icp.h"
 #include "../csm_all.h"
 
+int compatible(struct sm_params*params, int i, int j);
+
 int compatible(struct sm_params*params, int i, int j) {
 	if(!params->do_alpha_test) return 1;
 
@@ -25,14 +27,10 @@ int compatible(struct sm_params*params, int i, int j) {
 	}
 }
 
-void find_correspondences(struct sm_params*params, gsl_vector* x_old) {
+void find_correspondences(struct sm_params*params) {
 	const LDP laser_ref  = params->laser_ref;
 	const LDP laser_sens = params->laser_sens;
 
-/*	if(jf()) fprintf(jf(),"param max_correspondence_dist %f\n",params->max_correspondence_dist);
-	if(jf()) fprintf(jf(),"param max_linear_correction %f\n",params->max_linear_correction);
-	if(jf()) fprintf(jf(),"param max_angular_correction_deg %f\n",params->max_angular_correction_deg);*/
-	
 	int i;
 	for(i=0;i<laser_sens->nrays;i++) {
 		if(!ld_valid_ray(laser_sens,i)) {

@@ -10,187 +10,42 @@
 
 #include "icp.h"
 
-void sm_icp(struct sm_params*params, struct sm_result*res) {
-	res->valid = 0;
-	
-	if(!ld_valid_fields(params->laser_ref) || 
-	   !ld_valid_fields(params->laser_sens)) {
-		return;
-	}
-		
-	
-	if(JJ) jj_context_enter("sm_icp");
-	
-	egsl_push();
-	
-	LDP laser_ref  = params->laser_ref;
-	LDP laser_sens = params->laser_sens;
-			
-	if(params->use_corr_tricks || params->debug_verify_tricks)
-		ld_create_jump_tables(laser_ref);
-		
-	ld_compute_cartesian(laser_ref);
-	ld_compute_cartesian(laser_sens);
-
-	if(params->do_alpha_test) {
-		ld_simple_clustering(laser_ref, params->clustering_threshold);
-		ld_compute_orientation(laser_ref, params->orientation_neighbourhood, params->sigma);
-		ld_simple_clustering(laser_sens, params->clustering_threshold);
-		ld_compute_orientation(laser_sens, params->orientation_neighbourhood, params->sigma);
-	}
-
-	if(JJ) jj_add("laser_ref",  ld_to_json(laser_ref));
-	if(JJ) jj_add("laser_sens", ld_to_json(laser_sens));
-	
-	gsl_vector * x_new = gsl_vector_alloc(3);
-	gsl_vector * x_old = vector_from_array(3, params->first_guess);
-	
-	if(params->do_visibility_test) {
-		sm_debug("laser_ref:\n");
-		visibilityTest(laser_ref, x_old);
-
-		sm_debug("laser_sens:\n");
-		gsl_vector * minus_x_old = gsl_vector_alloc(3);
-		ominus(x_old,minus_x_old);
-		visibilityTest(laser_sens, minus_x_old);
-		gsl_vector_free(minus_x_old);
-	}
-	
-	double error;
-	int iterations;
-	int nvalid;
-	if(!icp_loop(params, x_old, x_new, &error, &nvalid, &iterations)) {
-		sm_error("ICP not complete. \n");
-		return;
-	}
-
-	double best_error = error;
-	gsl_vector * best_x = gsl_vector_alloc(3);
-	gsl_vector_memcpy(best_x, x_new);
-
-	if(params->restart && 
-		(error/nvalid)>(params->restart_threshold_mean_error) ) {
-		sm_debug("Restarting: %f > %f \n",(error/nvalid),(params->restart_threshold_mean_error));
-		double dt  = params->restart_dt;
-		double dth = params->restart_dtheta;
-		sm_debug("icp_loop: dt = %f dtheta= %f deg\n",dt,rad2deg(dth));
-		
-		double perturb[6][3] = {
-			{dt,0,0}, {-dt,0,0},
-			{0,dt,0}, {0,-dt,0},
-			{0,0,dth}, {0,0,-dth}
-		};
-
-		int a; for(a=0;a<6;a++){
-			sm_debug("-- Restarting with perturbation #%d\n", a);
-			struct sm_params my_params = *params;
-			gsl_vector * start = gsl_vector_alloc(3);
-				gvs(start, 0, gvg(x_new,0)+perturb[a][0]);
-				gvs(start, 1, gvg(x_new,1)+perturb[a][1]);
-				gvs(start, 2, gvg(x_new,2)+perturb[a][2]);
-			gsl_vector * x_a = gsl_vector_alloc(3);
-			double my_error; int my_valid; int my_iterations;
-			if(!icp_loop(&my_params, start, x_a, &my_error, &my_valid, &my_iterations)){
-				sm_error("Error during restart #%d/%d. \n", a, 6);
-				break;
-			}
-			iterations+=my_iterations;
-		
-			if(my_error < best_error) {
-				sm_debug("--Perturbation #%d resulted in error %f < %f\n", a,my_error,best_error);
-				gsl_vector_memcpy(best_x, x_a);
-				best_error = my_error;
-			}
-			gsl_vector_free(x_a); gsl_vector_free(start);
-		}
-	}
-	
-	
-	/* At last, we did it. */
-	res->valid = 1;
-	vector_to_array(best_x, res->x);
-	sm_debug("icp: final x =  %s  \n", gsl_friendly_pose(best_x));
-	
-	
-	if(params->do_compute_covariance)  {
-
-		val cov0_x, dx_dy1, dx_dy2;
-		compute_covariance_exact(
-			laser_ref, laser_sens, best_x,
-			&cov0_x, &dx_dy1, &dx_dy2);
-		
-		val cov_x = sc(square(params->sigma), cov0_x); 
-/*		egsl_v2da(cov_x, res->cov_x); */
-		
-		res->cov_x_m = egsl_v2gslm(cov_x);
-		res->dx_dy1_m = egsl_v2gslm(dx_dy1);
-		res->dx_dy2_m = egsl_v2gslm(dx_dy2);
-		
-		if(0) {
-			egsl_print("cov0_x", cov0_x);
-			egsl_print_spectrum("cov0_x", cov0_x);
-		
-			val fim = ld_fisher0(laser_ref);
-			val ifim = inv(fim);
-			egsl_print("fim", fim);
-			egsl_print_spectrum("ifim", ifim);
-		}
-	}
-	
-	
-	res->error = best_error;
-	res->iterations = iterations;
-	res->nvalid = nvalid;
-
-	gsl_vector_free(x_new);
-	gsl_vector_free(x_old);
-	gsl_vector_free(best_x);
-	egsl_pop();
-
-	if(JJ) jj_context_exit();
-}
-
-
-int icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new, 
+int icp_loop(struct sm_params*params, const double*q0, double*x_new, 
 	double*total_error, int*valid, int*iterations) {
-	LDP laser_ref  = params->laser_ref;
 	LDP laser_sens = params->laser_sens;
-	
-	gsl_vector * x_old = vector_from_array(3, start->data);
-	
-	sm_debug("icp: starting at  x' =  %s  \n", gsl_friendly_pose(x_old));
-	
-	gsl_vector * delta = gsl_vector_alloc(3);
-	gsl_vector * delta_old = gsl_vector_alloc(3);
-	gsl_vector_set_all(delta_old, 0.0);
-
+	double x_old[3], delta[3], delta_old[3] = {0,0,0};
+	copy_d(q0, 3, x_old);
 	unsigned int hashes[params->max_iterations];
 	int iteration;
-
-	sm_debug("icp_loop: starting at x_old= %s  \n",
-		gsl_friendly_pose(x_old));
+	
+	sm_debug("icp: starting at  q0 =  %s  \n", friendly_pose(x_old));
 	
 	if(JJ) jj_loop_enter("iterations");
 	
 	for(iteration=0; iteration<params->max_iterations;iteration++) {
 		if(JJ) jj_loop_iteration();
+		if(JJ) jj_add_double_array("x_old", x_old, 3);
 
 		egsl_push();
-		
-		if(JJ) jj_add("x_old", vector_to_json(x_old));
-		
-		ld_compute_world_coords(laser_sens, x_old->data);
-			
+
+		/** Compute laser_sens's points in laser_ref's coordinates
+		    by roto-translating by x_old */
+		ld_compute_world_coords(laser_sens, x_old);
+
+		/** Find correspondences (the naif or smart way) */
 		if(params->use_corr_tricks)
-			find_correspondences_tricks(params, x_old);
+			find_correspondences_tricks(params);
 		else
-			find_correspondences(params, x_old);
+			find_correspondences(params);
 
-		if(params->debug_verify_tricks)
-			debug_correspondences(params, x_old);
+		/** If debug_verify_tricks, make sure that find_correspondences_tricks()
+		    and find_correspondences() return the same answer */
+			if(params->debug_verify_tricks)
+				debug_correspondences(params);
 
+		/* If not many correspondences, bail out */
 		int num_corr = ld_num_valid_correspondences(laser_sens);
-		if(num_corr <0.2 * laser_sens->nrays){
+		if(num_corr < 0.2 * laser_sens->nrays) { /* TODO: arbitrary */
 			egsl_pop();
 			sm_error("Failed: before trimming, only %d correspondences.\n",num_corr);
 			return 0;
@@ -198,18 +53,19 @@ int icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 
 		if(JJ) jj_add("corr0", corr_to_json(laser_sens->corr, laser_sens->nrays));
 
+		/* Kill some correspondences (using dubious algorithm) */
 		kill_outliers_double(params);
 		int num_corr2 = ld_num_valid_correspondences(laser_sens);
 
 		if(JJ) jj_add("corr1", corr_to_json(laser_sens->corr, laser_sens->nrays));
 		
 		double error=0;
-		kill_outliers_trim(params, x_old, &error);
+		/* Trim correspondences */
+		kill_outliers_trim(params, &error);
 		int num_corr_after = ld_num_valid_correspondences(laser_sens);
 		
-		if(JJ) jj_add("corr2", corr_to_json(laser_sens->corr, laser_sens->nrays));
-
 		if(JJ) {
+			jj_add("corr2", corr_to_json(laser_sens->corr, laser_sens->nrays));
 			jj_add_int("num_corr0", num_corr);
 			jj_add_int("num_corr1", num_corr2);
 			jj_add_int("num_corr2", num_corr_after);
@@ -220,21 +76,22 @@ int icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 
 		sm_debug("Total error: %f  valid %d   mean = %f\n", *total_error, *valid, *total_error/ *valid);
 		
+		/* If not many correspondences, bail out */
 		if(num_corr_after <0.2 * laser_sens->nrays){
 			sm_error("Failed: after trimming, only %d correspondences.\n",num_corr_after);
 			egsl_pop();
 			return 0;
 		}
 
-		
-		compute_next_estimate(params, laser_ref, laser_sens,	 x_new);		
-		pose_diff(x_new, x_old, delta);
+		/* Compute next estimate based on the correspondences */
+		compute_next_estimate(params, x_new);
+		pose_diff_d(x_new, x_old, delta);
 		
 		{
 			sm_debug("killing %d -> %d -> %d \n", num_corr, num_corr2, num_corr_after);
 			if(JJ) {
-				jj_add("x_new", vector_to_json(x_new));
-				jj_add("delta", vector_to_json(delta));
+				jj_add_double_array("x_new", x_new, 3);
+				jj_add_double_array("delta", delta, 3);
 			}
 		}
 		/** Checks for oscillations */
@@ -243,45 +100,48 @@ int icp_loop(struct sm_params*params, const gsl_vector*start, gsl_vector*x_new,
 		{
 			sm_debug("icp_loop: it. %d  hash=%d nvalid=%d mean error = %f, x_new= %s\n", 
 				iteration, hashes[iteration], *valid, *total_error/ *valid, 
-				gsl_friendly_pose(x_new));
+				friendly_pose(x_new));
 		}
 
 		egsl_pop();
-						
-		int detected = 0;
-		int a; for(a=0;a<iteration;a++) {
+		
+		int loop_detected = 0; /* TODO: make function */
+		int a; for(a=iteration-1;a>=0;a--) {
 			if(hashes[a]==hashes[iteration]) {
 				sm_debug("icpc: oscillation detected (cycle length = %d)\n", iteration-a);
-				detected = 1;
+				loop_detected = 1;
+				break;
 			}
 		}
-		if(detected) break;
+		if(loop_detected) break;
 
-		if(termination_criterion(delta, params)) 
+		/* This termination criterium is useless when using
+		   the point-to-line-distance; however, we put it here because
+		   one can choose to use the point-to-point distance. */
+		if(termination_criterion(params, delta)) 
 			break;
 		
-		gsl_vector_memcpy(x_old, x_new);
-		gsl_vector_memcpy(delta_old, delta);
+		copy_d(x_new, 3, x_old);
+		copy_d(delta, 3, delta_old);
 	}
 
 	if(JJ) jj_loop_exit();
 	
 	*iterations = iteration+1;
 	
-	gsl_vector_free(x_old);
-	gsl_vector_free(delta);
-	gsl_vector_free(delta_old);
-
 	return 1;
 }
 
-int termination_criterion(gsl_vector*delta, struct sm_params*params){
-	double a = sqrt(gvg(delta,0)* gvg(delta,0)+ gvg(delta,1)* gvg(delta,1));
-	double b = fabs(gvg(delta,2));
+int termination_criterion(struct sm_params*params, const double*delta){
+	double a = norm_d(delta);
+	double b = fabs(delta[2]);
 	return (a<params->epsilon_xy) && (b<params->epsilon_theta);
 }
 
-void compute_next_estimate(struct sm_params*params, LDP laser_ref, LDP laser_sens, gsl_vector*x_new) {
+void compute_next_estimate(struct sm_params*params, double*x_new) {
+	LDP laser_ref  = params->laser_ref;
+	LDP laser_sens = params->laser_sens;
+	
 	struct gpc_corr c[laser_sens->nrays];
 
 	int i; int k=0;
@@ -306,7 +166,6 @@ void compute_next_estimate(struct sm_params*params, LDP laser_ref, LDP laser_sen
 		double normal[2];
 		normal[0] = +diff[1] * one_on_norm;
 		normal[1] = -diff[0] * one_on_norm;
-		
 
 		if(params->use_point_to_line_distance) {
 			double cos_alpha = normal[0];
@@ -326,18 +185,15 @@ void compute_next_estimate(struct sm_params*params, LDP laser_ref, LDP laser_sen
 		k++;
 	}
 	
+	/* TODO: use prior for odometry */
 	double std = 0.11;
 	const double inv_cov_x0[9] = 
 		{1/(std*std), 0, 0,
 		 0, 1/(std*std), 0,
 		 0, 0, 0};
 	
-	double x[3];
-	gpc_solve_valid(k, c, 0, 0, inv_cov_x0, x);
+	gpc_solve_valid(k, c, 0, 0, inv_cov_x0, x_new);
 	
-	gvs(x_new,0,x[0]);
-	gvs(x_new,1,x[1]);
-	gvs(x_new,2,x[2]);
 }
 	
 

@@ -260,10 +260,13 @@ double dist_to_segment_d(const double*a, const double*b, const double*x) {
 
 
 static char tmp_buf[100];
-const char* gsl_friendly_pose(gsl_vector*v) {
+const char* friendly_pose(double*pose) {
 	sprintf(tmp_buf, "(%4.2f mm, %4.2f mm, %4.4f deg)",
-		1000*gvg(v,0),1000*gvg(v,1),rad2deg(gvg(v,2)));
+		1000*pose[0],1000*pose[1],rad2deg(pose[2]));
 	return tmp_buf;
+}
+const char* gsl_friendly_pose(gsl_vector*v) {
+	return friendly_pose(v->data);
 }
 
 const char* egsl_friendly_pose(val v) {
