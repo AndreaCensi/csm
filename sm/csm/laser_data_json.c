@@ -200,39 +200,48 @@ LDP ld_from_json_stream(FILE*file) {
 	Tries to read a laser scan from file. If error or EOF, it returns 0.
 	Whitespace is skipped. If first valid char is '{', it tries to read 
 	it as JSON. If next char is 'F' (first character of "FLASER"),
-	it tries to read in Carmen format. Else, 0 is returned. 
+	it tries to read in Carmen format. Other lines are discarder.
+	0 is returned on error or feof
 */
 LDP ld_read_smart(FILE*f) {
-	int c;
 	while(1) {
-		c = fgetc(f);
-		if(feof(f)) { 
-			/* sm_debug("eof\n"); */
-			return 0;
-		}
-		if(!isspace(c)) break;
-	}
-	ungetc(c, f);
-
-	switch(c) {
-		case '{': {
-/*			sm_debug("Reading JSON\n"); */
-			return ld_from_json_stream(f);
-		}
-		case 'F': {
-/*			sm_debug("Reading Carmen\n");  */
-			LDP ld = (LDP) malloc(sizeof(struct laser_data));
-			if(ld_read_next_laser_carmen(f, ld)) {
-				sm_debug("bad carmen\n");
-				free(ld);
+		int c;
+		while(1) {
+			c = fgetc(f);
+			if(feof(f)) { 
+				/* sm_debug("eof\n"); */
 				return 0;
 			}
-			return ld;
+			if(!isspace(c)) break;
 		}
-		default:
-			sm_error("Could not read ld. First char is '%c'. \n", c);
-			
-		return 0;
+		ungetc(c, f);
+
+		switch(c) {
+			case '{': {
+/*				sm_debug("Reading JSON\n"); */
+				return ld_from_json_stream(f);
+			}
+			case 'F': {
+/*				sm_debug("Reading Carmen\n");  */
+				LDP ld = (LDP) malloc(sizeof(struct laser_data));
+				if(ld_read_next_laser_carmen(f, ld)) {
+					sm_debug("bad carmen\n");
+					free(ld);
+					return 0;
+				}
+				return ld;
+			}
+			default: {
+				/*sm_error("Could not read ld. First char is '%c'. ", c);*/
+				char max_line[10000];
+				char * res = fgets(max_line, 10000-2, f);
+				if(!res) {
+					sm_error("Could not skip line. \n");
+				} else {
+/*					sm_error("Skipped '%s'\n", res);*/
+				}
+			}
+		}
 	}
 }
 
