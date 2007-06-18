@@ -53,7 +53,7 @@ void compute_covariance_exact(
 		val d2J_dt2_k = sc(2.0, C_k);
 		val d2J_dt_dtheta_k = sc(2.0,m(C_k,v1));
 		
-		val v_new = sc(-1.0, p_i);
+		val v_new = m(rot(theta+M_PI), p_i);
 		val d2J_dtheta2_k = sc(2.0, sum( m3(tr(v2),C_k, v_new), m3(tr(v1),C_k,v1)));
 		add_to(d2J_dt2, d2J_dt2_k);
 		add_to(d2J_dt_dtheta, d2J_dt_dtheta_k ); 
