@@ -1,6 +1,12 @@
 #!/usr/bin/env ruby
+for s in ['../rsm', '.']
+	$LOAD_PATH << File.expand_path(File.join(File.dirname(__FILE__), s))
+end
+
 require 'rubygems'
 require 'json/pure'
+
+require 'fix_json'
 
 def read_all_objects(string)
 	a = []
@@ -11,7 +17,8 @@ def read_all_objects(string)
 		begin
 			a.push j.parse
 		rescue Exception => e
-			$stderr.write "After #{a.size} objects: #{e}" 
+			$stderr.puts "After #{a.size} objects: #{e}" 
+			return a
 		end
 	end	
 	a
@@ -85,7 +92,7 @@ class Array
 	end
 end
 
-io =  if file = ARGV[0] then File.open(file) else stdin end
+io =  if file = ARGV[0] then File.open(file) else $stdin end
 	
 a = read_all_objects(io.read)
 $stderr.write "json2matlab: Found #{a.size} JSON objects. "
