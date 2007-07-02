@@ -42,7 +42,7 @@ struct sm_params {
 		/** Displacement for restarting */
 		double restart_dtheta;
 	
-	
+
 	/** For now, a very simple max-distance clustering algorithm is used */
 	double clustering_threshold;
 	/** Number of neighbour rays used to estimate the orientation.*/
@@ -68,6 +68,11 @@ struct sm_params {
 	
 	double gpm_theta_bin_size_deg;
 	double gpm_extend_range_deg; 
+
+
+
+	/** Pose of sensor with respect to robot */
+	double laser[3]; 
 	
 };
 

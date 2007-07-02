@@ -52,9 +52,12 @@ int main(int argc, const char*argv[]) {
 		params.laser_ref = lds[i];
 		params.laser_sens = lds[i+1];
 
-		pose_diff_d( params.laser_sens->odometry,  
-		/* o minus */ params.laser_ref->odometry,
-			/* = */ params.first_guess);
+		double odometry[3];
+		pose_diff_d(params.laser_sens->odometry, params.laser_ref->odometry, odometry);
+		double ominus_laser[3], temp[3];
+		ominus_d(params.laser, ominus_laser);
+		oplus_d(ominus_laser, odometry, temp);
+		oplus_d(temp, params.laser, params.first_guess);
 
 		sm_icp(&params,&result); 
 		

@@ -96,4 +96,8 @@ void sm_options(struct sm_params*p, struct option*ops) {
 		"GPM: Dimension of bins for finding first theta.");
 	options_double(ops, "gpm_extend_range_deg", &(p->gpm_extend_range_deg), 15.0, 
 		"GPM: Area around maximum.");
+
+	options_double(ops, "laser_x", &(p->laser[0]), 0.0, "laser.x (m)");
+	options_double(ops, "laser_y", &(p->laser[1]), 0.0, "laser.y (m)");
+	options_double(ops, "laser_theta", &(p->laser[2]), 0.0, "laser.theta (rad)");
 }

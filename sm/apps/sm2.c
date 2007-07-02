@@ -88,9 +88,15 @@ int main(int argc, const char*argv[]) {
 		
 		params.laser_ref  = laser_ref;
 		params.laser_sens = laser_sens;
-		/* Set first guess as the difference in odometry */
-		pose_diff_d(laser_sens->odometry, laser_ref->odometry, params.first_guess);
 
+		/* Set first guess as the difference in odometry */
+		double odometry[3];
+		pose_diff_d(laser_sens->odometry, laser_ref->odometry, odometry);
+		double ominus_laser[3], temp[3];
+		ominus_d(params.laser, ominus_laser);
+		oplus_d(ominus_laser, odometry, temp);
+		oplus_d(temp, params.laser, params.first_guess);
+		
 		/* Do the actual work */
 		sm_icp(&params, &result); 
 		
