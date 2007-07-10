@@ -13,7 +13,7 @@ class LaserData
 		
 		ld = LaserData.new(nrays)
 				
-		ld.min_reading   = 0.1;
+		ld.min_reading   = 0.001;
 		ld.max_reading   = 49;
 		ld.min_theta     = -PI/2;
 		ld.max_theta     =  PI/2;
@@ -29,7 +29,7 @@ class LaserData
 				raise "Bad value (#{p.reading}) for ray#{a} in '#{l}'"
 			end
 			
-			ld.theta[i] = -PI/2 + i*PI/(ld.nrays-1)
+			ld.theta[i] = ld.min_theta + i * (ld.max_theta) / (ld.nrays-1)
 			ld.valid[i] = (reading < ld.max_reading) && (reading > ld.min_reading)
 			ld.readings[i] = ld.valid[i] ? reading : GSL::NAN
 

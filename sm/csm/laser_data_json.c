@@ -139,7 +139,9 @@ JO ld_to_json(LDP ld) {
 	
 	jo_add_double_array_if_not_nan(jo, "true_alpha",      ld->true_alpha, n);
 	
-
+	int timeval[2] = {ld->tv.tv_sec, ld->tv.tv_usec};
+	jo_add_int_array(jo, "timestamp", timeval, 2);
+	
 	return jo;
 /*	int *up_bigger, *up_smaller, *down_bigger, *down_smaller;
 

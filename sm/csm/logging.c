@@ -6,7 +6,7 @@
 
 const char * sm_program_name = 0;
 
-/*#define CSM_DEBUG */
+#define CSM_DEBUG 
 
 void sm_error(const char *msg, ...)
 {

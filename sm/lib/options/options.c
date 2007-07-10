@@ -148,15 +148,20 @@ int options_parse_stream(struct option*ops, const char*pwd, FILE*file) {
 }
 
 int options_parse_file(struct option*ops, const char*pwd, const char*filename) {
+	fprintf(stderr, "Filename lne=%d s='%s'\n", (int)strlen(filename), filename);
 	char concat[PATH_MAX*2+1];
 	strcpy(concat, pwd);
 	strcat(concat, "/");
 	strcat(concat, filename);
+
+	fprintf(stderr, "concat ='%s'\n", concat);
+
 	char *resolved;
 	if(! (resolved = realpath(concat, NULL))) {
 		fprintf(stderr, "Could not resolve '%s' ('%s').\n", concat, resolved); 
 		return 0;
 	}
+	fprintf(stderr, "resolved ='%s'\n", resolved);
 
 	const char * newdir = dirname(resolved);
 	if(!newdir) {
@@ -244,7 +249,7 @@ int options_set(struct option*o, const char*value) {
 
 const char*options_value_as_string(struct option*o);
 
-void display_table(FILE*f, const char**table, int rows, int columns, int padding) {
+void display_table(FILE*f,  char**table, int rows, int columns, int padding) {
 /*	int *col_size = malloc(sizeof(int)*columns);*/
 	int col_size[columns];
 	
@@ -272,7 +277,7 @@ void display_table(FILE*f, const char**table, int rows, int columns, int padding
 void options_dump(struct option * options, FILE*f, int write_desc) {
 	int n; for (n=0;options_valid(options+n);n++);
 
-	const char**table = malloc(sizeof(char*)*n*3);
+	char**table = malloc(sizeof(char*)*n*3);
 
 	int i;
 	for (i=0;i<n;i++) {
