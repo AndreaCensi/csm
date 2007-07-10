@@ -1,5 +1,5 @@
 
-The Canonical Scan Matcher v.1.0
+The Canonical Scan Matcher v.1.0.0
 ================================
 
 * TOC
