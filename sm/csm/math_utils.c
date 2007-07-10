@@ -257,6 +257,12 @@ double dist_to_segment_d(const double*a, const double*b, const double*x) {
 		return sqrt(GSL_MIN( distance_squared_d(a,x), distance_squared_d(b,x)));
 }
 
+int count_equal(const int*v, int n, int value) {
+	int num = 0, i;
+	for(i=0;i<n;i++) if(value == v[i]) num++;
+	return num;
+}
+
 
 
 static char tmp_buf[100];

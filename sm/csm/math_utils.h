@@ -91,5 +91,9 @@ val ld_fisher0(LDP ld);
 
 int is_nan(double v);
 
+/** Count numbers of items in array v equal to value */
+int count_equal(const int*v, int n, int value);
+
+
 #endif
 

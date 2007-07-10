@@ -49,16 +49,7 @@ void ld_alloc(LDP ld, int nrays) {
 	ld->up_smaller   = alloc_int_array(nrays, 0);
 	ld->down_bigger  = alloc_int_array(nrays, 0);
 	ld->down_smaller = alloc_int_array(nrays, 0);
-	
-/*	ld->p = (gsl_vector**) malloc(sizeof(gsl_vector*) * nrays);*/
-/*
-	int i;
-	for(i=0;i<nrays;i++) {
-		ld->p[i] = gsl_vector_alloc(2);
-		gvs(ld->p[i], 0, GSL_NAN);
-		gvs(ld->p[i], 1, GSL_NAN);
-	}
-*/
+
 	ld->corr = (struct correspondence*) 
 		malloc(sizeof(struct correspondence)*nrays);
 
@@ -171,11 +162,6 @@ int ld_num_valid_correspondences(LDP ld) {
 	return num;
 }
 
-int count_equal(const int*v, int n, int value) {
-	int num = 0, i;
-	for(i=0;i<n;i++) if(value == v[i]) num++;
-	return num;
-}
 
 int ld_valid_fields(LDP ld)  {
 	if(!ld) {

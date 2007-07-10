@@ -100,4 +100,9 @@ void sm_options(struct sm_params*p, struct option*ops) {
 	options_double(ops, "laser_x", &(p->laser[0]), 0.0, "laser.x (m)");
 	options_double(ops, "laser_y", &(p->laser[1]), 0.0, "laser.y (m)");
 	options_double(ops, "laser_theta", &(p->laser[2]), 0.0, "laser.theta (rad)");
+
+	options_double(ops, "min_reading", &(p->min_reading), 0.0, "Don't use readings less than min_reading");
+	options_double(ops, "max_reading", &(p->max_reading), 1000.0, "Don't use readings longer than max_reading");
+
+
 }

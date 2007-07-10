@@ -70,9 +70,11 @@ struct sm_params {
 	double gpm_extend_range_deg; 
 
 
-
 	/** Pose of sensor with respect to robot */
 	double laser[3]; 
+
+	/** mark as invalid ( = don't use ) rays outside of this interval */
+	double min_reading, max_reading;
 	
 };
 

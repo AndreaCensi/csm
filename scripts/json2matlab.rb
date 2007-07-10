@@ -92,6 +92,18 @@ class Array
 	end
 end
 
+if ARGV.any? {|x| x =~ /help/}
+	$stderr.puts "Three usages:"
+	$stderr.puts " 1) without parameters, it acts as a filter; out is a Matlab structure "
+	$stderr.puts "       $ json2matlab.rb  < in > out.m "
+	$stderr.puts " 2) with one parameter, it creates <in>.m (a function named <in>) "
+	$stderr.puts "       $ json2matlab.rb in.txt "
+	$stderr.puts " 2) with two parameters, it creates `f.m` (a function named 'f') "
+	$stderr.puts "       $ json2matlab.rb in.txt f "
+	exit 0
+end
+
+
 io =  if file = ARGV[0] then File.open(file) else $stdin end
 	
 a = read_all_objects(io.read)
@@ -106,8 +118,13 @@ a.recurse_json do |child, parent|
 	end
 end
 
+
 if file = ARGV[0]
 	basename = File.basename(file).gsub(/\.\w*$/,'')
+	if ARGV[1]
+		basename = ARGV[1]
+	end
+	
 	output_file = File.join(File.dirname(file), basename + ".m")
 	$stderr.puts "Writing to #{output_file.inspect}."
 	File.open(output_file, 'w') do |f|

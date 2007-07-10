@@ -17,20 +17,35 @@ void sm_journal_open(const char* file) {
 /*	journal_open(file);*/
 }
 
+void ld_invalid_if_outside(LDP ld, double min_reading, double max_reading) {
+	int i;
+	for(i=0;i<ld->nrays;i++) {
+		if(!ld_valid_ray(ld, i)) continue;
+		double r = ld->readings[i];
+		if( r <= min_reading || r > max_reading)
+			ld->valid[i] = 0;
+	}
+}
+
 void sm_icp(struct sm_params*params, struct sm_result*res) {
 	res->valid = 0;
+
+	LDP laser_ref  = params->laser_ref;
+	LDP laser_sens = params->laser_sens;
 	
-	if(!ld_valid_fields(params->laser_ref) || 
-	   !ld_valid_fields(params->laser_sens)) {
+	if(!ld_valid_fields(laser_ref) || 
+	   !ld_valid_fields(laser_sens)) {
 		return;
 	}
+	
+	/** Mark as invalid the rays outside of (min_reading, max_reading] */
+	ld_invalid_if_outside(laser_ref, params->min_reading, params->max_reading);
+	ld_invalid_if_outside(laser_sens, params->min_reading, params->max_reading);
 	
 	if(JJ) jj_context_enter("sm_icp");
 	
 	egsl_push();
 	
-	LDP laser_ref  = params->laser_ref;
-	LDP laser_sens = params->laser_sens;
 			
 	if(params->use_corr_tricks || params->debug_verify_tricks)
 		ld_create_jump_tables(laser_ref);

@@ -133,11 +133,16 @@ int options_parse_stream(struct option*ops, const char*pwd, FILE*file) {
 		if(!*line) continue;
 		const char * name = line;
 		while(!isspace(*line)) line++;
-		const char * value;
+		char * value;
 		if(*line == 0) value = ""; else {
 			*line = 0; line++;
 			while(isspace(*line)) line++;
 			value = line;
+			/* delete final spaces */
+			int len = strlen(value);
+			while(isspace(value[len-1]) && len > 0) {
+				value[len-1] = 0; len--;
+			}
 		}
 				
 		if(!options_try_pair(ops, name, value) && !options_tolerant) {
@@ -148,20 +153,17 @@ int options_parse_stream(struct option*ops, const char*pwd, FILE*file) {
 }
 
 int options_parse_file(struct option*ops, const char*pwd, const char*filename) {
-	fprintf(stderr, "Filename lne=%d s='%s'\n", (int)strlen(filename), filename);
 	char concat[PATH_MAX*2+1];
 	strcpy(concat, pwd);
 	strcat(concat, "/");
 	strcat(concat, filename);
 
-	fprintf(stderr, "concat ='%s'\n", concat);
-
+	char resolved_path[PATH_MAX];
 	char *resolved;
-	if(! (resolved = realpath(concat, NULL))) {
+	if(! (resolved = realpath(concat, resolved_path))) {
 		fprintf(stderr, "Could not resolve '%s' ('%s').\n", concat, resolved); 
 		return 0;
 	}
-	fprintf(stderr, "resolved ='%s'\n", resolved);
 
 	const char * newdir = dirname(resolved);
 	if(!newdir) {
@@ -174,11 +176,11 @@ int options_parse_file(struct option*ops, const char*pwd, const char*filename) {
 	file = fopen(resolved,"r");
 	if(file==NULL) {
 		fprintf(stderr, "Could not open '%s': %s.\n", resolved, strerror(errno)); 
-		free(resolved);
+		/* free(resolved); */
 		return 0;
 	}
 	
-	free(resolved);
+	/* free(resolved); */
 	return options_parse_stream(ops, newdir, file);
 }
 
@@ -250,7 +252,6 @@ int options_set(struct option*o, const char*value) {
 const char*options_value_as_string(struct option*o);
 
 void display_table(FILE*f,  char**table, int rows, int columns, int padding) {
-/*	int *col_size = malloc(sizeof(int)*columns);*/
 	int col_size[columns];
 	
 	int i,j;
@@ -270,8 +271,6 @@ void display_table(FILE*f,  char**table, int rows, int columns, int padding) {
 		}
 		fprintf(f, "\n");
 	}
-	
-/*	free(col_size);*/
 }
 
 void options_dump(struct option * options, FILE*f, int write_desc) {
