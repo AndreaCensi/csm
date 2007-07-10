@@ -61,6 +61,8 @@ int ld_read_next_laser_carmen(FILE*file, LDP ld) {
 		if(read_next_double(line,&cur,ld->odometry+0)) goto error;
 		if(read_next_double(line,&cur,ld->odometry+1)) goto error;
 		if(read_next_double(line,&cur,ld->odometry+2)) goto error;
+
+		/* Following: ipc_timestamp hostname timestamp */
 		
 		fprintf(stderr, "l");
 		return 0;

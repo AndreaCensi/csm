@@ -1,6 +1,7 @@
 #ifndef H_LASER_DATA
 #define H_LASER_DATA
 
+#include <sys/time.h>
 #include <stdio.h>
 
 #ifndef RUBY
@@ -14,7 +15,6 @@ typedef struct {
 	double p[2];
 	double rho, phi;
 } point2d;
-
 
 struct laser_data {
 	int nrays;
@@ -58,6 +58,8 @@ struct laser_data {
 	/** Cartesian representation, in "world" (laser_ref) coordinates. */
 	point2d *  restrict points_w;
 
+	/** Timestamp */
+	struct timeval tv;
 };
 
 struct correspondence {
