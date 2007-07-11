@@ -69,11 +69,14 @@ def fig2pics()
 	opt_fig2dev = nil
 	opt_output = nil
 	opt_bounds = nil
+	opt_verbose = false
+	opt_debug = false
 	
 	opt = OptionParser.new do |opts|
 #		opts.banner = "Usage: maruku [options] [file1.md [file2.md ..."
 #		opts.on("-v", "--[no-]verbose", "Run verbosely") do |v|
 #			MaRuKu::Globals[:verbose] = v end
+		opts.on("-v", "--verbose", "Be verbose") do opt_verbose = true; end
 
 		opts.on("-p", "--preamble PREAMBLE", "LaTeX preamble file") do |s|
 			opt_preamble = s
@@ -137,12 +140,11 @@ def fig2pics()
 # 	exit 3
 # end
 
-
 programs=["latex", "dvips",  "fig2dev", "epstopdf"];
 
 programs.each do |p| 
 	abs = `which #{p}`.chop
-	$stderr.puts "Using " + abs.inspect
+	$stderr.puts "Using " + abs.inspect if opt_debug
 	if not FileTest.exists?(abs) then	
 		$stderr.puts "Error: command #{p} not available (abs=#{abs.inspect})"
 		exit
@@ -152,8 +154,8 @@ end
 dir=File.dirname(input)
 
 basename=File.basename(input,".fig").sub(/^\.\//,"");
-$stderr.puts "dir #{basename}"
-$stderr.puts "basename #{basename}"
+$stderr.puts "dir #{basename}" if opt_debug
+$stderr.puts "basename #{basename}" if opt_debug
 outpng="#{dir}/#{basename}.png"
 outpdf="#{dir}/#{basename}.pdf"
 temp="#{dir}/#{basename}_tmp"
@@ -192,13 +194,13 @@ File.open(slide,"w") do |f|
 end
 
 execute_cmd	"latex -output-directory=#{abs_dir} #{slide}"
-execute_cmd	"dvips -Ppdf -E #{slidedvi} -o #{slideps}"
+execute_cmd	"dvips -q -Ppdf -E #{slidedvi} -o #{slideps}"
 
 if opt_bounds then change_bounds(slideps, opt_bounds) end
 
 if opt_output then outpdf = opt_output end
 		
-execute_cmd	"epstopdf #{slideps} --outfile=#{outpdf}"
+execute_cmd "epstopdf #{slideps} --outfile=#{outpdf}"
 
 execute_cmd  "rm -f #{slide} #{slidedvi} #{slideps} #{temp}.* #{slideprefix}.*"
 

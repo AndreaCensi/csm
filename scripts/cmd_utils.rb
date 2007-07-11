@@ -1,11 +1,19 @@
-def execute_cmd(m)
-	puts "$ " + m 
-	system m
+def execute_cmd_verb(cmd, verbose)
+	$stderr.puts "$ " + cmd
+	
+	if verbose
+		system cmd
+	else
+		output = `#{cmd}`
+	end
+	
 	if $?.exitstatus != 0
-		$stderr.puts "\n\n\t command:\n\n\t#{m}\n\n\tFAILED\n\n"
+		$stderr.puts "\n\n\t command:\n\n\t#{cmd}\n\n\tFAILED\n\n"
 		exit($?.exitstatus)
 	end
 end
+
+def execute_cmd(m); execute_cmd_verb(m, true); end
 
 def search_cmd(program, additional_paths = nil)
 	path = ENV['PATH'].split(":") 
