@@ -38,12 +38,14 @@ void ld_getbb(LDP  ld, double*x0, double*y0, double*x1, double*y1,
 	reference use_reference, double horizon);
 
 int main(int argc, const char*argv[]) {
+	sm_set_program_name(basename(argv[0]));
+
 	struct params p;
 	
 	struct option * ops = options_allocate(12);
 	options_int(ops, "interval", &p.interval, 10, "how many to ignore");
 	options_string(ops, "in", &p.input_filename, "stdin", "input file (Carmen or JSON)");
-	options_string(ops, "out", &p.output_filename, "carmen2pdf.pdf", "output file (PDF)");
+	options_string(ops, "out", &p.output_filename, "", "output file (if empty, input file + '.pdf')");
 	options_double(ops, "lt", &p.line_threshold, 0.2, "threshold for linking points (m)");
 	options_double(ops, "horizon", &p.horizon, 8.0, "horizon of the laser (m)");
 	options_double(ops, "padding", &p.padding, 0.2, "padding around bounding box (m)");
@@ -55,21 +57,31 @@ int main(int argc, const char*argv[]) {
 	options_string(ops, "use", &p.use, "estimate", "One in 'odometry','estimate','true_pose'");
 	
 	if(!options_parse_args(ops, argc, argv)) {
-		fprintf(stderr, "error.");
+		sm_error("Could not parse arguments.\n");
 		options_print_help(ops, stderr);
 		return -1;
 	}
 	
+	/* If out not specified */
+	if(strlen(p.output_filename)==0) {
+		char buf[PATH_MAX];
+		sprintf(buf, "%s.pdf", p.input_filename);
+		p.output_filename = strdup(buf);
+		sm_info("Writing on file '%s'.\n", p.output_filename);
+	}
 	
 	p.use_reference = Invalid;
 	int i; for(i=1;i<=3;i++) 
 		if(!strcmp(p.use, reference_name[i]))
 			p.use_reference = (reference) i;
 	if(Invalid == p.use_reference) {
-		fprintf(stderr, "Invalid reference '%s'. " 
+		sm_error("Invalid reference '%s'. " 
 			"Use one in 'odometry','estimate','true_pose'.\n", p.use);
 		return -1;
 	}
+	
+	
+	
 	
 	p.input_file = open_file_for_reading(p.input_filename);
 	if(!p.input_file) return -1;
@@ -104,28 +116,38 @@ void ld_get_buffer_polar(double phi, double rho, const double*pose,
 
 /** Reads all file to find bounding box */
 void get_bb(struct params*p, struct bounding_box*bb) {
-	LDP ld;	
-	int counter=0, considered = 0;
+	LDP ld;
+	int counter = 0, 
+	    considered = 0;
 
-	if((ld = ld_read_smart(p->input_file))) {
-		ld_getbb(ld,&bb->x0,&bb->y0,&bb->x1,&bb->y1,p->use_reference, p->horizon);
-		ld_free(ld);
-	}
-	
 	while((ld = ld_read_smart(p->input_file))) {
 		if(should_consider(p, counter))  {
+			if(!ld_valid_fields(ld))  {
+				sm_error("Invalid laser data (#%d in file)\n", counter);
+				continue;
+			}
+			
 			double x0,y0,x1,y1;
-			ld_getbb(ld,&x0,&y0,&x1,&y1,p->use_reference, p->horizon);
-			bb->x0 = GSL_MIN(x0, bb->x0);
-			bb->x1 = GSL_MAX(x1, bb->x1);
-			bb->y0 = GSL_MIN(y0, bb->y0);
-			bb->y1 = GSL_MAX(y1, bb->y1);
+			ld_getbb(ld,&x0,&y0,&x1,&y1, p->use_reference, p->horizon);
+			if(considered) {
+				bb->x0 = GSL_MIN(x0, bb->x0);
+				bb->x1 = GSL_MAX(x1, bb->x1);
+				bb->y0 = GSL_MIN(y0, bb->y0);
+				bb->y1 = GSL_MAX(y1, bb->y1);
+			} else {
+				/* this is the first one */
+				bb->x0 = x0;
+				bb->x1 = x1;
+				bb->y0 = y0;
+				bb->y1 = y1;
+			}
+			
 			considered++;
 		}
 		counter++;
 		ld_free(ld);
 	}
-	fprintf(stderr, "Considering %d of %d scans. ", considered, counter);
+	sm_info("Considering %d of %d scans.\n", considered, counter);
 	rewind(p->input_file);
 	
 	bb->x0 -= p->padding;
@@ -176,7 +198,7 @@ void carmen2pdf(struct params p) {
 		bb.width = bb.height / wheight * wwidth;
 	}
 	
-	printf("Bounding box: %f %f, %f %f\n",bb.x0,bb.y0,bb.x1,bb.y1);
+	sm_info("Bounding box: %f %f, %f %f\n",bb.x0,bb.y0,bb.x1,bb.y1);
 	
 	cairo_surface_t *surface;
 	cairo_t *cr;
@@ -187,11 +209,10 @@ void carmen2pdf(struct params p) {
 	status = cairo_status (cr);
 
 	if (status) {
-		printf("Failed to create pdf surface for file %s: %s\n",
+		sm_error("Failed to create pdf surface for file %s: %s\n",
 			p.output_filename, cairo_status_to_string (status));
 		return;
 	}
-	
 	
 	int counter=0; 
 	int first_pose=1; double old_pose_bx=0,old_pose_by=0;
@@ -350,13 +371,14 @@ void ld_getbb(LDP  ld, double*x0, double*y0, double*x1, double*y1,
  	reference use_reference, double horizon) {
 	double *pose = ld_get_reference(ld, use_reference);
 	
+	int nrays_used = 0;
 	int first=1;
 	int i; for(i=0;i<ld->nrays;i++) {
 		if(!ld->valid[i]) continue;
 		if(ld->readings[i]>horizon) continue;
 		double x,y;
 		ld_get_buffer_polar(ld->theta[i], ld->readings[i], pose, &x, &y, 0, 0,0);
-		
+
 		if(first) {
 			*x0 = *x1 = x;
 			*y0 = *y1 = y;
@@ -367,6 +389,7 @@ void ld_getbb(LDP  ld, double*x0, double*y0, double*x1, double*y1,
 			*x1 = GSL_MAX(*x1, x);
 			*y1 = GSL_MAX(*y1, y);
 		}
+		nrays_used++;
 	}
 }
 

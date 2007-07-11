@@ -1,8 +1,15 @@
 #include <csm/csm.h>
 
 int main(int argc, char * argv[]) {
-	LDP ld;
+	sm_set_program_name(basename(argv[0]));
+
+	LDP ld; int count=0, errors=0; 
 	while((ld = ld_read_smart(stdin))) {
+		if(!ld_valid_fields(ld))  {
+			sm_error("Invalid laser data (#%d in file)\n", count);
+			errors++;
+			continue;
+		}
 		
 		JO jo = ld_to_json(ld);
 		puts(json_object_to_json_string(jo));
@@ -10,7 +17,9 @@ int main(int argc, char * argv[]) {
 		jo_free(jo);
 		
 		ld_free(ld);
+
+		count++;
 	}
 	
-	return 0;
+	return errors;
 }
