@@ -76,7 +76,7 @@ int ld_read_next_laser_carmen(FILE*file, LDP ld) {
 		
 		if(nrays == 769) {
 			min_reading = 0.001;
-			max_reading = 8;
+			max_reading = 4;
 			fov = deg2rad(270.0);
 
 			static int print = 0;
