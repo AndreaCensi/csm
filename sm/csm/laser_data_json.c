@@ -73,6 +73,12 @@ JO vector_to_json(gsl_vector*vec) {
 	return jo;
 }
 
+
+void jo_add_timestamp(JO jo, const char*name, struct timeval*tv) {
+	int array[2] = {tv->tv_sec, tv->tv_usec};
+	jo_add_int_array(jo, name, array, 2);
+}
+
 JO result_to_json(struct sm_params*p, struct sm_result *r) {
 	JO jo = json_object_new_object();
 	jo_add_int(jo, "valid",  r->valid);
@@ -89,6 +95,9 @@ JO result_to_json(struct sm_params*p, struct sm_result *r) {
 		jo_add_int(jo, "iterations", r->iterations);
 		jo_add_int(jo, "nvalid", r->nvalid);
 		jo_add_double(jo, "error", r->error);
+		
+		jo_add_timestamp(jo, "laser_ref_timestamp", &(p->laser_ref->tv));
+		jo_add_timestamp(jo, "laser_sens_timestamp",  &(p->laser_sens->tv));
 	
 	return jo;
 }
@@ -143,12 +152,6 @@ JO ld_to_json(LDP ld) {
 	jo_add_int_array(jo, "timestamp", timeval, 2);
 	
 	return jo;
-/*	int *up_bigger, *up_smaller, *down_bigger, *down_smaller;
-
-	gsl_vector**p;
-	
-	struct correspondence* corr;
-*/
 }
 
 
