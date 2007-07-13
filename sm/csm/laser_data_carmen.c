@@ -121,9 +121,9 @@ int ld_read_next_laser_carmen(FILE*file, LDP ld) {
 		char buf[30];
 		int sec, usec;
 		int ok = 
-		read_next_integer(line, &cur, &sec ) && 
-		read_next_string(line, &cur, buf, 29) && 
-		read_next_integer(line, &cur, &usec );
+		!read_next_integer(line, &cur, &sec ) && 
+		!read_next_string(line, &cur, buf, 29) && 
+		!read_next_integer(line, &cur, &usec );
 	
 		if(ok) {	
 			ld->tv.tv_sec = sec;
