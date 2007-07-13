@@ -120,13 +120,19 @@ int ld_read_next_laser_carmen(FILE*file, LDP ld) {
 		/* Following: ipc_timestamp hostname timestamp */
 		char buf[30];
 		int sec, usec;
-		if(read_next_integer(line, &cur, &sec )) goto error;
-		if(read_next_string(line, &cur, buf, 29)) goto error;
-		if(read_next_integer(line, &cur, &usec )) goto error;
-		
-		ld->tv.tv_sec = sec;
-		ld->tv.tv_usec = usec;
-		
+		int ok = 
+		read_next_integer(line, &cur, &sec ) && 
+		read_next_string(line, &cur, buf, 29) && 
+		read_next_integer(line, &cur, &usec );
+	
+		if(ok) {	
+			ld->tv.tv_sec = sec;
+			ld->tv.tv_usec = usec;
+		} else {
+			ld->tv.tv_sec = 0;
+			ld->tv.tv_usec = 0;
+		}
+
 		fprintf(stderr, "l");
 		return 0;
 		
