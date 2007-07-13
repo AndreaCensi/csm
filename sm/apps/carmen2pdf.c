@@ -320,7 +320,7 @@ void carmen2pdf(struct params p) {
 			when to interrupt the stroke */
 			int i; 
 			cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
-			cairo_set_line_width(cr, 0.1);
+			cairo_set_line_width(cr, 0.5);
 			for(i=0;i<ld->nrays;i++) {
 				if(draw_info[i].valid==0) continue;
 				double *b = draw_info[i].b;

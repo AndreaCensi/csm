@@ -75,6 +75,7 @@
 	new_executable(sm2)
 	new_executable(sm3)
 	new_executable(json_extract)
+	new_executable(json_split)
 	new_executable(carmen2json)
 	new_executable(ld_noise)
 	new_executable(ld_slip)
@@ -96,6 +97,7 @@
 ########### Carmen2pdf ########## 
 IF(CAIRO_FOUND)
 	new_executable(carmen2pdf)
+	new_executable(sm_animate)
 	
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CAIRO_CFLAGS}")
 	TARGET_LINK_LIBRARIES(carmen2pdf -lcairo)

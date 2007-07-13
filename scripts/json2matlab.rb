@@ -7,22 +7,23 @@ require 'rubygems'
 require 'json/pure'
 
 require 'fix_json'
-
-def read_all_objects(string)
-	a = []
-	j = JSON::Pure::Parser.new(string)
-	while true
-		j.scan(/\s*/) 
-		break if j.eos?
-		begin
-			a.push j.parse
-		rescue Exception => e
-			$stderr.puts "After #{a.size} objects: #{e}" 
-			return a
-		end
-	end	
-	a
-end
+require 'json_utils'
+# 
+# def read_all_objects(string)
+# 	a = []
+# 	j = JSON::Pure::Parser.new(string)
+# 	while true
+# 		j.scan(/\s*/) 
+# 		break if j.eos?
+# 		begin
+# 			a.push j.parse
+# 		rescue Exception => e
+# 			$stderr.puts "After #{a.size} objects: #{e}" 
+# 			return a
+# 		end
+# 	end	
+# 	a
+# end
 
 class Array
 	def matrix_size?(x) [9].include?x end

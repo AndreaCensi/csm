@@ -102,6 +102,12 @@ int ld_read_next_laser_carmen(FILE*file, LDP ld) {
 			ld->readings[i] = ld->valid[i] ? reading : NAN;
 			ld->theta[i] = ld->min_theta + i * 
 			  (ld->max_theta-ld->min_theta) / (ld->nrays-1);
+			
+			/* bad hokuyo!! */
+			if(nrays == 769) {
+				if(i>727) { ld->valid[i]=0; ld->readings[i]=NAN;}
+			}
+			
 		}
 		
 		if(read_next_double(line,&cur,ld->estimate+0)) goto error;

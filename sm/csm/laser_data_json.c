@@ -182,6 +182,11 @@ LDP json_to_ld(JO jo) {
 	jo_read_double_array(jo, "estimate", ld->estimate, 3, NAN);	
 	jo_read_double_array(jo, "true_pose", ld->true_pose, 3, NAN);	
 	
+	int array[2] = {-1,-1};
+	jo_read_int_array(jo, "timestamp", array, 2,-1);
+	ld->tv.tv_sec = array[0];
+	ld->tv.tv_usec = array[1];
+	
 	return ld;
 }
 

@@ -53,7 +53,10 @@ void convolve(const int*valid,const double*original, int n, double*dest, double*
 	int j; /* index on the filter */
 	
 	for(i=0;i<n;i++) {
-		if(!valid[i]) continue;
+		if(!valid[i]) {
+			dest[i] = GSL_NAN;
+			continue;
+		}
 		
 		dest[i] = 0;
 		for(j=-(filter_len-1);j<=(filter_len-1);j++) {
@@ -86,7 +89,7 @@ void ld_smooth(LDP ld, int neighbours, double scale_rad) {
 	double filter_tot = filter[0];
 	for(j=1;j<len;j++) filter_tot+=filter[j];
 	/* and normalize */
-	for(j=0;j<len;j++) filter_tot/=filter_tot;
+	for(j=0;j<len;j++) filter[j]/=filter_tot;
 
 	double new_readings[ld->nrays];
 	convolve(ld->valid, ld->readings, ld->nrays, new_readings, filter, len);
