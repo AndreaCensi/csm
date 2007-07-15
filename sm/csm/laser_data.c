@@ -201,9 +201,9 @@ int ld_valid_fields(LDP ld)  {
 	double min_reading = 0;
 	double max_reading = 100;
 	int i; for(i=0;i<ld->nrays;i++) {
+		double th = ld->theta[i];
 		if(ld->valid[i]) {
 			double r = ld->readings[i];
-			double th = ld->theta[i];
 			if(is_nan(r) || is_nan(th)) {
 				sm_error("Ray #%d: r = %f  theta = %f but valid is %d\n",
 					i, r, th, ld->valid[i]);
@@ -213,8 +213,14 @@ int ld_valid_fields(LDP ld)  {
 				sm_error("Ray #%d: %f is not in interval (%f, %f) \n",
 					i, r, min_reading, max_reading);
 				return 0;
+			}		
+		} else {
+			/* ray not valid, but checking theta anyway */
+			if(is_nan(th)) {
+				sm_error("Ray #%d: valid = %d  but theta = %f",
+					i,  ld->valid[i], th);
+				return 0;
 			}
-			
 		}
 	}
 	/* Checks that there is at least 10% valid rays */

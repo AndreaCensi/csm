@@ -119,10 +119,11 @@ void ld_get_buffer_polar(double phi, double rho, const double*pose,
 /** Reads all file to find bounding box */
 void get_bb(struct params*p, struct bounding_box*bb) {
 	LDP ld;
-	int counter = 0, 
+	int counter = -1, 
 	    considered = 0;
 
 	while((ld = ld_read_smart(p->input_file))) {
+		counter++;
 		if(should_consider(p, counter))  {
 			if(!ld_valid_fields(ld))  {
 				sm_error("Invalid laser data (#%d in file)\n", counter);
@@ -146,7 +147,6 @@ void get_bb(struct params*p, struct bounding_box*bb) {
 			
 			considered++;
 		}
-		counter++;
 		ld_free(ld);
 	}
 	sm_info("Considering %d of %d scans.\n", considered, counter);

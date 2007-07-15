@@ -1,5 +1,6 @@
 #include <time.h>
 #include <string.h>
+#include <libgen.h>
 
 #include <options/options.h>
 #include <csm/csm_all.h>

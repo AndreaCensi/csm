@@ -9,11 +9,11 @@
 #include <csm/csm_all.h>
 
 struct {
-	double bias;
+	double interval;
 	int seed;
 }p ;
 
-void ld_resample(LDP ld);
+LDP ld_resample(LDP ld);
 
 gsl_rng * rng;
 
@@ -22,7 +22,7 @@ int main(int argc, const char ** argv) {
 	
 	
 	struct option* ops = options_allocate(3);
-	options_double(ops, "bias", &p.bias, 0.5, "bias");
+	options_double(ops, "interval", &p.interval, sqrt(2.0), " 1 = no resampling");
 		
 	options_int(ops, "seed", &p.seed, 0, 
 		"Seed for random number generator (if 0, use GSL_RNG_SEED env. variable).");
@@ -45,41 +45,63 @@ int main(int argc, const char ** argv) {
 	if(p.seed != 0)
 	gsl_rng_set(rng, (unsigned int) p.seed);
 
-	int count = 0;
+	int count = -1;
 	LDP ld;
 	while( (ld = ld_read_smart(stdin))) {
+		count++;
 		
-		if(count & 123456789) 
-			ld_resample(ld);
-			
-		JO jo = ld_to_json(ld);
-		puts(json_object_to_json_string(jo));
-		puts("\n");
-		jo_free(jo);
-		ld_free(ld);
+		if(!ld_valid_fields(ld))  {
+			sm_error("Invalid laser data (#%d in file)\n", count);
+			continue;
+		}
 		
+/*		if(count & 1) {*/
+			LDP ld2 = ld_resample(ld);
+			ld_write_as_json(ld2, stdout);
+			ld_free(ld2);
+			ld_free(ld);
+/*		} else {
+			ld_write_as_json(ld, stdout);
+			ld_free(ld);
+		}*/
+
 		count++;
 	}
 	
 	return 0;
 }
 
-void ld_resample(LDP ld) {
-	double new_readings[ld->nrays];
-	double new_theta[ld->nrays];
-	copy_d(ld->readings, ld->nrays, new_readings);
-	copy_d(ld->theta, ld->nrays, new_theta);
-
-	int i;
-	for(i=1;i<ld->nrays-1;i++) {
-		if(!ld_valid_ray(ld, i) || !ld_valid_ray(ld, i+1)) continue;
+LDP ld_resample(LDP ld) {
+	int n = (int) (floor(ld->nrays / p.interval)-1);
 	
-		double alpha = 0.5 + 0.5*gsl_rng_uniform(rng);
-		new_theta[i] = alpha * ld->theta[i] + (1-alpha) * ld->theta[i+1];
-		new_readings[i] = alpha * ld->readings[i] + (1-alpha) * ld->readings[i+1];
-	}
+	LDP ld2 = ld_alloc_new(n);	
+	int k;
+	for(k=0;k<n;k++) {
+		double index = k * p.interval;
+		int i = (int) floor(index);
+		double a = 1 - (index - i);
 
-	copy_d(new_readings, ld->nrays, ld->readings);
-	copy_d(new_theta, ld->nrays, ld->theta);
+		ld2->theta[k] = a * ld->theta[i] + (1-a) * ld->theta[i+1];
+
+		if(!ld->valid[i] || !ld->valid[i+1]) {
+			ld2->valid[k] = 0;
+			ld2->readings[k] = NAN;
+		} else {
+			ld2->readings[k] = a * ld->readings[i] + (1-a) * ld->readings[i+1];
+			ld2->valid[k] = 1;
+		}
+		
+/*		sm_debug("k=%d index=%f i=%d a=%f valid %d reading %f\n", k,index,i,a,ld2->valid[k],ld2->readings[k]);*/
+
+	}
+	
+	ld2->min_theta = ld2->theta[0];
+	ld2->max_theta = ld2->theta[n-1];
+	ld2->tv = ld->tv;
+
+	copy_d(ld->odometry, 3, ld2->odometry);
+	copy_d(ld->estimate, 3, ld2->estimate);
+	
+	return ld2;
 }
 

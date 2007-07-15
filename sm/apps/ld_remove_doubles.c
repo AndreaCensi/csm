@@ -1,16 +1,10 @@
 #include <time.h>
 #include <string.h>
 #include <libgen.h>
+
+
 #include <options/options.h>
 #include <csm/csm_all.h>
-
-
-void ld_write_as_json(LDP ld, FILE * stream) {
-	JO jo = ld_to_json(ld);
-	fputs(json_object_to_json_string(jo), stream);
-	fputs("\n", stream);
-	jo_free(jo);
-}
 
 int ld_equal_readings(LDP ld1, LDP ld2, double epsilon) {
 	int i;
@@ -26,29 +20,57 @@ int ld_equal_readings(LDP ld1, LDP ld2, double epsilon) {
 int main(int argc, const char*argv[]) {
 	sm_set_program_name(basename(argv[0]));
 	
-	/* Read first scan */
-	LDP laser_ref, laser_sens;
+	double epsilon;
 	
-	if(!(laser_ref = ld_read_smart(stdin))) {
-		sm_error("Could not read first scan.\n");
+	struct option* ops = options_allocate(3);
+	options_double(ops, "epsilon", &epsilon, 0.0001, "epsilon");
+	if(!options_parse_args(ops, argc, argv)) {
+		options_print_help(ops, stderr);
 		return -1;
 	}
 	
-	ld_write_as_json(laser_ref, stdout);
-	int count = 1;
+	/* Read first scan */
+	LDP laser_ref=0, laser_sens;
+		
+	int count = -1;	
+	int num_discarded = 0;
+	int num_invalid = 0;
+	int ref_index = 0;
 	
 	while( (laser_sens = ld_read_smart(stdin)) ) {
-
-		if(ld_equal_readings(laser_ref, laser_sens, 0.00001)) {
-			sm_debug("Found double (scan #%d, #%d)\n", count-1, count);
+		count++;
+		
+		if(!ld_valid_fields(laser_sens))  {
+			sm_error("Invalid laser data (#%d in file)\n", count);
+			num_invalid++;
+			continue;
+		}
+		
+		if(!laser_ref) { 
+			laser_ref = laser_sens; 
+			ld_write_as_json(laser_sens, stdout);
+			count++;
+			continue;
+		}
+		
+		if(ld_equal_readings(laser_ref, laser_sens, epsilon)) {
+			sm_debug("Found double (scan #%d, #%d)\n", ref_index, count);
+			num_discarded++;
 		} else {
 			ld_write_as_json(laser_sens, stdout);
 		}
 		
 		ld_free(laser_ref); laser_ref = laser_sens;
-		count ++;
+		ref_index = count;
 	}
-	ld_free(laser_ref);
+	if(laser_ref) ld_free(laser_ref);
 	
-	return 0;
+	sm_info("#   epsilon: %f m\n", epsilon);
+	sm_info("#     scans: %d\n", count);
+	if(count>0) {
+		sm_info("#   invalid: %d\n", num_invalid);
+		sm_info("# discarded: %d (%d%%)\n", num_discarded, num_discarded * 100 / count);
+	}
+
+	return num_invalid;
 }

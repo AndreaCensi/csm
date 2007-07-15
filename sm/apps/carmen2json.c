@@ -1,4 +1,5 @@
 #include <csm/csm.h>
+#include <libgen.h>
 
 int main(int argc, char * argv[]) {
 	sm_set_program_name(basename(argv[0]));
@@ -10,14 +11,10 @@ int main(int argc, char * argv[]) {
 			errors++;
 			continue;
 		}
-		
-		JO jo = ld_to_json(ld);
-		puts(json_object_to_json_string(jo));
-		puts("\n");
-		jo_free(jo);
+
+		ld_write_as_json(ld, stdout);
 		
 		ld_free(ld);
-
 		count++;
 	}
 	

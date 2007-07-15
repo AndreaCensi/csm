@@ -7,13 +7,6 @@
 
 #include <csm/csm_all.h>
 
-void ld_write_as_json(FILE*f, LDP ld) {
-	JO jo = ld_to_json(ld);
-	fputs(json_object_to_json_string(jo), f);
-	fputs("\n", f);
-	jo_free(jo);
-}
-
 int main(int argc, const char * argv[]) {
 
 	const char*input_filename;
@@ -66,7 +59,7 @@ int main(int argc, const char * argv[]) {
 	copy_d(laser_ref->odometry, 3, old_odometry);
 	
 	LDP laser_sens;
-	ld_write_as_json(output_stream, laser_ref);
+	ld_write_as_json(laser_ref, output_stream);
 	
 	while((laser_sens = ld_read_smart(input_stream))) {
 		double guess[3], old_guess[3];
@@ -94,7 +87,7 @@ int main(int argc, const char * argv[]) {
 			
 			
 			
-			ld_write_as_json(output_stream, laser_sens);
+			ld_write_as_json(laser_sens, output_stream);
 		
 		ld_free(laser_ref);
 		laser_ref = laser_sens;

@@ -2,6 +2,7 @@
 #include <gsl/gsl_randist.h>
 
 #include <math.h>
+#include <libgen.h>
 
 #include <options/options.h>
 #include <csm/csm_all.h>
@@ -13,6 +14,8 @@ struct ld_noise_params {
 };
 
 int main(int argc, const char * argv[]) {
+	sm_set_program_name(basename(argv[0]));
+	
 	struct ld_noise_params p;
 	
 	struct option* ops = options_allocate(3);
@@ -34,8 +37,13 @@ int main(int argc, const char * argv[]) {
 	if(p.seed != 0)
 	gsl_rng_set(rng, (unsigned int) p.seed);
 
-	LDP ld;
+	LDP ld; int count = -1;
 	while( (ld = ld_from_json_stream(stdin))) {
+		if(!ld_valid_fields(ld))  {
+			sm_error("Invalid laser data (#%d in file)\n", count);
+			continue;
+		}
+		
 		int i;
 		for(i=0;i<ld->nrays;i++) {
 			if(!ld->valid[i]) continue;
@@ -46,10 +54,8 @@ int main(int argc, const char * argv[]) {
 			if(p.discretization > 0)
 				*reading -= fmod(*reading , p.discretization);
 		}
-		JO jo = ld_to_json(ld);
-		puts(json_object_to_json_string(jo));
-		puts("\n");
-		jo_free(jo);
+	
+		ld_write_as_json(ld, stdout);
 		ld_free(ld);
 	}
 	

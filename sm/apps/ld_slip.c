@@ -47,8 +47,14 @@ int main(int argc, const char ** argv) {
 	if(p.seed != 0)
 	gsl_rng_set(rng, (unsigned int) p.seed);
 
-	LDP ld;
+	LDP ld; int count=-1;
 	while( (ld = ld_read_smart(stdin))) {
+		count++;
+		if(!ld_valid_fields(ld))  {
+			sm_error("Invalid laser data (#%d in file)\n", count);
+			continue;
+		}
+		
 		if(!any_nan(ld->true_pose, 3))
 			copy_d( (const double*) ld->true_pose, 3, ld->odometry);
 		
@@ -69,10 +75,8 @@ int main(int argc, const char ** argv) {
 	
 		sm_debug("error %s\n", friendly_pose(e));
 		
-		JO jo = ld_to_json(ld);
-		puts(json_object_to_json_string(jo));
-		puts("\n");
-		jo_free(jo);
+		ld_write_as_json(ld, stdout);
+		
 		ld_free(ld);
 	}
 	

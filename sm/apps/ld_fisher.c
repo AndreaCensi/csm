@@ -6,6 +6,8 @@
 #include <options/options.h>
 #include <csm/csm_all.h>
 
+#include <libgen.h>
+
 struct ld_fisher_params {
 	double sigma;
 };
@@ -13,6 +15,8 @@ struct ld_fisher_params {
 val ld_fisher0(LDP ld);
 
 int main(int argc, const char * argv[]) {
+	sm_set_program_name(basename(argv[0]));
+	
 	struct ld_fisher_params p;
 	
 	struct option* ops = options_allocate(3);

@@ -206,6 +206,14 @@ LDP ld_from_json_stream(FILE*file) {
 	return ld;
 }
 
+void ld_write_as_json(LDP ld, FILE * stream) {
+	JO jo = ld_to_json(ld);
+	fputs(json_object_to_json_string(jo), stream);
+	fputs("\n", stream);
+	jo_free(jo);
+}
+
+
 /** 
 	Tries to read a laser scan from file. If error or EOF, it returns 0.
 	Whitespace is skipped. If first valid char is '{', it tries to read 

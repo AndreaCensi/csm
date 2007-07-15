@@ -29,4 +29,6 @@ LDP ld_from_json_stream(FILE*);
 */
 LDP ld_read_smart(FILE*);
 
+void ld_write_as_json(LDP ld, FILE * stream);
+
 #endif

@@ -24,9 +24,10 @@ int main(int argc, const char * argv[]) {
 	}
 
 	int errors = 0;
-	int count = 0;
+	int count = -1;
 	LDP ld;
-	while( (ld = ld_read_smart(stdin))) {
+	while( (ld = ld_read_smart(stdin)) ) {
+		count++;
 		if(!ld_valid_fields(ld))  {
 			sm_error("Invalid laser data (#%d in file)\n", count);
 			errors++;
@@ -35,13 +36,9 @@ int main(int argc, const char * argv[]) {
 		
 		ld_smooth(ld, p.neighbours, deg2rad(p.scale_deg) );
 
-		JO jo = ld_to_json(ld);
-		puts(json_object_to_json_string(jo));
-		puts("\n");
-		jo_free(jo);
+		ld_write_as_json(ld, stdout);
+
 		ld_free(ld);
-		
-		count++;
 	}
 	
 	return errors;
@@ -95,7 +92,6 @@ void ld_smooth(LDP ld, int neighbours, double scale_rad) {
 	convolve(ld->valid, ld->readings, ld->nrays, new_readings, filter, len);
 	copy_d(new_readings, ld->nrays,  ld->readings);
 
-	
 	for(j=0;j<len;j++) {
 		
 	}
