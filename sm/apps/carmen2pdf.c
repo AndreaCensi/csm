@@ -1,5 +1,7 @@
 #include <time.h>
 #include <string.h>
+#include <libgen.h>
+
 #include <cairo.h>
 #include <cairo-pdf.h>
 
@@ -156,12 +158,6 @@ void get_bb(struct params*p, struct bounding_box*bb) {
 	bb->y1 += p->padding;
 }
 
-int any_nan(double *d, int n) {
-	int i; for(i=0;i<n;i++) 
-		if(is_nan(d[i]))
-		return 1;
-	return 0;
-}
 
 double * ld_get_reference(LDP ld, reference use_reference) {
 	double * pose;

@@ -76,6 +76,13 @@ int is_nan(double v) {
 	return v == v ? 0 : 1;
 }
 
+int any_nan(const double *d, int n) {
+	int i; for(i=0;i<n;i++) 
+		if(is_nan(d[i]))
+			return 1;
+	return 0;
+}
+
 double norm_d(const double*p) {
 	return sqrt(p[0]*p[0]+p[1]*p[1]);
 }
