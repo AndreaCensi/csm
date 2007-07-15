@@ -1,6 +1,5 @@
 #include <gsl/gsl_histogram.h>
 #include <gsl/gsl_matrix.h>
-#include <gsl/gsl_vector.h>
 
 
 #include "../csm_all.h"
@@ -36,14 +35,15 @@ void sm_gpm(struct sm_params*params, struct sm_result*res) {
 	gsl_histogram*hist = gsl_histogram_alloc(nbins);
 	gsl_histogram_set_ranges_uniform(hist, -M_PI, M_PI);
 	
-	
 	/* Fill the histogram with samples */
-	gsl_vector * u = vector_from_array(3, params->first_guess);
-	printf("gpm 1/2: old u = : %f %f %f\n",gvg(u,0),gvg(u,1),gvg(u,2));
+	double u[3]; copy_d(params->first_guess, 3, u);
+	sm_debug("gpm 1/2: old u = : %s \n", friendly_pose(u) );
+	
+	int interval = params->gpm_interval;
 	
 	ght_find_theta_range(laser_ref, laser_sens,
 		u, params->max_linear_correction,
-		params->max_angular_correction_deg, hist);
+		params->max_angular_correction_deg, interval, hist);
 		
 	/* Find the bin with most samples */
 	size_t max_bin = gsl_histogram_max_bin(hist);
@@ -57,7 +57,6 @@ void sm_gpm(struct sm_params*params, struct sm_result*res) {
 	min_range += -extend_range;
 	max_range += +extend_range;
 
-
 	/*	if(jf()) fprintf(jf(), "iteration 0\n");
 	journal_pose("x_old", u);*/
 
@@ -67,22 +66,22 @@ void sm_gpm(struct sm_params*params, struct sm_result*res) {
 
 
 	/* Now repeat the samples generation with a smaller domain */
-	gvs(u, 2, (max_range+min_range)/2);
-	double new_range_deg = rad2deg((max_range-min_range)/2);
+	u[2] = 0.5 * (max_range + min_range);
+	double new_range_deg = rad2deg( 0.5*(max_range - min_range) );
 	
-	gsl_vector * x_new = gsl_vector_alloc(3);
+	double x_new[3];
 	ght_one_shot(laser_ref, laser_sens,
 			u, params->max_linear_correction*2,
-			new_range_deg, x_new) ;
+			new_range_deg, interval, x_new) ;
 	/* Et voila, in x_new we have the answer */
 
 	{
 		sm_debug("gpm : max_correction_lin %f def %f\n", params->max_linear_correction, 		params->max_angular_correction_deg);
 
-		sm_debug("gpm 1/2: new u = : %f %f %f\n",gvg(u,0),gvg(u,1),gvg(u,2));
+		sm_debug("gpm 1/2: new u = : %s \n", friendly_pose(u) );
 		sm_debug("gpm 1/2: New range: %f to %f\n",rad2deg(min_range),rad2deg(max_range));
 
-		sm_debug("gpm 2/2: Solution: %f %f %f\n",gvg(x_new,0),gvg(x_new,1),gvg(x_new,2));
+		sm_debug("gpm 2/2: Solution: %s \n", friendly_pose(x_new));
 	/*	if(jf()) fprintf(jf(), "iteration 2\n");
 		journal_pose("x_old", x_new);	*/
 	}
@@ -90,25 +89,22 @@ void sm_gpm(struct sm_params*params, struct sm_result*res) {
 	/* Administrivia */
 
 	res->valid = 1;
-	res->x[0] = gvg(x_new,0);
-	res->x[1] = gvg(x_new,1);
-	res->x[2] = gvg(x_new,2);
+	copy_d(x_new, 3, res->x);
 	
 	res->iterations = 0;
 	
-	gsl_vector_free(u);
-	gsl_vector_free(x_new);
 	gsl_histogram_free(hist);
 }
 
 void ght_find_theta_range(LDP laser_ref, LDP laser_sens,
-	const gsl_vector*x0, double max_linear_correction,
-	double max_angular_correction_deg, gsl_histogram*hist) 
+	const double*x0, double max_linear_correction,
+	double max_angular_correction_deg, int interval, gsl_histogram*hist) 
 {
 	int count = 0;
 	int i;
 	for(i=0;i<laser_sens->nrays;i++) {
 		if(!laser_sens->alpha_valid[i]) continue;
+		if(i % interval) continue;
 		
 		const double * p_i = laser_sens->points[i].p;
 		int from; int to; int start_cell;
@@ -119,10 +115,11 @@ void ght_find_theta_range(LDP laser_ref, LDP laser_sens,
 		int j;
 		for(j=from;j<=to;j++) {
 			if(!laser_ref->alpha_valid[j]) continue;
+			if(j % interval) continue;
 			
 			double theta = angleDiff(laser_ref->alpha[j], laser_sens->alpha[i]);
 			
-			if(fabs(theta-gvg(x0,2))>deg2rad(max_angular_correction_deg))
+			if( fabs(theta-x0[2]) > deg2rad(max_angular_correction_deg))
 				continue;
 	
 			const double * p_j = laser_ref->points[j].p;
@@ -130,7 +127,7 @@ void ght_find_theta_range(LDP laser_ref, LDP laser_sens,
 			double c = cos(theta); double s = sin(theta);
 			double t_x = p_j[0] - (c*p_i[0]-s*p_i[1]);
 			double t_y = p_j[1] - (s*p_i[0]+c*p_i[1]);
-			double t_dist = sqrt(square(t_x-gvg(x0,0))+square(t_y-gvg(x0,1)));
+			double t_dist = sqrt( square(t_x-x0[0]) + square(t_y-x0[1]) );
 
 			if(t_dist > max_linear_correction)
 				continue;
@@ -145,8 +142,8 @@ void ght_find_theta_range(LDP laser_ref, LDP laser_sens,
 }
 
 void ght_one_shot(LDP laser_ref, LDP laser_sens,
-		const gsl_vector*x0, double max_linear_correction,
-	double max_angular_correction_deg, gsl_vector*x) 
+		const double*x0, double max_linear_correction,
+	double max_angular_correction_deg, int interval, double*x) 
 {
 	double L[3][3]  = {{0,0,0},{0,0,0},{0,0,0}};
 	double z[3] = {0,0,0};
@@ -155,6 +152,7 @@ void ght_one_shot(LDP laser_ref, LDP laser_sens,
 	int i;
 	for(i=0;i<laser_sens->nrays;i++) {
 		if(!laser_sens->alpha_valid[i]) continue;
+		if(i % interval) continue;
 		
 		const double  * p_i = laser_sens->points[i].p;
 
@@ -164,11 +162,12 @@ void ght_one_shot(LDP laser_ref, LDP laser_sens,
 
 		int j;
 		for(j=from;j<=to;j++) {
+			if(j % interval) continue;
 			if(!laser_ref->alpha_valid[j]) continue;
 			
 			double theta = angleDiff(laser_ref->alpha[j], laser_sens->alpha[i]);
 			
-			if(fabs(theta-gvg(x0,2))>deg2rad(max_angular_correction_deg))
+			if( fabs(theta-x0[2]) > deg2rad(max_angular_correction_deg) )
 				continue;
 	
 			const double * p_j = laser_ref->points[j].p;
@@ -176,14 +175,16 @@ void ght_one_shot(LDP laser_ref, LDP laser_sens,
 			double c = cos(theta); double s = sin(theta);
 			double t_x = p_j[0] - (c*p_i[0]-s*p_i[1]);
 			double t_y = p_j[1] - (s*p_i[0]+c*p_i[1]);
-			double t_dist = sqrt(square(t_x-gvg(x0,0))+square(t_y-gvg(x0,1)));
+			double t_dist = sqrt( square(t_x-x0[0]) + square(t_y-x0[1]) );
 
 			if(t_dist > max_linear_correction)
 				continue;
 
-			double weight = 1/(laser_sens->cov_alpha[i]+laser_ref->cov_alpha[j]);
-
-			weight = exp(-square(t_dist)-5*square(theta-gvg(x0,2)));
+			/*double weight = 1/(laser_sens->cov_alpha[i]+laser_ref->cov_alpha[j]);
+			double weight = exp( -square(t_dist) - 5 * square(theta-x0[2]) );*/
+			
+			double weight = 1;
+			
 			double alpha = laser_ref->alpha[j];
 			double ca = cos(alpha); double sa=sin(alpha);
 
@@ -217,7 +218,8 @@ void ght_one_shot(LDP laser_ref, LDP laser_sens,
 		
 		val ex = m(inv(eL), ez);
 		
-		egsl_v2vec(ex, x);
+		egsl_v2a(ex, x);
+		
 
 /*		egsl_print("eL", eL);
 		egsl_print("ez", ez);

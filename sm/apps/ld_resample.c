@@ -72,7 +72,8 @@ int main(int argc, const char ** argv) {
 }
 
 LDP ld_resample(LDP ld) {
-	int n = (int) (floor(ld->nrays / p.interval)-1);
+	/* FIXME magic number */
+	int n = (int) (floor(ld->nrays / p.interval))-4;
 	
 	LDP ld2 = ld_alloc_new(n);	
 	int k;
@@ -83,6 +84,11 @@ LDP ld_resample(LDP ld) {
 
 		ld2->theta[k] = a * ld->theta[i] + (1-a) * ld->theta[i+1];
 
+		if(is_nan(ld2->theta[k])) {
+			sm_debug("Hey, k=%d theta[%d]=%f theta[%d]=%f\n",
+				k,i,ld->theta[i],i+1,ld->theta[i+1]);
+		}
+		
 		if(!ld->valid[i] || !ld->valid[i+1]) {
 			ld2->valid[k] = 0;
 			ld2->readings[k] = NAN;
@@ -92,7 +98,6 @@ LDP ld_resample(LDP ld) {
 		}
 		
 /*		sm_debug("k=%d index=%f i=%d a=%f valid %d reading %f\n", k,index,i,a,ld2->valid[k],ld2->readings[k]);*/
-
 	}
 	
 	ld2->min_theta = ld2->theta[0];
@@ -101,6 +106,7 @@ LDP ld_resample(LDP ld) {
 
 	copy_d(ld->odometry, 3, ld2->odometry);
 	copy_d(ld->estimate, 3, ld2->estimate);
+	
 	
 	return ld2;
 }

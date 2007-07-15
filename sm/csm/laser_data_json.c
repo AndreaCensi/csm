@@ -207,6 +207,10 @@ LDP ld_from_json_stream(FILE*file) {
 }
 
 void ld_write_as_json(LDP ld, FILE * stream) {
+	if(!ld_valid_fields(ld)) {
+		sm_error("Writing bad data to the stream.\n");
+	}
+
 	JO jo = ld_to_json(ld);
 	fputs(json_object_to_json_string(jo), stream);
 	fputs("\n", stream);

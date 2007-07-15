@@ -68,7 +68,7 @@ struct sm_params {
 	
 	double gpm_theta_bin_size_deg;
 	double gpm_extend_range_deg; 
-
+	int gpm_interval;
 
 	/** Pose of sensor with respect to robot */
 	double laser[3]; 

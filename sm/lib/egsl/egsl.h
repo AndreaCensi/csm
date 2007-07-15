@@ -51,9 +51,9 @@ double egsl_atm(val, size_t i, size_t j);
 val egsl_vFa(size_t rows, const double*);
 val egsl_vFda(size_t rows, size_t columns, const double*);
 
-/** Copies a vector value into array */
+/** Copies a VECTOR value into array */
 void egsl_v2a(val, double*);
-/** Copies a matrix value into array (row1 .. rown) */
+/** Copies a MATRIX value into array (row1 .. rown) */
 void egsl_v2da(val, double*);
 /** Copies a vector value into a gsl_vector */
 void egsl_v2vec(val, gsl_vector*);

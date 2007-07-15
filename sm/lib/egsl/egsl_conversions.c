@@ -19,6 +19,13 @@ val egsl_vFa(size_t rows, const double*a) {
 	return v;
 }
 
+void egsl_v2a(val v, double*vec) {
+	gsl_matrix *m = egsl_gslm(v);
+	size_t i;
+	for(i=0; i < m->size1; i++)
+		vec[i] = gsl_matrix_get(m,i,0);
+}
+
 void egsl_v2da(val v, double*a){
 	gsl_matrix *m = egsl_gslm(v);
 	size_t i,j;

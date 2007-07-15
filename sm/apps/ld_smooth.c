@@ -1,4 +1,4 @@
-
+#include <libgen.h>
 #include <options/options.h>
 #include <csm/csm_all.h>
 
@@ -13,6 +13,8 @@ struct {
 void ld_smooth(LDP ld, int neighbours, double scale_rad);
 
 int main(int argc, const char * argv[]) {
+	sm_set_program_name(basename(argv[0]));
+	
 	struct option* ops = options_allocate(3);
 	options_double(ops, "scale_deg", &p.scale_deg, 0.0, "Scale factor (degrees) ");
 	options_int(ops, "neighbours", &p.neighbours, 1, "How many neighbours to consider (regardless of scale).");
@@ -76,7 +78,7 @@ void ld_smooth(LDP ld, int neighbours, double scale_rad) {
 		filter[j] = exp(-mahal);
 
 		if(once) 
-			fprintf(stderr, "filter[%d] = %f mahal = %f dist_rad = %f scale_rad = %f \n", j, filter[j], mahal, dist_rad, scale_rad);
+			sm_info("filter[%d] = %f mahal = %f dist_rad = %f scale_rad = %f \n", j, filter[j], mahal, dist_rad, scale_rad);
 		
 	}
 	
