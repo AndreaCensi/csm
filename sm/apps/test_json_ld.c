@@ -1,6 +1,6 @@
 #include <csm/csm.h>
 
-int main(int argc, char * argv[]) {
+int main() {
 	JO jo; /* the monkey */
 	LDP ld;
 	

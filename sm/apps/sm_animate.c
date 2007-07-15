@@ -1,121 +1,137 @@
-
-int main() {}
-#if 0
-
 #include <stdio.h>
-#include <string>
 #include <string.h>
 #include <float.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <libgen.h>
-#include <fig/fig.h>
-#include <fig/fig_utils.h>
 
-#include <simplemap/simplemap.h>
-
-#include <csm/csm_all.h>
+#include "../csm/csm_all.h"
 
 #include <options/options.h>
+#include <cairo-pdf.h>
 
-#include "ld_drawing.h"
+#include "ld_cairo.h"
 
-using namespace std;
-using namespace FIG;
-using namespace RDK2::Geometry;
-using namespace PPU;
-using namespace CSM;
-
-struct anim_params {
+typedef struct {
 	const char * file_input;
 	const char * file_output;
-	int depth_increment;
 	
-	ld_style laser_ref, laser_sens;
-	Fig_style corr;
-};
+	ld_style laser_ref_s, laser_sens_s;
+	/* Drawing style for correspondences */
+	line_style corr;
+} anim_params ;
 
-extern "C" FILE * open_file_for_reading(const char*);
-int draw_animation(Figure& fig, struct anim_params& p, JO jo, JO log);
+int draw_animation( anim_params* p, JO jo);
 
-void ld_draw_ld(Figure&fig, LDP ld, ld_style&p, Point2od pose) {
-	if(p.rays.draw) 
-		ld_draw_rays(fig, ld, &(p.rays), pose);
-	if(p.countour.draw) 
-		ld_draw_countour(fig, ld, &(p.countour), pose);
-	if(p.points.draw) 
-		ld_draw_points(fig, ld, &(p.points), pose, p.points_radius);
+
+void ls_set_defaults(line_style*ls) {
+	ls->draw = 1;
+	sprintf(ls->color, "black");
+	ls->width = 0.002;
+}
+
+void lds_set_defaults(ld_style*lds) {
+	ls_set_defaults(&(lds->rays));
+	lds->rays.width = 0.0002;
+	ls_set_defaults(&(lds->countour));
+	ls_set_defaults(&(lds->points));
+	lds->points_radius = 0.003;
+}
+
+void set_defaults(anim_params *p) {
+	lds_set_defaults(&(p->laser_ref_s));
+	lds_set_defaults(&(p->laser_sens_s));
+	ls_set_defaults(&(p->corr));
 }
 
 int main(int argc, const char** argv)
 {
-	struct anim_params p;
+	anim_params p;
+	set_defaults(&p);
 	
 	struct option* ops = options_allocate(60);
-	options_string(ops, "in", &p.file_input, "-", "Input file (defaults to stdin)");
-	options_string(ops, "out", &p.file_output, "animation.fig", "Output file ");
-	options_int(ops, "depth_increment", &p.depth_increment, 5, "depth increment for each frame");
+	options_string(ops, "in", &p.file_input, "stdin", "Input file (defaults to stdin)");
+	options_string(ops, "out", &p.file_output, "sm_animate.pdf", "Output file ");
 
-	p.laser_ref.add_options(ops, "ref","Ref");
-	p.laser_sens.add_options(ops, "sens","Sens");
-	p.corr.add_options(ops, "corr",     "Correspondences |");
+
+	lds_add_options(&(p.laser_ref_s), ops, "ref", "Ref  |");
+	lds_add_options(&(p.laser_sens_s), ops, "sens", "Sens |");
+	ls_add_options(&(p.corr), ops, "corr", "Correspondences |");
+	
 	
 	if(!options_parse_args(ops, argc, argv)) {
-		fprintf(stderr, "%s: draws icp animation.\n\nUsage:\n",
-			basename(*argv));
+		sm_info("Draws icp animation.\n\nUsage:\n");
 		options_print_help(ops, stderr);
 		return -1;
 	}
 
+
 	FILE * input = open_file_for_reading(p.file_input);
 	if(!input) return -1;
+	
 	
 	JO jo; 
 	int count = 0; 	
 	while( (jo = json_read_stream(input)) ) {
-		Figure fig;
-
-		JO log = jo_new();
-		char * base = basename(p.file_output);
-		
-		jo_add(log, "fig", jo_new_string(base) );
-/*
-		JO sm_icp = find_object_with_name(jo, "sm_icp");
-		if(!sm_icp) {
-			fprintf(stderr, "Could find 'sm_icp'.\n");
-			return -1;
-		} */
-			if(!draw_animation(fig, p, jo, log))
-			return 0;
-		
-		fig.write(p.file_output);
-		ofstream ofs( (string(p.file_output) + ".desc").c_str());
-		ofs << json_object_to_json_string(log);
-		jo_free(log);
-		
-		jo_free(jo);
+		if(!draw_animation(&p, jo))
+		return 0;
 		count++;
 	}
-	
-	
-	
+
 }
 
 /** Returns an array with depths */
-int draw_animation(Figure& fig, struct anim_params& p, JO jo, JO log) {
+int draw_animation(anim_params* p, JO jo) {
 	JO jo_ref = jo_get(jo, "laser_ref");
 	JO jo_sens = jo_get(jo, "laser_sens");
 	if(!jo_ref || !jo_sens) {
-		fprintf(stderr, "Could not get laser_ref/laser_sens.\n");
+		sm_error("Could not get laser_ref/laser_sens.\n");
 		return 0;
 	}
 	
 	LDP laser_ref = json_to_ld(jo_ref);
 	LDP laser_sens = json_to_ld(jo_sens); 
 	if(!laser_ref || !laser_sens) {
-		fprintf(stderr, "Could not read laser_ref/laser_sens.\n");
+		sm_error("Could not read laser_ref/laser_sens.\n");
 		return 0;
 	}
+
+	double max_readings = 0;
+	int i; for(i=0;i<laser_ref->nrays;i++) {
+		if(!ld_valid_ray(laser_ref,i)) continue;
+		if(max_readings < laser_ref->readings[i])
+			max_readings = laser_ref->readings[i];
+	}
+	sm_debug("max_readings: %f", max_readings);
+
+	double points = 500;
+	
+	cairo_surface_t *surface;
+	cairo_t *cr;
+	cairo_status_t status;
+	
+	surface = cairo_pdf_surface_create(p->file_output, points, points);
+	cr = cairo_create (surface);
+	status = cairo_status (cr);
+
+	if (status) {
+		sm_error("Failed to create pdf surface for file %s: %s\n",
+			p->file_output, cairo_status_to_string (status));
+		return 0;
+	}
+
+
+	cairo_translate(cr, points/2, points/2);
+	double scale = 0.5 *(points/max_readings);
+	cairo_scale(cr, scale, -scale);
+	
+	
+	cairo_set_line_width(cr, 0.01);
+	cairo_set_source_rgb (cr, 1.0, 0.2, 0.2);
+	cairo_arc (cr, 0.0, 0.0, max_readings, 0.0, 2*M_PI);
+	cairo_stroke (cr);
+	cairo_move_to(cr, 0.0, 0.0);
+	cairo_line_to(cr, max_readings, 0.0);
 	
 	JO iterations = jo_get(jo, "iterations");
 	if(!iterations || !json_object_is_type(iterations, json_type_array)) {
@@ -124,29 +140,10 @@ int draw_animation(Figure& fig, struct anim_params& p, JO jo, JO log) {
 	}
 	
 	int niterations = json_object_array_length(iterations);
-	fprintf(stderr, "Reading %d iterations.\n", niterations);
+	sm_error("Reading %d iterations.\n", niterations);
 	int it;
 
-	{
-		JO frames = jo_new_array();
-		for(it=0;it<niterations;it++) {
-			JO frame = jo_new();
 
-			int depths[4] = {p.corr.depth, p.laser_sens.rays.depth, 
-				p.laser_sens.countour.depth, p.laser_sens.points.depth};
-			int delta = p.depth_increment * it;
-			int a; for(a=0;a<4;a++) depths[a] += delta;
-
-			jo_add_int_array(frame, "depths", depths, 4);
-			jo_array_add(frames, frame);
-		}
-		jo_add(log, "frames", frames);
-		int depths[3] = { p.laser_ref.rays.depth, 
-			p.laser_ref.countour.depth, p.laser_ref.points.depth};
-		jo_add_int_array(log, "common_depths", depths, 3);
-	}
-	
-	ld_draw_ld(fig, laser_ref, p.laser_ref, Point2od(0,0,0));
 	for(it=0;it<niterations;it++) {
 		JO iteration = json_object_array_get_idx(iterations, it);
 		
@@ -159,21 +156,27 @@ int draw_animation(Figure& fig, struct anim_params& p, JO jo, JO log) {
 			return 0;
 		}
 
-		ld_draw_correspondences(fig, laser_ref, laser_sens, &(p.corr), Point2od(x_old));
-		ld_draw_ld(fig, laser_sens, p.laser_sens, Point2od(x_old));
-		
-		p.corr.depth                += p.depth_increment;
-		p.laser_sens.rays.depth     += p.depth_increment;
-		p.laser_sens.countour.depth += p.depth_increment;
-		p.laser_sens.points.depth   += p.depth_increment;
+		cairo_save(cr);
+			double zero[3] = {0,0,0};
+			cr_set_reference(cr, zero);
+			cr_ld_draw(cr, laser_ref, &(p->laser_ref_s));
+
+			/* compute w */
+/*			cr_draw_correspondences(fig, laser_ref, laser_sens, &(p.corr), Point2od(x_old));*/
+			cr_set_reference(cr, x_old);
+			cr_ld_draw(cr, laser_sens, &(p->laser_sens_s));
+
+			cairo_show_page (cr);
+
+		cairo_restore(cr);
 	}
 	
 	ld_free(laser_ref);
 	ld_free(laser_sens);
+
+	cairo_destroy (cr);
+	cairo_surface_destroy (surface);
 	
 	return 1;
 }
-
-#endif
-
 

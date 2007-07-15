@@ -101,8 +101,11 @@ IF(CAIRO_FOUND)
 	new_executable(carmen2pdf)
 	new_executable(sm_animate)
 	
+	ADD_LIBRARY(csm_cairo STATIC apps/ld_cairo.c)
+	
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CAIRO_CFLAGS}")
-	TARGET_LINK_LIBRARIES(carmen2pdf -lcairo)
+	TARGET_LINK_LIBRARIES(carmen2pdf csm_cairo -lcairo)
+	TARGET_LINK_LIBRARIES(sm_animate csm_cairo -lcairo)
 ENDIF(CAIRO_FOUND)
 
 

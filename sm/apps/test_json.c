@@ -1,6 +1,6 @@
 #include <csm/csm.h>
 
-int main(int argc, char * argv[]) {
+int main() {
 	
 	LDP ld = ld_alloc_new(50);
 	JO jo = ld_to_json(ld);
