@@ -5,6 +5,28 @@ void cr_ld_draw_rays(cairo_t*, LDP, line_style*);
 void cr_ld_draw_countour(cairo_t*, LDP, line_style*);
 void cr_ld_draw_points(cairo_t*, LDP, line_style*, float radius);
 
+void cr_ld_draw_corr(cairo_t*cr, LDP laser_ref, LDP laser_sens, line_style*ls) {
+	int i;
+	for(i=0; i < laser_sens->nrays; i++) {
+		if(!ld_valid_corr(laser_sens,i)) continue;
+
+		if(!laser_sens->corr[i].valid) continue;
+
+		int j1 = laser_sens->corr[i].j1;
+		int j2 = laser_sens->corr[i].j2;
+		
+		const double *p_j1  = laser_ref->points[j1].p;
+		const double *p_j2  = laser_ref->points[j2].p;
+		const double *p_i_w = laser_sens->points_w[i].p;
+		double proj[2];
+		projection_on_line_d(p_j1,  p_j2, p_i_w, proj, 0);
+	
+		cairo_move_to(cr, p_i_w[0], p_i_w[1]);
+/*		cairo_line_to(cr, p_j1[0], p_j1[1]);*/
+		cairo_line_to(cr, proj[0], proj[1]);
+		cairo_stroke(cr);	
+	}
+}
 
 void ls_add_options(line_style*ls, struct option*ops, 
 	const char*prefix, const char*desc_prefix) 
@@ -79,7 +101,7 @@ void compute_stroke_sequence(LDP ld, struct stroke_sequence*draw_info,
 
 void cr_ld_draw_countour(cairo_t*cr, LDP ld, line_style*ls) {
 	struct stroke_sequence draw_info[ld->nrays];
-	compute_stroke_sequence(ld, draw_info, 10);
+	compute_stroke_sequence(ld, draw_info, 10.0);
 	
 	/* draw contour: begin_new_stroke and end_stroke tell 
 	when to interrupt the stroke */
@@ -109,7 +131,7 @@ void cr_ld_draw_points(cairo_t*cr, LDP ld, line_style*ls, float radius) {
 		double x = ld->readings[i] * cos(ld->theta[i]);
 		double y = ld->readings[i] * sin(ld->theta[i]);
 
-		cairo_arc (cr, x, y, radius, 0, 2*M_PI);
+		cairo_arc (cr, x, y, radius, 0.0, 2*M_PI);
 		cairo_stroke (cr);
 	}
 }

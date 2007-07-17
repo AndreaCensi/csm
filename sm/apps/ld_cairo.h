@@ -33,6 +33,7 @@ void lds_add_options(ld_style*lds, struct option*ops,
 
 void cr_set_style(cairo_t*cr, line_style*);
 void cr_ld_draw(cairo_t* cr, LDP ld, ld_style *p);
+void cr_ld_draw_corr(cairo_t*cr, LDP laser_ref, LDP laser_sens, line_style*);
 
 void cr_set_reference(cairo_t*cr,double*pose);
 

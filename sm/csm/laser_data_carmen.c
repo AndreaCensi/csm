@@ -105,7 +105,10 @@ int ld_read_next_laser_carmen(FILE*file, LDP ld) {
 			
 			/* bad hokuyo!! */
 			if(nrays == 769) {
-				if(i>727) { ld->valid[i]=0; ld->readings[i]=NAN;}
+				if(i>725 || i<44) { 
+					ld->valid[i] = 0; 
+					ld->readings[i] = NAN;
+				}
 			}
 			
 		}

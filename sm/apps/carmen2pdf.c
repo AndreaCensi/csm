@@ -132,7 +132,7 @@ void get_bb(struct params*p, struct bounding_box*bb) {
 			
 			double x0,y0,x1,y1;
 			ld_getbb(ld,&x0,&y0,&x1,&y1, p->use_reference, p->horizon);
-			if(considered) {
+			if(considered > 0) {
 				bb->x0 = GSL_MIN(x0, bb->x0);
 				bb->x1 = GSL_MAX(x1, bb->x1);
 				bb->y0 = GSL_MIN(y0, bb->y0);
@@ -149,7 +149,7 @@ void get_bb(struct params*p, struct bounding_box*bb) {
 		}
 		ld_free(ld);
 	}
-	sm_info("Considering %d of %d scans.\n", considered, counter);
+	sm_info("Considering %d of %d scans.\n", considered, counter+1);
 	rewind(p->input_file);
 	
 	bb->x0 -= p->padding;

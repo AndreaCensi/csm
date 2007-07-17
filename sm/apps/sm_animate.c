@@ -105,12 +105,15 @@ int draw_animation(anim_params* p, JO jo) {
 	sm_debug("max_readings: %f", max_readings);
 
 	double points = 500;
+	double width_points = points;
+	double height_points = points;
+	
 	
 	cairo_surface_t *surface;
 	cairo_t *cr;
 	cairo_status_t status;
 	
-	surface = cairo_pdf_surface_create(p->file_output, points, points);
+	surface = cairo_pdf_surface_create(p->file_output, width_points, height_points);
 	cr = cairo_create (surface);
 	status = cairo_status (cr);
 
@@ -143,32 +146,65 @@ int draw_animation(anim_params* p, JO jo) {
 	sm_error("Reading %d iterations.\n", niterations);
 	int it;
 
+	ld_compute_cartesian(laser_ref);
+	ld_compute_cartesian(laser_sens);
 
+	if(niterations>10) niterations=10;
 	for(it=0;it<niterations;it++) {
 		JO iteration = json_object_array_get_idx(iterations, it);
 		
 		double x_old[3], x_new[3];
 		jo_read_double_array(iteration, "x_old", x_old, 3, NAN);
 		jo_read_double_array(iteration, "x_new", x_new, 3, NAN);
+
+		JO corr0 = jo_get(iteration, "corr0");
+		JO corr1 = jo_get(iteration, "corr1");
 		JO corr2 = jo_get(iteration, "corr2");
-		if(!corr2 || !json_to_corr(corr2, laser_sens->corr, laser_sens->nrays)) {
-			fprintf(stderr, "Could not read corr2\n");
+		if(!corr1 || !corr2 || !corr0) {
+			sm_error("Could not read correspondences (field 'corr<i>').\n");
 			return 0;
 		}
 
 		cairo_save(cr);
-			double zero[3] = {0,0,0};
-			cr_set_reference(cr, zero);
+	/*		double zero[3] = {0,0,0};
+			cr_set_reference(cr, zero);*/
 			cr_ld_draw(cr, laser_ref, &(p->laser_ref_s));
 
-			/* compute w */
-/*			cr_draw_correspondences(fig, laser_ref, laser_sens, &(p.corr), Point2od(x_old));*/
+			ld_compute_world_coords(laser_sens, x_old);
+
+			
+			cr_set_style(cr, &(p->corr));
+			cairo_set_source_rgb (cr, 1.0, 0.0, 0.0);
+			json_to_corr(corr0, laser_sens->corr, laser_sens->nrays);
+			cr_ld_draw_corr(cr, laser_ref, laser_sens, &(p->corr));
+
+			cairo_set_source_rgb (cr, 1.0, 0.0, 1.0);
+			json_to_corr(corr1, laser_sens->corr, laser_sens->nrays);
+			cr_ld_draw_corr(cr, laser_ref, laser_sens, &(p->corr));
+
+			cairo_set_source_rgb (cr, 0.0, 1.0, 0.0);
+			json_to_corr(corr2, laser_sens->corr, laser_sens->nrays);
+			cr_ld_draw_corr(cr, laser_ref, laser_sens, &(p->corr));
+
 			cr_set_reference(cr, x_old);
 			cr_ld_draw(cr, laser_sens, &(p->laser_sens_s));
 
-			cairo_show_page (cr);
-
 		cairo_restore(cr);
+
+		cairo_save(cr);
+			cairo_identity_matrix(cr);
+			cairo_set_font_size (cr, 12.0);
+			cairo_select_font_face (cr, "Sans",
+			    CAIRO_FONT_SLANT_NORMAL,
+			    CAIRO_FONT_WEIGHT_NORMAL);
+
+			char text[100];
+			sprintf(text, "Iteration #%d: %s", it, friendly_pose(x_old));
+			cairo_move_to(cr,  0.5*width_points, 0.5*height_points );
+			cairo_show_text(cr,text );
+		cairo_restore(cr);
+
+		cairo_show_page (cr);
 	}
 	
 	ld_free(laser_ref);

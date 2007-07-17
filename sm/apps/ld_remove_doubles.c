@@ -58,10 +58,11 @@ int main(int argc, const char*argv[]) {
 			num_discarded++;
 		} else {
 			ld_write_as_json(laser_sens, stdout);
+			ld_free(laser_ref); 
+			laser_ref = laser_sens;
+			ref_index = count;
 		}
 		
-		ld_free(laser_ref); laser_ref = laser_sens;
-		ref_index = count;
 	}
 	if(laser_ref) ld_free(laser_ref);
 	

@@ -83,6 +83,7 @@
 	new_executable(ld_smooth)
 	new_executable(ld_resample)
 	new_executable(ld_remove_doubles)
+	new_executable(ld_alternate)
 
 	new_executable(ld_stats)
 	new_executable(ld_correct)
