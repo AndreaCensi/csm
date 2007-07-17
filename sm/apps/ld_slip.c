@@ -40,7 +40,6 @@ int main(int argc, const char ** argv) {
 		options_print_help(ops, stderr);
 		return -1;
 	}
-	
 
 	gsl_rng_env_setup();
 	gsl_rng * rng = gsl_rng_alloc (gsl_rng_ranlxs0);

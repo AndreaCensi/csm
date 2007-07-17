@@ -85,6 +85,8 @@
 	new_executable(ld_remove_doubles)
 	new_executable(ld_alternate)
 
+	new_executable(ld_cluster_curv)
+	
 	new_executable(ld_stats)
 	new_executable(ld_correct)
 
