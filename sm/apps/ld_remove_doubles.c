@@ -54,7 +54,7 @@ int main(int argc, const char*argv[]) {
 		}
 		
 		if(ld_equal_readings(laser_ref, laser_sens, epsilon)) {
-			sm_debug("Found double (scan #%d, #%d)\n", ref_index, count);
+			sm_debug("Ignoring scan #%d, too similar to #%d.\n", count, ref_index);
 			num_discarded++;
 		} else {
 			ld_write_as_json(laser_sens, stdout);

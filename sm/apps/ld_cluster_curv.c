@@ -14,7 +14,7 @@ void ld_cluster_curv(LDP ld) ;
 
 int main(int argc, const char * argv[]) {
 	sm_set_program_name(basename(argv[0]));
-	
+/*	
 	struct option* ops = options_allocate(3);
 	options_double(ops, "scale_deg", &p.scale_deg, 0.0, "Scale factor (degrees) ");
 	options_int(ops, "neighbours", &p.neighbours, 1, "How many neighbours to consider (regardless of scale).");
@@ -24,7 +24,7 @@ int main(int argc, const char * argv[]) {
 		options_print_help(ops, stderr);
 		return -1;
 	}
-	
+*/	
 	jj_set_stream(open_file_for_writing("ld_cluster_curv.txt"));
 
 	int errors = 0;
@@ -66,10 +66,12 @@ void cluster_convolve(const int*cluster,const double*original, int n, double*des
 			double coeff = filter[abs(j)];
 			if(j<0 && negate_negative) coeff *= -1;
 			dest[i] += original[i2] * coeff;
+
+			if(is_nan(dest[i]))  
+				sm_error("i: %d; something wrong after processing i2: %d  cluster[i2]=%d original[i2] = %f \n", i, i2, cluster[i2], original[i2]);
+			
 		}
 		
-		if(is_nan(dest[i])) 
-			sm_error("Something wrong %d\n", i);
 	}
 }
 
@@ -96,17 +98,33 @@ int ld_max_cluster_id(LDP ld) {
 	return ld->cluster[ find_max(ld->cluster, ld->nrays)];
 }
 
+int ld_cluster_size(LDP ld, int i0) {
+	int this_cluster = ld->cluster[i0];
+	int num = 0; int i;
+	
+	for(i=i0;i<ld->nrays;i++)
+		if(ld->cluster[i] == this_cluster)
+			num++;
+		else if(ld->cluster[i] != -1) break;
+
+	return num;
+}
+
 void ld_remove_small_clusters(LDP ld, int min_size) {
 	int i;
-	for(i=0;i<ld->nrays;i++) {
+	for(i=0;i<ld->nrays;) {
 		int this_cluster = ld->cluster[i];
 
-		if(this_cluster == -1) continue;
-		int cluster_size = count_equal(ld->cluster, ld->nrays, this_cluster);
+		if(this_cluster == -1) { i++; continue; }
+		int cluster_size = ld_cluster_size(ld, i);
 
-		if(cluster_size < min_size) 
-			ld->cluster[i] = -1;
-
+		if(cluster_size < min_size)  {
+			for(;i<ld->nrays;i++)
+				if(ld->cluster[i] == this_cluster)
+					ld->cluster[i] = -1;
+				else if(ld->cluster[i] != -1) break;
+		} else i++;
+		
 /*		if(cluster_size >= min_size) {
 			while(++i < ld->nrays && ld->cluster[i] == this_cluster);
 		} else {
@@ -164,6 +182,12 @@ void ld_cluster_curv(LDP ld) {
 		if(JJ) jj_add_int_array("cluster", ld->cluster, n);
 
 		ld_compute_orientation(ld, neighbours, sigma);
+		
+		int i;
+		for(i=0;i<ld->nrays;i++) 
+			if(!ld->alpha_valid[i])
+			ld->cluster[i] = -1;
+		
 		if(JJ) jj_add_double_array("alpha", ld->alpha, n);
 		cluster_convolve(ld->cluster, ld->alpha, n, smooth_alpha, filter, 10, 0);
 		if(JJ) jj_add_int_array("alpha_valid", ld->alpha_valid, n);

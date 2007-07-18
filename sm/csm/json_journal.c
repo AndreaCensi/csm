@@ -2,7 +2,14 @@
 
 #include "csm_all.h"
 
+int jj_enabled();
+JO jj_stack_top();
+void jj_stack_push(JO jo);
+
 #define MAX_STACK 1000
+
+
+
 
 static JO jj_stack[MAX_STACK];
 static int jj_stack_index = -1;

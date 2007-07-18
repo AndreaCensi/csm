@@ -7,7 +7,7 @@ typedef struct {
 	int draw;
 	
 	double width;
-	char   color[10];
+	const char* color;
 /*	
 	int	thickness; //		(1/80 inch)
 	int	pen_color; //		(enumeration type, pen color)
@@ -21,9 +21,17 @@ typedef struct {
 typedef struct { 
 	line_style rays, countour;
 	line_style points;
-	float points_radius; 
+	double points_radius; 
 
+	line_style normals;
+	double normals_length;
+	
+	double connect_threshold;
+	double horizon;
 } ld_style;
+
+void ls_set_defaults(line_style*ls);
+void lds_set_defaults(ld_style*lds);
 
 void ls_add_options(line_style*ls, struct option*ops, 
 	const char*prefix, const char*desc_prefix);
@@ -36,5 +44,10 @@ void cr_ld_draw(cairo_t* cr, LDP ld, ld_style *p);
 void cr_ld_draw_corr(cairo_t*cr, LDP laser_ref, LDP laser_sens, line_style*);
 
 void cr_set_reference(cairo_t*cr,double*pose);
+
+/** Needs cartesian; returns 0 if not enough points. */
+int ld_get_bounding_box(LDP ld, double min[2], double max[2], double horizon);
+
+
 
 

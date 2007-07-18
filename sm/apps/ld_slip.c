@@ -72,7 +72,7 @@ int main(int argc, const char ** argv) {
 		ld->odometry[1] += e[1];
 		ld->odometry[2] += e[2];
 	
-		sm_debug("error %s\n", friendly_pose(e));
+		sm_debug("Adding noise %s.\n", friendly_pose(e));
 		
 		ld_write_as_json(ld, stdout);
 		

@@ -9,6 +9,10 @@ INLINE int ld_valid_ray(LDP ld, int i) {
 	return (i>=0) && (i<ld->nrays) && (ld->valid[i]);
 }
 
+INLINE int ld_valid_alpha(LDP ld, int i) {
+	return ld->alpha_valid[i] != 0;
+}
+
 INLINE void ld_set_null_correspondence(LDP ld, int i) {
 	ld->corr[i].valid = 0;
 	ld->corr[i].j1 = -1;	

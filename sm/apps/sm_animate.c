@@ -24,20 +24,6 @@ typedef struct {
 int draw_animation( anim_params* p, JO jo);
 
 
-void ls_set_defaults(line_style*ls) {
-	ls->draw = 1;
-	sprintf(ls->color, "black");
-	ls->width = 0.002;
-}
-
-void lds_set_defaults(ld_style*lds) {
-	ls_set_defaults(&(lds->rays));
-	lds->rays.width = 0.0002;
-	ls_set_defaults(&(lds->countour));
-	ls_set_defaults(&(lds->points));
-	lds->points_radius = 0.003;
-}
-
 void set_defaults(anim_params *p) {
 	lds_set_defaults(&(p->laser_ref_s));
 	lds_set_defaults(&(p->laser_sens_s));
@@ -46,6 +32,8 @@ void set_defaults(anim_params *p) {
 
 int main(int argc, const char** argv)
 {
+	sm_set_program_name(basename(argv[0]));
+	
 	anim_params p;
 	set_defaults(&p);
 	
@@ -53,18 +41,15 @@ int main(int argc, const char** argv)
 	options_string(ops, "in", &p.file_input, "stdin", "Input file (defaults to stdin)");
 	options_string(ops, "out", &p.file_output, "sm_animate.pdf", "Output file ");
 
-
-	lds_add_options(&(p.laser_ref_s), ops, "ref", "Ref  |");
-	lds_add_options(&(p.laser_sens_s), ops, "sens", "Sens |");
-	ls_add_options(&(p.corr), ops, "corr", "Correspondences |");
-	
+	lds_add_options(&(p.laser_ref_s), ops, "ref_", "");
+	lds_add_options(&(p.laser_sens_s), ops, "sens_", "");
+	ls_add_options(&(p.corr), ops, "corr_", "");
 	
 	if(!options_parse_args(ops, argc, argv)) {
 		sm_info("Draws icp animation.\n\nUsage:\n");
 		options_print_help(ops, stderr);
 		return -1;
 	}
-
 
 	FILE * input = open_file_for_reading(p.file_input);
 	if(!input) return -1;
@@ -78,6 +63,39 @@ int main(int argc, const char** argv)
 		count++;
 	}
 
+}
+
+int create_pdf_surface(const char*file, int max_width_points, int max_height_points,
+	double bb_min[2], double bb_max[2], cairo_surface_t**surface_p, cairo_t **cr) {
+	double bb_width = bb_max[0] - bb_min[0], bb_height = bb_max[1] - bb_min[1];
+	double surface_width, surface_height;
+	if( bb_width > bb_height ) {
+		/* largo e basso */
+		surface_width = max_width_points;
+		surface_height =  (surface_width / bb_width) * bb_height;
+	} else {
+		/* stretto e alto */
+		surface_height = max_height_points;
+		surface_width =  (surface_height / bb_height) * bb_width;
+	}
+	
+	*surface_p = cairo_pdf_surface_create(file, surface_width, surface_height);
+	*cr = cairo_create (*surface_p);
+	cairo_status_t status = cairo_status (*cr);
+
+	if (status) {
+		sm_error("Failed to create pdf surface for file %s: %s\n",
+			file, cairo_status_to_string (status));
+		return 0;
+	}
+
+	
+
+	double world_to_surface = surface_width / bb_width;
+	cairo_scale(*cr, world_to_surface, -world_to_surface );
+
+	cairo_translate(*cr, -bb_min[0], -bb_max[1]);
+	return 1;
 }
 
 /** Returns an array with depths */
@@ -95,6 +113,12 @@ int draw_animation(anim_params* p, JO jo) {
 		sm_error("Could not read laser_ref/laser_sens.\n");
 		return 0;
 	}
+	
+	ld_compute_orientation(laser_ref, 5, 0.004);
+	ld_compute_orientation(laser_sens, 5, 0.004);
+
+	ld_compute_cartesian(laser_ref);
+	ld_compute_cartesian(laser_sens);
 
 	double max_readings = 0;
 	int i; for(i=0;i<laser_ref->nrays;i++) {
@@ -102,31 +126,39 @@ int draw_animation(anim_params* p, JO jo) {
 		if(max_readings < laser_ref->readings[i])
 			max_readings = laser_ref->readings[i];
 	}
-	sm_debug("max_readings: %f", max_readings);
+	sm_debug("max_readings: %f\n", max_readings);
 
-	double points = 500;
-	double width_points = points;
-	double height_points = points;
-	
-	
-	cairo_surface_t *surface;
-	cairo_t *cr;
-	cairo_status_t status;
-	
-	surface = cairo_pdf_surface_create(p->file_output, width_points, height_points);
-	cr = cairo_create (surface);
-	status = cairo_status (cr);
-
-	if (status) {
-		sm_error("Failed to create pdf surface for file %s: %s\n",
-			p->file_output, cairo_status_to_string (status));
+	double ld_min[2], ld_max[2];
+	if(!ld_get_bounding_box(laser_ref, ld_min, ld_max, p->laser_ref_s.horizon)){
+		sm_error("Not enough good points to establish bounding box.\n");
 		return 0;
 	}
 
+	double padding = 0.2;
+	ld_min[0] -= padding;
+	ld_min[1] -= padding;
+	ld_max[0] += padding;
+	ld_max[1] += padding;
+	
+	sm_info("Bounding box: %f %f -- %f %f\n", ld_min[0], ld_min[1], ld_max[0], ld_max[1]);
 
-	cairo_translate(cr, points/2, points/2);
-	double scale = 0.5 *(points/max_readings);
-	cairo_scale(cr, scale, -scale);
+	int max_width_points = 500;
+	int max_height_points = 500;	
+	cairo_surface_t *surface;
+	cairo_t *cr;
+	
+	if(!create_pdf_surface(p->file_output, max_width_points, max_height_points, 
+		ld_min, ld_max, &surface, &cr)) return 0;
+
+	cairo_set_source_rgb (cr, 0.0, 1.0, 0.2);
+	cairo_set_line_width(cr, 0.02);
+	cairo_move_to(cr, ld_min[0], ld_min[1]);
+	cairo_line_to(cr, ld_min[0], ld_max[1]);
+	cairo_line_to(cr, ld_max[0], ld_max[1]);
+	cairo_line_to(cr, ld_max[0], ld_min[1]);
+	cairo_line_to(cr, ld_min[0], ld_min[1]);
+	cairo_stroke(cr);
+	
 	
 	
 	cairo_set_line_width(cr, 0.01);
@@ -200,7 +232,7 @@ int draw_animation(anim_params* p, JO jo) {
 
 			char text[100];
 			sprintf(text, "Iteration #%d: %s", it, friendly_pose(x_old));
-			cairo_move_to(cr,  0.5*width_points, 0.5*height_points );
+			cairo_move_to(cr,  0, 0 );
 			cairo_show_text(cr,text );
 		cairo_restore(cr);
 

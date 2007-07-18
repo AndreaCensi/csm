@@ -221,7 +221,17 @@ int ld_valid_fields(LDP ld)  {
 					i,  ld->valid[i], th);
 				return 0;
 			}
+
+			if(ld->cluster[i] != -1 ) {
+				sm_error("Invalid ray #%d has cluster %d\n.", i, ld->cluster[i]);
+				return 0;
+			}
 		}
+		if(ld->cluster[i] < -1 ) {
+			sm_error("Ray #%d: Invalid cluster value %d\n.", i, ld->cluster[i]);
+			return 0;
+		}
+		
 	}
 	/* Checks that there is at least 10% valid rays */
 	int num_valid   = count_equal(ld->valid, ld->nrays, 1);
