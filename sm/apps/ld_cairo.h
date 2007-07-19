@@ -46,7 +46,7 @@ void cr_ld_draw_corr(cairo_t*cr, LDP laser_ref, LDP laser_sens, line_style*);
 void cr_set_reference(cairo_t*cr,double*pose);
 
 /** Needs cartesian; returns 0 if not enough points. */
-int ld_get_bounding_box(LDP ld, double min[2], double max[2], double horizon);
+/*int ld_get_bounding_box(LDP ld, double min[2], double max[2], double horizon);*/
 
 
 

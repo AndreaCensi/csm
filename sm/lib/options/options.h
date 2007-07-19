@@ -8,7 +8,6 @@ namespace Options {
 extern "C" {
 #endif
 
-
 /**
  *  Utility functions to parse command line arguments.
  *
@@ -43,8 +42,9 @@ struct option {
 	int * set_pointer;
 };
 
+
 /** User-friendly interface */
-struct option* options_allocate(size_t n);
+struct option* options_allocate(int n);
 
 void options_int    (struct option*, const char* name,  
 	int *p,  int def_value, const char*desc);

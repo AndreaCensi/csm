@@ -2,7 +2,6 @@
 	INCLUDE_DIRECTORIES(.)
 
 	INCLUDE (FindGSL.cmake)                                                                                         
-
 	IF(GSL_FOUND)
 		MESSAGE(STATUS "Found GSL:")
 		MESSAGE(STATUS "   GSL_LIBRARIES = ${GSL_LIBRARIES}")
@@ -129,6 +128,7 @@ ADD_LIBRARY(csm-static STATIC
 ./csm/laser_data_fisher.c
 ./csm/laser_data_json.c
 ./csm/laser_data_load.c
+./csm/laser_data_drawing.c
 ./csm/logging.c
 ./csm/math_utils.c
 ./csm/orientation.c

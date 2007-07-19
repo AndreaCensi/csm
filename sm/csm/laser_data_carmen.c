@@ -30,7 +30,7 @@ int read_next_double(const char*line, size_t*cur, double*d) {
 int read_next_integer(const char*line, size_t*cur, int*d) {
 	int inc;
 	if(1 != sscanf(line+*cur, " %d %n", d, &inc)) {
-		sm_error("Could not read integer.\n");
+	/*	sm_error("Could not read integer.\n");*/
 		return -1;
 	}
 	*cur += inc;
@@ -59,14 +59,13 @@ int ld_read_next_laser_carmen(FILE*file, LDP ld) {
 			continue;
 		}
 		
-		size_t cur = strlen(carmen_prefix); int inc;
+		size_t cur = strlen(carmen_prefix); 
 		
-		int nrays;
-		if(1 != sscanf(line+cur, "%d %n", &nrays, &inc)) {
-			sm_debug("Could not get number of rays.\n");
+		int nrays=-1;
+		if(read_next_integer(line, &cur, &nrays)) {
+			sm_error("Could not get number of rays.\n");
 			goto error;
 		}
-		cur += inc;
 			
 		ld_alloc(ld, nrays);	
 		
@@ -134,6 +133,12 @@ int ld_read_next_laser_carmen(FILE*file, LDP ld) {
 		} else {
 			ld->tv.tv_sec = 0;
 			ld->tv.tv_usec = 0;
+			
+			static int warn = 1;
+			if(warn) {
+				sm_info("I could not read timestamp+hostname; ignoring (I will warn only once for this).\n");
+				warn = 0;
+			}
 		}
 
 		fprintf(stderr, "l");

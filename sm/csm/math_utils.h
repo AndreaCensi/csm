@@ -22,7 +22,7 @@ void possible_interval(
 	const double *p_i_w, struct laser_data*laser_sens, 
 	double max_angular_correction_deg, double max_linear_correction, int*from, int*to, int*start_cell);
 
-void transform_d(const double* point2d, const double* pose, double* result2d);
+void transform_d(const double point2d[2], const double pose[3], double result2d[2]);
 
 /** Returns norm of 2D point p */
 double norm_d(const double*p);

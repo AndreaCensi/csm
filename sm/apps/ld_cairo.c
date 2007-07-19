@@ -79,6 +79,7 @@ void cr_set_style(cairo_t*cr, line_style*ls) {
 	cairo_set_line_width(cr, ls->width);
 }
 
+/*
 int ld_get_bounding_box(LDP ld, double min[2], double max[2], double horizon) {
 	int nrays_used = 0;
 	int first=1;
@@ -101,7 +102,7 @@ int ld_get_bounding_box(LDP ld, double min[2], double max[2], double horizon) {
 		nrays_used++;
 	}
 	return nrays_used > 4;
-}
+}*/
 
 
 void cr_ld_draw_rays(cairo_t*cr, LDP ld) {

@@ -6,6 +6,7 @@
 #include <libgen.h>
 
 #include "../csm/csm_all.h"
+#include "../csm/laser_data_drawing.h"
 
 #include <options/options.h>
 #include <cairo-pdf.h>
@@ -19,6 +20,11 @@ typedef struct {
 	ld_style laser_ref_s, laser_sens_s;
 	/* Drawing style for correspondences */
 	line_style corr;
+	
+	
+	double max_width_cm;
+	double max_height_cm;
+	
 } anim_params ;
 
 int draw_animation( anim_params* p, JO jo);
@@ -68,6 +74,8 @@ int main(int argc, const char** argv)
 int create_pdf_surface(const char*file, int max_width_points, int max_height_points,
 	double bb_min[2], double bb_max[2], cairo_surface_t**surface_p, cairo_t **cr) {
 	double bb_width = bb_max[0] - bb_min[0], bb_height = bb_max[1] - bb_min[1];
+	
+	
 	double surface_width, surface_height;
 	if( bb_width > bb_height ) {
 		/* largo e basso */
@@ -78,6 +86,9 @@ int create_pdf_surface(const char*file, int max_width_points, int max_height_poi
 		surface_height = max_height_points;
 		surface_width =  (surface_height / bb_height) * bb_width;
 	}
+
+	sm_debug("bb: %f %f\n", bb_width, bb_height);
+	sm_debug("surface: %f %f\n", surface_width, surface_height);
 	
 	*surface_p = cairo_pdf_surface_create(file, surface_width, surface_height);
 	*cr = cairo_create (*surface_p);
@@ -129,10 +140,12 @@ int draw_animation(anim_params* p, JO jo) {
 	sm_debug("max_readings: %f\n", max_readings);
 
 	double ld_min[2], ld_max[2];
-	if(!ld_get_bounding_box(laser_ref, ld_min, ld_max, p->laser_ref_s.horizon)){
+	double pose[3] = {0,0,0};
+	if(!ld_get_bounding_box(laser_ref, ld_min, ld_max, pose, p->laser_ref_s.horizon)){
 		sm_error("Not enough good points to establish bounding box.\n");
 		return 0;
 	}
+	
 
 	double padding = 0.2;
 	ld_min[0] -= padding;
@@ -224,15 +237,15 @@ int draw_animation(anim_params* p, JO jo) {
 		cairo_restore(cr);
 
 		cairo_save(cr);
-			cairo_identity_matrix(cr);
-			cairo_set_font_size (cr, 12.0);
+/*			cairo_identity_matrix(cr);*/
+			cairo_set_font_size (cr, 0.1);
 			cairo_select_font_face (cr, "Sans",
 			    CAIRO_FONT_SLANT_NORMAL,
 			    CAIRO_FONT_WEIGHT_NORMAL);
 
 			char text[100];
 			sprintf(text, "Iteration #%d: %s", it, friendly_pose(x_old));
-			cairo_move_to(cr,  0, 0 );
+			cairo_move_to(cr,  0.0, 0.0 );
 			cairo_show_text(cr,text );
 		cairo_restore(cr);
 

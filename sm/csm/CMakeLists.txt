@@ -4,6 +4,8 @@ SET(csm_sources
 	laser_data_json.c
 	laser_data_carmen.c
 	laser_data_load.c
+	laser_data_drawing.c
+	
 	json_journal.c
 	math_utils.c
 	utils.c

@@ -25,7 +25,7 @@ int main(int argc, const char * argv[]) {
 		return -1;
 	}
 */	
-	jj_set_stream(open_file_for_writing("ld_cluster_curv.txt"));
+/* jj_set_stream(open_file_for_writing("ld_cluster_curv.txt")); */
 
 	int errors = 0;
 	int count = -1;
@@ -124,14 +124,6 @@ void ld_remove_small_clusters(LDP ld, int min_size) {
 					ld->cluster[i] = -1;
 				else if(ld->cluster[i] != -1) break;
 		} else i++;
-		
-/*		if(cluster_size >= min_size) {
-			while(++i < ld->nrays && ld->cluster[i] == this_cluster);
-		} else {
-			while(i < ld->nrays && ld->cluster[i] == this_cluster) {
-				ld->cluster[i++] = -1;
-			}
-		}*/
 	}
 }
 
@@ -147,7 +139,14 @@ void array_abs(double*v, int n) {
 	int i=0; for(i=0;i<n;i++) v[i] = fabs(v[i]);
 }
 
+
 void ld_cluster_curv(LDP ld) {
+	int min_cluster_size = 10;
+	double sigma = 0.005; 
+	int orientation_neighbours = 4;
+	int npeaks = 5;
+	double near_peak_threshold = 0.4;
+
 	if(JJ) jj_context_enter("ld_cluster_curv");
 	int n = ld->nrays;
 	
@@ -158,14 +157,13 @@ void ld_cluster_curv(LDP ld) {
 	if(JJ) jj_add_double_array("a02readings", ld->readings, n);
 	
 	
-	double sigma = 0.005; int neighbours = 4;
 	ld_simple_clustering(ld, sigma*5);
 /*	int i=0; for(i=0;i<n;i++)
 		ld->cluster[i] = ld->valid[i] ? 1 : -1;*/
 	
 	
 	if(JJ) jj_add_int_array("a04cluster", ld->cluster, n);
-	ld_remove_small_clusters(ld, 10);
+	ld_remove_small_clusters(ld, min_cluster_size);
 	ld_mark_cluster_as_invalid(ld, -1);
 	if(JJ) jj_add_int_array("a06cluster", ld->cluster, n);
 	
@@ -174,14 +172,14 @@ void ld_cluster_curv(LDP ld) {
 	double smooth_alpha[n];
 	double deriv_alpha[n];
 
-	int npeaks= 5; int p;
+	int p;
 	if(JJ) jj_loop_enter("it");
 	
 	for(p=0;p<npeaks;p++) {  if(JJ) jj_loop_iteration();
 		
 		if(JJ) jj_add_int_array("cluster", ld->cluster, n);
 
-		ld_compute_orientation(ld, neighbours, sigma);
+		ld_compute_orientation(ld, orientation_neighbours, sigma);
 		
 		int i;
 		for(i=0;i<ld->nrays;i++) 
@@ -201,7 +199,7 @@ void ld_cluster_curv(LDP ld) {
 		if(JJ) jj_add_int("peak", peak);
 		
 		int peak_cluster = ld->cluster[peak];
-		int up = peak; double threshold = 0.4 * deriv_alpha[peak];
+		int up = peak; double threshold = near_peak_threshold  * deriv_alpha[peak];
 		while(up<n-1 && (ld->cluster[up]==peak_cluster) && deriv_alpha[up+1] >  threshold) up++;
 		int down = peak;
 		while(down>1  && (ld->cluster[up]==peak_cluster) && deriv_alpha[down-1] > threshold) down--;
