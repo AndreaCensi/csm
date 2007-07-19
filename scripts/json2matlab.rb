@@ -8,25 +8,10 @@ require 'json/pure'
 
 require 'fix_json'
 require 'json_utils'
-# 
-# def read_all_objects(string)
-# 	a = []
-# 	j = JSON::Pure::Parser.new(string)
-# 	while true
-# 		j.scan(/\s*/) 
-# 		break if j.eos?
-# 		begin
-# 			a.push j.parse
-# 		rescue Exception => e
-# 			$stderr.puts "After #{a.size} objects: #{e}" 
-# 			return a
-# 		end
-# 	end	
-# 	a
-# end
 
 class Array
 	def matrix_size?(x) [9].include?x end
+		
 	def to_matlab
 		if is_matrix?
 			write_as_matrix
@@ -38,7 +23,7 @@ class Array
 	end
 	
 	def all_numbers?
-		all? {|x| x.kind_of? Numeric}
+		all? {|x| x.kind_of?(Numeric) or x.nil? }
 	end
 	
 	def is_matrix?
@@ -57,10 +42,13 @@ class Hash
 	def to_matlab
 		" struct(" +
 			keys.map{ |k|
-				if self[k].kind_of? Hash
-				"'#{k}', {#{self[k].to_matlab}}"
+				v = self[k]
+				if v.kind_of?(Array) and (not v.all_numbers?) and (not v.is_matrix?)
+				"'#{k}', {#{v.to_matlab}}"
+				elsif v.kind_of?(Hash)
+				"'#{k}', {#{v.to_matlab}}"
 				else
-				"'#{k}', #{self[k].to_matlab}"
+				"'#{k}', #{v.to_matlab}"
 				end
 			}.join(", ... \n\t") +
 		")"
@@ -69,12 +57,12 @@ end
 
 class Object
 	def to_matlab() to_s end
-
 end
 
 class Object 
 	def recurse_json(&block) end
 end
+
 class Hash
 	def recurse_json(&block) 
 		each do |k, v|
@@ -93,47 +81,60 @@ class Array
 	end
 end
 
-if ARGV.any? {|x| x =~ /help/}
-	$stderr.puts "Three usages:"
-	$stderr.puts " 1) without parameters, it acts as a filter; out is a Matlab structure "
-	$stderr.puts "       $ json2matlab.rb  < in > out.m "
-	$stderr.puts " 2) with one parameter, it creates <in>.m (a function named <in>) "
-	$stderr.puts "       $ json2matlab.rb in.txt "
-	$stderr.puts " 2) with two parameters, it creates `f.m` (a function named 'f') "
-	$stderr.puts "       $ json2matlab.rb in.txt f "
-	exit 0
+class NilClass
+	def to_matlab
+		"NaN"
+	end
 end
 
+def main_json2matlab
+	if ARGV.any? {|x| x =~ /help/}
+		$stderr.puts "Three usages:"
+		$stderr.puts " 1) without parameters, it acts as a filter; out is a Matlab structure "
+		$stderr.puts "       $ json2matlab.rb  < in.json > out.m "
+		$stderr.puts " 2) with one parameter, it creates <in>.m (a function named <in>) "
+		$stderr.puts "       $ json2matlab.rb in.json "
+		$stderr.puts " 2) with two parameters, it creates `f.m` (a function named 'f') "
+		$stderr.puts "       $ json2matlab.rb in.json f "
+		exit 0
+	end
 
-io =  if file = ARGV[0] then File.open(file) else $stdin end
+
+	io =  if file = ARGV[0] then File.open(file) else $stdin end
+	complete_file = io.read
+
+	a = read_all_objects(complete_file)
+	$stderr.write "json2matlab: Found #{a.size} JSON objects. "
+	a = a[0] if a.size == 1 
+
+	a.recurse_json do |child, parent| 
+		if parent.kind_of?(Array) and child.nil? then
+			(0.0/0.0) 
+		else
+			 child
+		end
+	end
+
+
+	if file = ARGV[0]
+		basename = File.basename(file).gsub(/\.\w*$/,'')
+		if ARGV[1]
+			basename = ARGV[1]
+		end
 	
-a = read_all_objects(io.read)
-$stderr.write "json2matlab: Found #{a.size} JSON objects. "
-a = a[0] if a.size == 1 
-
-a.recurse_json do |child, parent| 
-	if parent.kind_of?(Array) and child.nil? then
-		(0.0/0.0) 
+		output_file = File.join(File.dirname(file), basename + ".m")
+		$stderr.puts "Writing to #{output_file.inspect}."
+		File.open(output_file, 'w') do |f|
+			f.puts "function res = #{basename}"
+			f.puts "res = ..."
+			f.puts(a.to_matlab + ";")
+		end
 	else
-		 child
+		$stdout.puts(a.to_matlab + ";")	
 	end
+
 end
 
 
-if file = ARGV[0]
-	basename = File.basename(file).gsub(/\.\w*$/,'')
-	if ARGV[1]
-		basename = ARGV[1]
-	end
-	
-	output_file = File.join(File.dirname(file), basename + ".m")
-	$stderr.puts "Writing to #{output_file.inspect}."
-	File.open(output_file, 'w') do |f|
-		f.puts "function res = #{basename}"
-		f.puts "res = ..."
-		f.puts(a.to_matlab + ";")
-	end
-else
-	$stdout.puts(a.to_matlab + ";")	
-end
+main_json2matlab if File.basename($0) == 'json2matlab.rb'
 
