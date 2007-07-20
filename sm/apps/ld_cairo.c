@@ -1,4 +1,6 @@
-
+#include <cairo-pdf.h>
+#include <stdlib.h>
+#include <limits.h>
 #include <string.h>
 #include "ld_cairo.h"
 
@@ -73,36 +75,53 @@ void lds_add_options(ld_style*lds, struct option*ops,
 		lds->horizon, cat(desc_prefix, "Maximum distance to plot (m)."));
 }
 
-void cr_set_style(cairo_t*cr, line_style*ls) {
-	cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
+void cr_set_style(cairo_t *cr, line_style *ls) {
+	if(strlen(ls->color) == 4 && ls->color[0] == '#') {
+		char buf[2] = {0, 0};
+		double rgb[3];
+		int i; for(i=0;i<3;i++) {
+			buf[0] = ls->color[1+i];
+			char* endptr;
+			rgb[i] = (1/15.0) * strtol(buf, &endptr, 16);
+			if(endptr == buf) {
+				sm_error("Unknown color component: %s.\n", buf);
+			}
+		}
+		cairo_set_source_rgb (cr, rgb[0], rgb[1], rgb[2]);
+	} else {
+		if(!strcmp(ls->color, "black")) {
+			cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
+		} else {
+			sm_error("Unknown color: %s.\n", ls->color);
+			cairo_set_source_rgb (cr, 0.0, 1.0, 1.0);		
+		}
+	}
 	
 	cairo_set_line_width(cr, ls->width);
 }
 
-/*
-int ld_get_bounding_box(LDP ld, double min[2], double max[2], double horizon) {
-	int nrays_used = 0;
-	int first=1;
-	int i; for(i=0;i<ld->nrays;i++) {
-		if(!ld->valid[i]) continue;
-		if(ld->readings[i]>horizon) continue;
-
-		double *p = ld->points[i].p;
-
-		if(first) {
-			min[0]=max[0]=p[0];
-			min[1]=max[1]=p[1];
-			first = 0;
-		} else {
-			min[0] = GSL_MIN(min[0], p[0]);
-			min[1] = GSL_MIN(min[1], p[1]);
-			max[0] = GSL_MAX(max[0], p[0]);
-			max[1] = GSL_MAX(max[1], p[1]);
+void cr_lda_draw_pose_path(cairo_t*cr, LDP*scans, int nscans, ld_reference use_reference) {
+	int k; int first_pose=1;
+	for(k=0;k<nscans;k++) {
+		LDP ld = scans[k];
+		double *pose = ld_get_reference_pose(ld, use_reference);
+		if(!pose) {
+			sm_error("No '%s' pose specified for scan #%d, continuing.\n",
+				ld_reference_to_string(use_reference));
+			continue;
 		}
-		nrays_used++;
+	
+		if(first_pose) { 
+			first_pose = 0; 
+			cairo_move_to(cr, pose[0], pose[1]);
+		} else {
+			cairo_line_to(cr, pose[0], pose[1]);
+		}
 	}
-	return nrays_used > 4;
-}*/
+	cairo_close_path(cr);
+	cairo_stroke(cr);
+}
+
 
 
 void cr_ld_draw_rays(cairo_t*cr, LDP ld) {
@@ -233,8 +252,8 @@ void cr_ld_draw(cairo_t* cr, LDP ld, ld_style *p) {
 }
 
 void cr_set_reference(cairo_t*cr, double*pose) {
-	cairo_rotate(cr,pose[2]);
 	cairo_translate(cr,pose[0],pose[1]);
+	cairo_rotate(cr,pose[2]);
 }
 
 void ls_set_defaults(line_style*ls) {
@@ -260,3 +279,38 @@ void lds_set_defaults(ld_style*lds) {
 	lds->horizon = 10;
 }
 
+int create_pdf_surface(const char*file, int max_width_points, int max_height_points,
+	double bb_min[2], double bb_max[2], cairo_surface_t**surface_p, cairo_t **cr) {
+	double bb_width = bb_max[0] - bb_min[0], bb_height = bb_max[1] - bb_min[1];
+	
+	
+	double surface_width, surface_height;
+	if( bb_width > bb_height ) {
+		/* largo e basso */
+		surface_width = max_width_points;
+		surface_height =  (surface_width / bb_width) * bb_height;
+	} else {
+		/* stretto e alto */
+		surface_height = max_height_points;
+		surface_width =  (surface_height / bb_height) * bb_width;
+	}
+
+	sm_debug("bb: %f %f\n", bb_width, bb_height);
+	sm_debug("surface: %f %f\n", surface_width, surface_height);
+	
+	*surface_p = cairo_pdf_surface_create(file, surface_width, surface_height);
+	*cr = cairo_create (*surface_p);
+	cairo_status_t status = cairo_status (*cr);
+
+	if (status) {
+		sm_error("Failed to create pdf surface for file %s: %s\n",
+			file, cairo_status_to_string (status));
+		return 0;
+	}
+
+	double world_to_surface = surface_width / bb_width;
+	cairo_scale(*cr, world_to_surface, -world_to_surface );
+
+	cairo_translate(*cr, -bb_min[0], -bb_max[1]);
+	return 1;
+}

@@ -71,43 +71,6 @@ int main(int argc, const char** argv)
 
 }
 
-int create_pdf_surface(const char*file, int max_width_points, int max_height_points,
-	double bb_min[2], double bb_max[2], cairo_surface_t**surface_p, cairo_t **cr) {
-	double bb_width = bb_max[0] - bb_min[0], bb_height = bb_max[1] - bb_min[1];
-	
-	
-	double surface_width, surface_height;
-	if( bb_width > bb_height ) {
-		/* largo e basso */
-		surface_width = max_width_points;
-		surface_height =  (surface_width / bb_width) * bb_height;
-	} else {
-		/* stretto e alto */
-		surface_height = max_height_points;
-		surface_width =  (surface_height / bb_height) * bb_width;
-	}
-
-	sm_debug("bb: %f %f\n", bb_width, bb_height);
-	sm_debug("surface: %f %f\n", surface_width, surface_height);
-	
-	*surface_p = cairo_pdf_surface_create(file, surface_width, surface_height);
-	*cr = cairo_create (*surface_p);
-	cairo_status_t status = cairo_status (*cr);
-
-	if (status) {
-		sm_error("Failed to create pdf surface for file %s: %s\n",
-			file, cairo_status_to_string (status));
-		return 0;
-	}
-
-	
-
-	double world_to_surface = surface_width / bb_width;
-	cairo_scale(*cr, world_to_surface, -world_to_surface );
-
-	cairo_translate(*cr, -bb_min[0], -bb_max[1]);
-	return 1;
-}
 
 /** Returns an array with depths */
 int draw_animation(anim_params* p, JO jo) {

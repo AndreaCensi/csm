@@ -142,6 +142,9 @@ int ld_read_next_laser_carmen(FILE*, LDP ld);
 /** Reads all the scans it can find. */
 int ld_read_all(FILE*file, LDP **array, int*num);
 
+/** Read a scan every interval (1=all)*/
+int ld_read_some_scans(FILE*file, LDP **array, int*num, int interval);
+
 #include "laser_data_inline.h"
 
 #endif
