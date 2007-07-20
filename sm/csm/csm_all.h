@@ -11,6 +11,7 @@ extern "C" {
 #include "json_journal.h"
 #include "logging.h"
 #include "math_utils.h"
+#include "math_utils_gsl.h"
 
 #ifdef __cplusplus
 }}

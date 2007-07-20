@@ -1,7 +1,10 @@
 #ifndef H_SCAN_MATCHING_LIB
 #define H_SCAN_MATCHING_LIB
+
 #include "laser_data.h"
+
 #include <gsl/gsl_vector.h>
+#include <gsl/gsl_matrix.h>
 
 struct sm_params {
 	/** First scan (/ref/erence scan) */

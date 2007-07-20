@@ -4,10 +4,9 @@
 #include <sys/time.h>
 #include <stdio.h>
 
-#ifndef RUBY
+/*#ifndef RUBY
 #include <egsl/egsl.h>
-#include <egsl/egsl.h>
-#endif
+#endif*/
 
 struct correspondence;
 
@@ -48,10 +47,6 @@ struct laser_data {
 	double odometry[3];	
 	double estimate[3];	
 	
-#ifndef RUBY
-	/* Cartesian points */
-/*	gsl_vector**p;*/
-#endif
 
 	/** Cartesian representation */
 	point2d *  restrict points;
@@ -144,6 +139,11 @@ int ld_read_all(FILE*file, LDP **array, int*num);
 
 /** Read a scan every interval (1=all)*/
 int ld_read_some_scans(FILE*file, LDP **array, int*num, int interval);
+
+void possible_interval(
+	const double *p_i_w, LDP laser_sens, 
+	double max_angular_correction_deg, double max_linear_correction, int*from, int*to, int*start_cell);
+
 
 #include "laser_data_inline.h"
 
