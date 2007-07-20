@@ -23,6 +23,7 @@ int main(int argc, const char * argv[]) {
 		int i; for(i=0;i<n;i++) {
 			puts(s); puts("\n");
 		}
+		jo_free(jo);
 	}
 	
 	return 0;

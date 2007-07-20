@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <string.h>
-#include "ld_cairo.h"
+#include "laser_data_cairo.h"
 
 void cr_ld_draw_rays(cairo_t*, LDP);
 void cr_ld_draw_countour(cairo_t*, LDP, double, double);

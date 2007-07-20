@@ -25,7 +25,7 @@
 		
 		INCLUDE_DIRECTORIES(${CAIRO_INCLUDE_DIR})	
 	ELSE(CAIRO_FOUND)
-		MESSAGE(WARNING " Cairo not found: carmen2pdf will not be built.")
+		MESSAGE(WARNING " Cairo not found: plotting programs (e.g., 'log2pdf') will not be built.")
 		MESSAGE(WARNING " install Cairo from http://cairographics.org ")
 	ENDIF(CAIRO_FOUND)
 	
@@ -105,16 +105,14 @@ IF(CAIRO_FOUND)
 	new_executable(sm_animate)
 	new_executable(log2pdf)
 	
-	ADD_LIBRARY(csm_cairo STATIC apps/ld_cairo.c)
 	
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CAIRO_CFLAGS}")
-	TARGET_LINK_LIBRARIES(carmen2pdf csm_cairo -lcairo)
-	TARGET_LINK_LIBRARIES(log2pdf csm_cairo -lcairo)
-	TARGET_LINK_LIBRARIES(sm_animate csm_cairo -lcairo)
+	TARGET_LINK_LIBRARIES(carmen2pdf -lcairo)
+	TARGET_LINK_LIBRARIES(log2pdf  -lcairo)
+	TARGET_LINK_LIBRARIES(sm_animate -lcairo)
 ENDIF(CAIRO_FOUND)
 
-
-ADD_LIBRARY(csm-static STATIC
+SET(csm_sources 
 ./csm/clustering.c
 ./csm/gpm/gpm.c
 ./csm/icp/icp.c
@@ -154,6 +152,13 @@ ADD_LIBRARY(csm-static STATIC
 ./lib/options/options.c
 ./lib/options/options_interface.c
 )
+
+IF(CAIRO_FOUND)
+	SET(csm_sources ${csm_sources} csm/laser_data_cairo.c)
+ENDIF(CAIRO_FOUND)
+
+ADD_LIBRARY(csm-static STATIC ${csm_sources})
+
 TARGET_LINK_LIBRARIES(csm-static ${GSL_LIBRARIES})
 #ADD_EXECUTABLE(test-static test.c)
 #TARGET_LINK_LIBRARIES(test-static csm-static)

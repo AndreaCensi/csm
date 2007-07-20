@@ -11,7 +11,7 @@
 #include <options/options.h>
 #include <cairo-pdf.h>
 
-#include "ld_cairo.h"
+#include "../csm/laser_data_cairo.h"
 
 typedef struct {
 	const char * file_input;

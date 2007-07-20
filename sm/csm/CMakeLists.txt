@@ -25,11 +25,19 @@ SET(csm_sources
 	gpm/gpm.c
 )
 
+IF(CAIRO_FOUND)
+	SET(csm_sources ${csm_sources} laser_data_cairo.c)
+ENDIF(CAIRO_FOUND)
+
 ADD_LIBRARY(csm SHARED  ${csm_sources})
 
 # SET_TARGET_PROPERTIES(csm PROPERTIES STATIC_LIBRARY_FLAGS  " -static ")
 TARGET_LINK_LIBRARIES(csm json-c egsl gpc options)
 TARGET_LINK_LIBRARIES(csm ${GSL_LIBRARIES})
+
+IF(CAIRO_FOUND)
+	TARGET_LINK_LIBRARIES(csm cairo)
+ENDIF(CAIRO_FOUND)
 
 INSTALL(TARGETS csm 
 	ARCHIVE DESTINATION lib
