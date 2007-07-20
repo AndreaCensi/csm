@@ -150,7 +150,7 @@ int jo_read_double_array(JO s, const char*name, double*p, int n, double when_nul
 			p[i] = when_null;
 	}
 	}
-	return 0;
+	return 1;
 }
 
 int jo_read_int_array(JO s, const char*name, int*p, int n, int when_null) {
@@ -177,7 +177,7 @@ int jo_read_int_array(JO s, const char*name, int*p, int n, int when_null) {
 		else
 			p[i] = json_object_get_int(v);
 	}
-	return 0;
+	return 1; /** XXX should we thro error? */
 }
 
 JO jo_double_or_null(double v) {
@@ -201,23 +201,31 @@ JO jo_new_int_array(const int *v, int n) {
 	return array;
 }
 
-
-int jo_read_int(JO jo, const char*name, int*p) {
-	JO v = json_object_object_get(jo, (char*)name);
+/** XXX forse ho fatto casino */
+int json_to_int(JO jo, int*ptr) {
 	
-	if(!v) {
+	if(!jo) {
 /*		mc_error("Field '%s' not found.\n", name); */
 		return 0;
 	}
 	
-	if(!json_object_is_type(v, json_type_int)) {
+	if(!json_object_is_type(jo, json_type_int)) {
 		mc_error("I was looking for a int, instead got '%s'.\n",
-		         json_object_to_json_string(v));
+		         json_object_to_json_string(jo));
 		return 0;
 	}
 	
-	*p = json_object_get_int(v);
+	*ptr = json_object_get_int(jo);
+	
 	return 1;
+}
+
+int jo_read_int(JO jo, const char*name, int*p) {
+	JO v = json_object_object_get(jo, (char*)name);
+	if(!v) {
+		return 0;
+	}
+	return json_to_int(v, p);
 }
 
 double convert_to_double(JO jo) {
