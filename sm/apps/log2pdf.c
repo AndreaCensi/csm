@@ -27,9 +27,9 @@ typedef struct {
 
 	double offset_theta_deg;
 	
-	/* Drawing style for scans*/
+	/* Drawing style for scans */
 	ld_style laser;
-	/* Drawing style for correspondences */
+	/* Drawing style for robot path */
 	line_style pose_path;
 	
 } log2pdf_params;
@@ -135,15 +135,6 @@ int log2pdf(log2pdf_params *p) {
 
 	if(!create_pdf_surface(p->output_filename, max_width_points, max_height_points, 
 		bb_min, bb_max, &surface, &cr)) return 0;
-
-	cairo_set_source_rgb (cr, 0.0, 1.0, 0.2);
-	cairo_set_line_width(cr, 0.02);
-	cairo_move_to(cr, bb_min[0], bb_min[1]);
-	cairo_line_to(cr, bb_min[0], bb_max[1]);
-	cairo_line_to(cr, bb_max[0], bb_max[1]);
-	cairo_line_to(cr, bb_max[0], bb_min[1]);
-	cairo_line_to(cr, bb_min[0], bb_min[1]);
-	cairo_stroke(cr);
 
 	/* Draw pose path */
 	if(p->pose_path.draw) {
