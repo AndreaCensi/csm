@@ -1,0 +1,10 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: csm
+Description: The C(anonical) Scan Matcher
+Requires: @OROCOS_COMPONENTS_REQUIRES@
+Version: @OCL_VERSION@
+Libs: -L${libdir} -lcsm-static @csm_link_flags@
+Cflags: -I${includedir} @OROCOS_COMPONENTS_CFLAGS@

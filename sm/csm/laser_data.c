@@ -135,12 +135,19 @@ void ld_compute_world_coords(LDP ld, const double *pose) {
 	point2d * points = ld->points;
 	point2d * points_w = ld->points_w;
 	int i; for(i=0;i<nrays;i++) {
-/*		if(!ld_valid_ray(ld,i)) continue;*/
-		double x0 = points[i].p[0], y0 = points[i].p[1]; 
+		if(!ld_valid_ray(ld,i)) continue;
+		double x0 = points[i].p[0], 
+		       y0 = points[i].p[1]; 
+		
+		if(is_nan(x0) || is_nan(y0)) {
+			sm_error("ld_compute_world_coords(): I expected that cartesian coords were already computed: ray #%d: %f %f.\n", i, x0, y0);
+		}
+		
 		points_w[i].p[0] = cos_theta * x0 -sin_theta*y0 + pose_x;
 		points_w[i].p[1] = sin_theta * x0 +cos_theta*y0 + pose_y;
 		/* polar coordinates */
 	}
+	
 	for(i=0;i<nrays;i++) {
 		double x = points_w[i].p[0];
 		double y = points_w[i].p[1];

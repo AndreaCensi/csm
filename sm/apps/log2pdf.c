@@ -12,7 +12,6 @@
 #include <csm/laser_data_cairo.h>
 
 typedef struct {
-	int interval;
 	const char*use;
 	double padding;
 	double dimension;
@@ -32,6 +31,7 @@ typedef struct {
 	/* Drawing style for robot path */
 	line_style pose_path;
 	
+	double distance_xy, distance_th_deg;
 } log2pdf_params;
 
 int log2pdf(log2pdf_params *p);
@@ -54,16 +54,15 @@ int main(int argc, const char*argv[]) {
 	p.pose_path.color = "#f00";
 	
 	struct option * ops = options_allocate(100);
-	options_int(ops, "interval", &p.interval, 10, "how many to ignore");
 	options_string(ops, "in", &p.input_filename, "stdin", "input file (Carmen or JSON)");
 	options_string(ops, "out", &p.output_filename, "", "output file (if empty, input file + '.pdf')");
 	options_double(ops, "padding", &p.padding, 0.2, "padding around bounding box (m)");
 	options_double(ops, "dimension", &p.dimension, 500.0, "dimension of the image (points)");
-	options_int(ops, "draw_confidence", &p.draw_confidence, 0, " Draws confidence (cov_readings[i]) ");
-	options_double(ops, "confidence_mult", &p.confidence_mult, 3.0, " 3-sigma ");
 	options_double(ops, "offset_theta_deg", &p.offset_theta_deg, 0.0, " rotate entire map by this angle (deg) ");
 
 	options_string(ops, "use", &p.use, "estimate", "One in 'odometry','estimate','true_pose'");
+	options_double(ops, "distance_xy", &p.distance_xy, 5.0, " Minimum distance between scans (m) ");
+	options_double(ops, "distance_th_deg", &p.distance_th_deg, 45.0, " Minimum distance between scans (deg) ");
 	
 	lds_add_options(&(p.laser), ops, "laser_", "");
 	ls_add_options(&(p.pose_path), ops, "path_", "");
@@ -84,7 +83,7 @@ int main(int argc, const char*argv[]) {
 	
 	p.use_reference = Invalid;
 	int i; for(i=1;i<=3;i++) 
-		if(!strcmp(p.use, ld_reference_to_string(i) ))
+		if(!strcmp(p.use, ld_reference_to_string( (ld_reference) i) ))
 			p.use_reference = (ld_reference) i;
 
 	if(Invalid == p.use_reference) {
@@ -106,7 +105,9 @@ int log2pdf(log2pdf_params *p) {
 	if(!input_file) return 0;
 	
 	LDP*scans; int nscans;
-	if(!ld_read_some_scans(input_file, &scans, &nscans, p->interval)) {
+	
+	if(!ld_read_some_scans_distance(input_file,  &scans, &nscans,
+		 p->use_reference, p->distance_xy, deg2rad(p->distance_th_deg) ) ){
 		sm_error("Could not read map.\n"); 
 		return 0;
 	}
@@ -116,7 +117,7 @@ int log2pdf(log2pdf_params *p) {
 	/** Let's find the bounding box for the map */
 	double bb_min[2], bb_max[2];
 	double offset[3] = {0,0,0};
-	lda_get_bounding_box(scans, nscans, bb_min, bb_max, offset, Estimate, p->laser.horizon);
+	lda_get_bounding_box(scans, nscans, bb_min, bb_max, offset, p->use_reference, p->laser.horizon);
 	
 	bb_min[0] -= p->padding;
 	bb_min[1] -= p->padding;

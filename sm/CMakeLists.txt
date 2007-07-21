@@ -65,7 +65,8 @@
 	
 	MACRO(new_executable exec)
 		ADD_EXECUTABLE(${exec} apps/${exec}.c)
-		TARGET_LINK_LIBRARIES(${exec} csm-static ${GSL_LIBRARIES} gpc json-c egsl options)
+		TARGET_LINK_LIBRARIES(${exec} csm-static ${GSL_LIBRARIES})
+		# gpc json-c egsl options)
 		INSTALL(PROGRAMS ${exec} DESTINATION bin)
 	ENDMACRO(new_executable exec)
 	
@@ -84,6 +85,7 @@
 	new_executable(ld_remove_doubles)
 	new_executable(ld_alternate)
 
+	new_executable(ld_select)
 	new_executable(ld_cluster_curv)
 	new_executable(ld_linearize)
 	
@@ -99,17 +101,19 @@
 	ENABLE_TESTING()
 	ADD_TEST(test_math_utils test_math_utils)
 
+	set(csm_link_flags ${GSL_LIBRARIES})
+
 ########### Carmen2pdf ########## 
 IF(CAIRO_FOUND)
 	new_executable(carmen2pdf)
 	new_executable(sm_animate)
 	new_executable(log2pdf)
 	
-	
+	set(csm_link_flags "${csm_link_flags} -lcairo")
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CAIRO_CFLAGS}")
-	TARGET_LINK_LIBRARIES(carmen2pdf -lcairo)
-	TARGET_LINK_LIBRARIES(log2pdf  -lcairo)
-	TARGET_LINK_LIBRARIES(sm_animate -lcairo)
+#	TARGET_LINK_LIBRARIES(carmen2pdf -lcairo)
+#	TARGET_LINK_LIBRARIES(log2pdf  -lcairo)
+#	TARGET_LINK_LIBRARIES(sm_animate -lcairo)
 ENDIF(CAIRO_FOUND)
 
 SET(csm_sources 
@@ -159,9 +163,11 @@ ENDIF(CAIRO_FOUND)
 
 ADD_LIBRARY(csm-static STATIC ${csm_sources})
 
-TARGET_LINK_LIBRARIES(csm-static ${GSL_LIBRARIES})
+TARGET_LINK_LIBRARIES(csm-static ${csm_link_flags})
+
 #ADD_EXECUTABLE(test-static test.c)
 #TARGET_LINK_LIBRARIES(test-static csm-static)
 
-INSTALL(TARGETS csm-static
-	ARCHIVE DESTINATION lib)
+INSTALL(TARGETS csm-static ARCHIVE DESTINATION lib)
+
+SUBDIRS(pkg-config)

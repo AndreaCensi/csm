@@ -17,4 +17,9 @@ int ld_get_bounding_box(LDP ld, double bb_min[2], double bb_max[2],
 void lda_get_bounding_box(LDP *ld, int nld, double bb_min[2], double bb_max[2],
 	double offset[3], ld_reference use_reference, double horizon);
 
+
+int ld_read_some_scans_distance(FILE*file, LDP **array, int*num, 
+	ld_reference which, double d_xy, double d_th);
+
+
 #endif
