@@ -310,7 +310,7 @@ int create_pdf_surface(const char*file, int max_width_points, int max_height_poi
 
 	double world_to_surface = surface_width / bb_width;
 	cairo_scale(*cr, world_to_surface, -world_to_surface );
-
 	cairo_translate(*cr, -bb_min[0], -bb_max[1]);
+	
 	return 1;
 }

@@ -1,0 +1,10 @@
+Most of the blame is on Andrea Censi (http://www.dis.uniroma1.it/~censi/).
+
+The json-c library is (c) Michael Clark, released under the MIT license.
+ http://oss.metaparadigm.com/json-c/ 
+The copy in lib/json-c is based on version 0.7.
+
+Bounding box algorithm in file laser_data_bbox.c created by Cyrill Stachniss  (http://www.informatik.uni-freiburg.de/~stachnis/).
+
+ICP covariance bug fixes by Gian Diego Tipaldi (http://www.dis.uniroma1.it/~tipaldi/).
+

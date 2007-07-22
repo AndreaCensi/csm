@@ -133,6 +133,7 @@ SET(csm_sources
 ./csm/laser_data_json.c
 ./csm/laser_data_load.c
 ./csm/laser_data_drawing.c
+./csm/laser_data_bbox.c
 ./csm/logging.c
 ./csm/math_utils.c
 ./csm/orientation.c

@@ -17,6 +17,7 @@ void transform_d(const double point2d[2], const double pose[3], double result2d[
 double norm_d(const double*p);
 
 double distance_squared_d(const double *a, const double *b);
+double distance_d(const double *a, const double *b);
 
 
 double angleDiff(double a, double b);

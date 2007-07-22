@@ -71,6 +71,10 @@ double distance_squared_d(const double *a, const double *b) {
 	return x*x + y*y;
 }
 
+double distance_d(const double *a, const double *b) {
+	return sqrt(distance_squared_d(a,b));
+}
+
 
 int is_nan(double v) {
 	return v == v ? 0 : 1;

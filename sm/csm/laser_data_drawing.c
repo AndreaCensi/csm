@@ -38,6 +38,7 @@ int ld_get_bounding_box(LDP ld, double bb_min[2], double bb_max[2],
 		
 	return rays_used > 3;
 }
+
 	
 void lda_get_bounding_box(LDP *lda, int nld, double bb_min[2], double bb_max[2],
 	double offset[3], ld_reference use_reference, double horizon) {
