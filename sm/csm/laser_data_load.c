@@ -86,7 +86,7 @@ int distance_accept(LDP ld) {
 		   fabs(diff[2]) > distance_interval_th ) 
 		{
 			copy_d(this_pose, 3, distance_last_pose);
-			sm_debug("Accepting #%d, %f\n", distance_count, distance);
+		/*	sm_debug("Accepting #%d, %f\n", distance_count, distance);*/
 			return 1;
 		}
 		else 

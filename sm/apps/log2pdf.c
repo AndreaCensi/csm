@@ -140,8 +140,16 @@ int log2pdf(log2pdf_params *p) {
 	/* Draw pose path */
 	if(p->pose_path.draw) {
 		cairo_save(cr);
+		
 		cr_set_style(cr, &(p->pose_path));
 		cr_lda_draw_pose_path(cr, scans, nscans, p->use_reference);
+
+
+		cairo_set_source_rgb(cr, 0.3, 0, 1.0);
+		double *pose0 = ld_get_reference_pose(scans[0], p->use_reference);
+		cairo_arc(cr, pose0[0], pose0[1], 0.4, 0.0, 2*M_PI);
+		cairo_fill(cr);
+
 		cairo_restore(cr);
 	}
 

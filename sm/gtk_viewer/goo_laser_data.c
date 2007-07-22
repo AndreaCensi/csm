@@ -78,7 +78,7 @@ goo_laser_data_paint (GooCanvasItemSimple   *simple,
 		     const GooCanvasBounds *bounds)
 {
 	GooLaserData *gld = (GooLaserData*) simple;
-
+/*
 	cairo_set_line_width (cr, 0.01);
 	cairo_move_to (cr, gld->bb_min[0], gld->bb_min[1]);
 	cairo_line_to (cr, gld->bb_max[0], gld->bb_min[1]);
@@ -87,9 +87,8 @@ goo_laser_data_paint (GooCanvasItemSimple   *simple,
 	cairo_line_to (cr, gld->bb_min[0], gld->bb_min[1]);
 	cairo_close_path (cr);
 	cairo_set_source_rgb(cr, 0.8, 0.9, 0.8);
-	/*  goo_canvas_style_set_fill_options (simple->simple_data->style, cr);*/
 	cairo_stroke (cr);
-
+*/
 	cr_ld_draw(cr, gld->ld, &(gld->p->laser));
 }
 

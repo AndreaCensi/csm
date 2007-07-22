@@ -22,6 +22,9 @@ typedef struct {
 	int scans_num;
 	
 	double device_size[2];
+	
+	GooCanvasItem *root;
+	GooCanvas*canvas;
 } viewer_params;
 
 void compute_transformations(viewer_params*p);

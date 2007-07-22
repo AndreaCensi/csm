@@ -118,7 +118,6 @@ void cr_lda_draw_pose_path(cairo_t*cr, LDP*scans, int nscans, ld_reference use_r
 			cairo_line_to(cr, pose[0], pose[1]);
 		}
 	}
-	cairo_close_path(cr);
 	cairo_stroke(cr);
 }
 
@@ -196,9 +195,9 @@ void cr_ld_draw_countour(cairo_t*cr, LDP ld, double horizon, double connect_thre
 			cairo_move_to(cr, p[0], p[1]);
 		else
 			cairo_line_to(cr, p[0], p[1]);
-		if(draw_info[i].end_stroke)
-			cairo_stroke(cr);
+/*		if(draw_info[i].end_stroke)*/
 	}
+	cairo_stroke(cr);
 }
 
 void cr_ld_draw_points(cairo_t*cr, LDP ld, double radius) {

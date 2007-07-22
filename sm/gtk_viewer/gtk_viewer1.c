@@ -12,7 +12,8 @@ static gboolean on_delete_event      (GtkWidget      *window,
 				      GdkEvent       *event,
 				      gpointer        unused_data);
 
-
+void* reading_thread(void *data);
+	
 int main (int argc, char *argv[])
 {
 	viewer_params *p = (viewer_params*) malloc(sizeof(viewer_params));
@@ -33,9 +34,9 @@ int main (int argc, char *argv[])
 	lds_add_options(&(p->laser), ops, "laser_", "");
 	ls_add_options(&(p->pose_path), ops, "path_", "");
 
-
-
-
+  /* init threads */
+  g_thread_init(NULL);
+  gdk_threads_init();
 
 
   GtkWidget *window, *scrolled_win, *canvas;
@@ -62,64 +63,64 @@ int main (int argc, char *argv[])
 
   root = goo_canvas_get_root_item (GOO_CANVAS (canvas));
 
-#if 0
-  /* Add a few simple items. */
-  rect_item = goo_canvas_rect_new (root, 0, 0, 600, 400,
-				   "line-width", 10.0,
-				   "radius-x", 20.0,
-				   "radius-y", 10.0,
-				   "stroke-color", "yellow",
-/*				   "fill-color", "red",*/
-				   NULL);
+	p->device_size[0] = 800;
+	p->device_size[1] = 600;
+	
+	gtk_widget_set_size_request (canvas, p->device_size[0], p->device_size[1]);
+	goo_canvas_set_bounds (GOO_CANVAS (canvas), 0, 0, p->device_size[0], p->device_size[1]);
+	gtk_widget_show (canvas);
+	gtk_container_add (GTK_CONTAINER (scrolled_win), canvas);
 
+	p->root = root;
+	p->canvas = canvas;
+	
+	GError * error;
+	if (!g_thread_create(reading_thread, p, FALSE, &error)) {
+      g_printerr ("Failed to create YES thread: %s\n", error->message);
+      return 1;
+	}
+  /* Pass control to the GTK+ main event loop. */
+  gtk_main ();
 
-  text_item = goo_canvas_text_new (root, "Hello World", 300, 300, -1,
-				   GTK_ANCHOR_CENTER,
-				   "font", "Sans 24",
-				   NULL);
-  goo_canvas_item_rotate (text_item, 45, 300, 300);
-#endif
-  /* Connect a signal handler for the rectangle item. */
+}
 
-
+void* reading_thread(void *data) {
+	viewer_params * p = (viewer_params*) data;
+	
 	FILE * input = open_file_for_reading(p->input_filename);
-	if(!input) return -1;
+	if(!input) return 0;
 	
 	p->scans = malloc(1);
 	p->scans_items = malloc(1);
 	p->scans_size = 0;
 	p->scans_num = 0;
 	
-	
 	LDP ld;
 	while( (ld = ld_read_smart(input)) ) {
+	   
 		if(p->scans_num >= p->scans_size) {
 			p->scans_size = 2* p->scans_size +10;
 			p->scans = realloc(p->scans, sizeof(LDP) * p->scans_size);
 			p->scans_items = realloc(p->scans_items, sizeof(LDP) * p->scans_size);
 		}
 		
-		GooCanvasItem * gld = goo_laser_data_new (root, p, ld);
+		GooCanvasItem * gld = goo_laser_data_new (p->root, p, ld);
   		g_signal_connect (gld, "button_press_event",
 		    (GtkSignalFunc) on_rect_button_press, NULL);
 		
 		p->scans[p->scans_num] = ld;
 		p->scans_items[p->scans_num] = gld;
 		p->scans_num++;
+		
+		gdk_threads_enter();
+		compute_transformations(p);
+		goo_canvas_update(p->canvas);
+/*		gdk_flush ();*/
+		gdk_threads_leave();
+		/* sleep a while */
+		usleep(200);
+/*	      sleep(g_random_int_range (1, 4));*/
 	}
-
-	p->device_size[0] = 2*800;
-	p->device_size[1] = 2*600;
-	
-	gtk_widget_set_size_request (canvas, p->device_size[0]*0.5, p->device_size[1]*0.5);
-	goo_canvas_set_bounds (GOO_CANVAS (canvas), 0, 0, p->device_size[0], p->device_size[1]);
-	gtk_widget_show (canvas);
-	gtk_container_add (GTK_CONTAINER (scrolled_win), canvas);
-
-	compute_transformations(p);
-	
-  /* Pass control to the GTK+ main event loop. */
-  gtk_main ();
 
   return 0;
 }
@@ -154,8 +155,8 @@ void compute_transformations(viewer_params*p) {
 		oriented_bbox obbox;
 		ld_get_oriented_bbox(p->scans[k], 20, &obbox);
 		oplus_d(p->scans[k]->estimate, obbox.pose, obbox.pose);
-		sm_debug("%d: %s size %f %f\n", k, friendly_pose(obbox.pose), 
-			obbox.size[0], obbox.size[1]);
+	/*	sm_debug("%d: %s size %f %f\n", k, friendly_pose(obbox.pose), 
+			obbox.size[0], obbox.size[1]);*/
 		
 		bbfind_add_bbox(bbf, &obbox);
 	}
