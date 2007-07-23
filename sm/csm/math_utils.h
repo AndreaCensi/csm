@@ -34,8 +34,6 @@ void copy_d(const double*from, int n, double*to);
 void ominus_d(const double *x, double*res);
 void oplus_d(const double*x1, const double*x2, double*res);
 void pose_diff_d(const double*second, const double*first, double*res);
-
-
 	
 /** Projects (p[0],p[1]) on the LINE passing through (ax,ay)-(bx,by). If distance!=0, distance is set
 to the distance from the point to the segment */
@@ -47,6 +45,7 @@ void projection_on_line_d(const double *a,
 	
 /** Distance of x from its projection on segment a-b */
 double dist_to_segment_d(const double*a, const double*b, const double*x);
+/** Same thing as dist_to_segment_d(), but squared */
 double dist_to_segment_squared_d(const double*a, const double*b, const double*x);
 
 void projection_on_segment_d(
@@ -55,10 +54,8 @@ void projection_on_segment_d(
 	const double*x,
 	      double*proj);
 
-/** Some functions to print poses and covariances in a friendly way */
+/** A function to print poses and covariances in a friendly way */
 const char* friendly_pose(double*pose);
-
-
 
 /** Returns true v is NAN */
 int is_nan(double v);

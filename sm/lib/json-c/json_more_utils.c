@@ -52,7 +52,7 @@ JO json_read_stream(FILE*f) {
 	
 	JSON_checker_init();
 	while(1) {
-		if(count > buf_size - 2) {
+		if( ((size_t)count) > buf_size - 2) {
 			buf_size *= 2;
 			char * new_buf = realloc(buf, buf_size);
 			if(!new_buf) {
@@ -218,6 +218,19 @@ int json_to_int(JO jo, int*ptr) {
 	*ptr = json_object_get_int(jo);
 	
 	return 1;
+}
+
+int json_to_double(JO jo, double*ptr) {
+	if(json_object_is_type(jo, json_type_double)) {
+		*ptr = json_object_get_double(jo);
+		return 1;
+	} else if(json_object_is_type(jo, json_type_int)) {
+		*ptr = json_object_get_int(jo);
+		return 1;
+	} else{
+		*ptr = NAN;
+		return 0;
+	}
 }
 
 int jo_read_int(JO jo, const char*name, int*p) {

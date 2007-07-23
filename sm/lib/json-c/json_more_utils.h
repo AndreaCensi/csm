@@ -41,6 +41,7 @@ int jo_read_int_array    (JO, const char*name, int    *p, int n, int    when_nul
 
 
 int json_to_int(JO jo, int*ptr);
+int json_to_double(JO jo, double*ptr);
 
 	
 /* returns 0 if NAN */
