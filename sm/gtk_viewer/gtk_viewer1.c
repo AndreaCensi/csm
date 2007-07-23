@@ -14,8 +14,13 @@ static gboolean on_delete_event      (GtkWidget      *window,
 
 void* reading_thread(void *data);
 	
-int main (int argc, char *argv[])
+GooCanvasItem*  text_item;
+GooCanvasItem* rect_item;
+
+int main (int argc, char **argv)
 {
+	sm_set_program_name(basename(argv[0]));
+	
 	viewer_params *p = (viewer_params*) malloc(sizeof(viewer_params));
 	lds_set_defaults(&(p->laser));
 	ls_set_defaults(&(p->pose_path));
@@ -34,13 +39,19 @@ int main (int argc, char *argv[])
 	lds_add_options(&(p->laser), ops, "laser_", "");
 	ls_add_options(&(p->pose_path), ops, "path_", "");
 
+	if(!options_parse_args(ops, argc, argv)) {
+		fprintf(stderr, "A simple experimental GTK viewer.\n\nUsage:\n");
+		options_print_help(ops, stderr);
+		return -1;
+	}
+
   /* init threads */
   g_thread_init(NULL);
   gdk_threads_init();
 
 
   GtkWidget *window, *scrolled_win, *canvas;
-  GooCanvasItem *root, *rect_item, *text_item;
+GooCanvasItem *root;
 
   /* Initialize GTK+. */
   gtk_set_locale ();
@@ -74,6 +85,24 @@ int main (int argc, char *argv[])
 	p->root = root;
 	p->canvas = canvas;
 	
+	
+	/* Add a few simple items. */
+rect_item = goo_canvas_rect_new (root, 0, 0, 50, 50,
+				   "line-width", 10.0,
+				   "radius-x", 20.0,
+				   "radius-y", 10.0,
+				   "stroke-color", "yellow",
+				   "fill-color", "red",
+				   NULL);
+
+/*text_item = goo_canvas_text_new (root, "Hello World", 300, 300, -1,
+				   GTK_ANCHOR_CENTER,
+				   "font", "Sans 1",
+				   NULL);
+  goo_canvas_item_rotate (text_item, 45, 300, 300);
+  */
+
+	
 	GError * error;
 	if (!g_thread_create(reading_thread, p, FALSE, &error)) {
       g_printerr ("Failed to create YES thread: %s\n", error->message);
@@ -104,21 +133,25 @@ void* reading_thread(void *data) {
 			p->scans_items = realloc(p->scans_items, sizeof(LDP) * p->scans_size);
 		}
 		
-		GooCanvasItem * gld = goo_laser_data_new (p->root, p, ld);
-  		g_signal_connect (gld, "button_press_event",
-		    (GtkSignalFunc) on_rect_button_press, NULL);
-		
-		p->scans[p->scans_num] = ld;
-		p->scans_items[p->scans_num] = gld;
-		p->scans_num++;
-		
 		gdk_threads_enter();
+
+		if(1) {
+			GooCanvasItem * gld = goo_laser_data_new (p->root, p, ld);
+		g_signal_connect (gld, "button_press_event",
+			    (GtkSignalFunc) on_rect_button_press, NULL);
+			p->scans[p->scans_num] = ld;
+			p->scans_items[p->scans_num] = gld;
+			p->scans_num++;
+		} else {
+
+		}
 		compute_transformations(p);
 		goo_canvas_update(p->canvas);
 /*		gdk_flush ();*/
+		
 		gdk_threads_leave();
 		/* sleep a while */
-		usleep(200);
+		usleep(20);
 /*	      sleep(g_random_int_range (1, 4));*/
 	}
 
@@ -150,28 +183,50 @@ void item_to_world(const double pose[3], cairo_matrix_t*m) {
 
 void compute_transformations(viewer_params*p) {
 	int k;
-	bbfind * bbf = bbfind_new();
-	for(k=0;k<p->scans_num;k++) {
-		oriented_bbox obbox;
-		ld_get_oriented_bbox(p->scans[k], 20, &obbox);
-		oplus_d(p->scans[k]->estimate, obbox.pose, obbox.pose);
-	/*	sm_debug("%d: %s size %f %f\n", k, friendly_pose(obbox.pose), 
-			obbox.size[0], obbox.size[1]);*/
-		
-		bbfind_add_bbox(bbf, &obbox);
-	}
-	
 	oriented_bbox global;
-	if(bbfind_compute(bbf, &global)) {
-		sm_debug("Global: %s size %f %f\n",  friendly_pose(global.pose), 
-			global.size[0], global.size[1]);
-	}
 	
-	bbfind_free(bbf);
+	if(0) {
+		bbfind * bbf = bbfind_new();
+		int n = p->scans_num;
+/*		if(n>20) n = 20;*/
 	
+		for(k=0;k<n;k++) {
+			GooLaserData * gld = (GooLaserData*) p->scans_items[k];
+			bbfind_add_bbox(bbf, &gld->obbox);
+		}
+	
+	
+		if(bbfind_compute(bbf, &global)) {
+			sm_debug("%d Global: %s size %f %f\n", p->scans_num, friendly_pose(global.pose), 
+				global.size[0], global.size[1]);
+		} else {
+			sm_error("%d Could not compute global bounding box.\n", p->scans_num);
+		}
+		bbfind_free(bbf);
+	}else{
+	
+	global.pose[0] = -22;
+	global.pose[1] = -41;
+	global.pose[2] = M_PI/2;
+	global.size[0] = 106;
+	global.size[1] = 46;
+}
 	cairo_matrix_t m_world_to_viewport;
 	world_to_viewport(&global, p->device_size, &(m_world_to_viewport));
 
+	cairo_matrix_t *m = &m_world_to_viewport;
+	sm_info("Matrix: %f %f %f %f  %f %f\n", m->xx,m->yx,m->xy,m->yy, m->x0, m->y0);
+
+	cairo_matrix_t mm;
+	cairo_matrix_init_identity(&mm);
+/*	cairo_matrix_translate(&mm, 300, 600);*/
+	cairo_matrix_translate(&mm, 300, 600);
+	cairo_matrix_rotate(&mm, deg2rad(p->scans_num));
+	goo_canvas_item_set_transform(rect_item, &mm);
+
+	/*
+	goo_canvas_item_set_transform(text_item, &m_world_to_viewport);
+*/
 	for(k=0;k<p->scans_num;k++) {
 		GooCanvasItem * gld = p->scans_items[k];
 		

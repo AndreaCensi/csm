@@ -1,5 +1,5 @@
 /* This algorithm was created by Cyrill Stachniss 
-   http://www.informatik.uni-freiburg.de/~stachnis/ */
+	http://www.informatik.uni-freiburg.de/~stachnis/ */
 #include "laser_data_drawing.h"
 
 
@@ -39,7 +39,7 @@ int bbfind_add_point(bbfind*bbf, double point[2]) {
 
 int bbfind_add_point2(bbfind*bbf, double x, double y) {
 	if(bbf->num > bbf->buf_size - 2) {
-		bbf->buf_size  *= 2;
+		bbf->buf_size	*= 2;
 		if(! (bbf->buf = (BB_Point*) realloc(bbf->buf, sizeof(BB_Point)*bbf->buf_size)) ) {
 			sm_error("Cannot allocate (size=%d)\n", bbf->buf_size);
 			return 0;
@@ -79,17 +79,31 @@ int bbfind_add_bbox(bbfind*bbf, const oriented_bbox*bbox) {
 int bbfind_compute(bbfind*bbf, oriented_bbox*bbox) {
 	double ul[2], ur[2], ll[2], lr[2];
 	
-	if(!getBoundingBox(bbf->buf, bbf->num, ul, ur, ll, lr)) {
-		sm_error("Could not compute bounding box.\n");
-		return 0;
+	if(1) {
+		if(!getBoundingBox(bbf->buf, bbf->num, ul, ur, ll, lr)) {
+			sm_error("Could not compute bounding box.\n");
+			return 0;
+		}
+		bbox->pose[0] = ll[0];
+		bbox->pose[1] = ll[1];
+		bbox->pose[2] = atan2(lr[1]-ll[1], lr[0]-ll[0]);
+		bbox->size[0] = distance_d(lr, ll);
+		bbox->size[1] = distance_d(ll, ul);
+	} else {
+		double bb_min[2] = {bbf->buf[0].x,bbf->buf[0].y}, 
+				bb_max[2] = {bbf->buf[0].x,bbf->buf[0].y};
+		int i; for(i=0;i<bbf->num; i++) {
+			bb_min[0] = GSL_MIN(bb_min[0], bbf->buf[i].x);
+			bb_min[1] = GSL_MIN(bb_min[1], bbf->buf[i].y);
+			bb_max[0] = GSL_MAX(bb_max[0], bbf->buf[i].x);
+			bb_max[1] = GSL_MAX(bb_max[1], bbf->buf[i].y);
+		}
+		bbox->pose[0] = bb_min[0];
+		bbox->pose[1] = bb_min[1];
+		bbox->pose[2] = 0;
+		bbox->size[0] = bb_max[0] - bb_min[0];
+		bbox->size[1] = bb_max[1] - bb_min[1];
 	}
-	
-	bbox->pose[0] = ll[0];
-	bbox->pose[1] = ll[1];
-	bbox->pose[2] = atan2(lr[1]-ll[1], lr[0]-ll[0]);
-	bbox->size[0] = distance_d(lr, ll);
-	bbox->size[1] = distance_d(ll, ul);
-	
 	return 1;
 }
 
@@ -135,9 +149,9 @@ int getBoundingBox(BB_Point* p, int nOfPoints,
   double centerx = 0;
   double centery = 0;
   for (int i=0; i < nOfPoints; i++) {
-    centerx += p[i].x;
-    centery += p[i].y;
-  }    
+	 centerx += p[i].x;
+	 centery += p[i].y;
+  }	 
   centerx /= (double) nOfPoints;
   centery /= (double) nOfPoints;
 
@@ -152,12 +166,12 @@ int getBoundingBox(BB_Point* p, int nOfPoints,
   double x4 = 0.0;
 
   for (int i=0; i < nOfPoints; i++) {
-    double cix = p[i].x - centerx;
-    double ciy = p[i].y - centery;
-    
-    x1 += cix*cix;
-    x2 += cix*ciy;  
-    x4 += ciy*ciy;
+	 double cix = p[i].x - centerx;
+	 double ciy = p[i].y - centery;
+	 
+	 x1 += cix*cix;
+	 x2 += cix*ciy;  
+	 x4 += ciy*ciy;
   }
   x1 /= (double) nOfPoints;
   x2 /= (double) nOfPoints;
@@ -169,9 +183,11 @@ int getBoundingBox(BB_Point* p, int nOfPoints,
   // calculate the eigenvectors
   // ---------------------------
   // catch 1/0 or sqrt(<0)
-  if ((x3 == 0) || (x2 == 0)|| (x4*x4-2*x1*x4+x1*x1+4*x2*x3 < 0 )) 
-    return 0;
- 
+  if ((x3 == 0) || (x2 == 0)|| (x4*x4-2*x1*x4+x1*x1+4*x2*x3 < 0 ))  {
+	sm_error("Cyrill: Could not compute bounding box.\n");
+	return 0;
+}
+
  // eigenvalues
   double lamda1 = 0.5* (x4 + x1 + sqrt(x4*x4 - 2.0*x1*x4 + x1*x1 + 4.0*x2*x3));
   double lamda2 = 0.5* (x4 + x1 - sqrt(x4*x4 - 2.0*x1*x4 + x1*x1 + 4.0*x2*x3));
@@ -179,7 +195,7 @@ int getBoundingBox(BB_Point* p, int nOfPoints,
   // eigenvector 1  with  (x,y)
   double v1x = - (x4-lamda1) * (x4-lamda1) * (x1-lamda1) / (x2 * x3 * x3);
   double v1y = (x4-lamda1) * (x1-lamda1) / (x2 * x3);
-  // eigenvector 2 with  (x,y)
+  // eigenvector 2 with	 (x,y)
   double v2x = - (x4-lamda2) * (x4-lamda2) * (x1-lamda2) / (x2 * x3 * x3);
   double v2y = (x4-lamda2) * (x1-lamda2) / (x2 * x3);
 
@@ -200,14 +216,14 @@ int getBoundingBox(BB_Point* p, int nOfPoints,
   double ymin = 1e20;
   double ymax = -1e20;
   for(int i = 0; i< nOfPoints; i++) {
-    // dot-product of relativ coordinates of every point
-    x = (p[i].x - centerx) * v1x +  (p[i].y - centery) * v1y;
-    y = (p[i].x - centerx) * v2x +  (p[i].y - centery) * v2y;
+	 // dot-product of relativ coordinates of every point
+	 x = (p[i].x - centerx) * v1x +	(p[i].y - centery) * v1y;
+	 y = (p[i].x - centerx) * v2x +	(p[i].y - centery) * v2y;
 
-    if( x > xmax) xmax = x;
-    if( x < xmin) xmin = x;
-    if( y > ymax) ymax = y;
-    if( y < ymin) ymin = y;
+	 if( x > xmax) xmax = x;
+	 if( x < xmin) xmin = x;
+	 if( y > ymax) ymax = y;
+	 if( y < ymin) ymin = y;
   }
 
   // now we can compute the corners of the bounding box

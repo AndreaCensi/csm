@@ -17,6 +17,7 @@ typedef struct {
 	GooCanvasItemSimple parent_object;
 
 	double bb_min[2], bb_max[2];
+	oriented_bbox obbox;
 
 	LDP ld;
 	

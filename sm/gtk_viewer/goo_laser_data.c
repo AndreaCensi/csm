@@ -11,10 +11,7 @@ G_DEFINE_TYPE (GooLaserData, goo_laser_data, GOO_TYPE_CANVAS_ITEM_SIMPLE)
 static void
 goo_laser_data_init (GooLaserData *gld)
 {
-/*  gld->x = 0.0;
-  gld->y = 0.0;
-  gld->width = 0.0;
-  gld->height = 0.0;*/
+	
 }
 
 
@@ -32,9 +29,18 @@ goo_laser_data_new (GooCanvasItem      *parent, viewer_params *p, LDP ld)
 	gld = (GooLaserData*) item;
 
 	ld_get_bounding_box(ld, gld->bb_min, gld->bb_max, ld->estimate, 10);
-
+	double padding = 1;
+	gld->bb_min[0] -= padding;
+	gld->bb_min[1] -= padding;
+	gld->bb_max[0] += padding;
+	gld->bb_max[1] += padding;
+	
+	
 	gld->p = p;
 	gld->ld = ld;
+
+	ld_get_oriented_bbox(ld, 20, &(gld->obbox) );
+	oplus_d(ld->estimate, gld->obbox.pose, gld->obbox.pose);
 
 /*  va_start (var_args, height);
   first_property = va_arg (var_args, char*);
@@ -62,13 +68,18 @@ goo_laser_data_update  (GooCanvasItemSimple *simple,
 {
   GooLaserData *gld = (GooLaserData*) simple;
 
+double padding = 0;
   /* Compute the new bounds. */
-  simple->bounds.x1 = gld->bb_min[0];
-  simple->bounds.y1 = gld->bb_min[1];
-  simple->bounds.x2 = gld->bb_max[0];
-  simple->bounds.y2 = gld->bb_max[1];
-}
+  simple->bounds.x1 = gld->bb_min[0] - padding;
+  simple->bounds.y1 = gld->bb_min[1] - padding;
+  simple->bounds.x2 = gld->bb_max[0] + padding;
+  simple->bounds.y2 = gld->bb_max[1] + padding;
 
+/*sm_debug("Bound %f %f %f %f\n", gld->bb_min[0],
+gld->bb_min[1],	gld->bb_max[0],
+gld->bb_max[1]);*/
+
+}
 
 /* The paint method. This should draw the item on the given cairo_t, using
    the item's own coordinate space. */
@@ -89,6 +100,14 @@ goo_laser_data_paint (GooCanvasItemSimple   *simple,
 	cairo_set_source_rgb(cr, 0.8, 0.9, 0.8);
 	cairo_stroke (cr);
 */
+
+	cairo_set_antialias( cr, CAIRO_ANTIALIAS_NONE );
+
+
+	cairo_set_source_rgb(cr, 0.3, 0, 1.0);
+	cairo_arc(cr, 0,0,  0.4, 0.0, 2*M_PI);
+	cairo_fill(cr);
+	
 	cr_ld_draw(cr, gld->ld, &(gld->p->laser));
 }
 
