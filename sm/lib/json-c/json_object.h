@@ -20,8 +20,8 @@
 #undef TRUE
 #define TRUE ((boolean)1)
 
-extern char *json_number_chars;
-extern char *json_hex_chars;
+extern const char *json_number_chars;
+extern const char *json_hex_chars;
 
 /* forward structure definitions */
 

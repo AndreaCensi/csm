@@ -115,7 +115,7 @@ struct json_object* json_tokener_parse_len(char *str, int len) {
 
 
 int jo_read_double_array(JO s, const char*name, double*p, int n, double when_null) {
-	JO jo = json_object_object_get(s, (char*)name);
+	JO jo = json_object_object_get(s, name);
 	if(!jo) {
 /*		mc_error("Field '%s' not found.\n", name); */
 		return 0;
@@ -155,7 +155,7 @@ int jo_read_double_array(JO s, const char*name, double*p, int n, double when_nul
 
 int jo_read_int_array(JO s, const char*name, int*p, int n, int when_null) {
 	int size, i;
-	JO jo = json_object_object_get(s, (char*)name);
+	JO jo = json_object_object_get(s, name);
 	if(!jo) {
 /*		mc_error("Field '%s' not found.\n", name); */
 		return 0;
@@ -234,7 +234,7 @@ int json_to_double(JO jo, double*ptr) {
 }
 
 int jo_read_int(JO jo, const char*name, int*p) {
-	JO v = json_object_object_get(jo, (char*)name);
+	JO v = json_object_object_get(jo, name);
 	if(!v) {
 		return 0;
 	}
@@ -249,7 +249,7 @@ double convert_to_double(JO jo) {
 }
 
 int jo_read_double(JO jo, const char*name, double*p) {
-	JO v = json_object_object_get(jo, (char*)name);
+	JO v = json_object_object_get(jo, name);
 	
 	if(!v) {
 /*		mc_error("Field '%s' not found.\n", name); */
@@ -258,6 +258,23 @@ int jo_read_double(JO jo, const char*name, double*p) {
 	
 	*p = convert_to_double(v);
 	return 1;
+}
+
+
+int jo_read_string(JO jo, const char*name,  char*dest_string, size_t max_len) {
+	JO v = json_object_object_get(jo, name);
+	if(!v) return 0;
+	if(json_object_is_type(v, json_type_string))  {
+		strncpy(dest_string, json_object_get_string(v), max_len);
+		return 1;
+	} else {
+		strncpy(dest_string, "<string not found>", max_len);
+		return 0;
+	}
+}
+
+void jo_add_string(JO root, const char*name, const char*v) {
+	jo_add(root, name, jo_new_string(v));
 }
 
 void jo_add_double_array(JO root, const char*name, const double*v, int n) {

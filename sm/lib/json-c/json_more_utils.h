@@ -33,11 +33,14 @@ void jo_add_int          (JO, const char*name, int    v);
 void jo_add_double_array (JO, const char*name, const double *v, int n);
 void jo_add_int_array    (JO, const char*name, const int    *v, int n);
 
+void jo_add_string       (JO, const char*name, const char*v);
+
 /** Return 0 if there isn't a field called 'name' */
 int jo_read_int          (JO, const char*name, int*p) ;
 int jo_read_double(JO jo, const char*name, double*p);
 int jo_read_double_array (JO, const char*name, double *p, int n, double when_null);
 int jo_read_int_array    (JO, const char*name, int    *p, int n, int    when_null);
+int jo_read_string       (JO, const char*name, char*v, size_t max_len);
 
 
 int json_to_int(JO jo, int*ptr);

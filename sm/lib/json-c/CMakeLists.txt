@@ -16,10 +16,10 @@ SET(json-c_sources
 
 ADD_LIBRARY(json-c STATIC ${json-c_sources})
 
-ADD_EXECUTABLE(test1 test1.c)
+#ADD_EXECUTABLE(test1 test1.c)
 ADD_EXECUTABLE(test2 test2.c)
 
-TARGET_LINK_LIBRARIES(test1 json-c)
+#TARGET_LINK_LIBRARIES(test1 json-c)
 TARGET_LINK_LIBRARIES(test2 json-c)
 
 
