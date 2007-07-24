@@ -66,8 +66,8 @@ void lds_add_options(ld_style*lds, struct option*ops,
 
 	ls_add_options(&(lds->normals), ops, cat(prefix, "normals_"),  cat(desc_prefix, "Normals | "));
 
-	options_double(ops, cat(prefix, "normals_length"), &(lds->points_radius), 
-		lds->points_radius, cat(desc_prefix, "Length of normals sticks (meters)"));
+	options_double(ops, cat(prefix, "normals_length"), &(lds->normals_length), 
+		lds->normals_length, cat(desc_prefix, "Length of normals sticks (meters)"));
 
 	options_double(ops, cat(prefix, "connect_threshold"), &(lds->connect_threshold), 
 		lds->connect_threshold, cat(desc_prefix, "Threshold under which points are connected (m)."));
@@ -220,12 +220,12 @@ void cr_ld_draw_normals(cairo_t*cr, LDP ld, double length) {
 		double x1 = ld->readings[i] * cos(ld->theta[i]);
 		double y1 = ld->readings[i] * sin(ld->theta[i]);
 		double x2 = x1 + cos(alpha) * length;
-		double y2 = x2 + sin(alpha) * length;
+		double y2 = y1 + sin(alpha) * length;
 
 		cairo_move_to(cr, x1, y1);
 		cairo_line_to(cr, x2, y2);
-		cairo_stroke (cr);
 	}
+	cairo_stroke (cr);
 }
 
 void cr_ld_draw(cairo_t* cr, LDP ld, ld_style *p) {
