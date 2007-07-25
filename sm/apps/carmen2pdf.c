@@ -1,6 +1,13 @@
 #include <time.h>
 #include <string.h>
+
+#ifdef _JAMAIKO_PC
+#include <linux/limits.h>
+#endif
+
+#ifndef _JAMAIKO_PC
 #include <libgen.h>
+#endif
 
 #include <cairo.h>
 #include <cairo-pdf.h>

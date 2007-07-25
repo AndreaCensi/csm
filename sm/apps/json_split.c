@@ -1,4 +1,12 @@
+#ifndef _JAMAIKO_PC
 #include <libgen.h>
+#endif
+
+#ifdef _JAMAIKO_PC
+#include <string.h>
+#include <linux/limits.h>
+#endif
+
 #include <options/options.h>
 
 #include <csm/csm_all.h>
