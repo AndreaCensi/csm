@@ -9,6 +9,8 @@ function res = ld_plot(ld, params)
 %			rototranslated at ld.estimate, else is drawn at 0;
 %		params.rototranstated_odometry = false;
 	
+	ld.points = [ cos(ld.theta') .* ld.readings'; sin(ld.theta').* ld.readings'];
+	
 	if(nargin==1)
 		params.auto = false;
 	end
@@ -64,7 +66,7 @@ function res = ld_plot(ld, params)
 	
 	if params.plotNormals 
 		% disegno normali
-		maxLength = 0.05;
+		maxLength = 0.5;
 		
 		valids = find(ld.alpha_valid);
         if not(isfield(ld,'alpha_error'))
@@ -77,7 +79,7 @@ function res = ld_plot(ld, params)
 		emin = min(valid_errors);
 		emax = max(valid_errors);
 		
-		for i=1:size(valids,2)
+		for i=1:size(valids,1)
 			%weight = 1 + valid_errors(i) * maxLength;
 			weight = maxLength;
             
