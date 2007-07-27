@@ -9,6 +9,7 @@ SET(csm_sources
 	
 	json_journal.c
 	math_utils.c
+	math_utils_gsl.c
 	utils.c
 	orientation.c
 	clustering.c

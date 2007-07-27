@@ -136,6 +136,7 @@ SET(csm_sources
 ./csm/laser_data_bbox.c
 ./csm/logging.c
 ./csm/math_utils.c
+./csm/math_utils_gsl.c
 ./csm/orientation.c
 ./csm/sm_options.c
 ./csm/utils.c

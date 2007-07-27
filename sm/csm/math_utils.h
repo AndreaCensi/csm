@@ -30,10 +30,11 @@ int minmax(int from,int to,int x);
 
 /** Copies n doubles from from to to */
 void copy_d(const double*from, int n, double*to);
+
 /* With doubles */
-void ominus_d(const double *x, double*res);
-void oplus_d(const double*x1, const double*x2, double*res);
-void pose_diff_d(const double*second, const double*first, double*res);
+void ominus_d(const double x[3], double res[3]);
+void oplus_d(const double x1[3], const double x2[3], double res[3]);
+void pose_diff_d(const double second[3], const double first[3], double res[3]);
 	
 /** Projects (p[0],p[1]) on the LINE passing through (ax,ay)-(bx,by). If distance!=0, distance is set
 to the distance from the point to the segment */
