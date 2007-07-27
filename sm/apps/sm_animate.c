@@ -3,7 +3,6 @@
 #include <float.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <libgen.h>
 
 #include "../csm/csm_all.h"
 #include "../csm/laser_data_drawing.h"
@@ -38,8 +37,8 @@ void set_defaults(anim_params *p) {
 
 int main(int argc, const char** argv)
 {
-	sm_set_program_name(basename(argv[0]));
-	
+	sm_set_program_name(argv[0]);
+
 	anim_params p;
 	set_defaults(&p);
 	

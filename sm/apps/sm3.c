@@ -1,6 +1,5 @@
 #include <time.h>
 #include <string.h>
-#include <libgen.h>
 
 #include <csm/csm_all.h>
 
@@ -17,7 +16,7 @@ extern int distance_counter;
 
 
 int main(int argc, const char*argv[]) {
-	sm_set_program_name(basename(argv[0]));
+	sm_set_program_name(argv[0]);
 	
 	struct sm_params params;
 	struct sm_result result;

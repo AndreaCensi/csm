@@ -1,11 +1,10 @@
-#include <libgen.h>
 #include <options/options.h>
 #include <csm/csm_all.h>
 
 void ld_linearize(LDP ld);
 
 int main(int argc, const char * argv[]) {
-	sm_set_program_name(basename(argv[0]));
+	sm_set_program_name(argv[0]);
 	
 	int errors = 0;
 	int count = -1;

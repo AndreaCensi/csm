@@ -14,7 +14,7 @@ struct ld_noise_params {
 };
 
 int main(int argc, const char * argv[]) {
-	sm_set_program_name(basename(argv[0]));
+	sm_set_program_name(argv[0]);
 	
 	struct ld_noise_params p;
 	

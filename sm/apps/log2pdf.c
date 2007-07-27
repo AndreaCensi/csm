@@ -1,11 +1,8 @@
 #include <time.h>
 #include <string.h>
 
-#ifndef _JAMAIKO_PC
-#include <libgen.h>
-#endif
 
-#ifdef _JAMAIKO_PC
+#ifdef LINUX
 #include <linux/limits.h>
 #endif
 
@@ -46,7 +43,7 @@ int log2pdf(log2pdf_params *p);
 double offset_theta = 0;
 
 int main(int argc, char**argv) {
-	sm_set_program_name(basename(argv[0]));
+	sm_set_program_name(argv[0]);
 
 	log2pdf_params p;
 	

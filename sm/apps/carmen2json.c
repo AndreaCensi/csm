@@ -1,8 +1,7 @@
 #include <csm/csm.h>
-#include <libgen.h>
 
 int main(int argc, char * argv[]) {
-	sm_set_program_name(basename(argv[0]));
+	sm_set_program_name(argv[0]);
 
 	LDP ld; int count=0, errors=0; 
 	while((ld = ld_read_smart(stdin))) {

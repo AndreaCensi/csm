@@ -3,7 +3,6 @@
 #include <gsl/gsl_math.h>
 
 #include <math.h>
-#include <libgen.h>
 #include <options/options.h>
 
 #include <csm/csm_all.h>
@@ -18,7 +17,7 @@ LDP ld_resample(LDP ld);
 gsl_rng * rng;
 
 int main(int argc, const char ** argv) {
-	sm_set_program_name(basename(argv[0]));
+	sm_set_program_name(argv[0]);
 	
 	
 	struct option* ops = options_allocate(3);

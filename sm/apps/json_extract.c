@@ -4,6 +4,7 @@
 #include <csm/csm.h>
 
 int main(int argc, const char * argv[]) {
+	sm_set_program_name(argv[0]);
 	
 	int nth;
 	const char*input_filename;

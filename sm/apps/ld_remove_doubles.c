@@ -1,7 +1,4 @@
 #include <time.h>
-#include <string.h>
-#include <libgen.h>
-
 
 #include <options/options.h>
 #include <csm/csm_all.h>
@@ -18,7 +15,7 @@ int ld_equal_readings(LDP ld1, LDP ld2, double epsilon) {
 }
 
 int main(int argc, const char*argv[]) {
-	sm_set_program_name(basename(argv[0]));
+	sm_set_program_name(argv[0]);
 	
 	double epsilon;
 	

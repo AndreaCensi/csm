@@ -2,7 +2,7 @@
 #include <csm/csm_all.h>
 
 int main(int argc, const char ** argv) {
-	sm_set_program_name(basename(argv[0]));
+	sm_set_program_name(argv[0]);
 
 	int count = -1;
 	LDP ld;

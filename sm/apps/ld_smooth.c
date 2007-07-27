@@ -1,4 +1,3 @@
-#include <libgen.h>
 #include <options/options.h>
 #include <csm/csm_all.h>
 
@@ -13,7 +12,7 @@ struct {
 void ld_smooth(LDP ld, int neighbours, double scale_rad);
 
 int main(int argc, const char * argv[]) {
-	sm_set_program_name(basename(argv[0]));
+	sm_set_program_name(argv[0]);
 	
 	struct option* ops = options_allocate(3);
 	options_double(ops, "scale_deg", &p.scale_deg, 0.0, "Scale factor (degrees) ");

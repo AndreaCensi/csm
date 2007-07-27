@@ -1,13 +1,10 @@
 #include <time.h>
 #include <string.h>
 
-#ifdef _JAMAIKO_PC
+#ifdef LINUX
 #include <linux/limits.h>
 #endif
 
-#ifndef _JAMAIKO_PC
-#include <libgen.h>
-#endif
 
 #include <cairo.h>
 #include <cairo-pdf.h>
@@ -47,7 +44,7 @@ void ld_getbb(LDP  ld, double*x0, double*y0, double*x1, double*y1,
 	reference use_reference, double horizon);
 
 int main(int argc, const char*argv[]) {
-	sm_set_program_name(basename(argv[0]));
+	sm_set_program_name(argv[0]);
 
 	struct params p;
 	

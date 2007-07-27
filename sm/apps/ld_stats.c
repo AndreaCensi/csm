@@ -1,9 +1,9 @@
-#include <libgen.h>
 #include <options/options.h>
 
 #include <csm/csm_all.h>
 
 int main(int argc, const char * argv[]) {
+	sm_set_program_name(argv[0]);
 	
 	const char*input_filename;
 	const char*output_filename;
@@ -18,8 +18,7 @@ int main(int argc, const char * argv[]) {
 		"Max admissible theta displacement (deg)");
 	
 	if(!options_parse_args(ops, argc, argv)) {
-		fprintf(stderr, "%s : computes odometry statistics."
-			"\n\nOptions:\n", basename(argv[0]));
+		sm_info("computes odometry statistics.\n\nOptions:\n");
 		options_print_help(ops, stderr);
 		return -1;
 	}

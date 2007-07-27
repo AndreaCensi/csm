@@ -3,7 +3,6 @@
 #include <gsl/gsl_math.h>
 
 #include <math.h>
-#include <libgen.h>
 #include <options/options.h>
 
 #include <csm/csm_all.h>
@@ -16,7 +15,7 @@ struct ld_noise_params {
 };
 
 int main(int argc, const char ** argv) {
-	sm_set_program_name(basename(argv[0]));
+	sm_set_program_name(argv[0]);
 	
 	struct ld_noise_params p;
 	

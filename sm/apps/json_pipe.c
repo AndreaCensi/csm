@@ -1,9 +1,8 @@
-#include <libgen.h>
-
 #include <csm/csm.h>
 #include <options/options.h>
 
 int main(int argc, const char * argv[]) {
+	sm_set_program_name(argv[0]);
 	
 	int n;
 	
