@@ -14,7 +14,7 @@ int main(int argc, const char * argv[]) {
 	
 	if(!options_parse_args(ops, argc, argv)) {
 		fprintf(stderr, "%s : splits a JSON file into many files."
-			"\n\nOptions:\n", basename(argv[0]));
+			"\n\nOptions:\n", argv[0]);
 		options_print_help(ops, stderr);
 		return -1;
 	}
@@ -35,7 +35,7 @@ int main(int argc, const char * argv[]) {
 	
 	JO jo;
 	while( (jo = json_read_stream(input_stream)) ) {
-		char filename[PATH_MAX];
+		char filename[1000];
 		sprintf(filename, output_pattern, count);
 		if(!count) {
 			

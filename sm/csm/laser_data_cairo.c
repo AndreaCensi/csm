@@ -1,7 +1,15 @@
+
+/* stpcpy */
+#ifdef LINUX
+#define  _GNU_SOURCE
+#endif
+
+#include <string.h>
+
 #include <cairo-pdf.h>
 #include <stdlib.h>
 #include <limits.h>
-#include <string.h>
+
 #include "laser_data_cairo.h"
 
 void cr_ld_draw_rays(cairo_t*, LDP);

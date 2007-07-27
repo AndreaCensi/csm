@@ -105,7 +105,7 @@
 
 ########### Carmen2pdf ########## 
 IF(CAIRO_FOUND)
-	new_executable(carmen2pdf)
+#	new_executable(carmen2pdf)
 	new_executable(sm_animate)
 	new_executable(log2pdf)
 	
