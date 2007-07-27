@@ -11,7 +11,29 @@ diego:
 	leggi il secondo campo
 	e scrivi il secondo campo
 	(e scrivi, per sicurezza, il primo campo)
+
+#### Regarding the timestamp ####	
 	
+Regarding the timestamp "fields". The last three fields in a Carmen log can be:
+
+	integer   string   integer
+
+This is interpreted as seconds, hostname, microseconds. This is good if you want to write a `timeval` struct to the log and *be sure* it won't be modified by precision problems when writing, and parsing, as a `double`.
+
+If it doesn't look like a timestamp, then it is assumed that the fields are:
+
+	double string double
+
+In this case, the first double is interpreted as the timestamp in seconds, while the second double is discarded.
+
+The library will warn the user about these decisions by writing on the console this message:
+
+	sm2:inf: Reading timestamp as 'sec hostname usec'.
+
+or this one:
+
+	sm2:inf: Reading timestamp as doubles (discarding second one).
+
 ### The JSON log format ###
 
 See this site: <http://www.json.org> for general information about JSON.

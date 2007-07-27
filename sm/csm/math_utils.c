@@ -37,7 +37,7 @@ void transform(const gsl_vector* p, const gsl_vector* x, gsl_vector*res) {
 	gsl_vector_set(res, 1, s * gvg(p,0) +c*gvg(p,1) + gvg(x,1));
 }
 
-void transform_d(const double* point2d, const double* pose, double* result2d) {
+void transform_d(const double point2d[2], const double pose[3], double result2d[2]) {
 	double theta = pose[2];
 	double c = cos(theta); double s = sin(theta);
 	result2d[0] = pose[0] + c * point2d[0] - s * point2d[1];
@@ -196,24 +196,6 @@ double angleDiff(double a, double b) {
 	while(t>M_PI)  t-= 2*M_PI;
 	return t;
 }
-
-
-/** Projects (px,py) on segment (ax,ay)-(bx,by) */
-/*void projection_on_line2(double ax, double ay, 
-	double bx, double by, 
-	double px, double py,
-	double *x, double *y) 
-{
-	double t0 = ax-bx;
-	double t1 = ay-by;
-
-	double alpha = atan2(t1,t0) + M_PI/2;
-	double rho = cos(alpha)*ax+sin(alpha)*ay;
-
-	double c = cos(alpha); double s = sin(alpha);
-	*x =   c*rho + s*s*px - c*s*py ;
-	*y =   s*rho - c*s*px + c*c*py ;	
-} */
 
 void projection_on_line_d(const double *a,
 	const double *b,

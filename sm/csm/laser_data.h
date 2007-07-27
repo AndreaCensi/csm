@@ -32,12 +32,6 @@ struct laser_data {
 
 	double * restrict true_alpha;
 	
-	/* Jump tables needed by find_correspondences_tricks(). */
-	int * restrict up_bigger, 
-	    * restrict up_smaller, 
-	    * restrict down_bigger, 
-	    * restrict down_smaller;
-	
 	struct correspondence*  restrict corr;
 
 	double true_pose[3];		
@@ -52,6 +46,14 @@ struct laser_data {
 
 	/** Timestamp */
 	struct timeval tv;
+	char hostname[32];
+
+
+	/* Jump tables needed by find_correspondences_tricks(). */
+	int * restrict up_bigger, 
+	    * restrict up_smaller, 
+	    * restrict down_bigger, 
+	    * restrict down_smaller;	
 };
 
 struct correspondence {

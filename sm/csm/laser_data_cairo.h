@@ -9,14 +9,7 @@ typedef struct {
 	
 	double width;
 	const char* color;
-/*	
-	int	thickness; //		(1/80 inch)
-	int	pen_color; //		(enumeration type, pen color)
-	int	fill_color; //		(enumeration type, fill color)
-	int	pen_style; //		(pen style, not used)
-	int	area_fill; //		(enumeration type, -1 = no fill)
-//	float	style_val; //		(1/80 inch)
-*/
+	
 } line_style ;
 
 typedef struct { 
@@ -26,6 +19,10 @@ typedef struct {
 
 	line_style normals;
 	double normals_length;
+	
+	/* A circle at the pose */
+	line_style pose;
+	double pose_radius;
 	
 	double connect_threshold;
 	double horizon;

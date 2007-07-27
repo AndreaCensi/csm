@@ -80,7 +80,7 @@ int ld_read_next_laser_carmen(FILE*file, LDP ld) {
 
 			static int print = 0;
 			if(!print) { print = 1;
-				sm_debug("Assuming that 769 rays is an Hokuyo "
+				sm_info("Assuming that 769 rays is an Hokuyo "
 				 "with fov = %f deg, min_reading = %f m, max_reading = %fm\n",
 					rad2deg(fov), min_reading, max_reading);
 			}
@@ -120,26 +120,40 @@ int ld_read_next_laser_carmen(FILE*file, LDP ld) {
 		if(read_next_double(line,&cur,ld->odometry+2)) goto error;
 
 		/* Following: ipc_timestamp hostname timestamp */
-		char buf[30];
-		int sec, usec;
-		int ok = 
-		!read_next_integer(line, &cur, &sec ) && 
-		!read_next_string(line, &cur, buf, 29) && 
-		!read_next_integer(line, &cur, &usec );
-	
-		if(ok) {	
+		/* Two options:
+			double string double: 
+				the first is timestamp in seconds, the second is discarded
+			int string int:
+				the first is sec, the second is usec 
+		*/
+		static int warn_format = 1;
+
+		int inc; int sec=-1, usec=-1;
+		int res = sscanf(line + cur, "%d %s %d%n", &sec, ld->hostname, &usec,  &inc);
+		if(3 == res) {
 			ld->tv.tv_sec = sec;
 			ld->tv.tv_usec = usec;
+			if(warn_format)
+				sm_info("Reading timestamp as 'sec hostname usec'.\n");
 		} else {
-			ld->tv.tv_sec = 0;
-			ld->tv.tv_usec = 0;
-			
-			static int warn = 1;
-			if(warn) {
-				sm_info("I could not read timestamp+hostname; ignoring (I will warn only once for this).\n");
-				warn = 0;
+			double v1=-1, v2=-1;
+			res = sscanf(line + cur, "%lf %s %lf%n", &v1, ld->hostname, &v2,  &inc);
+			if(3 == res) {
+				ld->tv.tv_sec = (int) floor(v1);
+				ld->tv.tv_usec = floor( (v1 - floor(v1)) * 1e6 );
+				
+				if(warn_format)
+					sm_info("Reading timestamp as doubles (discarding second one).\n");
+				
+			} else {
+				ld->tv.tv_sec = 0;
+				ld->tv.tv_usec = 0;
+				if(warn_format)
+					sm_info("I could not read timestamp+hostname; ignoring (I will warn only once for this).\n");
 			}
 		}
+
+		warn_format = 0;
 
 		fprintf(stderr, "l");
 		return 0;

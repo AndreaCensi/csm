@@ -66,12 +66,17 @@ the orientation (at the moment a really dumb algorithm is used
 for clustering). If `cluster[i] == -1`, the point does not belong
 to any cluster.
 
-`ld.p[i]`
+`ld.points[i].p`
 : Point coordinates (cartesian). Computed from the polar coordinates
 `theta[i]` and `readings[i]`.
 
-<!--
-  ld.hostname
-  ld.timestamp1, ld.timestamp2
--->
+`ld.points_w[i].p`
+: Point coordinates (cartesian) in a "world" reference frame. Computed with the function `ld_compute_world_coords(LDP, double pose[3])`.
+
+`ld.hostname`
+: This is parsed from the Carmen data field.
+
+`ld.tv`
+: This is a `struct timeval` field giving a timestamp for the laser scan. Please see the section on parsing to learn how this is parsed from the Carmen log.
+
 

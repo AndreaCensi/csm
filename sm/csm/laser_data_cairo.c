@@ -64,6 +64,12 @@ void lds_add_options(ld_style*lds, struct option*ops,
 	options_double(ops, cat(prefix, "points_radius"), &(lds->points_radius), 
 		lds->points_radius, cat(desc_prefix, "Point radius"));
 
+
+	ls_add_options(&(lds->pose), ops, cat(prefix, "pose_"),  cat(desc_prefix, "PoseMarker | "));
+	
+	options_double(ops, cat(prefix, "pose_radius"), &(lds->pose_radius), 
+		lds->pose_radius, cat(desc_prefix, "Point radius"));
+
 	ls_add_options(&(lds->normals), ops, cat(prefix, "normals_"),  cat(desc_prefix, "Normals | "));
 
 	options_double(ops, cat(prefix, "normals_length"), &(lds->normals_length), 
@@ -248,6 +254,13 @@ void cr_ld_draw(cairo_t* cr, LDP ld, ld_style *p) {
 		cr_set_style(cr, &(p->normals));
 		cr_ld_draw_normals(cr, ld, p->normals_length);
 	}
+	
+	if(p->pose.draw) {
+		cr_set_style(cr, &(p->pose));
+		cairo_move_to(cr, 0.0, 0.0);
+		cairo_arc (cr, 0.0, 0.0, p->pose_radius, 0.0, 2*M_PI);
+		cairo_fill (cr);
+	}
 }
 
 void cr_set_reference(cairo_t*cr, double*pose) {
@@ -270,6 +283,10 @@ void lds_set_defaults(ld_style*lds) {
 	ls_set_defaults(&(lds->points));
 	lds->points_radius = 0.003;
 	lds->points.color = "#f00";
+	
+	ls_set_defaults(&(lds->pose));
+	lds->pose.color = "#f73";
+	lds->pose_radius = 0.24;
 	
 	lds->normals_length = 0.10;
 	ls_set_defaults(&(lds->normals));

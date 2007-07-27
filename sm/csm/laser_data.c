@@ -76,6 +76,8 @@ void ld_alloc(LDP ld, int nrays) {
 		ld->points[i].phi = GSL_NAN;
 		ld->points_w[i] = ld->points[i];
 	}
+	
+	strcpy(ld->hostname, "CSM");
 }
 
 void ld_free(LDP ld) {
