@@ -108,7 +108,7 @@ int log2pdf(log2pdf_params *p) {
 	
 	if(!ld_read_some_scans_distance(input_file,  &scans, &nscans,
 		 p->use_reference, p->distance_xy, deg2rad(p->distance_th_deg) ) ){
-		sm_error("Could not read map.\n"); 
+		sm_error("Could not read map from file '%s'.\n", p->input_filename); 
 		return 0;
 	}
 	
