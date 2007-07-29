@@ -106,11 +106,11 @@ IF(CAIRO_FOUND)
 ENDIF(CAIRO_FOUND)
 
 
-ADD_EXECUTABLE(test_math_utils csm/math_utils_test.c)
-TARGET_LINK_LIBRARIES(test_math_utils csm ${GSL_LIBRARIES})
+ADD_EXECUTABLE(test_math_utils_sanity csm/test_math_utils_sanity.c)
+TARGET_LINK_LIBRARIES(test_math_utils_sanity csm ${GSL_LIBRARIES})
 
 ENABLE_TESTING()
-ADD_TEST(test_math_utils test_math_utils)
+ADD_TEST(test_math_utils_sanity test_math_utils_sanity)
 
 
 SET(csm_sources 
