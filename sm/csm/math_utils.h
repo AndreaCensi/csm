@@ -67,6 +67,9 @@ int any_nan(const double *d, int n);
 /** Count numbers of items in array v equal to value */
 int count_equal(const int*v, int n, int value);
 
+/** Normalizes an angle in the 0-2PI range */
+double normalize_0_2PI(double angle);
+
 
 #endif
 

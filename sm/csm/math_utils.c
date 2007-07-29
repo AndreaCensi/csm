@@ -178,6 +178,12 @@ int count_equal(const int*v, int n, int value) {
 	return num;
 }
 
+double normalize_0_2PI(double t) {
+	while(t<0) t+=2*M_PI;
+	while(t>=2*M_PI) t-=2*M_PI;
+	return t;
+}
+
 static char tmp_buf[100];
 const char* friendly_pose(double*pose) {
 	sprintf(tmp_buf, "(%4.2f mm, %4.2f mm, %4.4f deg)",
