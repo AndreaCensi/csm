@@ -67,8 +67,6 @@ double norm_d(const double*p) {
 	return sqrt(p[0]*p[0]+p[1]*p[1]);
 }
 
-
-
 double deg2rad(double deg) {
 	return deg * (M_PI / 180);
 }
@@ -76,7 +74,6 @@ double deg2rad(double deg) {
 double rad2deg(double rad) {
 	return rad * (180 / M_PI);	
 }
-
 
 void copy_d(const double*from, int n, double*to) {
 	int i; for(i=0;i<n;i++) to[i] = from[i];

@@ -1,120 +1,117 @@
-	INCLUDE_DIRECTORIES(lib)
-	INCLUDE_DIRECTORIES(.)
 
-	INCLUDE (FindGSL.cmake)                                                                                         
-	IF(GSL_FOUND)
-		MESSAGE(STATUS "Found GSL:")
-		MESSAGE(STATUS "   GSL_LIBRARIES = ${GSL_LIBRARIES}")
-		MESSAGE(STATUS "   GSL_INCLUDE_DIR = ${GSL_INCLUDE_DIR}")
-		MESSAGE(STATUS "   CMAKE_GSL_CXX_FLAGS = ${CMAKE_GSL_CXX_FLAGS}")
-		MESSAGE(STATUS "   GSL_LINK_DIRECTORIES = ${GSL_LINK_DIRECTORIES}")
-		
-		INCLUDE_DIRECTORIES(${GSL_INCLUDE_DIR})	
-		LINK_DIRECTORIES(${GSL_LINK_DIRECTORIES})		 
-	ELSE(GSL_FOUND)
-		MESSAGE(SEND_ERROR "GSL not found.")
-	ENDIF(GSL_FOUND)
+SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 
-	INCLUDE (FindCairo.cmake)                                                                                         
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/lib)
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 
-	IF(CAIRO_FOUND)
-		MESSAGE(STATUS "Found Cairo at.")
-		MESSAGE(STATUS "   PREFIX_CAIRO= ${PREFIX_CAIRO}")
-		MESSAGE(STATUS "   CAIRO_CFLAGS = ${CAIRO_CFLAGS}")
-		MESSAGE(STATUS "   CAIRO_INCLUDE_DIR = ${CAIRO_INCLUDE_DIR}")
-		
-		INCLUDE_DIRECTORIES(${CAIRO_INCLUDE_DIR})	
-	ELSE(CAIRO_FOUND)
-		MESSAGE(WARNING " Cairo not found: plotting programs (e.g., 'log2pdf') will not be built.")
-		MESSAGE(WARNING " install Cairo from http://cairographics.org ")
-	ENDIF(CAIRO_FOUND)
+set(csm_c_flags "")
 	
-
-	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
-	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb")
-
-#	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused -Wall   -Wunreachable-code ")
-	#	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -W -Wmissing-prototypes  -Wpointer-arith -Wcast-qual -Wcast-align -Wwrite-strings -Wnested-externs -fshort-enums -fno-common" )
-	# -Wstrict-prototypes  -Wtraditional
-
-#	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unreachable-code")
+FIND_PACKAGE(GSL REQUIRED)
+IF(GSL_FOUND)
+	MESSAGE(STATUS "Found GSL:")
+	MESSAGE(STATUS "   GSL_LIBRARIES = ${GSL_LIBRARIES}")
+	MESSAGE(STATUS "   GSL_INCLUDE_DIR = ${GSL_INCLUDE_DIR}")
+	MESSAGE(STATUS "   CMAKE_GSL_CXX_FLAGS = ${CMAKE_GSL_CXX_FLAGS}")
+	MESSAGE(STATUS "   GSL_LINK_DIRECTORIES = ${GSL_LINK_DIRECTORIES}")
 	
-#	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ansi")
-#	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pedantic")
-
-	# for realpath
-	IF("${CMAKE_SYSTEM}" MATCHES "Linux")
+ 	set(csm_c_flags "${csm_c_flags} -I${GSL_INCLUDE_DIR}")
+	set(csm_link_flags "${csm_link_flags} -L${GSL_LINK_DIRECTORIES} ${GSL_LIBRARIES}")
 	
-		ADD_DEFINITIONS(-DLINUX)
-	ENDIF("${CMAKE_SYSTEM}" MATCHES "Linux")
+ELSE(GSL_FOUND)
+	MESSAGE(SEND_ERROR "GSL not found.")
+ENDIF(GSL_FOUND)
 
-	########### Options ########## 
-	SUBDIRS(lib/options)
-	SUBDIRS(lib/json-c)
-	SUBDIRS(lib/egsl)
-	SUBDIRS(lib/gpc)
-	SUBDIRS(csm)
-
-
-
-########### SM ########## 
-
-
-
-	########### SM applications ########## 
-	
-	MACRO(new_executable exec)
-		ADD_EXECUTABLE(${exec} apps/${exec}.c)
-		TARGET_LINK_LIBRARIES(${exec} csm-static ${GSL_LIBRARIES})
-		# gpc json-c egsl options)
-		INSTALL(PROGRAMS ${exec} DESTINATION bin)
-	ENDMACRO(new_executable exec)
-	
-	new_executable(sm0)
-	new_executable(sm1)
-	new_executable(sm2)
-	new_executable(sm3)
-	new_executable(json_extract)
-	new_executable(json_split)
-	new_executable(carmen2json)
-	new_executable(ld_noise)
-	new_executable(ld_slip)
-	new_executable(ld_fisher)
-	new_executable(ld_smooth)
-	new_executable(ld_resample)
-	new_executable(ld_remove_doubles)
-	new_executable(ld_alternate)
-
-	new_executable(ld_select)
-	new_executable(ld_cluster_curv)
-	new_executable(ld_linearize)
-	
-	new_executable(ld_stats)
-	new_executable(ld_correct)
-
-	new_executable(test_json_ld)
-	new_executable(test_json)
-
-	ADD_EXECUTABLE(test_math_utils csm/math_utils_test.c)
-	TARGET_LINK_LIBRARIES(test_math_utils csm ${GSL_LIBRARIES})
-
-	ENABLE_TESTING()
-	ADD_TEST(test_math_utils test_math_utils)
-
-	set(csm_link_flags ${GSL_LIBRARIES})
-
-########### Carmen2pdf ########## 
+FIND_PACKAGE(Cairo)
 IF(CAIRO_FOUND)
-#	new_executable(carmen2pdf)
+	MESSAGE(STATUS "Found Cairo at.")
+	MESSAGE(STATUS "   PREFIX_CAIRO= ${PREFIX_CAIRO}")
+	MESSAGE(STATUS "   CAIRO_CFLAGS = ${CAIRO_CFLAGS}")
+	MESSAGE(STATUS "   CAIRO_LIBRARY = ${CAIRO_LIBRARY}")
+	MESSAGE(STATUS "   CAIRO_INCLUDE_DIR = ${CAIRO_INCLUDE_DIR}")
+	
+	set(csm_link_flags "${csm_link_flags} ${CAIRO_LIBRARY}")
+	SET(csm_c_flags "${csm_c_flags} ${CAIRO_CFLAGS} -I${CAIRO_INCLUDE_DIR}")
+	
+ELSE(CAIRO_FOUND)
+	MESSAGE(WARNING " Cairo not found: plotting programs (e.g., 'log2pdf') will not be built.")
+	MESSAGE(WARNING " install Cairo from http://cairographics.org ")
+ENDIF(CAIRO_FOUND)
+
+MESSAGE(STATUS "csm_c_flags = ${csm_c_flags}")
+MESSAGE(STATUS "csm_link_flags = ${csm_link_flags}")
+
+
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${csm_c_flags}")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb")
+
+# for realpath
+IF("${CMAKE_SYSTEM}" MATCHES "Linux")
+	ADD_DEFINITIONS(-DLINUX)
+ENDIF("${CMAKE_SYSTEM}" MATCHES "Linux")
+
+########### Options ########## 
+
+SUBDIRS(lib/options)
+SUBDIRS(lib/json-c)
+SUBDIRS(lib/egsl)
+SUBDIRS(lib/gpc)
+SUBDIRS(csm)
+
+
+
+
+
+########### SM applications ########## 
+
+MACRO(new_executable exec)
+	ADD_EXECUTABLE(${exec} apps/${exec}.c)
+	TARGET_LINK_LIBRARIES(${exec} csm-static ${csm_link_flags})
+	# gpc json-c egsl options)
+	INSTALL(PROGRAMS ${exec} DESTINATION bin)
+ENDMACRO(new_executable exec)
+
+# new_executable(sm0)
+new_executable(sm1)
+new_executable(sm2)
+new_executable(sm3)
+new_executable(json_extract)
+new_executable(json_split)
+new_executable(carmen2json)
+new_executable(ld_noise)
+new_executable(ld_slip)
+new_executable(ld_fisher)
+new_executable(ld_smooth)
+new_executable(ld_resample)
+new_executable(ld_remove_doubles)
+new_executable(ld_alternate)
+new_executable(ld_recover)
+
+new_executable(ld_select)
+new_executable(ld_cluster_curv)
+new_executable(ld_linearize)
+
+# this are some random tests
+# new_executable(ld_stats)
+# new_executable(ld_correct)
+
+new_executable(test_json_ld)
+new_executable(test_json)
+
+
+
+IF(CAIRO_FOUND)
 	new_executable(sm_animate)
 	new_executable(log2pdf)
-	
-	set(csm_link_flags "${csm_link_flags} -lcairo")
-	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CAIRO_CFLAGS}")
-#	TARGET_LINK_LIBRARIES(carmen2pdf -lcairo)
-#	TARGET_LINK_LIBRARIES(log2pdf  -lcairo)
-#	TARGET_LINK_LIBRARIES(sm_animate -lcairo)
 ENDIF(CAIRO_FOUND)
+
+
+ADD_EXECUTABLE(test_math_utils csm/math_utils_test.c)
+TARGET_LINK_LIBRARIES(test_math_utils csm ${GSL_LIBRARIES})
+
+ENABLE_TESTING()
+ADD_TEST(test_math_utils test_math_utils)
+
 
 SET(csm_sources 
 ./csm/clustering.c
@@ -160,7 +157,7 @@ SET(csm_sources
 )
 
 IF(CAIRO_FOUND)
-	SET(csm_sources ${csm_sources} csm/laser_data_cairo.c)
+SET(csm_sources ${csm_sources} csm/laser_data_cairo.c)
 ENDIF(CAIRO_FOUND)
 
 ADD_LIBRARY(csm-static STATIC ${csm_sources})

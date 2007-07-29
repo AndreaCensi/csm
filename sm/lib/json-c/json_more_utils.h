@@ -12,6 +12,7 @@ typedef struct json_object* JO;
 #define jo_new_string json_object_new_string
 #define jo_new_null()   0
 #define jo_add        json_object_object_add
+#define jo_del        json_object_object_del
 #define jo_free       json_object_put
 #define jo_get        json_object_object_get
 #define jo_new        json_object_new_object
@@ -37,7 +38,7 @@ void jo_add_string       (JO, const char*name, const char*v);
 
 /** Return 0 if there isn't a field called 'name' */
 int jo_read_int          (JO, const char*name, int*p) ;
-int jo_read_double(JO jo, const char*name, double*p);
+int jo_read_double       (JO, const char*name, double*p);
 int jo_read_double_array (JO, const char*name, double *p, int n, double when_null);
 int jo_read_int_array    (JO, const char*name, int    *p, int n, int    when_null);
 int jo_read_string       (JO, const char*name, char*v, size_t max_len);

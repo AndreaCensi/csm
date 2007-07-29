@@ -4,7 +4,7 @@ includedir=${prefix}/include
 
 Name: csm
 Description: The C(anonical) Scan Matcher
-Requires: @OROCOS_COMPONENTS_REQUIRES@
-Version: @OCL_VERSION@
-Libs: -L${libdir} -lcsm-static @csm_link_flags@
-Cflags: -I${includedir} @OROCOS_COMPONENTS_CFLAGS@
+Requires: gsl
+Version: @csm_version@
+Libs: @csm_link_flags@ -L${libdir} -lcsm-static 
+Cflags: @csm_c_flags@ -I${includedir} @OROCOS_COMPONENTS_CFLAGS@

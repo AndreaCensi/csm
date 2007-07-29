@@ -1,3 +1,5 @@
+#include <string.h>
+#include <strings.h>
 #include "laser_data_drawing.h"
 
 const char*ld_reference_name[4] = { "invalid","odometry","estimate","true_pose"};
@@ -5,6 +7,17 @@ const char*ld_reference_name[4] = { "invalid","odometry","estimate","true_pose"}
 const char*ld_reference_to_string(ld_reference r) {
 	return ld_reference_name[r];
 }
+
+ld_reference ld_string_to_reference(const char*s) {
+	int i; for(i=1;i<=3;i++) 
+		if(!strcasecmp(s, ld_reference_to_string( (ld_reference) i) ))
+			return (ld_reference) i;
+			
+	sm_error("Could not translate string '%s' to a reference name.\n", s);
+	return Invalid;
+}
+
+
 
 
 int ld_get_bounding_box(LDP ld, double bb_min[2], double bb_max[2],
@@ -70,14 +83,21 @@ void lda_get_bounding_box(LDP *lda, int nld, double bb_min[2], double bb_max[2],
 	}
 }
 
-double * ld_get_reference_pose(LDP ld, ld_reference use_reference) {
+double * ld_get_reference_pose_silent(LDP ld, ld_reference use_reference) {
 	double * pose;
 	switch(use_reference) {
 		case Odometry: pose = ld->odometry; break;
 		case Estimate: pose = ld->estimate; break;
 		case True_pose: pose = ld->true_pose; break;
-		default: exit(-1);
+		default: 
+			sm_error("Could not find pose identified by %d.\n", (int) use_reference);
+			return 0;
 	}
+	return pose;
+}
+
+double * ld_get_reference_pose(LDP ld, ld_reference use_reference) {
+	double * pose = ld_get_reference_pose_silent(ld, use_reference);
 	if(any_nan(pose, 3)) {
 		sm_error("Required field '%s' not set in laser scan.\n", 
 			ld_reference_to_string(use_reference) );

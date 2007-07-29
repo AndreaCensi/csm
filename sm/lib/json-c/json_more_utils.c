@@ -294,7 +294,7 @@ void jo_add_double(JO root, const char*name, double v) {
 }
 
 JO json_parse(const char*str) {
-	return json_tokener_parse_len((char*)str, (int)strlen(str));
+	return json_tokener_parse_len(str, (int)strlen(str));
 }
 
 const char* json_write(JO jo) {

@@ -29,7 +29,7 @@
   /* MSC has the version as _strnicmp */
 # define strncasecmp _strnicmp
 #elif !HAVE_STRNCASECMP
-# error You do not have strncasecmp on your system.
+/*# error You do not have strncasecmp on your system.*/
 #endif /* HAVE_STRNCASECMP */
 
 

@@ -56,7 +56,11 @@ class Hash
 end
 
 class Object
-	def to_matlab() to_s end
+	def to_matlab(); to_s; end
+end
+
+class String
+	def to_matlab(); "'" + to_s + "'"; end
 end
 
 class Object 

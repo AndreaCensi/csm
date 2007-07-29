@@ -1,4 +1,4 @@
-#include <cairo/cairo.h>
+#include <cairo.h>
 #include <options/options.h>
 #include "../csm/csm_all.h"
 #include "../csm/laser_data_drawing.h"

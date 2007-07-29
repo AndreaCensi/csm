@@ -6,9 +6,15 @@
 typedef enum { Invalid = 0, Odometry = 1, Estimate = 2, True_pose = 3 } ld_reference;
 
 const char*ld_reference_to_string(ld_reference);
+ld_reference ld_string_to_reference(const char*string);
 
-/** Returns 0 if nan */
+/** Gets a pointer to the pose specified by 'use_reference',
+    or 0 if use_reference is invalid. */ 
+double * ld_get_reference_pose_silent(LDP ld, ld_reference use_reference);
+/** Same as ld_get_reference_pose_silent(), but it also checks 
+    that the pose is valid (no NANs inside). */
 double * ld_get_reference_pose(LDP ld, ld_reference use_reference);
+
 
 /** Returns != 0 if enough points were found */
 int ld_get_bounding_box(LDP ld, double bb_min[2], double bb_max[2],
@@ -26,6 +32,8 @@ typedef struct {
 	/** width, height; */
 	double size[2]; 
 } oriented_bbox;
+
+typedef oriented_bbox* BB2;
 
 void oriented_bbox_compute_corners(const oriented_bbox*obbox,
 	double ul[2], double ur[2], double ll[2], double lr[2]);

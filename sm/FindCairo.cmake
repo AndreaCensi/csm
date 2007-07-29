@@ -4,7 +4,7 @@
 
 # This module defines
 # CAIRO_INCLUDE_DIR, where to find art*.h etc
-# CAIRO_LIBRARY, the libraries to link against to use LIBART.
+# CAIRO_LIBRARY, the libraries to link against to use cairo
 # CAIRO_FOUND, If false, do not try to use LIBART.
 # CAIRO_LIBS, link information
 # CAIRO_CFLAGS, cflags for include information

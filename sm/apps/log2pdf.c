@@ -42,7 +42,7 @@ int log2pdf(log2pdf_params *p);
 
 double offset_theta = 0;
 
-int main(int argc, char**argv) {
+int main(int argc, const char* argv[]) {
 	sm_set_program_name(argv[0]);
 
 	log2pdf_params p;
@@ -85,11 +85,7 @@ int main(int argc, char**argv) {
 		sm_info("Writing on file '%s'.\n", p.output_filename);
 	}
 	
-	p.use_reference = Invalid;
-	int i; for(i=1;i<=3;i++) 
-		if(!strcmp(p.use, ld_reference_to_string( (ld_reference) i) ))
-			p.use_reference = (ld_reference) i;
-
+	p.use_reference = ld_string_to_reference(p.use);
 	if(Invalid == p.use_reference) {
 		sm_error("Invalid reference '%s'. " 
 			"Use one in 'odometry','estimate','true_pose'.\n", p.use);
