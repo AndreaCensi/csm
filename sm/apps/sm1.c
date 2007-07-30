@@ -77,6 +77,10 @@ int main(int argc, const char*argv[]) {
 			
 		puts(json_object_to_json_string(jo));
 		puts("\n");
+		
+		jo_free(jo);
+		ld_free(ld1);
+		ld_free(ld2);
 	}
 	
 	return 0;
