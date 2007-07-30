@@ -80,10 +80,11 @@ int distance_accept(LDP ld) {
 		return 1;
 	} else {
 		double diff[3];
-		pose_diff_d(distance_last_pose, ld->estimate, diff);
+		pose_diff_d(distance_last_pose, this_pose, diff);
 		double distance  = norm_d(diff);
-		if(distance > distance_interval_xy || 
-		   fabs(diff[2]) > distance_interval_th ) 
+		
+		if(distance >= distance_interval_xy || 
+		   fabs(diff[2]) >= distance_interval_th ) 
 		{
 			copy_d(this_pose, 3, distance_last_pose);
 		/*	sm_debug("Accepting #%d, %f\n", distance_count, distance);*/
