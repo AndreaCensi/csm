@@ -39,7 +39,12 @@ function res = ld_plot(ld, params)
 			reference = [0 0 0]';
 		end
 	end
-		
+	
+	if isnan(reference(1)) || isnan(reference(2)) || isnan(reference(3))
+		fprintf('ld_plot: Invalid reference.\n');
+		return;
+	end
+	
 	hold on
 	
 	if isfield(ld,'valid') == 0
