@@ -54,7 +54,9 @@ int icp_loop(struct sm_params*params, const double*q0, double*x_new,
 		if(JJ) jj_add("corr0", corr_to_json(laser_sens->corr, laser_sens->nrays));
 
 		/* Kill some correspondences (using dubious algorithm) */
-		kill_outliers_double(params);
+		if(params->outliers_remove_doubles)
+			kill_outliers_double(params);
+		
 		int num_corr2 = ld_num_valid_correspondences(laser_sens);
 
 		if(JJ) jj_add("corr1", corr_to_json(laser_sens->corr, laser_sens->nrays));
@@ -105,16 +107,18 @@ int icp_loop(struct sm_params*params, const double*q0, double*x_new,
 
 		egsl_pop();
 		
-		int loop_detected = 0; /* TODO: make function */
-		int a; for(a=iteration-1;a>=0;a--) {
-			if(hashes[a]==hashes[iteration]) {
-				sm_debug("icpc: oscillation detected (cycle length = %d)\n", iteration-a);
-				loop_detected = 1;
-				break;
+		if(params->use_point_to_line_distance) {
+			int loop_detected = 0; /* TODO: make function */
+			int a; for(a=iteration-1;a>=0;a--) {
+				if(hashes[a]==hashes[iteration]) {
+					sm_debug("icpc: oscillation detected (cycle length = %d)\n", iteration-a);
+					loop_detected = 1;
+					break;
+				}
 			}
+			if(loop_detected) break;
 		}
-		if(loop_detected) break;
-
+	
 		/* This termination criterium is useless when using
 		   the point-to-line-distance; however, we put it here because
 		   one can choose to use the point-to-point distance. */
@@ -149,25 +153,25 @@ void compute_next_estimate(struct sm_params*params, double*x_new) {
 		if(!ld_valid_corr(laser_sens,i))
 			continue;
 		
-		/* Note that these are NOT the current points_w */
-		c[k].p[0] = laser_sens->points[i].p[0];
-		c[k].p[1] = laser_sens->points[i].p[1];
-
 		int j1 = laser_sens->corr[i].j1;
-		c[k].q[0] = laser_ref->points[j1].p[0];
-		c[k].q[1] = laser_ref->points[j1].p[1];
-		
 		int j2 = laser_sens->corr[i].j2;
-		
-		double diff[2];
-		diff[0] = laser_ref->points[j1].p[0]-laser_ref->points[j2].p[0];
-		diff[1] = laser_ref->points[j1].p[1]-laser_ref->points[j2].p[1];
-		double one_on_norm = 1 / sqrt(diff[0]*diff[0]+diff[1]*diff[1]);
-		double normal[2];
-		normal[0] = +diff[1] * one_on_norm;
-		normal[1] = -diff[0] * one_on_norm;
+
 
 		if(params->use_point_to_line_distance) {
+			/* Note that these are NOT the current points_w */
+			c[k].p[0] = laser_sens->points[i].p[0];
+			c[k].p[1] = laser_sens->points[i].p[1];
+			c[k].q[0] = laser_ref->points[j1].p[0];
+			c[k].q[1] = laser_ref->points[j1].p[1];
+
+			double diff[2];
+			diff[0] = laser_ref->points[j1].p[0]-laser_ref->points[j2].p[0];
+			diff[1] = laser_ref->points[j1].p[1]-laser_ref->points[j2].p[1];
+			double one_on_norm = 1 / sqrt(diff[0]*diff[0]+diff[1]*diff[1]);
+			double normal[2];
+			normal[0] = +diff[1] * one_on_norm;
+			normal[1] = -diff[0] * one_on_norm;
+
 			double cos_alpha = normal[0];
 			double sin_alpha = normal[1];
 			
@@ -176,6 +180,15 @@ void compute_next_estimate(struct sm_params*params, double*x_new) {
 			c[k].C[0][1] = cos_alpha*sin_alpha;
 			c[k].C[1][1] = sin_alpha*sin_alpha;
 		} else {
+			c[k].p[0] = laser_sens->points[i].p[0];
+			c[k].p[1] = laser_sens->points[i].p[1];
+			
+			projection_on_segment_d(
+				laser_ref->points[j1].p,
+				laser_ref->points[j2].p,
+				laser_sens->points_w[i].p,
+				c[k].q);
+			
 			c[k].C[0][0] = 1;
 		 	c[k].C[1][0] = 
 		 	c[k].C[0][1] = 0;
