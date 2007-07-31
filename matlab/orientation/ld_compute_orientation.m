@@ -18,6 +18,7 @@ MAX = params.max_points;
 MIN_DIST = params.min_dist;
 THRESHOLD = params.threshold;
 
+ld.points = [ cos(ld.theta') .* ld.readings'; sin(ld.theta').* ld.readings'];
 n = size(ld.points,2);
 
 for i=1:n
@@ -111,4 +112,11 @@ for i=1:n
 	end
 	
 end
+
+ld.alpha = ld.alpha';
+ld.alpha_valid = ld.alpha_valid';
+ld.alpha_error = ld.alpha_error';
+ld.ar_alpha = ld.ar_alpha';
+ld.ar_alpha_error = ld.ar_alpha_error';
+
 

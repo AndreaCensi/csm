@@ -71,7 +71,7 @@ function res = ld_plot(ld, params)
 	
 	if params.plotNormals 
 		% disegno normali
-		maxLength = 0.5;
+		maxLength = 0.1;
 		
 		valids = find(ld.alpha_valid);
         if not(isfield(ld,'alpha_error'))
@@ -88,7 +88,8 @@ function res = ld_plot(ld, params)
 			%weight = 1 + valid_errors(i) * maxLength;
 			weight = maxLength;
             
-			v = [cos(valid_alpha(i)); sin(valid_alpha(i))] * weight;
+			alpha = valid_alpha(i);
+			v = [cos(alpha); sin(alpha)] * weight;
 			from = valid_points(:,i);
 			to = from + v;
 			plotVectors( reference, [from to] , 'g-');
