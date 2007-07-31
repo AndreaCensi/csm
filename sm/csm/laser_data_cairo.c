@@ -102,6 +102,18 @@ void cr_set_style(cairo_t *cr, line_style *ls) {
 			}
 		}
 		cairo_set_source_rgb (cr, rgb[0], rgb[1], rgb[2]);
+	} else if(strlen(ls->color) == 5 && ls->color[0] == '#') {
+			char buf[2] = {0, 0};
+			double rgba[4];
+			int i; for(i=0;i<4;i++) {
+				buf[0] = ls->color[1+i];
+				char* endptr;
+				rgba[i] = (1/15.0) * strtol(buf, &endptr, 16);
+				if(endptr == buf) {
+					sm_error("Unknown color component: %s.\n", buf);
+				}
+			}
+			cairo_set_source_rgba (cr, rgba[0], rgba[1], rgba[2], rgba[3]);
 	} else {
 		if(!strcmp(ls->color, "black")) {
 			cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
@@ -141,8 +153,9 @@ void cr_ld_draw_rays(cairo_t*cr, LDP ld) {
 	int i; for(i=0;i<ld->nrays;i++) {
 		if(!ld_valid_ray(ld, i)) continue;
 		
-		double threshold = 2;
-		if(ld->readings[i]<2) continue;
+		double threshold = 0.03;
+		
+/*		if(ld->readings[i]<2) continue;*/
 		
 		double x1 = threshold * cos(ld->theta[i]);
 		double y1 = threshold * sin(ld->theta[i]);

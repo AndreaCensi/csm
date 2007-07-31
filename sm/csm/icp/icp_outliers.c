@@ -205,6 +205,7 @@ void quicksort(double *array, int begin, int end) {
 	}
 }
 
+#if 0
 double hoare_selection(double *data, int start, int end, int k)
 {
   int pivotIndex, i, j;
@@ -239,4 +240,4 @@ double hoare_selection(double *data, int start, int end, int k)
   return(data[k]);
 }
 
-
+#endif

@@ -91,6 +91,7 @@ int main(int argc, const char* argv[]) {
 			"Use one in 'odometry','estimate','true_pose'.\n", p.use);
 		return -1;
 	}
+	sm_info("Using reference: %s.\n", ld_reference_to_string(p.use_reference));
 	
 	
 	log2pdf(&p);

@@ -14,6 +14,7 @@
 
 typedef struct {
 	const char * file_input;
+
 	const char * file_output;
 	
 	ld_style laser_ref_s, laser_sens_s;
@@ -26,13 +27,20 @@ typedef struct {
 	
 } anim_params ;
 
-int draw_animation( anim_params* p, JO jo);
+int draw_animation( anim_params* p, JO jo, const char*filename);
 
 
 void set_defaults(anim_params *p) {
 	lds_set_defaults(&(p->laser_ref_s));
 	lds_set_defaults(&(p->laser_sens_s));
 	ls_set_defaults(&(p->corr));
+	p->laser_ref_s.points.color = "#00f";
+	p->laser_sens_s.points.color = "#f00";
+	p->laser_ref_s.pose.color = p->laser_ref_s.points.color;
+	p->laser_sens_s.pose.color = p->laser_sens_s.points.color;
+	p->laser_sens_s.pose_radius = 
+	p->laser_ref_s.pose_radius = 0.015;
+	
 }
 
 int main(int argc, const char** argv)
@@ -44,7 +52,7 @@ int main(int argc, const char** argv)
 	
 	struct option* ops = options_allocate(60);
 	options_string(ops, "in", &p.file_input, "stdin", "Input file (defaults to stdin)");
-	options_string(ops, "out", &p.file_output, "sm_animate.pdf", "Output file ");
+	options_string(ops, "out", &p.file_output, "sm_animate_%02d.pdf", "Output file ");
 
 	lds_add_options(&(p.laser_ref_s), ops, "ref_", "");
 	lds_add_options(&(p.laser_sens_s), ops, "sens_", "");
@@ -63,8 +71,10 @@ int main(int argc, const char** argv)
 	JO jo; 
 	int count = 0; 	
 	while( (jo = json_read_stream(input)) ) {
-		if(!draw_animation(&p, jo))
-		return 0;
+		char filename[100];
+		sprintf(filename, p.file_output, count);
+		if(!draw_animation(&p, jo, filename))
+			return 0;
 		count++;
 	}
 
@@ -72,7 +82,7 @@ int main(int argc, const char** argv)
 
 
 /** Returns an array with depths */
-int draw_animation(anim_params* p, JO jo) {
+int draw_animation(anim_params* p, JO jo, const char*filename) {
 	JO jo_ref = jo_get(jo, "laser_ref");
 	JO jo_sens = jo_get(jo, "laser_sens");
 	if(!jo_ref || !jo_sens) {
@@ -122,26 +132,26 @@ int draw_animation(anim_params* p, JO jo) {
 	cairo_surface_t *surface;
 	cairo_t *cr;
 	
-	if(!create_pdf_surface(p->file_output, max_width_points, max_height_points, 
+	if(!create_pdf_surface(filename, max_width_points, max_height_points, 
 		ld_min, ld_max, &surface, &cr)) return 0;
 
-	cairo_set_source_rgb (cr, 0.0, 1.0, 0.2);
+/*	cairo_set_source_rgb (cr, 0.0, 1.0, 0.2);
 	cairo_set_line_width(cr, 0.02);
 	cairo_move_to(cr, ld_min[0], ld_min[1]);
 	cairo_line_to(cr, ld_min[0], ld_max[1]);
 	cairo_line_to(cr, ld_max[0], ld_max[1]);
 	cairo_line_to(cr, ld_max[0], ld_min[1]);
 	cairo_line_to(cr, ld_min[0], ld_min[1]);
-	cairo_stroke(cr);
+	cairo_stroke(cr);*/
 	
 	
 	
-	cairo_set_line_width(cr, 0.01);
+/*	cairo_set_line_width(cr, 0.01);
 	cairo_set_source_rgb (cr, 1.0, 0.2, 0.2);
 	cairo_arc (cr, 0.0, 0.0, max_readings, 0.0, 2*M_PI);
 	cairo_stroke (cr);
 	cairo_move_to(cr, 0.0, 0.0);
-	cairo_line_to(cr, max_readings, 0.0);
+	cairo_line_to(cr, max_readings, 0.0);*/
 	
 	JO iterations = jo_get(jo, "iterations");
 	if(!iterations || !json_object_is_type(iterations, json_type_array)) {

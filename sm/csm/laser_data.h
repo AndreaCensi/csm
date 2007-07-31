@@ -93,29 +93,6 @@ void ld_create_jump_tables(LDP);
 /** Computes an hash of the correspondences */
 unsigned int ld_corr_hash(LDP);
 
-#if 0
-	/** -1 if not found */
-	INLINE_DECL int ld_next_valid(LDP ld, int i, int dir);
-
-	/** True if the i-th is a valid ray */
-	INLINE_DECL int ld_valid_ray(LDP ld, int i);
-
-	/** True if the i-th is a valid correspondences */
-	INLINE_DECL int ld_valid_corr(LDP ld, int i);
-
-	/** Sets the i-th correspondence as valid. */
-	INLINE_DECL void ld_set_correspondence(LDP, int i, int j1, int j2);
-
-	/** Marks the i-th correspondence as invalid. */
-	INLINE_DECL void ld_set_null_correspondence(LDP, int i);
-
-	/** Find the next valid ray (j > i), or -1 if not found. */
-	INLINE_DECL int ld_next_valid_up(LDP, int i);
-
-	/** Find the prev valid ray (j < i), or -1 if not found.*/
-	INLINE_DECL int ld_next_valid_down(LDP, int i);
-#endif
-
 /** Returns the number of valid correspondences. */
 int ld_num_valid_correspondences(LDP);
 

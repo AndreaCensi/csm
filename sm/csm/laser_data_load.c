@@ -59,11 +59,11 @@ int ld_read_all(FILE*file, LDP **array, int*num) {
 /* Read according to distance */
 
 
-int distance_count;
-double distance_last_pose[3];
-double distance_interval_xy = 10;
-double distance_interval_th = 10;
-ld_reference distance_reference;
+static int distance_count;
+static double distance_last_pose[3];
+static double distance_interval_xy = 10;
+static double distance_interval_th = 10;
+static ld_reference distance_reference;
 
 void distance_accept_reset(ld_reference which, double interval_xy, double interval_th) {
 	distance_count = 0;
@@ -74,6 +74,8 @@ void distance_accept_reset(ld_reference which, double interval_xy, double interv
 
 int distance_accept(LDP ld) {
 	double * this_pose = ld_get_reference_pose(ld, distance_reference);
+	if(!this_pose) return 0;
+	
 	distance_count++;
 	if(distance_count == 1) {
 		copy_d(this_pose, 3, distance_last_pose);

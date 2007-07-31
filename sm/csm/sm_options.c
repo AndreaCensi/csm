@@ -84,6 +84,9 @@ void sm_options(struct sm_params*p, struct option*ops) {
 		&(p->do_visibility_test), 0,
 		" ... ");
 
+	options_int(ops, "outliers_remove_doubles", 
+		&(p->outliers_remove_doubles), 1, "no two points in laser_sens can have the same corr."); 
+
 	options_int(ops, "do_compute_covariance", 
 		&(p->do_compute_covariance), 0,
 		" ... ");

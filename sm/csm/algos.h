@@ -61,6 +61,9 @@ struct sm_params {
 	double outliers_adaptive_order; /* 0.7 */
 	double outliers_adaptive_mult; /* 2 */
 
+	int outliers_remove_doubles; 
+
+
 	int do_visibility_test;
 
 	int use_point_to_line_distance;
