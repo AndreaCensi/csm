@@ -40,14 +40,14 @@ void transform_d(const double point2d[2], const double pose[3], double result2d[
 
 int distance_counter = 0;
 
-double distance_squared_d(const double *a, const double *b) {
+double distance_squared_d(const double a[2], const double b[2]) {
 	distance_counter++;
 	double x = a[0]-b[0];
 	double y = a[1]-b[1];
 	return x*x + y*y;
 }
 
-double distance_d(const double *a, const double *b) {
+double distance_d(const double a[2], const double b[2]) {
 	return sqrt(distance_squared_d(a,b));
 }
 
@@ -63,7 +63,7 @@ int any_nan(const double *d, int n) {
 	return 0;
 }
 
-double norm_d(const double*p) {
+double norm_d(const double p[2]) {
 	return sqrt(p[0]*p[0]+p[1]*p[1]);
 }
 
@@ -119,10 +119,10 @@ double angleDiff(double a, double b) {
 	return t;
 }
 
-void projection_on_line_d(const double *a,
-	const double *b,
-	const double *p,
-	double *res, double *distance)
+void projection_on_line_d(const double a[2],
+	const double b[2],
+	const double p[2],
+	double res[2], double *distance)
 {
 	double t0 = a[0]-b[0];
 	double t1 = a[1]-b[1];
@@ -140,8 +140,12 @@ void projection_on_line_d(const double *a,
 		*distance = fabs(rho-(c*p[0]+s*p[1]));
 }
 
-void projection_on_segment_d(const double*a,const double*b,const double*x,
-	double * proj) {
+void projection_on_segment_d(
+	const double a[2],
+	const double b[2],
+	const double x[2],
+	double proj[2]) 
+{
 	projection_on_line_d(a,b,x,proj,0);
 	if ((proj[0]-a[0])*(proj[0]-b[0]) +
 	    (proj[1]-a[1])*(proj[1]-b[1]) < 0 ) {
@@ -154,14 +158,14 @@ void projection_on_segment_d(const double*a,const double*b,const double*x,
 }
 
 
-double dist_to_segment_squared_d(const double*a, const double*b, const double*x) {
+double dist_to_segment_squared_d(const double a[2], const double b[2], const double x[2]) {
 	double projection[2];
 	projection_on_segment_d(a, b, x, projection);
 	double distance_sq_d = distance_squared_d(projection, x);
 	return distance_sq_d;
 }
 
-double dist_to_segment_d(const double*a, const double*b, const double*x) {
+double dist_to_segment_d(const double a[2], const double b[2], const double x[2]) {
 	double proj[2]; double distance;
 	projection_on_line_d(a,b,x,proj, &distance);
 	if ((proj[0]-a[0])*(proj[0]-b[0]) +

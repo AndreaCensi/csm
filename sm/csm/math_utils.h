@@ -14,10 +14,10 @@
 void transform_d(const double point2d[2], const double pose[3], double result2d[2]);
 
 /** Returns norm of 2D point p */
-double norm_d(const double*p);
+double norm_d(const double p[2]);
 
-double distance_squared_d(const double *a, const double *b);
-double distance_d(const double *a, const double *b);
+double distance_squared_d(const double a[2], const double b[2]);
+double distance_d(const double a[2], const double b[2]);
 
 
 double angleDiff(double a, double b);
@@ -31,29 +31,32 @@ int minmax(int from,int to,int x);
 /** Copies n doubles from from to to */
 void copy_d(const double*from, int n, double*to);
 
-/* With doubles */
+/** These are the operators defined in Smith & Cheeseman  */
 void ominus_d(const double x[3], double res[3]);
 void oplus_d(const double x1[3], const double x2[3], double res[3]);
 void pose_diff_d(const double second[3], const double first[3], double res[3]);
 	
 /** Projects (p[0],p[1]) on the LINE passing through (ax,ay)-(bx,by). If distance!=0, distance is set
 to the distance from the point to the segment */
-void projection_on_line_d(const double *a,
-	const double *b,
-	const double *p,
-	double *res,
+void projection_on_line_d(
+	const double a[2],
+	const double b[2],
+	const double p[2],
+	double res[2],
 	double *distance);
 	
-/** Distance of x from its projection on segment a-b */
-double dist_to_segment_d(const double*a, const double*b, const double*x);
-/** Same thing as dist_to_segment_d(), but squared */
-double dist_to_segment_squared_d(const double*a, const double*b, const double*x);
-
+/** Projection of P on the SEGMENT A-B */
 void projection_on_segment_d(
-	const double*a,
-	const double*b,
-	const double*x,
-	      double*proj);
+	const double a[2],
+	const double b[2],
+	const double P[2],
+   double proj[2]);
+	
+/** Distance of x from its projection on segment a-b */
+double dist_to_segment_d(const double a[2], const double b[2], const double x[2]);
+
+/** Same thing as dist_to_segment_d(), but squared */
+double dist_to_segment_squared_d(const double a[2], const double b[2], const double x[2]);
 
 /** A function to print poses and covariances in a friendly way */
 const char* friendly_pose(double*pose);
