@@ -45,7 +45,8 @@ int icp_loop(struct sm_params*params, const double*q0, double*x_new,
 
 		/* If not many correspondences, bail out */
 		int num_corr = ld_num_valid_correspondences(laser_sens);
-		if(num_corr < 0.2 * laser_sens->nrays) { /* TODO: arbitrary */
+		double fail_perc = 0.05;
+		if(num_corr < fail_perc * laser_sens->nrays) { /* TODO: arbitrary */
 			egsl_pop();
 			sm_error("Failed: before trimming, only %d correspondences.\n",num_corr);
 			return 0;
@@ -79,14 +80,14 @@ int icp_loop(struct sm_params*params, const double*q0, double*x_new,
 		sm_debug("Total error: %f  valid %d   mean = %f\n", *total_error, *valid, *total_error/ *valid);
 		
 		/* If not many correspondences, bail out */
-		if(num_corr_after <0.2 * laser_sens->nrays){
+		if(num_corr_after < fail_perc * laser_sens->nrays){
 			sm_error("Failed: after trimming, only %d correspondences.\n",num_corr_after);
 			egsl_pop();
 			return 0;
 		}
 
 		/* Compute next estimate based on the correspondences */
-		compute_next_estimate(params, x_new);
+		compute_next_estimate(params, x_old, x_new);
 		pose_diff_d(x_new, x_old, delta);
 		
 		{
@@ -107,6 +108,8 @@ int icp_loop(struct sm_params*params, const double*q0, double*x_new,
 
 		egsl_pop();
 		
+		
+		/** PLICP terminates in a finite number of steps! */
 		if(params->use_point_to_line_distance) {
 			int loop_detected = 0; /* TODO: make function */
 			int a; for(a=iteration-1;a>=0;a--) {
@@ -142,7 +145,9 @@ int termination_criterion(struct sm_params*params, const double*delta){
 	return (a<params->epsilon_xy) && (b<params->epsilon_theta);
 }
 
-void compute_next_estimate(struct sm_params*params, double*x_new) {
+void compute_next_estimate(struct sm_params*params, 
+	const double x_old[3], double x_new[3]) 
+{
 	LDP laser_ref  = params->laser_ref;
 	LDP laser_sens = params->laser_sens;
 	
@@ -189,10 +194,21 @@ void compute_next_estimate(struct sm_params*params, double*x_new) {
 				laser_sens->points_w[i].p,
 				c[k].q);
 			
-			c[k].C[0][0] = 1;
+			double factor = 1;
+			if(params->use_ml_weights) {
+				double alpha = laser_ref->true_alpha[j1];
+				if(!is_nan(alpha)) {
+					double pose_theta = x_old[2];
+					/** Incidence of the ray */
+					double beta = alpha - (pose_theta+laser_sens->theta[i]);
+					factor = 1 / square(cos(beta));
+				}
+			} 
+			
+			c[k].C[0][0] = factor;
 		 	c[k].C[1][0] = 
 		 	c[k].C[0][1] = 0;
-		 	c[k].C[1][1] = 1;
+		 	c[k].C[1][1] = factor;
 		}
 		
 		k++;

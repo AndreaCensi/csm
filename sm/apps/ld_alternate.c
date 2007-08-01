@@ -1,10 +1,10 @@
-#include <libgen.h>
 #include <csm/csm_all.h>
 
 int main(int argc, const char ** argv) {
 	sm_set_program_name(argv[0]);
 
-	int count = -1;
+	int every = 5;
+	int count = 0;
 	LDP ld;
 	while( (ld = ld_read_smart(stdin))) {
 		count++;
@@ -14,11 +14,9 @@ int main(int argc, const char ** argv) {
 			continue;
 		}
 
-		int order = count & 1;
-		
 		int i;
 		for(i=0;i<ld->nrays;i++) {
-			if( (i % 2) == order ) {
+			if( (i % every) != 0 ) {
 				ld->valid[i] = 0;
 				ld->readings[i] = NAN;
 			}

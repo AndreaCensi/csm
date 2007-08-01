@@ -7,9 +7,9 @@
 #include <gsl/gsl_matrix.h>
 
 struct sm_params {
-	/** First scan (/ref/erence scan) */
+	/** First scan ("ref"erence scan) */
 	LDP laser_ref;
-	/** Second scan */
+	/** Second scan ("sens"or scan) */
 	LDP laser_sens;
 
 	/** Where to start */
@@ -66,22 +66,32 @@ struct sm_params {
 
 	int do_visibility_test;
 
+	/** If 1, use PlICP; if 0, use vanilla ICP. */
 	int use_point_to_line_distance;
+
+	/** If 1, the field "true_alpha" is used to compute the incidence
+	    beta, and the factor (1/cos^2(beta)) used to weight the impact
+	    of each correspondence. */
+	int use_ml_weights;
+	
+	/** Use the method in http://purl.org/censi/2006/icpcov to compute
+	    the matching covariance. */
 	int do_compute_covariance;
 
 	/** Checks that find_correspondences_tricks give the right answer */
 	int debug_verify_tricks;
 	
-	double gpm_theta_bin_size_deg;
-	double gpm_extend_range_deg; 
-	int gpm_interval;
-
-	/** Pose of sensor with respect to robot */
+	/** Pose of sensor with respect to robot: used for computing
+	    the first estimate given the odometry. */
 	double laser[3]; 
 
 	/** mark as invalid ( = don't use ) rays outside of this interval */
 	double min_reading, max_reading;
 	
+	double gpm_theta_bin_size_deg;
+	double gpm_extend_range_deg; 
+	int gpm_interval;
+
 };
 
 struct sm_result {

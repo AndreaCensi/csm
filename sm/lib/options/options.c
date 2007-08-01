@@ -267,7 +267,11 @@ void display_table(FILE*f,  char**table, int rows, int columns, int padding) {
 	for(i=0;i<rows;i++) {
 		for(j=0;j<columns;j++)  {
 			const char * s = table[j+i*columns];
-			fprintf(f, "%s%*s", s, (int)(col_size[j]-strlen(s)), "");
+			/* don't add padding to last column */
+			if(j != columns - 1)
+				fprintf(f, "%s%*s", s, (int)(col_size[j]-strlen(s)), "");
+			else
+				fputs(s, f);
 		}
 		fprintf(f, "\n");
 	}
