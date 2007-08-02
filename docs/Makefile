@@ -7,12 +7,14 @@ src=\
   preamble.txt \
   readme.txt \
   install.txt \
+  install-ruby.txt \
   laserdata.txt \
   formats.txt \
-  other.txt 
+  examples.txt 
 
 csm_manual.txt: $(src)
 	cat $^ > $@
+	chmod -w $@
 
 %.pdf: %.txt
 	$(maruku) --pdf -o $@ $<

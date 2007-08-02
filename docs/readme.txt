@@ -1,25 +1,30 @@
 
-The Canonical Scan Matcher v.1.0.0
+The C(anonical) Scan Matcher v.1.0.0
 ================================
 
 * TOC
 {:toc}
 
+## Introduction ##
+
+The goals I had in mind in creating this software:
+
+*	Document some of my research:
+	<http://purl.org/censi/2007/plicp>
+
+*	Had 
+
 ## Content of this package ##
 
-This package contains a lot of software, but only some of that
-is in a complete and usable state.
-
+The core content is the C scan matching library which is quite polished, but this package contains a lot of software, only some of that in an usable state.
+In general, I am not ashamed of the prototypical code I write.
 
 ### Stable things: C scan matching library ###
 
 The directory `sm/csm` contains a scan matcher written in C, plus 
-associated tools and apps. This is stable and might be used.
+associated tools and apps. This is stable and reasonably bug-free.
 
 There are many libraries in the `sm/lib` directory:
-
--	Directory `gpc`: a library for solving point-to-line correspondence
-	problems. This is documented in another file.
 
 -	Directory `egsl`: a light wrapper for GSL that makes manipulating
 	matrices easy and efficient. This is documented in another file:
@@ -36,39 +41,49 @@ There are many libraries in the `sm/lib` directory:
 
 There are many applications in the `sm/apps` directory:
 
--	Application `carmen2pdf`: converts a laser log to a PDF map.
-	To build this application, it is needed to install the [Cairo] graphics
-	library.
+-	Application `sm2`: standard scan-matching. Reads a log, runs ICP, and writes the scan-matched output. Input can be both Carmen and JSON.
 
--	Application `carmen2json`: 
-
--	Application `json_extract`:
-
--	Application `json_pipe`:
-
--	Application `ld_fisher`:
-
--	Application `ld_noise`:
-
--	Application `ld_slip`:
-
--	Application `sm0`: old test.
+-	Application `sm3`: like sm2, but instead of actual output it measures the performance. This is the application that produced the stats found in the paper submitted to ICRA'08.
 
 -	Application `sm1`: useful for running experiments. Reads scans
 	from two different files, and outputs statistics.
 
--	Application `sm2`: standard scan-matching.
+Visualization apps:
 
+-	Application `log2pdf`: converts a laser log to a PDF map.
+	To build this application, it is needed to install the [Cairo] graphics
+	library.
+
+-	Application `sm_animate`: creates an animation for the ICP process, displaying the correspondences, etc. This application reads the output created by `sm2` with the `-file_jj` option. To build this application, it is needed to install the [Cairo] graphics
+library.
+
+Miscellaneous Unix-style processing for laser data:
+
+-	Application `carmen2json`: converts a Carmen log to the JSON format.
+
+-	Application `ld_fisher`: computes the Fisher's information matrix. See <http://purl.org/censi/2006/accuracy> for details.
+
+-	Application `json_extract`: extract the n-th object from a JSON stream.
+
+-	Application `ld_slip`: adds some noise to the odometry field.
+
+-	Application `ld_smooth`: smooths the readings data.
+
+-	Application `ld_noise`: adds sensor noise.
+
+-	Application `ld_cluster_curv`: clusterize the rays based on the analysis of the curvature.
+
+-	Application `ld_linearize`: fits a line to each cluster (data must have been previously clustered, for example by `ld_cluster_curv`).
+
+
+GUI apps:
+
+-   `apps/gtk_viewer` contains the prototype of a viewer using GTK. It does not work yet.
 
 ### Unstable things: scripts ###
 
 In the `scripts/` directory you can find:
 
--	Script `fig2pics.rb`: used for converting FIG files to PDF.
-	It has many more options than [`fig2dev`][fig2dev] (that is being used internally), 
-	including the ability to use a LaTeX preamble and to change
-	the resulting bounding box.
-	
 -	Script `json2matlab.rb`: converts a JSON object in a Matlab scripts.
 	This is the holy grail of data exchange.
 	
@@ -76,22 +91,28 @@ In the `scripts/` directory you can find:
 	the Ruby JSON library. Without them, it is limited to only
 	1 JSON object in each file.
 
+-	Script `fig2pics.rb`: used for converting FIG files to PDF.
+	It has many more options than [`fig2dev`][fig2dev] (that is being used internally), 
+	including the ability to use a LaTeX preamble and to change
+	the resulting bounding box.
+
 -	Script `create_video.rb`: displays the scan-matching process.
 	This reads the journal files written by applications `sm1` and `sm2`.
-
+	**Made obsolete by `sm_animate`**
 
 ### Unstable things: Ruby and Matlab implementations ###
 
 Unstable things include:
 
--	Directory `sm_ruby_wrapper/`: a ruby wrapper for the `sm` C library.
+-	Directory `sm_ruby_wrapper/`: a ruby wrapper for the `sm` C library. This wrapper is used for running some of the experiments. It is not documented and it needs tidying a little.
 
 -	Directory `rsm/`: a Ruby implementation of the same algorithms used
-	in the `sm` library.
+	in the `sm` library. Some times ago, the C and Matlab implementation
+	were perfectly in sync. Now they differ a little. However, in the future
+	I will try to get them back in sync, as the only way of having a good
+	chance of making a bug-free implementation, is to make it twice.
 
--	Directory `matlab/` and `matlab_new/`: once upon a time, the C, Ruby, 
-	and Matlab implementation were equivalent, but now they are out of 
-	sync. The Matlab scripts are a mess that needs tidying.
+-	Directory `matlab/` and `matlab_new/`. The Matlab scripts are a mess that needs tidying. There's a lot in there. They are kept here because they are used for creating some of the figures in the submitted papers. Also, the first PLICP implementation was written in Matlab and is buried there, somewhere.
 	
 	Also, I occasionally tried to make sure that the scripts run fine
 	in [Octave]. They do, except for the plotting.
