@@ -40,6 +40,9 @@ void jo_add_string       (JO, const char*name, const char*v);
 /** Return 0 if there isn't a field called 'name' */
 int jo_read_int          (JO, const char*name, int*p) ;
 int jo_read_double       (JO, const char*name, double*p);
+
+/* Returns 0 if there isn't a file called "name", or it's not an array, or 
+its length is not at least "n". Else, it returns 1. */
 int jo_read_double_array (JO, const char*name, double *p, int n, double when_null);
 int jo_read_int_array    (JO, const char*name, int    *p, int n, int    when_null);
 int jo_read_string       (JO, const char*name, char*v, size_t max_len);

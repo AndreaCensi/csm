@@ -1,3 +1,6 @@
+#ifndef H_LASER_DATA_CAIRO
+#define H_LASER_DATA_CAIRO
+
 #include <cairo.h>
 #include <options/options.h>
 #include "../csm/csm_all.h"
@@ -48,9 +51,5 @@ void cr_lda_draw_pose_path(cairo_t*cr, LDP*lda, int nscans, ld_reference use_ref
 int create_pdf_surface(const char*file, int max_width_points, int max_height_points,
 	double bb_min[2], double bb_max[2], cairo_surface_t**surface_p, cairo_t **cr);
 
-/** Needs cartesian; returns 0 if not enough points. */
-/*int ld_get_bounding_box(LDP ld, double min[2], double max[2], double horizon);*/
-
-
-
+#endif
 
