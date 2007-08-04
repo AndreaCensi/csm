@@ -17,6 +17,7 @@ typedef struct json_object* JO;
 #define jo_get        json_object_object_get
 #define jo_new        json_object_new_object
 #define jo_array_add  json_object_array_add
+#define jo_array_get  json_object_array_get_idx
 
 /** Reads a JSON object from stream.
     Returns 0 on error. XXX: does not support unicode. */
@@ -45,6 +46,9 @@ int jo_read_string       (JO, const char*name, char*v, size_t max_len);
 
 
 int json_to_int(JO jo, int*ptr);
+
+/** Converts an integer or a double to a double, 
+    or else *ptr will be set to NAN. */
 int json_to_double(JO jo, double*ptr);
 
 	
