@@ -21,7 +21,7 @@ int main(int argc, const char*argv[]) {
 	struct sm_params params;
 	struct sm_result result;
 	
-	struct option* ops = options_allocate(30);
+	struct option* ops = options_allocate(100);
 	options_string(ops, "in", &p.input_filename, "stdin",
 		"Log file");
 	

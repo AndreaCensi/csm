@@ -37,7 +37,7 @@ int main(int argc, const char*argv[]) {
 	struct sm_params params;
 	struct sm_result result;
 	
-	struct option* ops = options_allocate(31);
+	struct option* ops = options_allocate(100);
 	options_string(ops, "in", &p.file_in, "stdin", "Input file ");
 	options_string(ops, "out", &p.file_out, "stdout", "Output file ");
 	options_string(ops, "out_stats", &p.file_out_stats, "", "Output file (stats) ");

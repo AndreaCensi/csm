@@ -22,7 +22,7 @@ int main(int argc, const char*argv[]) {
 	struct sm_params params;
 	struct sm_result result;
 	
-	struct option* ops = options_allocate(30);
+	struct option* ops = options_allocate(100);
 	options_string(ops, "file1", &p.file1, "file1.txt",
 		"File with first series of scans (at pose1)");
 	options_string(ops, "file2", &p.file2, "file2.txt",
