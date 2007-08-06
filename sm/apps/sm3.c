@@ -71,16 +71,20 @@ int main(int argc, const char*argv[]) {
 	clock_t end = clock();
 	float seconds = (end-start)/((float)CLOCKS_PER_SEC);
 	
-	printf("sm3: CPU time = %f (seconds) (start=%d end=%d)\n", seconds,(int)start,(int)end);
-	printf("sm3: Total number of matchings = %d\n", num_matchings);
-	printf("sm3: Total number of iterations = %d\n", num_iterations);
-	printf("sm3: Avg. iterations per matching = %f\n", num_iterations/((float)num_matchings));
-	printf("sm3: Avg. seconds per matching = %f\n", seconds/num_matchings);
-	printf("sm3:   that is, %d matchings per second\n", (int)floor(num_matchings/seconds));
-	printf("sm3: Avg. seconds per iteration = %f (note: very imprecise)\n", seconds/num_iterations);
-	printf("sm3: Number of comparisons = %d \n", distance_counter);
-	printf("sm3: Avg. comparisons per ray per iteration = %f \n", 
-		(distance_counter/((float)num_iterations*params.laser_ref->nrays)));
-	
+	if(num_matchings>0) {
+		printf("sm3: CPU time = %f (seconds) (start=%d end=%d)\n", seconds,(int)start,(int)end);
+		printf("sm3: Total number of matchings = %d\n", num_matchings);
+		printf("sm3: Total number of iterations = %d\n", num_iterations);
+		printf("sm3: Avg. iterations per matching = %f\n", num_iterations/((float)num_matchings));
+		printf("sm3: Avg. seconds per matching = %f\n", seconds/num_matchings);
+		printf("sm3:   that is, %d matchings per second\n", (int)floor(num_matchings/seconds));
+		printf("sm3: Avg. seconds per iteration = %f (note: very imprecise)\n", seconds/num_iterations);
+		printf("sm3: Number of comparisons = %d \n", distance_counter);
+		printf("sm3: Avg. comparisons per ray per iteration = %f \n", 
+			(distance_counter/((float)num_iterations*params.laser_ref->nrays)));
+	} else {
+		sm_error("Empty file?\n");
+		return 1;
+	}
 	return 0;
 }
