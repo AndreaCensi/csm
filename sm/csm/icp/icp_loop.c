@@ -161,9 +161,9 @@ void compute_next_estimate(struct sm_params*params,
 		int j1 = laser_sens->corr[i].j1;
 		int j2 = laser_sens->corr[i].j2;
 
+/*		if(params->use_point_to_line_distance) {*/
+		if(laser_sens->corr[i].type == corr_pl) {
 
-		if(params->use_point_to_line_distance) {
-			/* Note that these are NOT the current points_w */
 			c[k].p[0] = laser_sens->points[i].p[0];
 			c[k].p[1] = laser_sens->points[i].p[1];
 			c[k].q[0] = laser_ref->points[j1].p[0];

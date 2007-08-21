@@ -60,9 +60,11 @@ struct correspondence {
 	/** 1 if this correspondence is valid  */
 	int valid; 
 	/** Closest point in the other scan.  */
-	int j1; 
+	int j1;
 	/** Second closest point in the other scan.  */
 	int j2;
+	/** Type of correspondence (point to point, or point to line) */
+	enum { corr_pp = 0, corr_pl = 1} type;
 	/** Squared distance from p(i) to point j1 */
 	double dist2_j1; 
 };
@@ -72,7 +74,7 @@ typedef struct laser_data* LDP;
 /** This returns a new structure, with all fields initialized */
 LDP ld_alloc_new(int nrays);
 
-/** This DOES free()s the pointer  */
+/** This DOES free() the pointer  */
 void ld_free(LDP);
 
 /** This allocs the fields in the given structure. Use ld_alloc_new(), not this. */

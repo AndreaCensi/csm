@@ -1,15 +1,9 @@
 #include <assert.h>
-
 #include "csm_all.h"
+#include "json_journal.h"
 
-int jj_enabled();
-JO jj_stack_top();
-void jj_stack_push(JO jo);
 
 #define MAX_STACK 1000
-
-
-
 
 static JO jj_stack[MAX_STACK];
 static int jj_stack_index = -1;
@@ -44,10 +38,11 @@ void jj_context_enter(const char*context_name) {
 	
 	JO jo = json_object_new_object();
 	if(jj_stack_index>=0)
-	jo_add(jj_stack_top(), (char*)context_name, jo);
+	jo_add(jj_stack_top(), context_name, jo);
 	
 	jj_stack_push(jo);
 }
+
 
 void jj_must_be_hash() {
 	assert(json_object_is_type(jj_stack_top(), json_type_object));	
@@ -104,7 +99,6 @@ void jj_add_double_array(const char *name, double *v, int n) {
 void jj_add_int_array(const char*name, int* v, int n) {
 	jj_add(name, jo_new_int_array(v, n));	
 }
-
 
 void jj_add(const char*name, JO jo) {
 	jj_must_be_hash();

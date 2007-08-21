@@ -41,6 +41,9 @@ int json_to_corr(JO array, struct correspondence*corr, int n) {
 			corr[i].valid = 1;
 			jo_read_int(element, "j1", &(corr[i].j1));
 			jo_read_int(element, "j2", &(corr[i].j2));
+			int type;
+			jo_read_int(element, "type", &(type));
+			corr[i].type = type;
 		}
 	}
 	return 1;
@@ -54,6 +57,7 @@ JO corr_to_json(struct correspondence*corr, int n) {
 			JO c = jo_new();
 			jo_add_int(c, "j1", corr[i].j1);
 			jo_add_int(c, "j2", corr[i].j2);
+			jo_add_int(c, "type", (int) corr[i].type);
 			jo_array_add(jo, c);
 		} else {
 			jo_array_add(jo, jo_new_null());

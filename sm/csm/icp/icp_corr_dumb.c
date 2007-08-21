@@ -93,6 +93,9 @@ void find_correspondences(struct sm_params*params) {
 		
 		ld_set_correspondence(laser_sens, i, j1, j2);
 		laser_sens->corr[i].dist2_j1 = best_dist;
+		laser_sens->corr[i].type = 
+			params->use_point_to_line_distance ? corr_pl : corr_pp;
+		
 	}
 	
 }

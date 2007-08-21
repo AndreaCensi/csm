@@ -19,7 +19,7 @@ void cr_ld_draw_points(cairo_t*, LDP, double radius);
 void cr_ld_draw_corr(cairo_t*cr, LDP laser_ref, LDP laser_sens, line_style*ls) {
 	int i;
 	for(i=0; i < laser_sens->nrays; i++) {
-		if(!ld_valid_corr(laser_sens,i)) continue;
+		if(!ld_valid_corr(laser_sens, i)) continue;
 
 		if(!laser_sens->corr[i].valid) continue;
 
@@ -30,10 +30,13 @@ void cr_ld_draw_corr(cairo_t*cr, LDP laser_ref, LDP laser_sens, line_style*ls) {
 		const double *p_j2  = laser_ref->points[j2].p;
 		const double *p_i_w = laser_sens->points_w[i].p;
 		double proj[2];
-		projection_on_line_d(p_j1,  p_j2, p_i_w, proj, 0);
+	
+		if(laser_sens->corr[i].type == corr_pl)
+			projection_on_line_d(p_j1,  p_j2, p_i_w, proj, 0);
+		else
+			projection_on_segment_d(p_j1,  p_j2, p_i_w, proj);
 	
 		cairo_move_to(cr, p_i_w[0], p_i_w[1]);
-/*		cairo_line_to(cr, p_j1[0], p_j1[1]);*/
 		cairo_line_to(cr, proj[0],  proj[1]);
 		cairo_stroke(cr);	
 	}
@@ -235,7 +238,7 @@ void cr_ld_draw_points(cairo_t*cr, LDP ld, double radius) {
 		double y = ld->readings[i] * sin(ld->theta[i]);
 
 		cairo_arc (cr, x, y, radius, 0.0, 2*M_PI);
-		cairo_stroke (cr);
+		cairo_fill(cr);
 	}
 }
 

@@ -25,4 +25,15 @@ void jj_add(const char*name, JO);
 void jj_set_stream(FILE*);
 FILE*  jj_get_stream(void);
 
+/**** Private functions */
+
+/** (private) Gets the top of the stack. */
+JO jj_stack_top();
+/** (private) Pushes an object onto the stack. */
+void jj_stack_push(JO jo);
+/** (private) Asserts if the stack top is not an hash. */
+void jj_must_be_hash();
+/** (private) Asserts if the stack top is not an array. */
+void jj_must_be_array();
+
 #endif
