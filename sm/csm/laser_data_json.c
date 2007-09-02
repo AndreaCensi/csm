@@ -263,6 +263,7 @@ LDP ld_read_smart(FILE*f) {
 				char * res = fgets(max_line, 10000-2, f);
 				if(!res) {
 					sm_error("Could not skip line. \n");
+					return 0;
 				} else {
 /*					sm_error("Skipped '%s'\n", res);*/
 				}

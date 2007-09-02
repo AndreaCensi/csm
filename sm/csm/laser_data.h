@@ -121,6 +121,10 @@ int ld_read_some_scans(FILE*file, LDP **array, int*num, int interval);
 /** Write a scan in carmen format */
 void ld_write_as_carmen(LDP ld, FILE * stream);
 
+/** Write a scan according to out_format = {"carmen", "json"} */
+void ld_write_format(LDP ld, FILE*stream, const char * out_format);
+
+
 void possible_interval(
 	const double *p_i_w, LDP laser_sens, 
 	double max_angular_correction_deg, double max_linear_correction, int*from, int*to, int*start_cell);

@@ -1,5 +1,9 @@
 #!/usr/bin/env ruby
 
+#
+# 2007-08-22: sostituto \usepackage{times} a \usepackage{ae,aecompl}
+#
+
 require 'tempfile'
 require 'optparse'
 require 'fileutils'
@@ -167,7 +171,7 @@ slideps="#{dir}/#{basename}_slide.ps"
 slidepdf="#{dir}/#{basename}_slide.pdf"
 
 abs_dir = Pathname.new("#{dir}").realpath
-absolute_img = abs_dir + "#{basename}_tmp"
+absolute_img = abs_dir + "#{basename}_tmp.eps"
 
 execute_cmd "fig2dev -L pstex_t  #{opt_fig2dev} -p #{absolute_img} #{input} #{temp}.tex"
 execute_cmd "fig2dev -L pstex    #{opt_fig2dev}    #{input} #{temp}.eps"
@@ -182,7 +186,8 @@ slidecontent=<<EOF
 		\\usepackage{color}
 		\\usepackage{epsfig}
 		\\usepackage[T1]{fontenc}
-                \\usepackage{ae,aecompl,aeguill}
+		\\usepackage{times}
+%  \\usepackage{ae,aecompl,aeguill}
 		#{preamble_text} 
 		\\begin{document}\\thispagestyle{empty}
 		\\input{#{abs_dir}/#{basename}_tmp.tex}

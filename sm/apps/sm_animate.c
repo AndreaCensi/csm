@@ -179,8 +179,9 @@ int draw_animation(anim_params* p, JO jo, const char*filename) {
 
 		cairo_restore(cr);
 
+		if(0) {
 		cairo_save(cr);
-/*			cairo_identity_matrix(cr);*/
+			cairo_identity_matrix(cr);
 			cairo_set_font_size (cr, 0.1);
 			cairo_select_font_face (cr, "Sans",
 			    CAIRO_FONT_SLANT_NORMAL,
@@ -191,7 +192,8 @@ int draw_animation(anim_params* p, JO jo, const char*filename) {
 			cairo_move_to(cr,  0.0, 0.0 );
 			cairo_show_text(cr, text);
 		cairo_restore(cr);
-
+		}
+	
 		cairo_show_page (cr);
 	}
 	

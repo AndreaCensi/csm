@@ -186,3 +186,14 @@ void ld_write_as_carmen(LDP ld, FILE * stream) {
 	fputs("\n", stream);
 }
 
+void ld_write_format(LDP ld, FILE*f, const char * out_format) {
+	if(!strncmp(out_format, "carmen", 6))
+		ld_write_as_carmen(ld, f);
+	else
+		ld_write_as_json(ld, f);
+	/* XXX: check validity of format string */
+}
+
+
+
+
