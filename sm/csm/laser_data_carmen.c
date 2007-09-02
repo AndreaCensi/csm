@@ -165,4 +165,24 @@ int ld_read_next_laser_carmen(FILE*file, LDP ld) {
 	return -2;
 }
 
+/** Write the laser data in CARMEN format */
+void ld_write_as_carmen(LDP ld, FILE * stream) {
+	int i;
+	double timestamp;
+	if(!ld_valid_fields(ld)) {
+		sm_error("Writing bad data to the stream.\n");
+	}
+	fprintf(stream, "FLASER %d ", ld->nrays);
+	for(i=0; i<ld->nrays; i++){
+		fprintf(stream, "%g ", ld->readings[i]);
+	}
+	fprintf(stream, "%g %g %g ", ld->estimate[0], ld->estimate[1], ld->estimate[2]);
+	fprintf(stream, "%g %g %g ", ld->odometry[0], ld->odometry[1], ld->odometry[2]);
+	
+	timestamp = ld->tv.tv_sec + ((double)ld->tv.tv_sec)/1e6;
+	
+	fprintf(stream, "%g %s %g", timestamp, ld->hostname, timestamp);
+	
+	fputs("\n", stream);
+}
 
