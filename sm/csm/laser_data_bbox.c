@@ -51,7 +51,7 @@ int bbfind_add_point2(bbfind*bbf, double x, double y) {
 	return 1;
 }
 
-void oriented_bbox_compute_corners(const oriented_bbox*obbox,
+void oriented_bbox_compute_corners(const BB2 obbox,
 	double ul[2], double ur[2], double ll[2], double lr[2]) {
 	
 	ll[0] = obbox->pose[0];
@@ -65,7 +65,7 @@ void oriented_bbox_compute_corners(const oriented_bbox*obbox,
 		
 }
 
-int bbfind_add_bbox(bbfind*bbf, const oriented_bbox*bbox) {
+int bbfind_add_bbox(bbfind*bbf, const BB2 bbox) {
 	double ul[2], ur[2], ll[2], lr[2];
 	oriented_bbox_compute_corners(bbox, ul, ur, ll, lr);
 	return
@@ -76,7 +76,7 @@ int bbfind_add_bbox(bbfind*bbf, const oriented_bbox*bbox) {
 }
 
 
-int bbfind_compute(bbfind*bbf, oriented_bbox*bbox) {
+int bbfind_compute(bbfind*bbf, BB2 bbox) {
 	double ul[2], ur[2], ll[2], lr[2];
 	
 	if(1) {

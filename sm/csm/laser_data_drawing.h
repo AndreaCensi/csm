@@ -16,12 +16,6 @@ double * ld_get_reference_pose_silent(LDP ld, ld_reference use_reference);
 double * ld_get_reference_pose(LDP ld, ld_reference use_reference);
 
 
-/** Returns != 0 if enough points were found */
-int ld_get_bounding_box(LDP ld, double bb_min[2], double bb_max[2],
-	double pose[3], double horizon);
-	
-void lda_get_bounding_box(LDP *ld, int nld, double bb_min[2], double bb_max[2],
-	double offset[3], ld_reference use_reference, double horizon);
 
 int ld_read_some_scans_distance(FILE*file, LDP **array, int*num, 
 	ld_reference which, double d_xy, double d_th);
@@ -35,10 +29,21 @@ typedef struct {
 
 typedef oriented_bbox* BB2;
 
-void oriented_bbox_compute_corners(const oriented_bbox*obbox,
+
+/** Returns != 0 if enough points were found */
+int ld_get_bounding_box(LDP ld, double bb_min[2], double bb_max[2],
+	double pose[3], double horizon);
+	
+void lda_get_bounding_box(LDP *ld, int nld, double bb_min[2], double bb_max[2],
+	double offset[3], ld_reference use_reference, double horizon);
+
+/*void lda_get_bb2(LDP *ld, int nld, BB2 bb2, ld_reference use_reference, double horizon);*/
+
+
+void oriented_bbox_compute_corners(const BB2,
 	double ul[2], double ur[2], double ll[2], double lr[2]);
 
-void ld_get_oriented_bbox(LDP ld, double horizon, oriented_bbox*);
+void ld_get_oriented_bbox(LDP ld, double horizon, BB2);
 
 /* Simple API for finding bounding box */
 struct bbfind_imp;
@@ -47,9 +52,9 @@ bbfind * bbfind_new();
 
 int bbfind_add_point(bbfind*, double point[2]);
 int bbfind_add_point2(bbfind*, double x, double y);
-int bbfind_add_bbox(bbfind*, const oriented_bbox*);
+int bbfind_add_bbox(bbfind*, const BB2);
 
-int bbfind_compute(bbfind*, oriented_bbox*);
+int bbfind_compute(bbfind*, BB2);
 void bbfind_free(bbfind*);
 
 #endif
