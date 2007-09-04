@@ -17,9 +17,6 @@ ld_reference ld_string_to_reference(const char*s) {
 	return Invalid;
 }
 
-
-
-
 int ld_get_bounding_box(LDP ld, double bb_min[2], double bb_max[2],
 	double pose[3], double horizon) {
 

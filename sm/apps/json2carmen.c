@@ -11,7 +11,7 @@ int main(int argc, char * argv[]) {
 			continue;
 		}
 
-		ld_write_as_json(ld, stdout);
+		ld_write_as_carmen(ld, stdout);
 		
 		ld_free(ld);
 		count++;
