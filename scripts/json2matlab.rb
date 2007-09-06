@@ -98,13 +98,14 @@ def main_json2matlab
 		$stderr.puts "       $ json2matlab.rb  < in.json > out.m "
 		$stderr.puts " 2) with one parameter, it creates <in>.m (a function named <in>) "
 		$stderr.puts "       $ json2matlab.rb in.json "
-		$stderr.puts " 2) with two parameters, it creates `f.m` (a function named 'f') "
+		$stderr.puts " 3) with two parameters, it creates `f.m` (a function named 'f') "
 		$stderr.puts "       $ json2matlab.rb in.json f "
+		$stderr.puts "       $ json2matlab.rb - f         reading from stdin"
 		exit 0
 	end
 
 
-	io =  if file = ARGV[0] then File.open(file) else $stdin end
+	io =  if ( (file = ARGV[0]) && (file != '-') ) then File.open(file) else $stdin end
 	complete_file = io.read
 
 	a = read_all_objects(complete_file)
