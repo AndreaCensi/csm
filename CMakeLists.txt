@@ -1,15 +1,14 @@
 PROJECT (CSM C)
 
-
+SET(local_prefix "local_config/local-")
 FIND_PROGRAM(HOSTNAME hostname PATHS $ENV{PATH})
-
 IF(HOSTNAME)
 	EXEC_PROGRAM(${HOSTNAME} ARGS -s OUTPUT_VARIABLE host)
-	SET(local "local-${host}.cmake")
+	SET(local "${local_prefix}${host}.cmake")
 	
 	SET(extension "$ENV{CSM_CONF}")
 	IF(extension)
-		SET(local "local-${host}-${extension}.cmake")
+		SET(local "${local_prefix}${host}-${extension}.cmake")
 	ENDIF(extension)
 	
 	IF(EXISTS ${local})
