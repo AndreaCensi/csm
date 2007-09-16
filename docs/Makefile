@@ -1,10 +1,14 @@
 
 maruku=ruby -I~/maruku/lib ~/maruku/bin/maruku
 
-all: csm_manual.pdf csm_manual.html
+out=out/csm_manual.pdf out/csm_manual.html
+
+all: $(out)
+
 
 src=\
   preamble.txt \
+  inline_style.css \
   readme.txt \
   install.txt \
   install-ruby.txt \
@@ -12,9 +16,13 @@ src=\
   formats.txt \
   examples.txt 
 
-csm_manual.txt: $(src)
+
+%: tmp_%
+	cp $< $@
+
+out/csm_manual.txt: $(src)
+	mkdir -p out
 	cat $^ > $@
-	chmod -w $@
 
 %.pdf: %.txt
 	$(maruku) --pdf -o $@ $<
@@ -22,4 +30,9 @@ csm_manual.txt: $(src)
 %.html: %.txt
 	$(maruku) --html $<
 
+clean: 
+	rm $(out)
+	
+copy: out/csm_manual.html
+	cp $< ../CSM_MANUAL.html
 

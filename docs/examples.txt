@@ -1,29 +1,35 @@
 
 ## Examples ##
 
+
+### Simple scan matching ###
+
 Simple scan-matching:
 
 	$ sm2 < in.log > out.log
 
 where `in.log` may be in either Carmen or JSON format.
 
-Creating a pdf:
+### Creating a PDF ###
 
-	$ log2pdf -use odometry  -in in.log -out out.pdf
-	$ log2pdf -use estimate  -in in.log -out out.pdf
+Creating a PDF:
 
+	$ log2pdf -use odometry  -in in.log -out out_odometry.pdf
+	$ log2pdf -use estimate  -in in.log -out out_estimate.pdf
 
-## Examining one particular matching (video) ##
+### Examining one particular matching (video) ###
 
-To zoom on one particular matching, write a journal:
+To zoom on one particular matching, write a "journal"
+using the `-file_jj` option of `sm2`:
 
 	$ sm2 -file_jj journal.txt < in.log > out.log
 
-Extract what you are interested in from the journal:
+Extract what you are interested in from the journal.
+In this example, the 13th matching:
 
 	$ json_extract -nth 13 < journal.txt > matching13.txt
 
-Create animation:
+Create the animation:
 
 	$ sm_animate -in matching13.txt
 

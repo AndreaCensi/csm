@@ -1,5 +1,5 @@
 
-The C(anonical) Scan Matcher v.1.0.0
+The C(anonical) Scan Matcher 
 ================================
 
 * TOC
@@ -7,12 +7,13 @@ The C(anonical) Scan Matcher v.1.0.0
 
 ## Introduction ##
 
-The goals I had in mind in creating this software:
+I created this package:
 
-*	Document some of my research:
-	<http://purl.org/censi/2007/plicp>
+- To have a well-documented reference implementation of [PL-ICP](http://purl.org/censi/2007/plicp). If you are only interested in the core algorithm of PL-ICP, a [separate concise implementation in C/Matlab/Ruby](http://purl.org/censi/2007/plicp) is available.
 
-*	Had 
+- To have a **trustworthy** scan matcher to be used in the experiments for some papers on [ICP covariance](http://purl.org/censi/2006/icpcov), [the Cramer-Rao bound for range finders](http://purl.org/censi/2006/accuracy), and [robot calibration](http://purl.org/censi/2007/calib).  For batch experiments, it's also useful that it's pretty fast.
+
+- To have a collection of utilies for command line (UNIX-style) manipulation of laser data, and creating beautiful maps and animations.
 
 ## Content of this package ##
 
