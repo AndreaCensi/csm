@@ -21,7 +21,7 @@ h2 {
 	padding: 1em; margin-left: -1em;}
 </style>
 <h1 id='the_canonical_scan_matcher'>The C(anonical) Scan Matcher</h1>
-<div class='maruku_toc'><ul style='list-style: none;'><li><span class='maruku_section_number'>1. </span><a href='#introduction'>Introduction</a></li><li><span class='maruku_section_number'>2. </span><a href='#content_of_this_package'>Content of this package</a><ul style='list-style: none;'><li><span class='maruku_section_number'>2.1. </span><a href='#stable_things_c_scan_matching_library'>Stable things: C scan matching library</a></li><li><span class='maruku_section_number'>2.2. </span><a href='#stable_things_applications'>Stable things: applications</a></li><li><span class='maruku_section_number'>2.3. </span><a href='#unstable_things_scripts'>Unstable things: scripts</a></li><li><span class='maruku_section_number'>2.4. </span><a href='#unstable_things_ruby_and_matlab_implementations'>Unstable things: Ruby and Matlab implementations</a></li></ul></li><li><span class='maruku_section_number'>3. </span><a href='#installation'>Installation</a><ul style='list-style: none;'><li><span class='maruku_section_number'>3.1. </span><a href='#downloading'>Downloading</a></li><li><span class='maruku_section_number'>3.2. </span><a href='#required_software_dependencies'>Required software dependencies</a></li><li><span class='maruku_section_number'>3.3. </span><a href='#compiling'>Compiling</a></li><li><span class='maruku_section_number'>3.4. </span><a href='#getting_started'>Getting started</a></li><li><span class='maruku_section_number'>3.5. </span><a href='#installing_ruby_libraries_and_wrapper_optional'>Installing Ruby libraries and wrapper (optional)</a></li></ul></li><li><span class='maruku_section_number'>4. </span><a href='#the__data_structure'>The <code>laser_data</code> data structure</a></li><li><span class='maruku_section_number'>5. </span><a href='#input_and_output_formats'>Input and output formats</a><ul style='list-style: none;'><li><span class='maruku_section_number'>5.1. </span><a href='#the_json_log_format'>The JSON log format</a></li><li><span class='maruku_section_number'>5.2. </span><a href='#the_carmen_log_format'>The Carmen log format</a><ul style='list-style: none;'><li><span class='maruku_section_number'>5.2.1. </span><a href='#regarding_the_timestamp'>Regarding the timestamp</a></li></ul></li></ul></li><li><span class='maruku_section_number'>6. </span><a href='#examples'>Examples</a><ul style='list-style: none;'><li><span class='maruku_section_number'>6.1. </span><a href='#simple_scan_matching'>Simple scan matching</a></li><li><span class='maruku_section_number'>6.2. </span><a href='#creating_a_pdf'>Creating a PDF</a></li><li><span class='maruku_section_number'>6.3. </span><a href='#examining_one_particular_matching_video'>Examining one particular matching (video)</a></li></ul></li></ul></div>
+<div class='maruku_toc'><ul style='list-style: none;'><li><span class='maruku_section_number'>1. </span><a href='#introduction'>Introduction</a></li><li><span class='maruku_section_number'>2. </span><a href='#content_of_this_package'>Content of this package</a><ul style='list-style: none;'><li><span class='maruku_section_number'>2.1. </span><a href='#stable_things_c_scan_matching_library'>Stable things: C scan matching library</a></li><li><span class='maruku_section_number'>2.2. </span><a href='#stable_things_applications'>Stable things: applications</a></li><li><span class='maruku_section_number'>2.3. </span><a href='#unstable_things_scripts'>Unstable things: scripts</a></li><li><span class='maruku_section_number'>2.4. </span><a href='#unstable_things_ruby_and_matlab_implementations'>Unstable things: Ruby and Matlab implementations</a></li></ul></li><li><span class='maruku_section_number'>3. </span><a href='#installation'>Installation</a><ul style='list-style: none;'><li><span class='maruku_section_number'>3.1. </span><a href='#required_software_dependencies'>Required software dependencies</a></li><li><span class='maruku_section_number'>3.2. </span><a href='#compiling'>Compiling</a></li><li><span class='maruku_section_number'>3.3. </span><a href='#getting_started'>Getting started</a></li><li><span class='maruku_section_number'>3.4. </span><a href='#installing_ruby_libraries_and_wrapper_optional'>Installing Ruby libraries and wrapper (optional)</a></li></ul></li><li><span class='maruku_section_number'>4. </span><a href='#the__data_structure'>The <code>laser_data</code> data structure</a></li><li><span class='maruku_section_number'>5. </span><a href='#input_and_output_formats'>Input and output formats</a><ul style='list-style: none;'><li><span class='maruku_section_number'>5.1. </span><a href='#the_json_log_format'>The JSON log format</a></li><li><span class='maruku_section_number'>5.2. </span><a href='#the_carmen_log_format'>The Carmen log format</a><ul style='list-style: none;'><li><span class='maruku_section_number'>5.2.1. </span><a href='#regarding_the_timestamp'>Regarding the timestamp</a></li></ul></li></ul></li><li><span class='maruku_section_number'>6. </span><a href='#examples'>Examples</a><ul style='list-style: none;'><li><span class='maruku_section_number'>6.1. </span><a href='#simple_scan_matching'>Simple scan matching</a></li><li><span class='maruku_section_number'>6.2. </span><a href='#creating_a_pdf'>Creating a PDF</a></li><li><span class='maruku_section_number'>6.3. </span><a href='#examining_one_particular_matching_video'>Examining one particular matching (video)</a></li></ul></li></ul></div>
 <h2 id='introduction'><span class='maruku_section_number'>1. </span>Introduction</h2>
 
 <p>I created this package:</p>
@@ -177,20 +177,22 @@ h2 {
 </ul>
 
 <h2 id='installation'><span class='maruku_section_number'>3. </span>Installation</h2>
+<!--
+### Downloading ###
 
-<h3 id='downloading'><span class='maruku_section_number'>3.1. </span>Downloading</h3>
+Download with SVN, using the following:
 
-<p>Download with SVN, using the following:</p>
+	$ svn checkout --username ANTANI svn://net143-184.mclink.it/csm
 
-<pre><code>$ svn checkout --username ANTANI svn://net143-184.mclink.it/csm</code></pre>
+where `ANTANI` is your surname (you should have received a password). 
 
-<p>where <code>ANTANI</code> is your surname (you should have received a password).</p>
+This will checkout both the source code
+and some files used for experiments, that might be slightly slow to download.
+If you are only interested in  the source code, use:
 
-<p>This will checkout both the source code and some files used for experiments, that might be slightly slow to download. If you are only interested in the source code, use:</p>
-
-<pre><code>$ svn checkout --username ANTANI svn://net143-184.mclink.it/csm/csm</code></pre>
-
-<h3 id='required_software_dependencies'><span class='maruku_section_number'>3.2. </span>Required software dependencies</h3>
+	$ svn checkout --username ANTANI svn://net143-184.mclink.it/csm/csm
+-->
+<h3 id='required_software_dependencies'><span class='maruku_section_number'>3.1. </span>Required software dependencies</h3>
 
 <p>This software has been tested on Mac OS X, Linux, and Windows XP (using Cygwin). It compiles with GCC (3.3 or 4.x) and the Intel C++ Compiler (ICC).</p>
 
@@ -210,7 +212,7 @@ h2 {
 
 <p><strong>OS X</strong>. &#8230;</p>
 
-<h3 id='compiling'><span class='maruku_section_number'>3.3. </span>Compiling</h3>
+<h3 id='compiling'><span class='maruku_section_number'>3.2. </span>Compiling</h3>
 
 <p>If you are lucky, this should be it:</p>
 
@@ -243,7 +245,7 @@ $ make install</code></pre>
 
 <p>Later, remember to set your <code>PATH</code> variable to <code>csm/deploy/bin</code>.</p>
 
-<h3 id='getting_started'><span class='maruku_section_number'>3.4. </span>Getting started</h3>
+<h3 id='getting_started'><span class='maruku_section_number'>3.3. </span>Getting started</h3>
 
 <p>You might get started by doing this:</p>
 
@@ -257,7 +259,7 @@ $ make install</code></pre>
 $ log2pdf -use odometry -in out.log -out out-odometry.pdf
 $ log2pdf -use estimate -in out.log -out out-estimate.pdf</code></pre>
 
-<h3 id='installing_ruby_libraries_and_wrapper_optional'><span class='maruku_section_number'>3.5. </span>Installing Ruby libraries and wrapper (optional)</h3>
+<h3 id='installing_ruby_libraries_and_wrapper_optional'><span class='maruku_section_number'>3.4. </span>Installing Ruby libraries and wrapper (optional)</h3>
 
 <p>This step-by-step guide is written by me, for me.</p>
 

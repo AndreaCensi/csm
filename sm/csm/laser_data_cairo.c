@@ -92,12 +92,12 @@ void lds_add_options(ld_style*lds, struct option*ops,
 		lds->horizon, cat(desc_prefix, "Maximum distance to plot (m)."));
 }
 
-void cr_set_style(cairo_t *cr, line_style *ls) {
-	if(strlen(ls->color) == 4 && ls->color[0] == '#') {
+void cr_set_color(cairo_t *cr, const char* color) {
+	if(strlen(color) == 4 && color[0] == '#') {
 		char buf[2] = {0, 0};
 		double rgb[3];
 		int i; for(i=0;i<3;i++) {
-			buf[0] = ls->color[1+i];
+			buf[0] = color[1+i];
 			char* endptr;
 			rgb[i] = (1/15.0) * strtol(buf, &endptr, 16);
 			if(endptr == buf) {
@@ -105,11 +105,11 @@ void cr_set_style(cairo_t *cr, line_style *ls) {
 			}
 		}
 		cairo_set_source_rgb (cr, rgb[0], rgb[1], rgb[2]);
-	} else if(strlen(ls->color) == 5 && ls->color[0] == '#') {
+	} else if(strlen(color) == 5 && color[0] == '#') {
 			char buf[2] = {0, 0};
 			double rgba[4];
 			int i; for(i=0;i<4;i++) {
-				buf[0] = ls->color[1+i];
+				buf[0] = color[1+i];
 				char* endptr;
 				rgba[i] = (1/15.0) * strtol(buf, &endptr, 16);
 				if(endptr == buf) {
@@ -118,14 +118,17 @@ void cr_set_style(cairo_t *cr, line_style *ls) {
 			}
 			cairo_set_source_rgba (cr, rgba[0], rgba[1], rgba[2], rgba[3]);
 	} else {
-		if(!strcmp(ls->color, "black")) {
+		if(!strcmp(color, "black")) {
 			cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
 		} else {
-			sm_error("Unknown color: %s.\n", ls->color);
+			sm_error("Unknown color: %s.\n", color);
 			cairo_set_source_rgb (cr, 0.0, 1.0, 1.0);		
 		}
 	}
-	
+}
+
+void cr_set_style(cairo_t *cr, line_style *ls) {
+	cr_set_color(cr, ls->color);
 	cairo_set_line_width(cr, ls->width);
 }
 
@@ -354,3 +357,40 @@ int create_pdf_surface(const char*file, int max_width_points, int max_height_poi
 	
 	return 1;
 }
+
+int create_image_surface(int max_width_pixels, int max_height_pixels,
+	double bb_min[2], double bb_max[2], cairo_surface_t**surface_p, cairo_t **cr) {
+	double bb_width = bb_max[0] - bb_min[0], bb_height = bb_max[1] - bb_min[1];
+
+	double surface_width, surface_height;
+	if( bb_width > bb_height ) {
+		/* largo e basso */
+		surface_width = max_width_pixels;
+		surface_height =  (surface_width / bb_width) * bb_height;
+	} else {
+		/* stretto e alto */
+		surface_height = max_height_pixels;
+		surface_width =  (surface_height / bb_height) * bb_width;
+	}
+
+	sm_debug("bb: %f %f\n", bb_width, bb_height);
+	sm_debug("surface: %f %f\n", surface_width, surface_height);
+
+	*surface_p = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, surface_width, surface_height);
+	*cr = cairo_create (*surface_p);
+	cairo_status_t status = cairo_status (*cr);
+
+	if (status) {
+		sm_error("Failed to create image surface: %s\n",
+			cairo_status_to_string (status));
+		return 0;
+	}
+
+	double world_to_surface = surface_width / bb_width;
+	cairo_scale(*cr, world_to_surface, -world_to_surface );
+	cairo_translate(*cr, -bb_min[0], -bb_max[1]);
+
+	return 1;
+}
+
+

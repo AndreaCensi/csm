@@ -40,6 +40,7 @@ void ls_add_options(line_style*ls, struct option*ops,
 void lds_add_options(ld_style*lds, struct option*ops, 
 	const char*prefix, const char*desc_prefix);
 
+void cr_set_color(cairo_t *cr, const char* color);
 void cr_set_style(cairo_t*cr, line_style*);
 void cr_ld_draw(cairo_t* cr, LDP ld, ld_style *p);
 void cr_ld_draw_corr(cairo_t*cr, LDP laser_ref, LDP laser_sens, line_style*);
@@ -50,6 +51,10 @@ void cr_lda_draw_pose_path(cairo_t*cr, LDP*lda, int nscans, ld_reference use_ref
 
 int create_pdf_surface(const char*file, int max_width_points, int max_height_points,
 	double bb_min[2], double bb_max[2], cairo_surface_t**surface_p, cairo_t **cr);
+
+int create_image_surface(int width, int height,
+	double bb_min[2], double bb_max[2], cairo_surface_t**surface_p, cairo_t **cr);
+
 
 #endif
 

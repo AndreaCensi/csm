@@ -2,6 +2,7 @@
 Installation
 ------------
 
+<!--
 ### Downloading ###
 
 Download with SVN, using the following:
@@ -15,6 +16,7 @@ and some files used for experiments, that might be slightly slow to download.
 If you are only interested in  the source code, use:
 
 	$ svn checkout --username ANTANI svn://net143-184.mclink.it/csm/csm
+-->
 
 ### Required software dependencies ###
 
