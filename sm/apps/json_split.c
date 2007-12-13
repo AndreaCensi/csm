@@ -21,7 +21,8 @@ int main(int argc, const char * argv[]) {
 	
 	
 	/* Substitute "$" with "%" */
-	char *f = output_pattern;
+	
+	char *f = (char*)output_pattern;
 	while(*f) {
 		if(*f=='^') *f='%';
 		f++;
