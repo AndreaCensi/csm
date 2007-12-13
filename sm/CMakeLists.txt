@@ -14,7 +14,7 @@ IF(GSL_FOUND)
 	set(csm_link_flags "${csm_link_flags} -L${GSL_LINK_DIRECTORIES} ${GSL_LIBRARIES}")
 	
 ELSE(GSL_FOUND)
-	MESSAGE(SEND_ERROR "GSL not found.")
+	MESSAGE(FATAL_ERROR "GSL not found.")
 ENDIF(GSL_FOUND)
 
 FIND_PACKAGE(Cairo)
@@ -29,8 +29,8 @@ IF(CAIRO_FOUND)
 	SET(csm_c_flags "${csm_c_flags} ${CAIRO_CFLAGS} -I${CAIRO_INCLUDE_DIR}")
 	
 ELSE(CAIRO_FOUND)
-	MESSAGE(WARNING " Cairo not found: plotting programs (e.g., 'log2pdf') will not be built.")
-	MESSAGE(WARNING " install Cairo from http://cairographics.org ")
+	MESSAGE(WARNING "* Cairo not found: plotting programs (e.g., 'log2pdf') will not be built.")
+	MESSAGE(WARNING "* install Cairo from http://cairographics.org ")
 ENDIF(CAIRO_FOUND)
 
 
