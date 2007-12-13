@@ -8,7 +8,7 @@ IF(HOSTNAME)
 		SET(hostname_params "")
 	ELSE(CYGWIN)
 		SET(hostname_params "-s")
-	END(CYGWIN)
+	ENDIF(CYGWIN)
 	
 	EXEC_PROGRAM(${HOSTNAME} ARGS ${hostname_params} OUTPUT_VARIABLE host)
 
