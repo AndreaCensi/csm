@@ -1,11 +1,7 @@
 
+	
 SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/lib)
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
-
-set(csm_c_flags "")
-	
 FIND_PACKAGE(GSL REQUIRED)
 IF(GSL_FOUND)
 	MESSAGE(STATUS "Found GSL:")
@@ -36,6 +32,13 @@ ELSE(CAIRO_FOUND)
 	MESSAGE(WARNING " Cairo not found: plotting programs (e.g., 'log2pdf') will not be built.")
 	MESSAGE(WARNING " install Cairo from http://cairographics.org ")
 ENDIF(CAIRO_FOUND)
+
+
+
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/lib)
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
+
+set(csm_c_flags "")
 
 MESSAGE(STATUS "csm_c_flags = ${csm_c_flags}")
 MESSAGE(STATUS "csm_link_flags = ${csm_link_flags}")
