@@ -34,6 +34,10 @@ Required software:
 
 **OS X**. ...
 
+**Windows, using Cygwin**. CSM runs fine on Cygwin, but very slow compared to Linux/OS X.
+Make sure you install the Cygwin packages `cairo`, `gsl`, `gsl-apps`, `gsl-devel`.
+
+
 ### Compiling ###
 
 If you are lucky, this should be it:

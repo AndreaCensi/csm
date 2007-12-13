@@ -3,6 +3,7 @@ PROJECT (CSM C)
 SET(local_prefix "local_config/local-")
 FIND_PROGRAM(HOSTNAME hostname PATHS $ENV{PATH})
 IF(HOSTNAME)
+	# TODO: hostname does not accept -s on cygwin
 	EXEC_PROGRAM(${HOSTNAME} ARGS -s OUTPUT_VARIABLE host)
 	SET(local "${local_prefix}${host}.cmake")
 	

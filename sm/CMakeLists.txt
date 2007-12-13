@@ -1,3 +1,4 @@
+set(csm_c_flags "")
 
 	
 SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
@@ -38,7 +39,6 @@ ENDIF(CAIRO_FOUND)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/lib)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 
-set(csm_c_flags "")
 
 MESSAGE(STATUS "csm_c_flags = ${csm_c_flags}")
 MESSAGE(STATUS "csm_link_flags = ${csm_link_flags}")
