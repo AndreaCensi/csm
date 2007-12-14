@@ -1,9 +1,4 @@
 
-/* stpcpy */
-#ifdef LINUX
-#define  _GNU_SOURCE
-#endif
-
 #include <string.h>
 
 #include <cairo-pdf.h>
@@ -46,7 +41,7 @@ const char* cat(const char*a, const char*b) {
 	size_t la = strlen(a);
 	size_t lb = strlen(b);
 	char* buf = malloc(la+lb+3);
-	stpcpy(stpcpy(buf, a), b);
+	strcpy(strcpy(buf, a), b);
 	return buf;
 }
 

@@ -4,11 +4,11 @@ SET(local_prefix "local_config/local-")
 FIND_PROGRAM(HOSTNAME hostname PATHS $ENV{PATH})
 IF(HOSTNAME)
 	# TODO: hostname does not accept -s on cygwin
-	IF(CYGWIN)
+	IF(CYGWIN OR WIN32)
 		SET(hostname_params "")
-	ELSE(CYGWIN)
+	ELSE(CYGWIN OR WIN32)
 		SET(hostname_params "-s")
-	ENDIF(CYGWIN)
+	ENDIF(CYGWIN OR WIN32)
 	
 	EXEC_PROGRAM(${HOSTNAME} ARGS ${hostname_params} OUTPUT_VARIABLE host)
 
