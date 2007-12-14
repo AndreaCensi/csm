@@ -26,17 +26,19 @@ It compiles with GCC (3.3 or 4.x) and the Intel C++ Compiler (ICC).
 Required software:
 * The build system is based on `cmake`, which is available at <http://www.cmake.org/>.
 * The GSL, Gnu Scientific Library, available at <http://www.gnu.org/software/gsl/>.
-* (optional) For `log2pdf` and other visualization applications, you will need the Cairo graphics library, available at <http://cairographics.org>.
+* (optional) For `log2pdf` and other visualization applications, you will need the Cairo graphics library, available at <http://cairographics.org>. The recommended version is the stable 1.4.12.
 
 **Linux**. CMake, Cairo, and GSL are probably already packaged for your Linux distribution. For example, in Ubuntu, you can simply enter this command to install all dependencies:
 
-	$ apt-get install build-essential cmake libgsl0-dev libcairo2-dev 
+	$ sudo apt-get install build-essential cmake libgsl0-dev libcairo2-dev 
 
-**OS X**. ...
+**OS X**. You can install GSL using [Fink](http://finkproject.org/). You have to install Cairo manually. 
 
-**Windows, using Cygwin**. CSM runs fine on Cygwin, but very slow compared to Linux/OS X.
+**Windows XP, using Cygwin**. CSM runs fine on Cygwin, but very slow compared to Linux/OS X.
 Make sure you install the Cygwin packages `cairo`, `gsl`, `gsl-apps`, `gsl-devel`.
 
+**Windows XP, using Visual Studio**. CSM doesn't compile yet on this platform. CMake can theoretically create
+Visual Studio projects, but I could not manage to do it. Also, some CMake code is probably Unix-specific.
 
 ### Compiling ###
 

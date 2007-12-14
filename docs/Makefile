@@ -1,5 +1,6 @@
 
-maruku=ruby -I~/maruku/lib ~/maruku/bin/maruku
+#maruku=ruby -I~/maruku/lib ~/maruku/bin/maruku
+maruku=maruku
 
 out=out/csm_manual.pdf out/csm_manual.html
 

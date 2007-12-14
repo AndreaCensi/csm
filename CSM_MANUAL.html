@@ -203,14 +203,18 @@ If you are only interested in  the source code, use:
 
 <li>The GSL, Gnu Scientific Library, available at <a href='http://www.gnu.org/software/gsl/'>http://www.gnu.org/software/gsl/</a>.</li>
 
-<li>(optional) For <code>log2pdf</code> and other visualization applications, you will need the Cairo graphics library, available at <a href='http://cairographics.org'>http://cairographics.org</a>.</li>
+<li>(optional) For <code>log2pdf</code> and other visualization applications, you will need the Cairo graphics library, available at <a href='http://cairographics.org'>http://cairographics.org</a>. The recommended version is the stable 1.4.12.</li>
 </ul>
 
 <p><strong>Linux</strong>. CMake, Cairo, and GSL are probably already packaged for your Linux distribution. For example, in Ubuntu, you can simply enter this command to install all dependencies:</p>
 
-<pre><code>$ apt-get install build-essential cmake libgsl0-dev libcairo2-dev </code></pre>
+<pre><code>$ sudo apt-get install build-essential cmake libgsl0-dev libcairo2-dev </code></pre>
 
-<p><strong>OS X</strong>. &#8230;</p>
+<p><strong>OS X</strong>. You can install GSL using <a href='http://finkproject.org/'>Fink</a>. You have to install Cairo manually.</p>
+
+<p><strong>Windows XP, using Cygwin</strong>. CSM runs fine on Cygwin, but very slow compared to Linux/OS X. Make sure you install the Cygwin packages <code>cairo</code>, <code>gsl</code>, <code>gsl-apps</code>, <code>gsl-devel</code>.</p>
+
+<p><strong>Windows XP, using Visual Studio</strong>. CSM doesn&#8217;t compile yet on this platform. CMake can theoretically create Visual Studio projects, but I could not manage to do it. Also, some CMake code is probably Unix-specific.</p>
 
 <h3 id='compiling'><span class='maruku_section_number'>3.2. </span>Compiling</h3>
 
