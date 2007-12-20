@@ -34,6 +34,7 @@ typedef struct {
 	ld_style laser;
 	/* Drawing style for robot path */
 	line_style pose_path;
+	double start_pose_width;
 	
 	double distance_xy, distance_th_deg;
 } log2pdf_params;
@@ -67,7 +68,7 @@ int main(int argc, const char* argv[]) {
 	options_string(ops, "use", &p.use, "estimate", "One in 'odometry','estimate','true_pose'");
 	options_double(ops, "distance_xy", &p.distance_xy, 5.0, " Minimum distance between scans (m) ");
 	options_double(ops, "distance_th_deg", &p.distance_th_deg, 45.0, " Minimum distance between scans (deg) ");
-	
+	options_double(ops, "start_pose_width", &p.start_pose_width, 0.4, "First pose | Circle width");
 	lds_add_options(&(p.laser), ops, "laser_", "");
 	ls_add_options(&(p.pose_path), ops, "path_", "");
 	
@@ -148,7 +149,7 @@ int log2pdf(log2pdf_params *p) {
 		if(nscans > 0) {
 			cairo_set_source_rgb(cr, 0.3, 0.0, 1.0);
 			double *pose0 = ld_get_reference_pose(scans[0], p->use_reference);
-			cairo_arc(cr, pose0[0], pose0[1], 0.4, 0.0, 2*M_PI);
+			cairo_arc(cr, pose0[0], pose0[1], p->start_pose_width, 0.0, 2*M_PI);
 			cairo_fill(cr);
 		}
 
