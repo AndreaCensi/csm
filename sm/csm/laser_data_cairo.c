@@ -41,7 +41,7 @@ const char* cat(const char*a, const char*b) {
 	size_t la = strlen(a);
 	size_t lb = strlen(b);
 	char* buf = malloc(la+lb+3);
-	strcpy(strcpy(buf, a), b);
+	stpcpy(stpcpy(buf, a), b);
 	return buf;
 }
 
