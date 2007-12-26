@@ -114,6 +114,11 @@ int log2pdf(log2pdf_params *p) {
 		return 0;
 	}
 	
+	if(nscans == 0) {
+		sm_error("I could not read any scan from file '%s'.\n", p->input_filename);
+		return 0;
+	}
+	
 	sm_info("Read map: %d scans in total.\n", nscans);
 
 	/** Let's find the bounding box for the map */
