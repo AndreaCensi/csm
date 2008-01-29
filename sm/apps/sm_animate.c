@@ -164,15 +164,15 @@ int draw_animation(anim_params* p, JO jo, const char*filename) {
 			cr_set_style(cr, &(p->corr));
 			cairo_set_source_rgb (cr, 1.0, 0.0, 0.0);
 			json_to_corr(corr0, laser_sens->corr, laser_sens->nrays);
-			cr_ld_draw_corr(cr, laser_ref, laser_sens, &(p->corr));
+			cr_ld_draw_corr(cr, laser_ref, laser_sens);
 
 			cairo_set_source_rgb (cr, 1.0, 0.0, 1.0);
 			json_to_corr(corr1, laser_sens->corr, laser_sens->nrays);
-			cr_ld_draw_corr(cr, laser_ref, laser_sens, &(p->corr));
+			cr_ld_draw_corr(cr, laser_ref, laser_sens);
 
 			cairo_set_source_rgb (cr, 0.0, 1.0, 0.0);
 			json_to_corr(corr2, laser_sens->corr, laser_sens->nrays);
-			cr_ld_draw_corr(cr, laser_ref, laser_sens, &(p->corr));
+			cr_ld_draw_corr(cr, laser_ref, laser_sens);
 
 			cr_set_reference(cr, x_old);
 			cr_ld_draw(cr, laser_sens, &(p->laser_sens_s));

@@ -193,7 +193,7 @@ enum json_type json_object_get_type(struct json_object *this)
 
 /* json_object_to_json_string */
 
-char* json_object_to_json_string(struct json_object *this)
+const char* json_object_to_json_string(struct json_object *this)
 {
   if(!this) return "null";
   if(!this->_pb) {

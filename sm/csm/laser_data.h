@@ -107,10 +107,31 @@ void ld_simple_clustering(LDP ld, double threshold);
 /** A cool orientation estimation algorithm. Needs cluster. */
 void ld_compute_orientation(LDP ld, int size_neighbourhood, double sigma);
 
+
+
+
+/** 
+	Tries to read a laser scan from file. If error or EOF, it returns 0.
+	Whitespace is skipped. If first valid char is '{', it tries to read 
+	it as JSON. If next char is 'F' (first character of "FLASER"),
+	it tries to read in Carmen format. Else, 0 is returned. 
+*/
+LDP ld_read_smart(FILE*);
+
+/** 
+	Tries to read a laser scan from a string.
+*/
+LDP ld_read_smart_string(const char*);
+
+
 /** Read next FLASER line in file (initializes ld). 
-	Returns 0 on success, -1 if error, -2 eof. 
+	Returns 0 on failure. If the file is EOF, it returns 1 
+	and sets ld to 0.
 	You probably want to use the ld_read_smart() function. */
-int ld_read_next_laser_carmen(FILE*, LDP ld);
+int ld_read_next_laser_carmen(FILE*, LDP*ld);
+
+/** Read laser data from a Carmen-formatted line */
+LDP ld_from_carmen_string(const char*line);
 
 /** Reads all the scans it can find. */
 int ld_read_all(FILE*file, LDP **array, int*num);

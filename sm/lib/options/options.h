@@ -4,7 +4,6 @@
 #include <stdio.h>
 
 #ifdef __cplusplus
-namespace Options {
 extern "C" {
 #endif
 
@@ -89,7 +88,6 @@ void options_dump(struct option * options, FILE*f, int write_desc);
 
 #ifdef __cplusplus
 }
-} // namespace Options 
 #endif
 
 

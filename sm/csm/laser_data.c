@@ -4,6 +4,10 @@
 
 #include "csm_all.h"
 
+double* alloc_double_array(int n, double def);
+int* alloc_int_array(int n, int def);
+
+/* -------------------------------------------------- */
 
 LDP ld_alloc_new(int nrays) {
 	LDP ld = malloc(sizeof(struct laser_data));

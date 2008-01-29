@@ -1,6 +1,6 @@
 #include <math.h>
 
-#include "../csm_all.h"
+#include "icp.h"
 
 void quicksort(double *array, int begin, int end);
 double hoare_selection(double *data, int start, int end, int k);

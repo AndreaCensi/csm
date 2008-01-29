@@ -6,6 +6,7 @@
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_matrix.h>
 
+
 struct sm_params {
 	/** First scan ("ref"erence scan) */
 	LDP laser_ref;
@@ -94,6 +95,7 @@ struct sm_params {
 
 };
 
+
 struct sm_result {
 	int valid;
 	
@@ -113,6 +115,8 @@ struct sm_result {
 
 void sm_icp(struct sm_params*input, struct sm_result*output);
 void sm_gpm(struct sm_params*input, struct sm_result*output);
+
+
 
 void sm_journal_open(const char* file);
 

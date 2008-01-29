@@ -39,5 +39,9 @@ void compute_covariance_exact(
 
 void visibilityTest(LDP ld, const gsl_vector*x_old);
 
+/** Marks a ray invalid if reading is outside range [min_reading, max_reading]. */
+void ld_invalid_if_outside(LDP ld, double min_reading, double max_reading);
+
+void swap_double(double*a,double*b);
 
 #endif

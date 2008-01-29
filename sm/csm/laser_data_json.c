@@ -5,6 +5,14 @@
 
 #include "csm_all.h"
 
+void jo_add_timestamp(JO jo, const char*name, struct timeval*tv);
+int is_all_nan(const double *v, int n );
+void jo_add_double_array_if_not_nan(JO jo, const char*name, const double *v, int n);
+int all_is(int *a, int n, int v);
+
+/* -------------------------------------------- */
+
+
 JO matrix_to_json(gsl_matrix*m) {
 	JO jo = jo_new_array();
 	if(m->size1>1) {
@@ -158,7 +166,7 @@ JO ld_to_json(LDP ld) {
 	return jo;
 }
 
-
+/* TODO: add some checks */
 LDP json_to_ld(JO jo) {
 	int n;
 	if(!jo_read_int(jo, "nrays", &n)) {
@@ -194,12 +202,30 @@ LDP json_to_ld(JO jo) {
 	return ld;
 }
 
+LDP ld_from_json_string(const char*s) {
+	JO jo = json_parse(s);
+	if(!jo) {
+		sm_error("Invalid JSON found.\n");
+		return 0;
+	}
+	LDP ld = json_to_ld(jo);
+	if(!ld) {
+		sm_error("Could not read laser_data:\n\n%s\n", json_object_to_json_string(jo));
+		return 0;
+	}
+	jo_free(jo);
+	return ld;
+}
+
 LDP ld_from_json_stream(FILE*file) {
 	JO jo; /* the monkey */
 	LDP ld;
 	
 	jo = json_read_stream(file);
-	if(!jo) return 0;
+	if(!jo) {
+		sm_error("Invalid JSON found.\n");
+		return 0;
+	}
 
 	ld = json_to_ld(jo);
 	if(!ld) {
@@ -207,6 +233,9 @@ LDP ld_from_json_stream(FILE*file) {
 		return 0;
 	}
 	jo_free(jo);
+	
+	fprintf(stderr, "j");
+	
 	return ld;
 }
 
@@ -220,57 +249,4 @@ void ld_write_as_json(LDP ld, FILE * stream) {
 	fputs("\n", stream);
 	jo_free(jo);
 }
-
-
-/** 
-	Tries to read a laser scan from file. If error or EOF, it returns 0.
-	Whitespace is skipped. If first valid char is '{', it tries to read 
-	it as JSON. If next char is 'F' (first character of "FLASER"),
-	it tries to read in Carmen format. Other lines are discarder.
-	0 is returned on error or feof
-*/
-LDP ld_read_smart(FILE*f) {
-	while(1) {
-		int c;
-		while(1) {
-			c = fgetc(f);
-			if(feof(f)) { 
-				/* sm_debug("eof\n"); */
-				return 0;
-			}
-			if(!isspace(c)) break;
-		}
-		ungetc(c, f);
-
-		switch(c) {
-			case '{': {
-/*				sm_debug("Reading JSON\n"); */
-				return ld_from_json_stream(f);
-			}
-			case 'F': {
-/*				sm_debug("Reading Carmen\n");  */
-				LDP ld = (LDP) malloc(sizeof(struct laser_data));
-				if(ld_read_next_laser_carmen(f, ld)) {
-					sm_debug("bad carmen\n");
-					free(ld);
-					return 0;
-				}
-				return ld;
-			}
-			default: {
-				/*sm_error("Could not read ld. First char is '%c'. ", c);*/
-				char max_line[10000];
-				char * res = fgets(max_line, 10000-2, f);
-				if(!res) {
-					sm_error("Could not skip line. \n");
-					return 0;
-				} else {
-/*					sm_error("Skipped '%s'\n", res);*/
-				}
-			}
-		}
-	}
-}
-
-
 

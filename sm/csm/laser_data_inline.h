@@ -1,6 +1,8 @@
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_vector.h>
 
+#include "csm.h"
+
 /* Simple inline functions */
 
 /*#warning Seen ld_valid_ray*/

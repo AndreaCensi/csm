@@ -13,6 +13,8 @@
 #include "linkhash.h"
 
 
+double convert_to_double(JO jo);
+
 #ifndef NAN
 #define NAN strtod("NaN",0)
 #endif

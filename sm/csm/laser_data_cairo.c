@@ -7,11 +7,17 @@
 
 #include "laser_data_cairo.h"
 
+const char* cat(const char*a, const char*b);
 void cr_ld_draw_rays(cairo_t*, LDP);
 void cr_ld_draw_countour(cairo_t*, LDP, double, double);
 void cr_ld_draw_points(cairo_t*, LDP, double radius);
+void cr_ld_draw_normals(cairo_t*cr, LDP ld, double length);
 
-void cr_ld_draw_corr(cairo_t*cr, LDP laser_ref, LDP laser_sens, line_style*ls) {
+
+
+/* ----------------------------------------------- */
+
+void cr_ld_draw_corr(cairo_t*cr, LDP laser_ref, LDP laser_sens) {
 	int i;
 	for(i=0; i < laser_sens->nrays; i++) {
 		if(!ld_valid_corr(laser_sens, i)) continue;
@@ -169,43 +175,6 @@ void cr_ld_draw_rays(cairo_t*cr, LDP ld) {
 		cairo_stroke(cr);
 	}
 }
-
-struct stroke_sequence {
-	int begin_new_stroke;
-	int end_stroke;
-	int valid;
-	
-	double p[2];
-}; 
-
-void compute_stroke_sequence(LDP ld, struct stroke_sequence*draw_info,
-	double horizon, double connect_threshold) {
-	int last_valid = -1; int first = 1;
-	int i; for(i=0;i<ld->nrays;i++) {
-		if( (!ld_valid_ray(ld,i)) || (ld->readings[i] > horizon) ) {
-			draw_info[i].valid = 0;
-			continue;
-		}
-		draw_info[i].valid = 1;
-		draw_info[i].p[0] = ld->readings[i] * cos(ld->theta[i]);
-		draw_info[i].p[1] = ld->readings[i] * sin(ld->theta[i]);
-		
-		if(first) { 
-			first = 0; 
-			draw_info[i].begin_new_stroke = 1;
-			draw_info[i].end_stroke = 0;
-		} else {
-			int near =  square(connect_threshold) > 
-				distance_squared_d(draw_info[last_valid].p, draw_info[i].p);
-			draw_info[i].begin_new_stroke = near ? 0 : 1;
-			draw_info[i].end_stroke = 0;
-			draw_info[last_valid].end_stroke = draw_info[i].begin_new_stroke;
-		}
-		last_valid = i;
-	} /*for */
-	if(last_valid >= 0)
-		draw_info[last_valid].end_stroke = 1;
-} /* find buff .. */
 
 void cr_ld_draw_countour(cairo_t*cr, LDP ld, double horizon, double connect_threshold) {
 	struct stroke_sequence draw_info[ld->nrays];
@@ -372,7 +341,7 @@ int create_image_surface(int max_width_pixels, int max_height_pixels,
 	sm_debug("bb: %f %f\n", bb_width, bb_height);
 	sm_debug("surface: %f %f\n", surface_width, surface_height);
 
-	*surface_p = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, surface_width, surface_height);
+	*surface_p = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, (int) surface_width, (int)surface_height);
 	*cr = cairo_create (*surface_p);
 	cairo_status_t status = cairo_status (*cr);
 

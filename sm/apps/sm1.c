@@ -11,9 +11,9 @@ struct sm1_params {
 	const char * file_jj;
 } p;
 
-extern void sm_options(struct sm_params*p, struct option*ops);
 
 extern int distance_counter;
+extern void sm_options(struct sm_params*p, struct option*ops);
 
 
 int main(int argc, const char*argv[]) {

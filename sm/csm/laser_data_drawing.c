@@ -1,6 +1,8 @@
 #include <string.h>
 #include <strings.h>
 #include "laser_data_drawing.h"
+#include "logging.h"
+#include "math_utils.h"
 
 const char*ld_reference_name[4] = { "invalid","odometry","estimate","true_pose"};
 
@@ -107,4 +109,36 @@ double * ld_get_reference_pose(LDP ld, ld_reference use_reference) {
 	}
 	return pose;
 }
+
+
+void compute_stroke_sequence(LDP ld, struct stroke_sequence*draw_info,
+	double horizon, double connect_threshold) {
+	int last_valid = -1; int first = 1;
+	int i; for(i=0;i<ld->nrays;i++) {
+		if( (!ld_valid_ray(ld,i)) || (ld->readings[i] > horizon) ) {
+			draw_info[i].valid = 0;
+			continue;
+		}
+		draw_info[i].valid = 1;
+		draw_info[i].p[0] = ld->readings[i] * cos(ld->theta[i]);
+		draw_info[i].p[1] = ld->readings[i] * sin(ld->theta[i]);
+		
+		if(first) { 
+			first = 0; 
+			draw_info[i].begin_new_stroke = 1;
+			draw_info[i].end_stroke = 0;
+		} else {
+			int near =  square(connect_threshold) > 
+				distance_squared_d(draw_info[last_valid].p, draw_info[i].p);
+			draw_info[i].begin_new_stroke = near ? 0 : 1;
+			draw_info[i].end_stroke = 0;
+			draw_info[last_valid].end_stroke = draw_info[i].begin_new_stroke;
+		}
+		last_valid = i;
+	} /*for */
+	if(last_valid >= 0)
+		draw_info[last_valid].end_stroke = 1;
+} /* find buff .. */
+
+
 

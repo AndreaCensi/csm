@@ -1,7 +1,8 @@
 /* This algorithm was created by Cyrill Stachniss 
 	http://www.informatik.uni-freiburg.de/~stachnis/ */
 #include "laser_data_drawing.h"
-
+#include "math_utils.h"
+#include "logging.h"
 
 // the 2d-point structure for the input
 typedef struct {
@@ -24,6 +25,11 @@ struct bbfind_imp {
 	int buf_size;
 	BB_Point * buf;
 };
+
+/* Initialize structure */
+bbfind * bbfind_new(void);
+
+/* -------------------------------------- */
 
 bbfind * bbfind_new() {
 	bbfind * bbf = malloc(sizeof(bbfind));

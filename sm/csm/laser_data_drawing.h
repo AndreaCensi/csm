@@ -1,7 +1,7 @@
 #ifndef H_LASER_DATA_DRAWING
 #define H_LASER_DATA_DRAWING
 
-#include "csm_all.h"
+#include "laser_data.h"
 
 typedef enum { Invalid = 0, Odometry = 1, Estimate = 2, True_pose = 3 } ld_reference;
 
@@ -56,5 +56,19 @@ int bbfind_add_bbox(bbfind*, const BB2);
 
 int bbfind_compute(bbfind*, BB2);
 void bbfind_free(bbfind*);
+
+/* For drawing stroke */
+
+struct stroke_sequence {
+	int begin_new_stroke;
+	int end_stroke;
+	int valid;
+	
+	double p[2];
+}; 
+
+void compute_stroke_sequence(LDP ld, struct stroke_sequence*,
+	double horizon, double connect_threshold);
+
 
 #endif

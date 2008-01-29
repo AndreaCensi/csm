@@ -1,5 +1,4 @@
 #include <assert.h>
-#include "csm_all.h"
 #include "json_journal.h"
 
 
@@ -8,6 +7,7 @@
 static JO jj_stack[MAX_STACK];
 static int jj_stack_index = -1;
 static FILE * jj_file = 0;
+
 
 int jj_enabled() {
 	return jj_file != 0;
@@ -42,6 +42,7 @@ void jj_context_enter(const char*context_name) {
 	
 	jj_stack_push(jo);
 }
+
 
 
 void jj_must_be_hash() {

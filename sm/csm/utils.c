@@ -3,6 +3,10 @@
 
 #include "csm_all.h"
 
+/** Wraps around fopen and provides error message. */
+FILE * open_file(const char *filename, const char*mode);
+
+
 FILE * open_file(const char *filename, const char*mode) {
 	FILE*file = fopen(filename, mode);
 	if(file==NULL) {

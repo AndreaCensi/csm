@@ -28,12 +28,14 @@ FILE*  jj_get_stream(void);
 /**** Private functions */
 
 /** (private) Gets the top of the stack. */
-JO jj_stack_top();
+JO jj_stack_top(void);
 /** (private) Pushes an object onto the stack. */
 void jj_stack_push(JO jo);
+void jj_stack_pop(void);
 /** (private) Asserts if the stack top is not an hash. */
-void jj_must_be_hash();
+void jj_must_be_hash(void);
 /** (private) Asserts if the stack top is not an array. */
-void jj_must_be_array();
+void jj_must_be_array(void);
+
 
 #endif

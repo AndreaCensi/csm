@@ -1,7 +1,31 @@
+#include <ctype.h>
+
 #include "csm_all.h"
 #include "laser_data_drawing.h"
 
-/** Loads all laser data */
+/** Loads *some* data based on an acceptance criterion. */
+int ld_read_some(FILE*file, LDP **array, int*num, int (*accept)(LDP));
+
+	/* Every n scans */
+	int interval_accept(LDP ld);
+		int interval_count = 0;
+		int interval_interval = 10;
+
+	/* Every one */
+	int always(LDP ld);
+	
+	/* Read according to distance */
+	int distance_accept(LDP ld);
+		static int distance_count;
+		static double distance_last_pose[3];
+		static double distance_interval_xy = 10;
+		static double distance_interval_th = 10;
+		static ld_reference distance_reference;
+		void distance_accept_reset(ld_reference, double interval_xy, double interval_th);
+
+
+
+/* ---------------------------------------- */
 
 int ld_read_some(FILE*file, LDP **array, int*num, int (*accept)(LDP)) {
 	*array = 0; *num = 0;
@@ -10,12 +34,14 @@ int ld_read_some(FILE*file, LDP **array, int*num, int (*accept)(LDP)) {
 	
 	while(1) {
 		LDP ld = ld_read_smart(file);
+
 		if(!ld) break;
 		
 		if( ! (*accept)(ld) ) {
 			ld_free(ld);
 			continue;
 		}
+		
 		
 		ar[(*num)++] = ld;
 		
@@ -35,8 +61,6 @@ int ld_read_some(FILE*file, LDP **array, int*num, int (*accept)(LDP)) {
 
 
 /* Read every tot scans */
-int interval_count = 0;
-int interval_interval = 10;
 int interval_accept(LDP ld) {
 	ld=ld;
 	int accept = interval_count % interval_interval == 0;
@@ -55,15 +79,6 @@ int always(LDP ld)  { ld=ld; return 1; }
 int ld_read_all(FILE*file, LDP **array, int*num) {
 	return ld_read_some(file, array, num, always);
 }
-
-/* Read according to distance */
-
-
-static int distance_count;
-static double distance_last_pose[3];
-static double distance_interval_xy = 10;
-static double distance_interval_th = 10;
-static ld_reference distance_reference;
 
 void distance_accept_reset(ld_reference which, double interval_xy, double interval_th) {
 	distance_count = 0;
@@ -102,6 +117,73 @@ int ld_read_some_scans_distance(FILE*file, LDP **array, int*num,
 	distance_accept_reset(which, d_xy, d_th);
 	return ld_read_some(file, array, num, distance_accept);
 }
+
+
+
+/** 
+	Tries to read a laser scan from file. If error or EOF, it returns 0.
+	Whitespace is skipped. If first valid char is '{', it tries to read 
+	it as JSON. If next char is 'F' (first character of "FLASER"),
+	it tries to read in Carmen format. Other lines are discarded.
+	0 is returned on error or feof
+*/
+LDP ld_read_smart(FILE*f) {
+	while(1) {
+		int c;
+		while(1) {
+			c = fgetc(f);
+			if(feof(f)) { 
+				/* sm_debug("eof\n"); */
+				return 0;
+			}
+			if(!isspace(c)) break;
+		}
+		ungetc(c, f);
+
+		switch(c) {
+			case '{': {
+/*				sm_debug("Reading JSON\n"); */
+				return ld_from_json_stream(f);
+			}
+			case 'F': {
+/*				sm_debug("Reading Carmen\n");  */
+				LDP ld;
+				if(!ld_read_next_laser_carmen(f, &ld)) {
+					sm_error("bad carmen\n");
+					return 0;
+				}
+				return ld;
+			}
+			default: {
+				/*sm_error("Could not read ld. First char is '%c'. ", c);*/
+				char max_line[10000];
+				char * res = fgets(max_line, 10000-2, f);
+				if(!res) {
+					sm_error("Could not skip line. \n");
+					return 0;
+				} else {
+					fprintf(stderr, "s");
+/*					sm_error("Skipped '%s'\n", res);*/
+				}
+			}
+		}
+	}
+}
+
+LDP ld_read_smart_string(const char*line) {
+	switch(*line) {
+		case '{': 
+			return ld_from_json_string(line);
+		
+		case 'F': 
+			return ld_from_carmen_string(line);
+			
+		default:
+			sm_error("Invalid laserdata format: '%s'.", line);
+			return 0;
+	}
+}
+
 
 
 
