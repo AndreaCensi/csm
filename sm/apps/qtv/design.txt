@@ -1,0 +1,68 @@
+
+
+Modalità
+--------
+
+1) Singolo visore
+
+	Visualizza l'ultimo laserdata.
+
+2) Visore continuo.
+
+	Ogni laserdata ha un ID. Se l'ID si ripresenta, si aggiorna.
+	Ogni laserdata ricorda la storia (opzionale)
+	
+
+Tipi di dato
+------------
+
+0) Comandi
+	CLEAR cancella tutto
+
+Oggetti:
+1) Laserdata
+2) Punti grafo
+3) Connessioni grafo (either tra laserdata o punti grafo)
+4) Labels
+	text
+	x,y,theta
+	min_zoom	Visibile solo sotto una certa distanza
+	
+5) Log
+	messaggio di log
+
+Campi comuni:
+	text
+	
+Grafica:
+	color
+
+Parametri
+---------
+
+follow_last   Segui l'ultimo scan 
+follow_zoom   Ampiezza per seguire
+follow_smooth Smoothness per seguire
+
+
+Multiple viewpoints
+-------------------
+
+
+
+Architettura
+-------------
+- Widgets
+- Containers
+	- log
+	- graphics scene
+- Parser/demux: trasla stringhe/json in oggetti
+- Input threads (stdin, file, tcp)
+
+
+
+
+
+
+
+
