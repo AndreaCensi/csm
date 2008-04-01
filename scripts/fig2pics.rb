@@ -204,8 +204,8 @@ execute_cmd	"dvips -q -Ppdf -E #{slidedvi} -o #{slideps}"
 if opt_bounds then change_bounds(slideps, opt_bounds) end
 
 if opt_output then outpdf = opt_output end
-		
-execute_cmd "epstopdf #{slideps} --outfile=#{outpdf}"
+
+execute_cmd("epstopdf #{slideps} --outfile=#{outpdf} --debug", exit_on_error=true)
 
 execute_cmd  "rm -f #{slide} #{slidedvi} #{slideps} #{temp}.* #{slideprefix}.*"
 

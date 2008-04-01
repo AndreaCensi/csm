@@ -1,4 +1,4 @@
-def execute_cmd_verb(cmd, verbose)
+def execute_cmd_verb(cmd, verbose, exit_on_error)
 	$stderr.puts "$ " + cmd
 	
 	if verbose
@@ -7,13 +7,15 @@ def execute_cmd_verb(cmd, verbose)
 		output = `#{cmd}`
 	end
 	
-	if $?.exitstatus != 0
-		$stderr.puts "\n\n\t command:\n\n\t#{cmd}\n\n\tFAILED\n\n"
+	if exit_on_error && $?.exitstatus != 0
+		$stderr.puts "\n\n\t command:\n\n\t#{cmd.inspect}\n\n\tFAILED, exit status = #{$?.exitstatus}\n\n"
 		exit($?.exitstatus)
 	end
+	
+	$?.exitstatus
 end
 
-def execute_cmd(m); execute_cmd_verb(m, true); end
+def execute_cmd(m, exit_on_error=true); execute_cmd_verb(m, true, exit_on_error); end
 
 def search_cmd(program, additional_paths = nil)
 	path = ENV['PATH'].split(":") 
