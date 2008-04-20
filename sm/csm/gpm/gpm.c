@@ -194,7 +194,7 @@ void ght_one_shot(LDP laser_ref, LDP laser_sens,
 		int from; int to; int start_cell;
 		possible_interval(p_i_w, laser_ref, max_angular_correction_deg,
 			max_linear_correction, &from, &to, &start_cell);
-//		from = 0; to = laser_ref->nrays-1;
+		from = 0; to = laser_ref->nrays-1;
 		
 
 		int j;
@@ -245,7 +245,18 @@ void ght_one_shot(LDP laser_ref, LDP laser_sens,
 	}
 	
 	*num_correspondences = count;
-		
+
+	if(1) {
+		double weight = 0.5 * count;
+		z[0] += x0[0] * weight;
+		z[1] += x0[1] * weight;
+//		z[2] += x0[2] * weight;
+		L[0][0] += weight;
+		L[0][1] += 0;
+		L[1][0] += 0;
+		L[1][1] += weight;
+//		L[2][2] += weight;
+	}
 
 	sm_debug("gpm: second step:   %f / %d = %f \n", rad2deg(z[2]), count, rad2deg(z[2]) / count);
 
