@@ -31,9 +31,11 @@ void sm_gpm(struct sm_params*params, struct sm_result*res) {
 
 	/* Create an histogram whose bin is large `theta_bin_size` */
 	double theta_bin_size = deg2rad(params->gpm_theta_bin_size_deg);
-	size_t nbins = (size_t) ceil(2*M_PI/theta_bin_size);
+	double hist_min = -M_PI-theta_bin_size; /* be robust */
+	double hist_max = +M_PI+theta_bin_size;
+	size_t nbins = (size_t) ceil(  (hist_max-hist_min) / theta_bin_size);
 	gsl_histogram*hist = gsl_histogram_alloc(nbins);
-	gsl_histogram_set_ranges_uniform(hist, -M_PI, M_PI);
+	gsl_histogram_set_ranges_uniform(hist, hist_min, hist_max);
 	
 	/* Fill the histogram with samples */
 	double u[3]; copy_d(params->first_guess, 3, u);
@@ -41,10 +43,19 @@ void sm_gpm(struct sm_params*params, struct sm_result*res) {
 	
 	int interval = params->gpm_interval;
 	
+	int num_correspondences_theta=-1;
+	
+	
 	ght_find_theta_range(laser_ref, laser_sens,
 		u, params->max_linear_correction,
-		params->max_angular_correction_deg, interval, hist);
+		params->max_angular_correction_deg, interval, hist, &num_correspondences_theta);
 		
+	if(num_correspondences_theta < laser_ref->nrays) {
+		sm_error("sm_gpm(): I found only %d correspondences in the first pass of GPM. I consider it a failure.\n",
+			num_correspondences_theta);
+		return;
+	}
+	
 	/* Find the bin with most samples */
 	size_t max_bin = gsl_histogram_max_bin(hist);
 	
@@ -70,13 +81,23 @@ void sm_gpm(struct sm_params*params, struct sm_result*res) {
 	double new_range_deg = rad2deg( 0.5*(max_range - min_range) );
 	
 	double x_new[3];
+	int num_correspondences=-1;
 	ght_one_shot(laser_ref, laser_sens,
 			u, params->max_linear_correction*2,
-			new_range_deg, interval, x_new) ;
+			new_range_deg, interval, x_new, &num_correspondences) ;
+			
+	if(num_correspondences < laser_ref->nrays) {
+		sm_error("sm_gpm(): I found only %d correspondences in the second pass of GPM. I consider it a failure.\n",
+			num_correspondences);
+		return;
+	}
+
 	/* Et voila, in x_new we have the answer */
 
 	{
 		sm_debug("gpm : max_correction_lin %f def %f\n", params->max_linear_correction, 		params->max_angular_correction_deg);
+		sm_debug("gpm : acceptable range for theta: [%f, %f]\n", min_range,max_range);
+		sm_debug("gpm : 1) Num correspondences for theta: %d\n", num_correspondences_theta);
 
 		sm_debug("gpm 1/2: new u = : %s \n", friendly_pose(u) );
 		sm_debug("gpm 1/2: New range: %f to %f\n",rad2deg(min_range),rad2deg(max_range));
@@ -98,8 +119,11 @@ void sm_gpm(struct sm_params*params, struct sm_result*res) {
 
 void ght_find_theta_range(LDP laser_ref, LDP laser_sens,
 	const double*x0, double max_linear_correction,
-	double max_angular_correction_deg, int interval, gsl_histogram*hist) 
+	double max_angular_correction_deg, int interval, gsl_histogram*hist, int*num_correspondences) 
 {
+	/** Compute laser_sens's points in laser_ref's coordinates by roto-translating by x0 */
+	ld_compute_world_coords(laser_sens, x0);
+	
 	int count = 0;
 	int i;
 	for(i=0;i<laser_sens->nrays;i++) {
@@ -107,20 +131,23 @@ void ght_find_theta_range(LDP laser_ref, LDP laser_sens,
 		if(i % interval) continue;
 		
 		const double * p_i = laser_sens->points[i].p;
+		
+		const double * p_i_w = laser_sens->points_w[i].p;
 		int from; int to; int start_cell;
-		possible_interval(p_i, laser_ref, max_angular_correction_deg,
+		possible_interval(p_i_w, laser_ref, max_angular_correction_deg,
 			max_linear_correction, &from, &to, &start_cell);
 
-/*		printf("i=%d alpah=%f cov=%f\n", i,laser_sens->alpha[i],laser_sens->cov_alpha[i]);*/
+		printf("\n i=%d interval = [%d,%d] ", i, from, to);
 		int j;
 		for(j=from;j<=to;j++) {
 			if(!laser_ref->alpha_valid[j]) continue;
 			if(j % interval) continue;
 			
 			double theta = angleDiff(laser_ref->alpha[j], laser_sens->alpha[i]);
-			
-			if( fabs(theta-x0[2]) > deg2rad(max_angular_correction_deg))
+			double theta_diff = angleDiff(theta,x0[2]); 
+			if( fabs(theta_diff) > deg2rad(max_angular_correction_deg) )
 				continue;
+			theta = x0[2] + theta_diff; // otherwise problems near +- PI
 	
 			const double * p_j = laser_ref->points[j].p;
 			
@@ -134,17 +161,23 @@ void ght_find_theta_range(LDP laser_ref, LDP laser_sens,
 				
 			/*double weight = 1/(laser_sens->cov_alpha[i]+laser_ref->cov_alpha[j]);*/
 			double weight = 1;
-			gsl_histogram_accumulate(hist,theta, weight);
+			gsl_histogram_accumulate(hist, theta, weight);
+			gsl_histogram_accumulate(hist, theta+2*M_PI, weight); /* be robust */
+			gsl_histogram_accumulate(hist, theta-2*M_PI, weight);
 			count ++;
 		}
 	}
+	*num_correspondences = count;
 	sm_debug(" correspondences = %d\n",count);
 }
 
 void ght_one_shot(LDP laser_ref, LDP laser_sens,
 		const double*x0, double max_linear_correction,
-	double max_angular_correction_deg, int interval, double*x) 
+	double max_angular_correction_deg, int interval, double*x, int*num_correspondences) 
 {
+	/** Compute laser_sens's points in laser_ref's coordinates by roto-translating by x0 */
+	ld_compute_world_coords(laser_sens, x0);
+	
 	double L[3][3]  = {{0,0,0},{0,0,0},{0,0,0}};
 	double z[3] = {0,0,0};
 	
@@ -154,11 +187,15 @@ void ght_one_shot(LDP laser_ref, LDP laser_sens,
 		if(!laser_sens->alpha_valid[i]) continue;
 		if(i % interval) continue;
 		
-		const double  * p_i = laser_sens->points[i].p;
 
+		const double * p_i = laser_sens->points_w[i].p;
+
+		const double * p_i_w = laser_sens->points_w[i].p;
 		int from; int to; int start_cell;
-		possible_interval(p_i, laser_ref, max_angular_correction_deg,
+		possible_interval(p_i_w, laser_ref, max_angular_correction_deg,
 			max_linear_correction, &from, &to, &start_cell);
+//		from = 0; to = laser_ref->nrays-1;
+		
 
 		int j;
 		for(j=from;j<=to;j++) {
@@ -166,9 +203,10 @@ void ght_one_shot(LDP laser_ref, LDP laser_sens,
 			if(!laser_ref->alpha_valid[j]) continue;
 			
 			double theta = angleDiff(laser_ref->alpha[j], laser_sens->alpha[i]);
-			
-			if( fabs(theta-x0[2]) > deg2rad(max_angular_correction_deg) )
+			double theta_diff = angleDiff(theta,x0[2]); 
+			if( fabs(theta_diff) > deg2rad(max_angular_correction_deg) )
 				continue;
+			theta = x0[2] + theta_diff; // otherwise problems near +- PI
 	
 			const double * p_j = laser_ref->points[j].p;
 			
@@ -188,6 +226,8 @@ void ght_one_shot(LDP laser_ref, LDP laser_sens,
 			double alpha = laser_ref->alpha[j];
 			double ca = cos(alpha); double sa=sin(alpha);
 
+//				printf("%d ", (int) rad2deg(theta));
+
 /*			printf("valid %d alpha %f weight %f t_x %f t_y %f\n",
 				laser_ref->alpha_valid[j],alpha,weight,
 				t_x, t_y); */
@@ -204,8 +244,11 @@ void ght_one_shot(LDP laser_ref, LDP laser_sens,
 		}
 	}
 	
-	sm_debug("gpm: second step: found %d correspondences\n",count);
-	
+	*num_correspondences = count;
+		
+
+	sm_debug("gpm: second step:   %f / %d = %f \n", rad2deg(z[2]), count, rad2deg(z[2]) / count);
+
 	egsl_push();
 		val eL = egsl_alloc(3,3);
 			size_t a,b; 
@@ -226,6 +269,9 @@ void ght_one_shot(LDP laser_ref, LDP laser_sens,
 		egsl_print("ex", ex); */
 
 	egsl_pop();
+
+	sm_debug("gpm: second step: theta = %f   %f / %d = %f \n", rad2deg(x[2]), rad2deg(z[2]), count, rad2deg(z[2]) / count);
+	sm_debug("gpm: second step: found %d correspondences\n",count);
 	
 }
 

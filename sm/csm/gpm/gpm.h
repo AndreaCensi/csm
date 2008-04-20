@@ -6,11 +6,11 @@
 
 void ght_find_theta_range(LDP laser_ref, LDP laser_sens,
                 const double*x0, double max_linear_correction,
-        double max_angular_correction_deg, int interval, gsl_histogram*hist);
+        double max_angular_correction_deg, int interval, gsl_histogram*hist, int*num_correspondences);
 
 void ght_one_shot(LDP laser_ref, LDP laser_sens,
                 const double*x0, double max_linear_correction,
-                double max_angular_correction_deg, int interval, double*x) ;
+                double max_angular_correction_deg, int interval, double*x, int*num_correspondences) ;
 
 #endif
 

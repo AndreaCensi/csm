@@ -41,7 +41,8 @@ struct laser_data {
 
 	/** Cartesian representation */
 	point2d *  restrict points;
-	/** Cartesian representation, in "world" (laser_ref) coordinates. */
+	/** Cartesian representation, in "world" (laser_ref) coordinates. 
+	    Computed using ld_compute_world_coords() */
 	point2d *  restrict points_w;
 
 	/** Timestamp */

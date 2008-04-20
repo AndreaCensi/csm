@@ -89,7 +89,7 @@ void sm_options(struct sm_params*p, struct option*ops) {
 
 	options_int(ops, "do_compute_covariance", 
 		&(p->do_compute_covariance), 0,
-		" ... ");
+		"If 1, computes the covariance of ICP using the method http://purl.org/censi/2006/icpcov .");
 
 	options_int(ops, "debug_verify_tricks", 
 		&(p->debug_verify_tricks), 0,
