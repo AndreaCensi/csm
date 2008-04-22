@@ -96,6 +96,8 @@ new_executable(ld_select)
 new_executable(ld_cluster_curv)
 new_executable(ld_linearize)
 
+new_executable(json2matlab)
+
 # this are some random tests
 # new_executable(ld_stats)
 # new_executable(ld_correct)

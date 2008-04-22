@@ -1,5 +1,21 @@
-#include <csm/csm.h>
+#include <assert.h>
+
+#include <csm/csm_all.h>
 #include <options/options.h>
+
+#include <json-c/json.h>
+#include <json-c/json_object_private.h>
+
+void jo_write_as_matlab(JO jo, FILE*out);
+
+void jo_write_as_matrix(JO jo, FILE*out);
+void jo_write_as_column_vector(JO jo, FILE* out);
+
+void jo_write_as_cell_array(JO jo, FILE* out);
+int jo_is_numeric_matrix(JO jo);
+int jo_is_numeric_array(JO jo);
+void jo_write_as_matlab_object(JO jo, FILE*out);
+
 
 int main(int argc, const char * argv[]) {
 	sm_set_program_name(argv[0]);
@@ -27,16 +43,178 @@ int main(int argc, const char * argv[]) {
 	if(!in) return -3;
 	
 	fprintf(out, "function res = %s\n", function);
-	fprintf(out, " res = ... \n", function);
-	fprintf(out, " [ ... \n", function);
+	fprintf(out, " res = ... \n");
+	fprintf(out, " { ... \n\t");
 	
 	JO jo; 
+	int i = 0;
 	while((jo = json_read_stream(in))) {
-		jo_to_matlab(jo, out);
-		
+		if(i>0) fprintf(out, ", ...\n\t");
+		jo_write_as_matlab(jo, out);
 		jo_free(jo);
+		i++;
+	}
+
+	fprintf(out, "... \n }; \n");
+	return 0;
+}
+
+
+void jo_write_as_matlab(JO jo, FILE*out) {
+	if(!jo) { fprintf(out, "NaN"); } 
+	
+	switch(json_object_get_type(jo)) {
+		case json_type_null: 
+			fprintf(out, "NaN"); 
+			return;
+		
+		case json_type_boolean:
+			fprintf(out, json_object_get_boolean(jo) ? "true" : "false" );
+			return;
+		
+		case json_type_int:
+			fprintf(out, "%d", json_object_get_int(jo));		
+			return;
+
+		case json_type_double:
+			fprintf(out, "%lg", json_object_get_double(jo));		
+			return;
+		
+		case json_type_object:
+			jo_write_as_matlab_object(jo, out);
+			return;
+		
+		case json_type_array:
+			if(jo_is_numeric_matrix(jo))
+			jo_write_as_matrix(jo, out);
+			else
+			if(jo_is_numeric_array(jo))
+			jo_write_as_column_vector(jo, out);
+			else 
+			jo_write_as_cell_array(jo, out);		
+		return;
+		
+		case json_type_string:
+			fprintf(out, "'");
+			const char* s = json_object_get_string(jo);
+			while(*s) 
+				if(*s==39) fputc('"', out);
+				else fputc(*s, out);
+				
+			fprintf(out, "'");
+			return;
 	}
 	
-	fprintf(out, "; \n");
-	return 0;
+	
+}
+
+
+
+void jo_write_as_matlab_object(JO jo, FILE*out) {
+	int i=0;
+	struct json_object_iter iter;
+	fprintf(out, "struct(");
+	
+	json_object_object_foreachC(jo, iter) {
+		if(i) fprintf(out, ", ... \n\t ");
+		fprintf(out, "'%s', ", iter.key);
+		
+		enum json_type t = json_object_get_type(iter.val);
+		if( (t == json_type_array) && (!jo_is_numeric_matrix(iter.val)) && (!jo_is_numeric_array(iter.val))) {
+			fprintf(out, "{");
+			jo_write_as_matlab(iter.val, out);
+			fprintf(out, "}");
+		} else if(t == json_type_object) {
+			fprintf(out, "{ ");
+			jo_write_as_matlab(iter.val, out);
+			fprintf(out, " }");			
+		} else jo_write_as_matlab(iter.val, out);
+
+		i++;
+	}
+	fprintf(out, ")");
+}
+
+
+int jo_is_numeric_matrix(JO jo) {
+	if(json_object_get_type(jo) != json_type_array) return 0;
+	int len = json_object_array_length(jo);
+	int ncolumns = -1;
+	for(int i=0;i<len;i++){
+		JO row = json_object_array_get_idx(jo, i);
+		if(!jo_is_numeric_array(row)) return 0;
+		if(i==0) 
+			ncolumns = json_object_array_length(row);
+		else
+			if(ncolumns !=  json_object_array_length(row))
+			return 0;
+	}
+	if(ncolumns==0) return 0;
+	return 1;
+}
+
+int jo_is_numeric_array(JO jo) {
+	if(json_object_get_type(jo) != json_type_array) return 0;
+	int len = json_object_array_length(jo);
+	for(int i=0;i<len;i++){
+		JO elem = json_object_array_get_idx(jo, i);
+		switch(json_object_get_type(elem)) {
+			case json_type_null: 
+			case json_type_boolean:
+			case json_type_int:
+			case json_type_double:
+			continue;
+			default:
+			return 0;
+		}
+	}
+	return 1;
+}
+
+void jo_write_as_matrix(JO jo, FILE*out) {
+//		"[ " + map{|row| row.join(", ")}.join("; ... \n") +  "]"	
+	assert(json_object_get_type(jo) == json_type_array);
+	fprintf(out, "[");
+	int len = json_object_array_length(jo);
+	for(int i=0;i<len;i++){
+		if(i>0) fprintf(out, ";  ");
+		JO row = json_object_array_get_idx(jo, i);
+		int n = json_object_array_length(row);
+		for(int j=0;j<n;j++) {
+			if(j>0) fprintf(out, ", ");
+			jo_write_as_matlab(json_object_array_get_idx(row, j), out);
+		}
+	}
+	fprintf(out, "]");		
+}
+
+void jo_write_as_column_vector(JO jo, FILE* out) {
+//	"[  "+map{|x| x.to_matlab }.join("; ")+"]"
+	assert(json_object_get_type(jo) == json_type_array);
+	fprintf(out, "[");
+	int len = json_object_array_length(jo);
+	for(int i=0;i<len;i++){
+		if(i>0) fprintf(out, "; ");
+		JO elem = json_object_array_get_idx(jo, i);
+		jo_write_as_matlab(elem, out);
+	}
+	fprintf(out, "]");
+}
+
+void jo_write_as_cell_array(JO jo, FILE* out) {
+	assert(json_object_get_type(jo) == json_type_array);
+	int len = json_object_array_length(jo);
+	if(len==0) { 
+		fprintf(out, "{}"); 
+		return; 
+	} else {	
+		fprintf(out, "{ ");
+		for(int i=0;i<len;i++){
+			if(i>0) fprintf(out, ", ");
+			JO elem = json_object_array_get_idx(jo, i);
+			jo_write_as_matlab(elem, out);
+		}
+		fprintf(out, "}");
+	}
+//		"{ ... \n "+map{|x| x.to_matlab }.join(",  ... \n")+"}"
 }
