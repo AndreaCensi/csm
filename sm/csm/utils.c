@@ -29,3 +29,24 @@ FILE * open_file_for_writing(const char*filename) {
 	return open_file(filename, "w");
 }
 
+void my_basename(const char *file, char*dest) {
+  const char *start = strrchr(file, DIR_SEPARATOR);
+  if(!start)
+	strcpy(dest, file);
+  else
+    strcpy(dest, start+1);
+}
+
+void my_basename_no_suffix(const char *file, char*dest) {
+  const char *start = strrchr(file, DIR_SEPARATOR);
+  if(!start) start = file; else start += 1;
+  const char *end = strrchr(file, '.');
+  if(!end || end<start) end = start + strlen(start);
+  strncpy(dest, start, end-start);
+}
+
+void my_no_suffix(const char *file, char*dest) {
+  const char *end = strrchr(file, '.');
+  if(!end) end = file + strlen(file);
+  strncpy(dest, file, end-file);
+}

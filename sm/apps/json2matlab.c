@@ -1,5 +1,5 @@
 #include <assert.h>
-
+#include <string.h>
 #include <csm/csm_all.h>
 #include <options/options.h>
 
@@ -26,15 +26,44 @@ int main(int argc, const char * argv[]) {
 	
 	struct option* ops = options_allocate(3);
 	options_string(ops, "in", &input_filename, "stdin", "input file (JSON)");
-	options_string(ops, "out", &out_filename, "stdout", "output file");
+	options_string(ops, "out", &out_filename, "stdout", "output file (MATLAB)");
 	options_string(ops, "function", &function, "myfun", "Matlab function name");
 	
+	if(argc == 2 && (argv[1][0] != '-')) { 
+		/* one parameter */
+		input_filename = argv[1]; int len = strlen(input_filename) + 4;
+		char base[len], no_suffix[len], out[len];
+		my_no_suffix(input_filename, no_suffix);
+		sprintf(out, "%s.m", no_suffix);
+		my_basename_no_suffix(input_filename, base);
+		out_filename = out;
+		function = base;
+	} else if(argc == 3 && (argv[1][0] != '-') && (argv[2][0] != '-')) { 
+		input_filename = argv[1]; 
+		out_filename = argv[2];
+		int len = strlen(input_filename) + 4;
+		char base[len];
+		my_basename_no_suffix(input_filename, base);
+		function = base;	
+	} else
 	if(!options_parse_args(ops, argc, argv)) {
-		sm_info("Converts JSON stream to Matlab file"
+		sm_info(
+		"Converts JSON stream to Matlab file. \n"
+		"There are three usages: \n"
+		" 1) with only one parameter, \n"
+		"    $ json2matlab dir/mydata.json \n"
+		"    creates a Matlab function 'mydata' inside the file 'dir/mydata.m' \n"
+		" 2) with two parameters, \n"
+		"     $ json2matlab dir/mydata.json dir/out.m \n" 
+		"    creates a Matlab function 'out' inside the file 'dir/out.m'. \n"
+		" 3) otherwise, use the options switches below: \n"
+		
 			"\n\nOptions:\n", (char*)argv[0] );
 		options_print_help(ops, stderr);
 		return -1;
 	}
+	
+	
 	
 	FILE * out = open_file_for_writing(out_filename);
 	if(!out) return -2;
@@ -73,7 +102,7 @@ void jo_write_as_matlab(JO jo, FILE*out) {
 			return;
 		
 		case json_type_int:
-			fprintf(out, "%d", json_object_get_int(jo));		
+			fprintf(out, "int64(%d)", json_object_get_int(jo));		
 			return;
 
 		case json_type_double:
