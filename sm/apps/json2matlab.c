@@ -24,7 +24,7 @@ int main(int argc, const char * argv[]) {
 	const char * out_filename;
 	const char * function;
 	
-	struct option* ops = options_allocate(3);
+	struct option* ops = options_allocate(5);
 	options_string(ops, "in", &input_filename, "stdin", "input file (JSON)");
 	options_string(ops, "out", &out_filename, "stdout", "output file (MATLAB)");
 	options_string(ops, "function", &function, "myfun", "Matlab function name");
