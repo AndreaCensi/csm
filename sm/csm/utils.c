@@ -42,11 +42,25 @@ void my_basename_no_suffix(const char *file, char*dest) {
   if(!start) start = file; else start += 1;
   const char *end = strrchr(file, '.');
   if(!end || end<start) end = start + strlen(start);
+
   strncpy(dest, start, end-start);
+  dest[end-file] = '\0';
+//	sm_debug("start: '%s' end: '%s' base_no_suffix: '%s'\n", start, end, dest);
 }
 
 void my_no_suffix(const char *file, char*dest) {
   const char *end = strrchr(file, '.');
   if(!end) end = file + strlen(file);
   strncpy(dest, file, end-file);
+  dest[end-file] = '\0';
 }
+
+
+/** Our version of strdup. */
+char * my_strdup(const char *s) {
+	size_t len = strlen(s) + 1; /* null byte */
+	char * t = (char*) malloc(len);
+	memcpy(t,s,len);
+	return t;
+}
+

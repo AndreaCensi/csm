@@ -24,4 +24,6 @@ void my_basename_no_suffix(const char *file, char*dest);
 /*  "dir/base.suf" -> "dir/base" */
 void my_no_suffix(const char *file, char*dest);
 
+char * my_strdup(const char *s);
+
 #endif

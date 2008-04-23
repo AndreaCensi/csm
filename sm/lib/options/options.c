@@ -280,18 +280,30 @@ void display_table(FILE*f,  char**table, int rows, int columns, int padding) {
 void options_dump(struct option * options, FILE*f, int write_desc) {
 	int n; for (n=0;options_valid(options+n);n++);
 
-	char**table = malloc(sizeof(char*)*n*3);
+	int nrows = n + 2;
+	char**table = malloc(sizeof(char*)*nrows*3);
 
+	int row = 0;
+	table[row*3 +0] = strdup_("Option name");
+	table[row*3 +1] = strdup_("Default");
+	table[row*3 +2] = strdup_("Description");
+	row++;
+	table[row*3 +0] = strdup_("-----------");
+	table[row*3 +1] = strdup_("-------");
+	table[row*3 +2] = strdup_("-----------");
+	row++;
+	
 	int i;
 	for (i=0;i<n;i++) {
-		table[i*3 +0] = strdup_(options[i].name);
-		table[i*3 +1] = strdup_(options_value_as_string(options+i));
-		table[i*3 +2] = write_desc ? strdup_(options[i].desc) : strdup_(""); 
+		table[row*3 +0] = strdup_(options[i].name);
+		table[row*3 +1] = strdup_(options_value_as_string(options+i));
+		table[row*3 +2] = write_desc ? strdup_(options[i].desc) : strdup_(""); 
+		row ++;
 	}
 
-	display_table(f, table, n, 3, 2);
+	display_table(f, table, nrows, 3, 2);
 
-	int a; for(a=0;a<n*3;a++) free((void*)table[a]);
+	int a; for(a=0;a<nrows*3;a++) free((void*)table[a]);
 	free((void*)table);
 }
 
