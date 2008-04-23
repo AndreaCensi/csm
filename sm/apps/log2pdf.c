@@ -82,7 +82,7 @@ int main(int argc, const char* argv[]) {
 	if(strlen(p.output_filename)==0) {
 		char buf[PATH_MAX];
 		sprintf(buf, "%s.pdf", p.input_filename);
-		p.output_filename = strdup(buf);
+		p.output_filename = my_strdup(buf);
 		sm_info("Writing on file '%s'.\n", p.output_filename);
 	}
 	
