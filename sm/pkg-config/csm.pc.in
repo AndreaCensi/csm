@@ -7,4 +7,4 @@ Description: The C(anonical) Scan Matcher
 Requires: gsl
 Version: @csm_version@
 Libs: @csm_link_flags@ -L${libdir} -lcsm-static 
-Cflags: @csm_c_flags@ -I${includedir} @OROCOS_COMPONENTS_CFLAGS@
+Cflags: @csm_c_flags@ -I${includedir}
