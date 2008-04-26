@@ -129,9 +129,13 @@ void jo_write_as_matlab(JO jo, FILE*out) {
 		case json_type_string:
 			fprintf(out, "'");
 			const char* s = json_object_get_string(jo);
-			while(*s) 
-				if(*s==39) fputc('"', out);
-				else fputc(*s, out);
+			while(*s) {
+				if(*s==39) 
+				fputc('"', out);
+				else 
+				fputc(*s, out);
+				s++;
+			}
 				
 			fprintf(out, "'");
 			return;
