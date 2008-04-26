@@ -154,10 +154,15 @@ int options_parse_stream(struct option*ops, const char*pwd, FILE*file) {
 
 int options_parse_file(struct option*ops, const char*pwd, const char*filename) {
 	char concat[PATH_MAX*2+1];
-	strcpy(concat, pwd);
-	strcat(concat, "/");
-	strcat(concat, filename);
 
+	if(filename[0] != '/') {
+		strcpy(concat, pwd);
+		strcat(concat, "/");
+		strcat(concat, filename);
+	} else {
+		strcpy(concat, filename);	
+	}
+	
 	char resolved_path[PATH_MAX];
 	char *resolved;
 	if(! (resolved = realpath(concat, resolved_path))) {
