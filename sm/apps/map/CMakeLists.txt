@@ -13,7 +13,7 @@ IF(${CSM_FOUND})
 	LINK_DIRECTORIES(${CSM_LIBRARY_DIRS})
 
 ELSE(${CSM_FOUND})	
-	MESSAGE(SEND_ERROR, "CSM not found.")
+	MESSAGE(FATAL_ERROR "CSM not found. Check that the environment variable PKG_CONFIG_PATH includes the path containing the file 'csm.pc'.")
 ENDIF(${CSM_FOUND})		
 
 

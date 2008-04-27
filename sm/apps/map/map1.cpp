@@ -2,7 +2,7 @@
 #include "pan.h"
 #include <options/options.h>
 
-struct {
+struct myparams {
 	const char * file_in;
 	const char * file_out;
 	const char * file_out_stats;
