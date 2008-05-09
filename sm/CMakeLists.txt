@@ -114,7 +114,7 @@ ENDIF(CAIRO_FOUND)
 
 
 ADD_EXECUTABLE(test_math_utils_sanity csm/test_math_utils_sanity.c)
-TARGET_LINK_LIBRARIES(test_math_utils_sanity csm ${GSL_LIBRARIES})
+TARGET_LINK_LIBRARIES(test_math_utils_sanity csm-static ${GSL_LIBRARIES})
 
 ENABLE_TESTING()
 ADD_TEST(test_math_utils_sanity test_math_utils_sanity)
