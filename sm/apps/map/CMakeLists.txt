@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 2.4)
+
 project(map)
 
 
@@ -18,7 +20,6 @@ ENDIF(${CSM_FOUND})
 
 
 
-# the variable "qtproject_SRCS" contains all .cpp files of this project
 set(map1_SRCS
 	map1.cpp
 )

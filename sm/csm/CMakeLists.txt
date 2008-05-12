@@ -45,7 +45,7 @@ ENDIF(CAIRO_FOUND)
 # 	ARCHIVE DESTINATION lib
 # 	LIBRARY DESTINATION lib)
 # 
-# FILE(GLOB csm_headers "*.h")
-# foreach(header ${csm_headers})
-# 	INSTALL(FILES ${header} DESTINATION include/csm)
-# endforeach(header ${csm_headers})
+FILE(GLOB csm_headers "*.h")
+foreach(header ${csm_headers})
+ 	INSTALL(FILES ${header} DESTINATION include/csm)
+endforeach(header ${csm_headers})
