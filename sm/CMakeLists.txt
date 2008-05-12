@@ -1,6 +1,6 @@
-set(csm_c_flags "")
+cmake_minimum_required(VERSION 2.4)
+#set(csm_c_flags "")
 
-	
 SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 
 FIND_PACKAGE(GSL REQUIRED)
@@ -12,7 +12,8 @@ IF(GSL_FOUND)
 	MESSAGE(STATUS "   GSL_LINK_DIRECTORIES = ${GSL_LINK_DIRECTORIES}")
 	
  	set(csm_c_flags "${csm_c_flags} -I${GSL_INCLUDE_DIR}")
-	set(csm_link_flags "${csm_link_flags} -L${GSL_LINK_DIRECTORIES} ${GSL_LIBRARIES}")
+#	set(csm_link_flags "${csm_link_flags} -L${GSL_LINK_DIRECTORIES} ${GSL_LIBRARIES}")
+	set(csm_link_flags "-L${GSL_LINK_DIRECTORIES} ${GSL_LIBRARIES}")
 	
 ELSE(GSL_FOUND)
 	MESSAGE(FATAL_ERROR "GSL not found.")
