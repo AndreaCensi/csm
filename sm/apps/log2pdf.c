@@ -94,9 +94,7 @@ int main(int argc, const char* argv[]) {
 	}
 	sm_info("Using reference: %s.\n", ld_reference_to_string(p.use_reference));
 	
-	
-	log2pdf(&p);
-	return 0;
+	return !log2pdf(&p);
 }
 
 
