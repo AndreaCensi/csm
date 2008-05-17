@@ -169,12 +169,13 @@ SET(csm_sources ${csm_sources} csm/laser_data_cairo.c)
 ENDIF(CAIRO_FOUND)
 
 ADD_LIBRARY(csm-static STATIC ${csm_sources})
-
 TARGET_LINK_LIBRARIES(csm-static ${csm_link_flags})
-
-#ADD_EXECUTABLE(test-static test.c)
-#TARGET_LINK_LIBRARIES(test-static csm-static)
-
 INSTALL(TARGETS csm-static ARCHIVE DESTINATION lib)
+
+ADD_LIBRARY(csm SHARED ${csm_sources})
+TARGET_LINK_LIBRARIES(csm ${csm_link_flags})
+INSTALL(TARGETS csm ARCHIVE DESTINATION lib LIBRARY DESTINATION lib)
+
+
 
 SUBDIRS(pkg-config)
