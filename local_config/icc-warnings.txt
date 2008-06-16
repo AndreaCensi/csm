@@ -1,0 +1,216 @@
+/home/acensi/src/csm/csm/sm/csm/icp/icp.c(3): remark #869: parameter "file" was never referenced
+  void sm_journal_open(const char* file) {
+                                   ^
+
+/home/acensi/src/csm/csm/sm/csm/laser_data_json.c(97): remark #1572: floating-point equality and inequality comparisons are unreliable
+  	int i; for(i=0;i<n;i++) if(v[i]==v[i]) return 0;
+  	                                 ^
+
+/home/acensi/src/csm/csm/sm/csm/logging.c(20): remark #593: parameter "msg" was set but never used
+  void sm_debug(const char *msg, ...)
+                            ^
+
+/home/acensi/src/csm/csm/sm/csm/math_utils.c(76): remark #1572: floating-point equality and inequality comparisons are unreliable
+  	return v == v ? 0 : 1;
+  	            ^
+
+/home/acensi/src/csm/csm/sm/lib/gpc/gpc.c(33): remark #869: parameter "x0" was never referenced
+  	const double*x0, const double *cov_x0,
+  	             ^
+
+/home/acensi/src/csm/csm/sm/lib/gpc/gpc.c(33): remark #869: parameter "cov_x0" was never referenced
+  	const double*x0, const double *cov_x0,
+  	                               ^
+
+/home/acensi/src/csm/csm/sm/lib/gpc/gpc_utils.c(70): remark #1572: floating-point equality and inequality comparisons are unreliable
+  		if( (z[2*i+1]==0) && (z[2*i]>lambda))
+  		               ^
+
+/home/acensi/src/csm/csm/sm/lib/json-c/debug.c(50): warning #266: function "vsyslog" declared implicitly
+  	  vsyslog(LOG_ERR, msg, ap);
+  	  ^
+
+/home/acensi/src/csm/csm/sm/lib/json-c/debug.c(65): warning #266: function "vsyslog" declared implicitly
+  		vsyslog(LOG_DEBUG, msg, ap);
+  		^
+
+/home/acensi/src/csm/csm/sm/lib/json-c/debug.c(78): warning #266: function "vsyslog" declared implicitly
+  		vsyslog(LOG_ERR, msg, ap);
+  		^
+
+/home/acensi/src/csm/csm/sm/lib/json-c/debug.c(90): warning #266: function "vsyslog" declared implicitly
+  		vsyslog(LOG_INFO, msg, ap);
+  		^
+
+/home/acensi/src/csm/csm/sm/lib/json-c/json_more_utils.c(184): remark #1572: floating-point equality and inequality comparisons are unreliable
+  	return (v == v) ?  /* NAN is null */
+  	             ^
+
+/home/acensi/src/csm/csm/sm/lib/json-c/json_object.c(271): warning #266: function "strdup" declared implicitly
+    lh_table_insert(this->o.c_object, strdup(key), val);
+                                      ^
+
+/home/acensi/src/csm/csm/sm/lib/json-c/json_object.c(271): warning #167: argument of type "const char *" is incompatible with parameter of type "void *"
+    lh_table_insert(this->o.c_object, strdup(key), val);
+                                             ^
+
+/home/acensi/src/csm/csm/sm/lib/json-c/json_object.c(312): remark #1572: floating-point equality and inequality comparisons are unreliable
+      return (this->o.c_double != 0);
+                                  ^
+
+/home/acensi/src/csm/csm/sm/lib/json-c/json_tokener.c(334): remark #810: conversion from "unsigned int" to "unsigned char" may lose significant bits
+  	    utf_out[0] = tok->ucs_char;
+  	               ^
+
+/home/acensi/src/csm/csm/sm/lib/json-c/json_tokener.c(337): remark #810: conversion from "unsigned int" to "unsigned char" may lose significant bits
+  	    utf_out[0] = 0xc0 | (tok->ucs_char >> 6);
+  	               ^
+
+/home/acensi/src/csm/csm/sm/lib/json-c/json_tokener.c(338): remark #810: conversion from "unsigned int" to "unsigned char" may lose significant bits
+  	    utf_out[1] = 0x80 | (tok->ucs_char & 0x3f);
+  	               ^
+
+/home/acensi/src/csm/csm/sm/lib/json-c/json_tokener.c(341): remark #810: conversion from "unsigned int" to "unsigned char" may lose significant bits
+  	    utf_out[0] = 0xe0 | (tok->ucs_char >> 12);
+  	               ^
+
+/home/acensi/src/csm/csm/sm/lib/json-c/json_tokener.c(342): remark #810: conversion from "unsigned int" to "unsigned char" may lose significant bits
+  	    utf_out[1] = 0x80 | ((tok->ucs_char >> 6) & 0x3f);
+  	               ^
+
+/home/acensi/src/csm/csm/sm/lib/json-c/json_tokener.c(343): remark #810: conversion from "unsigned int" to "unsigned char" may lose significant bits
+  	    utf_out[2] = 0x80 | (tok->ucs_char & 0x3f);
+  	               ^
+
+/home/acensi/src/csm/csm/sm/lib/json-c/json_tokener.c(451): warning #266: function "strdup" declared implicitly
+  	obj_field_name = strdup(tok->pb->buf);
+  	                 ^
+
+/home/acensi/src/csm/csm/sm/lib/json-c/linkhash.c(170): remark #111: statement is unreachable
+  	return NULL;
+  	^
+
+/home/acensi/src/csm/csm/sm/lib/json-c/printbuf.c(122): warning #266: function "vasprintf" declared implicitly
+      if((size = vasprintf(&t, msg, ap)) == -1) return -1;
+                 ^
+
+/home/acensi/src/csm/csm/sm/lib/gpc/gpc.c(33): remark #869: parameter "x0" was never referenced
+  	const double*x0, const double *cov_x0,
+  	             ^
+
+/home/acensi/src/csm/csm/sm/lib/gpc/gpc.c(33): remark #869: parameter "cov_x0" was never referenced
+  	const double*x0, const double *cov_x0,
+  	                               ^
+
+/home/acensi/src/csm/csm/sm/lib/gpc/gpc_utils.c(70): remark #1572: floating-point equality and inequality comparisons are unreliable
+  		if( (z[2*i+1]==0) && (z[2*i]>lambda))
+  		               ^
+
+/home/acensi/src/csm/csm/sm/lib/json-c/debug.c(50): warning #266: function "vsyslog" declared implicitly
+  	  vsyslog(LOG_ERR, msg, ap);
+  	  ^
+
+/home/acensi/src/csm/csm/sm/lib/json-c/debug.c(65): warning #266: function "vsyslog" declared implicitly
+  		vsyslog(LOG_DEBUG, msg, ap);
+  		^
+
+/home/acensi/src/csm/csm/sm/lib/json-c/debug.c(78): warning #266: function "vsyslog" declared implicitly
+  		vsyslog(LOG_ERR, msg, ap);
+  		^
+
+/home/acensi/src/csm/csm/sm/lib/json-c/debug.c(90): warning #266: function "vsyslog" declared implicitly
+  		vsyslog(LOG_INFO, msg, ap);
+  		^
+
+/home/acensi/src/csm/csm/sm/lib/json-c/json_object.c(271): warning #266: function "strdup" declared implicitly
+    lh_table_insert(this->o.c_object, strdup(key), val);
+                                      ^
+
+/home/acensi/src/csm/csm/sm/lib/json-c/json_object.c(271): warning #167: argument of type "const char *" is incompatible with parameter of type "void *"
+    lh_table_insert(this->o.c_object, strdup(key), val);
+                                             ^
+
+/home/acensi/src/csm/csm/sm/lib/json-c/json_object.c(312): remark #1572: floating-point equality and inequality comparisons are unreliable
+      return (this->o.c_double != 0);
+                                  ^
+
+/home/acensi/src/csm/csm/sm/lib/json-c/json_tokener.c(334): remark #810: conversion from "unsigned int" to "unsigned char" may lose significant bits
+  	    utf_out[0] = tok->ucs_char;
+  	               ^
+
+/home/acensi/src/csm/csm/sm/lib/json-c/json_tokener.c(337): remark #810: conversion from "unsigned int" to "unsigned char" may lose significant bits
+  	    utf_out[0] = 0xc0 | (tok->ucs_char >> 6);
+  	               ^
+
+/home/acensi/src/csm/csm/sm/lib/json-c/json_tokener.c(338): remark #810: conversion from "unsigned int" to "unsigned char" may lose significant bits
+  	    utf_out[1] = 0x80 | (tok->ucs_char & 0x3f);
+  	               ^
+
+/home/acensi/src/csm/csm/sm/lib/json-c/json_tokener.c(341): remark #810: conversion from "unsigned int" to "unsigned char" may lose significant bits
+  	    utf_out[0] = 0xe0 | (tok->ucs_char >> 12);
+  	               ^
+
+/home/acensi/src/csm/csm/sm/lib/json-c/json_tokener.c(342): remark #810: conversion from "unsigned int" to "unsigned char" may lose significant bits
+  	    utf_out[1] = 0x80 | ((tok->ucs_char >> 6) & 0x3f);
+  	               ^
+
+/home/acensi/src/csm/csm/sm/lib/json-c/json_tokener.c(343): remark #810: conversion from "unsigned int" to "unsigned char" may lose significant bits
+  	    utf_out[2] = 0x80 | (tok->ucs_char & 0x3f);
+  	               ^
+
+/home/acensi/src/csm/csm/sm/lib/json-c/json_tokener.c(451): warning #266: function "strdup" declared implicitly
+  	obj_field_name = strdup(tok->pb->buf);
+  	                 ^
+
+/home/acensi/src/csm/csm/sm/lib/json-c/linkhash.c(170): remark #111: statement is unreachable
+  	return NULL;
+  	^
+
+/home/acensi/src/csm/csm/sm/lib/json-c/printbuf.c(122): warning #266: function "vasprintf" declared implicitly
+      if((size = vasprintf(&t, msg, ap)) == -1) return -1;
+                 ^
+
+/home/acensi/src/csm/csm/sm/lib/json-c/json_more_utils.c(184): remark #1572: floating-point equality and inequality comparisons are unreliable
+  	return (v == v) ?  /* NAN is null */
+  	             ^
+
+/home/acensi/src/csm/csm/sm/csm/laser_data_json.c(97): remark #1572: floating-point equality and inequality comparisons are unreliable
+  	int i; for(i=0;i<n;i++) if(v[i]==v[i]) return 0;
+  	                                 ^
+
+/home/acensi/src/csm/csm/sm/csm/math_utils.c(76): remark #1572: floating-point equality and inequality comparisons are unreliable
+  	return v == v ? 0 : 1;
+  	            ^
+
+/home/acensi/src/csm/csm/sm/csm/logging.c(20): remark #593: parameter "msg" was set but never used
+  void sm_debug(const char *msg, ...)
+                            ^
+
+/home/acensi/src/csm/csm/sm/csm/icp/icp.c(3): remark #869: parameter "file" was never referenced
+  void sm_journal_open(const char* file) {
+                                   ^
+
+/home/acensi/src/csm/csm/sm/csm/math_utils_test.c(12): remark #177: variable "A" was declared but never referenced
+  	gsl_vector * A = vector_from_array(2,a);
+  	             ^
+
+/home/acensi/src/csm/csm/sm/csm/math_utils_test.c(13): remark #177: variable "B" was declared but never referenced
+  	gsl_vector * B = vector_from_array(2,b);
+  	             ^
+
+/home/acensi/src/csm/csm/sm/lib/json-c/test1.c(167): remark #1599: declaration hides variable "my_array" (declared at line 11)
+  	struct json_object *my_array = json_object_new_array();
+  	                    ^
+
+/home/acensi/src/csm/csm/sm/lib/json-c/test1.c(168): remark #1599: declaration hides variable "i" (declared at line 13)
+  	int i; for(i=0;i<20;i++) {
+  	    ^
+
+/home/acensi/src/csm/csm/sm/lib/json-c/test1.c(7): remark #593: parameter "argc" was set but never used
+  int main(int argc, char **argv)
+               ^
+
+/home/acensi/src/csm/csm/sm/lib/json-c/test1.c(7): remark #593: parameter "argv" was set but never used
+  int main(int argc, char **argv)
+                            ^
+
