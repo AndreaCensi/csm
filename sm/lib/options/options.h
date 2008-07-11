@@ -15,6 +15,7 @@ extern "C" {
 
 enum option_type { OPTION_STRING=0, OPTION_INT=1, OPTION_DOUBLE=2 };
  
+
 struct option {
 	/** Name of the option (or 0 if this is the last element). */
 	const char * name;

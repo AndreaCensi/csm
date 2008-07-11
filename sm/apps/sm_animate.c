@@ -33,6 +33,8 @@ typedef struct {
 	
 	/* Padding, in meters, to be added */
 	double padding;
+	
+	int write_info;
 } anim_params ;
 
 int draw_animation( anim_params* p, JO jo, const char*filename);
@@ -50,6 +52,7 @@ int main(int argc, const char** argv)
 	options_string(ops, "in", &p.file_input, "stdin", "Input file (defaults to stdin)");
 	options_string(ops, "out", &p.file_output, "sm_animate_%02d.pdf", "Output file ");
 
+	options_int(ops, "write_info", &p.write_info, 0, "Writes informations and statistics in the picture.");
 	options_int(ops, "max_iterations", &p.max_iterations, 10, "Maximum number of iterations");
 	options_int(ops, "zoom_ray", &p.zoom_ray, -1, "If >= 0, the action is zoomed on a particular ray.");
 	options_int(ops, "width_pt", &p.width_pt, 500, "Maximum width, in points, of the PDF.");
@@ -61,7 +64,7 @@ int main(int argc, const char** argv)
 	ls_add_options(&(p.corr), ops, "corr_", "");
 	
 	if(!options_parse_args(ops, argc, argv)) {
-		sm_info("Draws ICP animation. It reads the output of sm2 with the 'file_jj' witch. \n\nUsage:\n");
+		sm_info("Draws ICP animation. It reads the output created by sm2 when given the 'file_jj' switch. \n\nUsage:\n");
 		options_print_help(ops, stderr);
 		return -1;
 	}
@@ -138,7 +141,7 @@ int draw_animation(anim_params* p, JO jo, const char*filename) {
 	
 	int niterations = json_object_array_length(iterations);
 	if(niterations>p->max_iterations) niterations = p->max_iterations;
-	sm_error("Displaying %d iterations.\n", niterations);
+	sm_info("Displaying %d iterations.\n", niterations);
 
 	int it;
 	for(it=0;it<niterations;it++) {
@@ -179,19 +182,21 @@ int draw_animation(anim_params* p, JO jo, const char*filename) {
 
 		cairo_restore(cr);
 
-		if(0) {
-		cairo_save(cr);
-			cairo_identity_matrix(cr);
-			cairo_set_font_size (cr, 0.1);
-			cairo_select_font_face (cr, "Sans",
-			    CAIRO_FONT_SLANT_NORMAL,
-			    CAIRO_FONT_WEIGHT_NORMAL);
+		if(p->write_info) {
+			cairo_save(cr);
+				cairo_identity_matrix(cr);
+				cairo_set_font_size (cr, 20);
+				cairo_select_font_face (cr, "Sans",
+				    CAIRO_FONT_SLANT_NORMAL,
+				    CAIRO_FONT_WEIGHT_NORMAL);
 
-			char text[100];
-			sprintf(text, "Iteration #%d: %s", it, friendly_pose(x_old));
-			cairo_move_to(cr,  0.0, 0.0 );
-			cairo_show_text(cr, text);
-		cairo_restore(cr);
+				char text[100];
+				sprintf(text, "Iteration #%d: x_old: %s", it, friendly_pose(x_old));
+				cairo_move_to(cr,  0.0, -20.0 );
+				cairo_show_text(cr, text);
+				
+				sm_info("%s\n",text);
+			cairo_restore(cr);
 		}
 	
 		cairo_show_page (cr);

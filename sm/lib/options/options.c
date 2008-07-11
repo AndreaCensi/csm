@@ -66,6 +66,11 @@ int options_parse_args(struct option*ops, int argc, const char* argv[]) {
 			exit(0);
 		}
 		
+		if(!strcmp("help",name) || !strcmp("h",name) ) {
+			options_print_help(ops, stdout);
+			exit(0);
+		}
+		
 		if(!strcmp("config", name)) {
 			if(i>=argc-1) {
 				fprintf(stderr, "Please specify config file.\n");
@@ -313,6 +318,13 @@ void options_dump(struct option * options, FILE*f, int write_desc) {
 }
 
 void options_print_help(struct option * options, FILE*f) {
+	fprintf(f, 
+	"Generic options: \n"
+	"  -help          Displays this help.\n"
+	"  -config_dump   Dumps the configuration on the standard output. \n"
+	"  -config FILE   Loads a config file in the format used by config_dump.\n"
+	"\n");
+	
 	options_dump(options, f, 1);
 }
 
