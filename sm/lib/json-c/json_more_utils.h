@@ -18,6 +18,8 @@ typedef struct json_object* JO;
 #define jo_new        json_object_new_object
 #define jo_array_add  json_object_array_add
 #define jo_array_get  json_object_array_get_idx
+#define jo_array_length json_object_array_length
+#define jo_get_string json_object_get_string 
 
 /** Reads a JSON object from stream.
     Returns 0 on error. XXX: does not support unicode. */
@@ -30,22 +32,26 @@ int json_stream_skip(FILE*);
 JO jo_new_double_array(const double *v, int n);
 JO jo_new_int_array   (const int    *v, int n);
 
-void jo_add_double       (JO, const char*name, double v);
-void jo_add_int          (JO, const char*name, int    v);
-void jo_add_double_array (JO, const char*name, const double *v, int n);
-void jo_add_int_array    (JO, const char*name, const int    *v, int n);
+void jo_add_double       (JO parent, const char*name, double v);
+void jo_add_int          (JO parent, const char*name, int    v);
+void jo_add_double_array (JO parent, const char*name, const double *v, int n);
+void jo_add_int_array    (JO parent, const char*name, const int    *v, int n);
 
-void jo_add_string       (JO, const char*name, const char*v);
+void jo_add_string       (JO parent, const char*name, const char*v);
 
 /** Return 0 if there isn't a field called 'name' */
-int jo_read_int          (JO, const char*name, int*p) ;
-int jo_read_double       (JO, const char*name, double*p);
+int jo_read_int          (JO parent, const char*name, int*p) ;
+int jo_read_double       (JO parent, const char*name, double*p);
 
-/* Returns 0 if there isn't a file called "name", or it's not an array, or 
+/* Returns 0 if there isn't a field called "name", or it's not an array, or 
 its length is not at least "n". Else, it returns 1. */
-int jo_read_double_array (JO, const char*name, double *p, int n, double when_null);
-int jo_read_int_array    (JO, const char*name, int    *p, int n, int    when_null);
-int jo_read_string       (JO, const char*name, char*v, size_t max_len);
+int jo_read_double_array (JO parent, const char*name, double *p, int n, double when_null);
+int jo_read_int_array    (JO parent, const char*name, int    *p, int n, int    when_null);
+int jo_read_string       (JO parent, const char*name, char*v, size_t max_len);
+
+
+/* Returns 0 if jo is not a double array, or its length is not n */
+int jo_read_from_double_array (JO array, double *p, int n, double when_null);
 
 
 int json_to_int(JO jo, int*ptr);

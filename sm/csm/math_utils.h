@@ -58,6 +58,13 @@ double dist_to_segment_d(const double a[2], const double b[2], const double x[2]
 /** Same thing as dist_to_segment_d(), but squared */
 double dist_to_segment_squared_d(const double a[2], const double b[2], const double x[2]);
 
+/* Executes ray tracing for a segment. p0 and p1 are the segments extrema, eye is the position
+of the eye, and direction is the direction of the ray coming out of the eye. Returns true
+if the ray intersects the segment, and in that case *range contains the length of the ray. */
+int segment_ray_tracing(const double p0[2], const double p1[2], const double eye[2], double direction, double*range);
+
+double segment_alpha(const double p0[2], const double p1[2]);
+
 /** A function to print poses and covariances in a friendly way */
 const char* friendly_pose(double*pose);
 

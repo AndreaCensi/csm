@@ -123,6 +123,11 @@ int jo_read_double_array(JO s, const char*name, double*p, int n, double when_nul
 		return 0;
 	}
 	
+	return jo_read_from_double_array (jo, p, n, when_null);
+}
+
+/* Returns 0 if jo is not a double array, or its length is not n */
+int jo_read_from_double_array (JO jo, double *p, int n, double when_null) {
 	if(!json_object_is_type(jo, json_type_array)) {
 		mc_error("This is not an array: '%s'\n",json_object_to_json_string(jo));
 		return 0;
@@ -154,6 +159,9 @@ int jo_read_double_array(JO s, const char*name, double*p, int n, double when_nul
 	}
 	return 1;
 }
+
+
+
 
 int jo_read_int_array(JO s, const char*name, int*p, int n, int when_null) {
 	int size, i;
