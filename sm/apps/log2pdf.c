@@ -83,7 +83,7 @@ int main(int argc, const char* argv[]) {
 		char buf[PATH_MAX];
 		sprintf(buf, "%s.pdf", p.input_filename);
 		p.output_filename = my_strdup(buf);
-		sm_info("Writing on file '%s'.\n", p.output_filename);
+/*		sm_info("Writing on file '%s'.\n", p.output_filename);*/
 	}
 	
 	p.use_reference = ld_string_to_reference(p.use);
@@ -92,7 +92,7 @@ int main(int argc, const char* argv[]) {
 			"Use one in 'odometry','estimate','true_pose'.\n", p.use);
 		return -1;
 	}
-	sm_info("Using reference: %s.\n", ld_reference_to_string(p.use_reference));
+/*	sm_info("Using reference: %s.\n", ld_reference_to_string(p.use_reference));*/
 	
 	return !log2pdf(&p);
 }
@@ -117,7 +117,7 @@ int log2pdf(log2pdf_params *p) {
 		return 0;
 	}
 	
-	sm_info("Read map: %d scans in total.\n", nscans);
+	sm_debug("Read map: %d scans in total.\n", nscans);
 
 	/** Let's find the bounding box for the map */
 	double bb_min[2], bb_max[2];
@@ -130,8 +130,9 @@ int log2pdf(log2pdf_params *p) {
 	bb_max[1] += p->padding;
 	
 
-	sm_info("Bounding box: %f %f -- %f %f.\n", bb_min[0], bb_min[1],
+	sm_debug("Bounding box: %f %f -- %f %f.\n", bb_min[0], bb_min[1],
 		bb_max[0], bb_max[1]);
+
 		
 	/* Create PDF surface and setup paper size and transformations */
 	int max_width_points = p->dimension;
