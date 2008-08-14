@@ -93,7 +93,7 @@ int main(int argc, const char * argv[]) {
 
 
 void jo_write_as_matlab(JO jo, FILE*out) {
-	if(!jo) { fprintf(out, "NaN"); } 
+	if(!jo) { fprintf(out, "NaN"); return; } 
 	
 	switch(json_object_get_type(jo)) {
 		case json_type_null: 
@@ -194,6 +194,12 @@ int jo_is_numeric_array(JO jo) {
 	int len = json_object_array_length(jo);
 	for(int i=0;i<len;i++){
 		JO elem = json_object_array_get_idx(jo, i);
+
+		/* I consider null elements as numeric values because they can be
+		   converted into NaN */
+		if(elem==0)
+			continue;
+			
 		switch(json_object_get_type(elem)) {
 			case json_type_null: 
 			case json_type_boolean:
