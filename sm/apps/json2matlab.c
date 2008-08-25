@@ -17,17 +17,44 @@ int jo_is_numeric_array(JO jo);
 void jo_write_as_matlab_object(JO jo, FILE*out);
 
 
+const char * banner = 
+"Converts JSON stream to Matlab file. \n"
+"There are three usages: \n"
+" 1) with only one parameter, \n"
+"    $ json2matlab dir/mydata.json \n"
+"    creates a Matlab function 'mydata' inside the file 'dir/mydata.m' \n"
+" 2) with two parameters, \n"
+"     $ json2matlab dir/mydata.json dir/out.m \n" 
+"    creates a Matlab function 'out' inside the file 'dir/out.m'. \n"
+" 3) otherwise, use the options switches. \n"
+" \n"
+" By default it creates a complete script of the kind:\n"
+" \n"
+"   function res = function_name()\n"
+"      res = \n"
+"		{ ...}\n"
+" \n"
+" If complete_script is set to 0, it just outputs the meat: \n"
+" \n"
+"		{ ...}\n"
+" \n";
+
+
 int main(int argc, const char * argv[]) {
 	sm_set_program_name(argv[0]);
 
 	const char * input_filename;
 	const char * out_filename;
 	const char * function;
+	int complete_script;
+	
+	options_banner(banner);
 	
 	struct option* ops = options_allocate(5);
 	options_string(ops, "in", &input_filename, "stdin", "input file (JSON)");
 	options_string(ops, "out", &out_filename, "stdout", "output file (MATLAB)");
 	options_string(ops, "function", &function, "", "Matlab function name (if empty, use basename of out)");
+	options_int(ops, "complete_script", &complete_script, 1, "Write complete script 'function  res = ...'");
 	
 	if(argc == 2 && (argv[1][0] != '-')) { 
 		/* one parameter */
@@ -42,22 +69,9 @@ int main(int argc, const char * argv[]) {
 		input_filename = argv[1]; 
 		out_filename = argv[2];
 	} else {
-		if(!options_parse_args(ops, argc, argv)) {
-			sm_info(
-			"Converts JSON stream to Matlab file. \n"
-			"There are three usages: \n"
-			" 1) with only one parameter, \n"
-			"    $ json2matlab dir/mydata.json \n"
-			"    creates a Matlab function 'mydata' inside the file 'dir/mydata.m' \n"
-			" 2) with two parameters, \n"
-			"     $ json2matlab dir/mydata.json dir/out.m \n" 
-			"    creates a Matlab function 'out' inside the file 'dir/out.m'. \n"
-			" 3) otherwise, use the options switches below: \n"
-		
-				"\n\nOptions:\n", (char*)argv[0] );
-			options_print_help(ops, stderr);
+		/* FIXME help not shown */
+		if(!options_parse_args(ops, argc, argv))
 			return -1;
-		}
 	}
 
 	if(!strcmp(function,"")) {
@@ -74,8 +88,10 @@ int main(int argc, const char * argv[]) {
 	FILE * in = open_file_for_reading(input_filename);
 	if(!in) return -3;
 	
-	fprintf(out, "function res = %s\n", function);
-	fprintf(out, " res = ... \n");
+	if(complete_script) {
+		fprintf(out, "function res = %s\n", function);
+		fprintf(out, " res = ... \n");
+	}
 	fprintf(out, " { ... \n\t");
 	
 	JO jo; 
@@ -173,6 +189,8 @@ void jo_write_as_matlab_object(JO jo, FILE*out) {
 
 
 int jo_is_numeric_matrix(JO jo) {
+	/* null is not a matrix */
+	if(!jo) return 0;
 	if(json_object_get_type(jo) != json_type_array) return 0;
 	int len = json_object_array_length(jo);
 	int ncolumns = -1;
@@ -190,6 +208,8 @@ int jo_is_numeric_matrix(JO jo) {
 }
 
 int jo_is_numeric_array(JO jo) {
+	/* null is not an array */
+	if(!jo) return 0;
 	if(json_object_get_type(jo) != json_type_array) return 0;
 	int len = json_object_array_length(jo);
 	for(int i=0;i<len;i++){

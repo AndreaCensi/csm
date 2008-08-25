@@ -9,6 +9,7 @@ struct sm1_params {
 	const char * file1;
 	const char * file2;
 	const char * file_jj;
+	const char * file_output;
 } p;
 
 
@@ -29,6 +30,7 @@ int main(int argc, const char*argv[]) {
 		"File with second series of scans (at pose2)");
 	options_string(ops, "file_jj", &p.file_jj, "",
 		"File for journaling -- if left empty, journal not open.");
+	options_string(ops, "out", &p.file_output, "stdout", "Output file (JSON structs)");
 	
 	sm_options(&params, ops);
 	if(!options_parse_args(ops, argc, argv)) {
@@ -41,6 +43,10 @@ int main(int argc, const char*argv[]) {
 	FILE * file2 = !strcmp(p.file1, p.file2) ? file1 
 		: open_file_for_reading(p.file2);
 	if(!file1 || !file2) return -1;
+	
+	
+	FILE * out = open_file_for_writing(p.file_output);
+	if(!out) return -2;
 	
 	if(strcmp(p.file_jj, "")) {
 		FILE * jj = open_file_for_writing(p.file_jj);
@@ -61,6 +67,7 @@ int main(int argc, const char*argv[]) {
 		/* o minus */ params.laser_ref->odometry,
 			/* = */ params.first_guess);
 
+		/* TODO: add switch */
 /*			sm_gpm(&params, &result); */
 		sm_icp(&params,&result); 
 		
@@ -75,13 +82,17 @@ int main(int argc, const char*argv[]) {
 			jo_add_double_array(jo, "true_x", true_x, 3);
 			jo_add_double_array(jo, "true_e", true_e, 3);
 			
-		puts(json_object_to_json_string(jo));
-		puts("\n");
+		fputs(json_object_to_json_string(jo), out);
+		fputs("\n",out);
 		
 		jo_free(jo);
 		ld_free(ld1);
 		ld_free(ld2);
 	}
+	
+	fclose(file1);
+	fclose(file2);
+	fclose(out);
 	
 	return 0;
 /*
