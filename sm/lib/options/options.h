@@ -44,6 +44,10 @@ struct option {
 
 
 /** User-friendly interface */
+
+/* Sets the banner for the help message. (pointer is kept) */
+void options_banner(const char*message);
+
 struct option* options_allocate(int n);
 
 void options_int    (struct option*, const char* name,  

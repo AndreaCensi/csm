@@ -11,6 +11,8 @@
 #include "options.h"
 
 /** User-friendly interface */
+
+
 struct option* options_allocate(int n) {
 	n += 2; /* better safe than sorry */
 	struct option* ops = malloc(sizeof(struct option)*n);

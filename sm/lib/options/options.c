@@ -27,6 +27,12 @@
 
 #include "options.h"
 
+const char * options_banner_string = "";
+
+void options_banner(const char*message) {
+	options_banner_string = message;
+}
+
 /** Our version of strdup. */
 char * strdup_(const char *s) {
 	size_t len = strlen(s) + 1; /* null byte */
@@ -85,7 +91,7 @@ int options_parse_args(struct option*ops, int argc, const char* argv[]) {
 		
 		struct option * o;
 		if(0 == (o =options_find(ops, name)) ) {
-			fprintf(stderr, "Option '%s' not found.\n", name);
+			fprintf(stderr, "Option '%s' not found (use -help to get list of options).\n", name);
 			if(!options_tolerant) return 0;
 		}
 
@@ -136,12 +142,23 @@ int options_parse_stream(struct option*ops, const char*pwd, FILE*file) {
 			continue;
 		}
 		if(!*line) continue;
+		/* Here starts the name; later we put a terminating 0 */
 		const char * name = line;
+		/* name continus until nonspace char */
 		while(!isspace(*line)) line++;
+
 		char * value;
 		if(*line == 0) value = ""; else {
-			*line = 0; line++;
+			*line = 0; /* terminating 0 for name */
+			line++;
+			/* ignore spaces */
 			while(isspace(*line)) line++;
+			/* ignore possible "=" */
+			if(*line == '=') line++;
+			/* ignore spaces */
+			while(isspace(*line)) line++;
+
+			/* here starts the value */
 			value = line;
 			/* delete final spaces */
 			int len = strlen(value);
@@ -318,6 +335,7 @@ void options_dump(struct option * options, FILE*f, int write_desc) {
 }
 
 void options_print_help(struct option * options, FILE*f) {
+	fprintf(f, options_banner_string);
 	fprintf(f, 
 	"Generic options: \n"
 	"  -help          Displays this help.\n"
