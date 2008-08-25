@@ -9,7 +9,7 @@ def execute_cmd_verb(cmd, verbose, exit_on_error)
 	
 	if exit_on_error && $?.exitstatus != 0
 		$stderr.puts "\n\n\t command:\n\n\t#{cmd.inspect}\n\n\tFAILED, exit status = #{$?.exitstatus}\n\n"
-		exit($?.exitstatus)
+		exit($?.exitstatus || -1)
 	end
 	
 	$?.exitstatus
@@ -18,6 +18,10 @@ end
 def execute_cmd(m, exit_on_error=true); execute_cmd_verb(m, true, exit_on_error); end
 
 def search_cmd(program, additional_paths = nil)
+	if File.exists? program
+    return program
+  end
+  
 	path = ENV['PATH'].split(":") 
 	path.push File.dirname($0)
 	path.push Dir.pwd

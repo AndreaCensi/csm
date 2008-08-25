@@ -17,9 +17,6 @@ class Options
 	
 	
 	def populate(opts)
-		#		opts.banner = "Usage: maruku [options] [file1.md [file2.md ..."
-		#		opts.on("-v", "--[no-]verbose", "Run verbosely") do |v|
-		#			MaRuKu::Globals[:verbose] = v end
 
 		opts.on("--config FILE", "Load config from file") do |file|
 			load_config_from_file(file)
@@ -64,6 +61,7 @@ class Options
 	
 	RegComment = /^\s*\#/ 
 	RegOption  = /^\s*(\w+)\s*=?\s*(.+)$/ 
+	RegLoad    = /^\s*(?:<|source)\s*(.*)$/
 
 	def load_config_from_file(file)
 		load_config_from_string(File.open(file).read, File.dirname(file))
@@ -87,7 +85,7 @@ class Options
 				else
 					$stderr.puts "Unknown key #{name.inspect} (#{@hash.keys.inspect})"
 				end
-			elsif m = /^\s*<\s*(.*)$/.match(line)
+			elsif m = RegLoad.match(line)
 				filename = m[1]
 				filename = File.expand_path(File.join(dir, filename))
 				read_conf(File.open(filename), File.dirname(filename))
