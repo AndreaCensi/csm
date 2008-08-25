@@ -6,8 +6,13 @@
 
 #include "csm_all.h"
 
+int sm_debug_write_flag = 0;
+
 const char * sm_program_name = 0;
 
+void sm_debug_write(int flag) {
+	sm_debug_write_flag = flag;
+}
 
 char sm_program_name_temp[256];
 void sm_set_program_name(const char*name) {
@@ -32,8 +37,8 @@ void check_for_xterm_color() {
 #define XTERM_COLOR_RESET "\e[0m"
 
 #define XTERM_ERROR XTERM_COLOR_RED
+#define XTERM_DEBUG "\e[1;35;40m"
 
-#define CSM_DEBUG 
 
 void sm_error(const char *msg, ...)
 {
@@ -65,11 +70,17 @@ void sm_info(const char *msg, ...)
 	}
 	vfprintf(stderr, msg, ap);
 }
+
 void sm_debug(const char *msg, ...)
 {
+	if(!sm_debug_write_flag) return;
+	
 	check_for_xterm_color();
 	
-	#ifdef CSM_DEBUG
+	if(xterm_color_available)
+		fprintf(stderr, XTERM_DEBUG);
+	
+	
 	va_list ap;
 	va_start(ap, msg);
 	if(sm_program_name) {
@@ -77,7 +88,8 @@ void sm_debug(const char *msg, ...)
 		fputs(":dbg: ", stderr);
 	}
 	vfprintf(stderr, msg, ap);
-	#else
-	msg = 0;
-	#endif
+	
+	
+	if(xterm_color_available)
+		fprintf(stderr, XTERM_COLOR_RESET);
 }
