@@ -72,6 +72,9 @@ int main(int argc, const char** argv)
 		
 		double fov = deg2rad(p.fov_deg);
 		
+		ld->min_theta = -fov/2;
+		ld->max_theta = +fov/2;
+		
 		for(int i=0;i<ld->nrays;i++) {
 			ld->theta[i] = - fov/2 + fov * i / (ld->nrays-1);;
 			
