@@ -21,16 +21,12 @@
 #include "gpc.h"
 #include "gpc_utils.h"
 
-int gpc_solve(int K, const struct gpc_corr*c, double *x) {
-	return gpc_solve_valid(K,c,0,0,0,x);
-}
-
 #define M(matrix, rows, col) static gsl_matrix*matrix=0; if(!matrix) matrix = gsl_matrix_alloc(rows,col);
 /*#define MF(matrix) gsl_matrix_free(matrix)*/
 #define MF(matrix) /*gsl_matrix_free(matrix)*/
 
 
-int gpc_solve_valid(int K, const struct gpc_corr*c, const int*valid, 
+int gpc_solve(int K, const struct gpc_corr*c,
 	const double*x0, const double *cov_x0,
 	double *x_out) 
 {
@@ -48,7 +44,7 @@ int gpc_solve_valid(int K, const struct gpc_corr*c, const int*valid,
 	double d_g[4] = {0, 0, 0, 0};
 	int k;
 	for(k=0;k<K;k++) {
-		if(valid && !valid[k]) continue;
+		if(!c[k].valid) continue;
 		
 		double C00 = c[k].C[0][0];
 		double C01 = c[k].C[0][1];
@@ -201,30 +197,74 @@ int gpc_solve_valid(int K, const struct gpc_corr*c, const int*valid,
 		fprintf(stderr, "q = %f %f %f %f %f \n", q[4],  q[3],  q[2], q[1], q[0]);
 	}
 
-	double lambda;
-	
-	if(!poly_greatest_real_root(5,q,&lambda)) {
+	/*
+	double lambdas[4];
+	if(!poly_real_roots(5, q, lambdas)) {
 		fprintf(stderr, "Cannot solve polynomial.\n");
 		return 0;
 	}
+
+	double lambdas_error[4];
+	double lambdas_pose[4][3];
 	
-	if(TRACE_ALGO) {
-		fprintf(stderr, "lambda = %f \n", lambda);
-	}	
+	for(int i=0;i<4;i++) {
+		double lambda = lambdas[i];
+		
+		if(TRACE_ALGO) {
+			fprintf(stderr, "lambda = %f \n", lambda);
+		}	
+	
+		M(W,4,4); gsl_matrix_set_zero(W); gms(W,2,2,1.0); gms(W,3,3,1.0);
+		M(x,4,1);
+	
+		m_scale(2*lambda, W);
+		gsl_matrix_add(bigM,W);
+		m_inv(bigM, temp44);
+		m_mult(temp44, g, x);
+		m_scale(-1.0, x);
+	
+		lambdas_pose[i][0] = gmg(x,0,0);
+		lambdas_pose[i][1] = gmg(x,1,0);
+		lambdas_pose[i][2] = atan2(gmg(x,3,0),gmg(x,2,0));
+		
+		lambdas_error[i] = gpc_total_error(c, K, lambdas_pose[i]);
+	}
+	
+	int lowest_error = 0;
+	for(int i=0;i<4;i++) {
+		printf("#%d lambda=%lf error=%lf\n",i,lambdas[i],lambdas_error[i]);
+		if(lambdas_error[i] < lambdas_error[lowest_error])
+			lowest_error = i;
+	}
+	
+	double lr;
+	poly_greatest_real_root(5,q,&lr);
+	printf("Choose %d: lambda = %lf   bigger real root = %lf \n",lowest_error,lambdas[lowest_error],lr);
+	
+	x_out[0]=lambdas_pose[lowest_error][0];
+	x_out[1]=lambdas_pose[lowest_error][1];
+	x_out[2]=lambdas_pose[lowest_error][2];
+	*/
+	
+	double lambda;
+	if(!poly_greatest_real_root(5,q,&lambda)) return 0;
 	
 	M(W,4,4); gsl_matrix_set_zero(W); gms(W,2,2,1.0); gms(W,3,3,1.0);
 	M(x,4,1);
-	
+
 	m_scale(2*lambda, W);
 	gsl_matrix_add(bigM,W);
 	m_inv(bigM, temp44);
 	m_mult(temp44, g, x);
 	m_scale(-1.0, x);
-	
+
 	x_out[0] = gmg(x,0,0);
 	x_out[1] = gmg(x,1,0);
 	x_out[2] = atan2(gmg(x,3,0),gmg(x,2,0));
+
 	
+	
+		
 	if(TRACE_ALGO) {
 		fprintf(stderr, "x =  %f  %f %f deg\n", x_out[0], x_out[1],x_out[2]*180/M_PI);
 	}
@@ -262,6 +302,7 @@ double gpc_error(const struct gpc_corr*co, const double*x) {
 double gpc_total_error(const struct gpc_corr*co, int n, const double*x){
 	double error = 0;
 	for(int i=0;i<n;i++) {
+		if(!co[i].valid) continue;
 		error += gpc_error(co+i,x);
 		if(error<0) {
 			fprintf(stderr, "Something fishy!\n");

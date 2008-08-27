@@ -25,6 +25,8 @@ struct gpc_corr {
 	double q[2];
 
 	double C[2][2];
+	
+	int valid;
 };
 
 /**
@@ -39,11 +41,8 @@ struct gpc_corr {
 
 #define TRACE_ALGO 0
 
-int gpc_solve(int K, const struct gpc_corr*, double *x);
-
-/** if valid[k] is 0, the correspondence is not used */
-int gpc_solve_valid(int K, const struct gpc_corr*, 
-	const int*valid, 
+/** if c[k].valid is 0, the correspondence is not used */
+int gpc_solve(int K, const struct gpc_corr*, 
 	const double*x0, const double *cov_x0,
 	double *x);
 

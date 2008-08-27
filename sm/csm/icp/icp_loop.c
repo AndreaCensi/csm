@@ -174,6 +174,8 @@ int compute_next_estimate(struct sm_params*params,
 		int j1 = laser_sens->corr[i].j1;
 		int j2 = laser_sens->corr[i].j2;
 
+		c[k].valid = 1;
+		
 /*		if(params->use_point_to_line_distance) {*/
 		if(laser_sens->corr[i].type == corr_pl) {
 
@@ -249,7 +251,7 @@ int compute_next_estimate(struct sm_params*params,
 		 0, 0, 0};
 	
 	
-	int ok = gpc_solve_valid(k, c, 0, 0, inv_cov_x0, x_new);
+	int ok = gpc_solve(k, c, 0, inv_cov_x0, x_new);
 	if(!ok) {
 		sm_error("gpc_solve_valid failed");
 		return 0;

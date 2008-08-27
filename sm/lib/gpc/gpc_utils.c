@@ -58,10 +58,28 @@ double m_dot(const gsl_matrix*A,const gsl_matrix*B) {
 	return sum;
 }
 
+int poly_real_roots(unsigned int n, const double*a, double *roots) {
+	double z[(n-1)*2];
+	gsl_poly_complex_workspace * w  = gsl_poly_complex_workspace_alloc(n);
+	if(GSL_SUCCESS != gsl_poly_complex_solve (a, n, w, z)) {
+		return 0;
+	}
+	gsl_poly_complex_workspace_free (w);
+	
+	unsigned int i=0;
+	for(i=0;i<n-1;i++) {
+		roots[i] = z[2*i];
+	}	
+	return 1;
+}
+
+
 int poly_greatest_real_root(unsigned int n, const double*a, double *root) {
 	double z[(n-1)*2];
 	gsl_poly_complex_workspace * w  = gsl_poly_complex_workspace_alloc(n);
-	gsl_poly_complex_solve (a, n, w, z);
+	if(GSL_SUCCESS != gsl_poly_complex_solve (a, n, w, z)) {
+		return 0;
+	}
 	gsl_poly_complex_workspace_free (w);
 	if(TRACE_ALGO) {
 		printf("Solving the equation\n a = [");

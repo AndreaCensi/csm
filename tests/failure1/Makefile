@@ -2,7 +2,11 @@
 only_corr=-sens_countour_draw 0 -ref_countour_draw 0 -sens_points_draw 0 -ref_points_draw 0 -sens_rays_draw 0 -ref_rays_draw 0 -write_info 1
 
 all:
-	log2pdf -config hokuyo.config -use odometry -in stallo2.log
+	json_extract -nth 0 -in stallo2.log -out stallo2-0.json
+	json_extract -nth 1 -in stallo2.log -out stallo2-1.json
+	log2pdf -config hokuyo.config -use odometry -in stallo2-0.json
+	log2pdf -config hokuyo.config -use odometry -in stallo2-1.json
+	log2pdf -config hokuyo.config -use odometry -in stallo2.log -distance_xy 0
 	sm2 -restart 0 -in stallo2.log -out stallo2_plicp.log -max_iterations 10 -file_jj stallo2_plicp.journal
 	sm_animate $(only_corr) -in  stallo2_plicp.journal -out 'stallo2_plicp_%02d.pdf'
 	sm2 -restart 0  -in stallo2.log -out stallo2_icp.log  -use_point_to_line_distance  0 -max_iterations 10 -file_jj stallo2_icp.journal
