@@ -14,6 +14,8 @@ struct {
 	
 	/* which algorithm to run */
 	int algo;
+	
+	int debug;
 } p;
 
 extern void sm_options(struct sm_params*p, struct option*ops);
@@ -44,6 +46,10 @@ int main(int argc, const char*argv[]) {
 	options_string(ops, "file_jj", &p.file_jj, "",
 		"File for journaling -- if left empty, journal not open.");
 	options_int(ops, "algo", &p.algo, 0, "Which algorithm to use (0:icp 1:gpm-stripped) ");
+	
+	options_int(ops, "debug", &p.debug, 0, "Shows debug information");
+	
+	
 	p.format = 0;
 /*	options_int(ops, "format", &p.format, 0,
 		"Output format (0: log in JSON format, 1: log in Carmen format (not implemented))");*/
@@ -54,6 +60,8 @@ int main(int argc, const char*argv[]) {
 		options_print_help(ops, stderr);
 		return -1;
 	}
+
+	sm_debug_write(p.debug);
 
 	/* Open input and output files */
 	
@@ -119,6 +127,11 @@ int main(int argc, const char*argv[]) {
 			default:
 				sm_error("Unknown algorithm to run: %d.\n",p.algo);
 				return -1;
+		}
+		
+		if(!result.valid){
+			sm_error("One ICP matching failed. Because I process recursively, I will stop here.\n");
+			break;
 		}
 		
 		/* Add the result to the previous estimate */

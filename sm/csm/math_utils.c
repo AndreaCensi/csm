@@ -41,12 +41,6 @@ void possible_interval(
 
 
 
-void transform_d(const double point2d[2], const double pose[3], double result2d[2]) {
-	double theta = pose[2];
-	double c = cos(theta); double s = sin(theta);
-	result2d[0] = pose[0] + c * point2d[0] - s * point2d[1];
-	result2d[1] = pose[1] + s * point2d[0] + c * point2d[1];
-}
 
 int distance_counter = 0;
 
@@ -107,6 +101,14 @@ void oplus_d(const double x1[3], const double x2[3], double res[3]) {
 	res[0]=x;
 	res[1]=y;
 	res[2]=theta;
+}
+
+
+void transform_d(const double point2d[2], const double pose[3], double result2d[2]) {
+	double theta = pose[2];
+	double c = cos(theta); double s = sin(theta);
+	result2d[0] = pose[0] + c * point2d[0] - s * point2d[1];
+	result2d[1] = pose[1] + s * point2d[0] + c * point2d[1];
 }
 
 void pose_diff_d(const double pose2[3], const double pose1[3], double res[3]) {

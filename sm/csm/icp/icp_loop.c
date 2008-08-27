@@ -22,6 +22,8 @@ int icp_loop(struct sm_params*params, const double*q0, double*x_new,
 	
 	if(JJ) jj_loop_enter("iterations");
 	
+	int all_is_okay = 1;
+	
 	for(iteration=0; iteration<params->max_iterations;iteration++) {
 		if(JJ) jj_loop_iteration();
 		if(JJ) jj_add_double_array("x_old", x_old, 3);
@@ -47,9 +49,10 @@ int icp_loop(struct sm_params*params, const double*q0, double*x_new,
 		int num_corr = ld_num_valid_correspondences(laser_sens);
 		double fail_perc = 0.05;
 		if(num_corr < fail_perc * laser_sens->nrays) { /* TODO: arbitrary */
-			egsl_pop();
 			sm_error("Failed: before trimming, only %d correspondences.\n",num_corr);
-			return 0;
+			all_is_okay = 0;
+			egsl_pop(); /* loop context */
+			break;
 		}
 
 		if(JJ) jj_add("corr0", corr_to_json(laser_sens->corr, laser_sens->nrays));
@@ -82,8 +85,9 @@ int icp_loop(struct sm_params*params, const double*q0, double*x_new,
 		/* If not many correspondences, bail out */
 		if(num_corr_after < fail_perc * laser_sens->nrays){
 			sm_error("Failed: after trimming, only %d correspondences.\n",num_corr_after);
-			egsl_pop();
-			return 0;
+			all_is_okay = 0;
+			egsl_pop(); /* loop context */
+			break;
 		}
 
 		/* Compute next estimate based on the correspondences */
@@ -106,8 +110,6 @@ int icp_loop(struct sm_params*params, const double*q0, double*x_new,
 				friendly_pose(x_new));
 		}
 
-		egsl_pop();
-		
 		
 		/** PLICP terminates in a finite number of steps! */
 		if(params->use_point_to_line_distance) {
@@ -125,18 +127,23 @@ int icp_loop(struct sm_params*params, const double*q0, double*x_new,
 		/* This termination criterium is useless when using
 		   the point-to-line-distance; however, we put it here because
 		   one can choose to use the point-to-point distance. */
-		if(termination_criterion(params, delta)) 
+		if(termination_criterion(params, delta)) {
+			egsl_pop();
 			break;
+		}
 		
 		copy_d(x_new, 3, x_old);
 		copy_d(delta, 3, delta_old);
+		
+		
+		egsl_pop();
 	}
 
 	if(JJ) jj_loop_exit();
 	
 	*iterations = iteration+1;
 	
-	return 1;
+	return all_is_okay;
 }
 
 int termination_criterion(struct sm_params*params, const double*delta){

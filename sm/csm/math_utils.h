@@ -11,18 +11,20 @@
 #define NAN GSL_NAN
 #endif
      
-void transform_d(const double point2d[2], const double pose[3], double result2d[2]);
-
 /** Returns norm of 2D point p */
 double norm_d(const double p[2]);
 
-double distance_squared_d(const double a[2], const double b[2]);
 double distance_d(const double a[2], const double b[2]);
+double distance_squared_d(const double a[2], const double b[2]);
 
-
+/** Returns an angle difference in the [-pi, pi] range */
 double angleDiff(double a, double b);
 double square(double x);
+
+/** Degrees to radians */
 double deg2rad(double deg);
+
+/** Radians to degrees */
 double rad2deg(double rad);
 
 
@@ -35,6 +37,9 @@ void copy_d(const double*from, int n, double*to);
 void ominus_d(const double x[3], double res[3]);
 void oplus_d(const double x1[3], const double x2[3], double res[3]);
 void pose_diff_d(const double second[3], const double first[3], double res[3]);
+	
+	
+void transform_d(const double point2d[2], const double pose[3], double result2d[2]);
 	
 /** Projects (p[0],p[1]) on the LINE passing through (ax,ay)-(bx,by). If distance!=0, distance is set
 to the distance from the point to the segment */
@@ -63,6 +68,7 @@ of the eye, and direction is the direction of the ray coming out of the eye. Ret
 if the ray intersects the segment, and in that case *range contains the length of the ray. */
 int segment_ray_tracing(const double p0[2], const double p1[2], const double eye[2], double direction, double*range);
 
+/** Returns the orientation of the normal for the line passing through p0-p1 */
 double segment_alpha(const double p0[2], const double p1[2]);
 
 /** A function to print poses and covariances in a friendly way */

@@ -4,10 +4,10 @@
 #include "csm_all.h"
 
 /** 
-	This computes Fisher's information matrix, in robot coordinates.
+	This computes the Fisher Information Matrix, in robot coordinates.
 	Uses field 'true_alpha' (and 'theta', 'readings').  
 	
-	For details about the Fisher's information matrix for localization,
+	For details about the the Fisher Information Matrix,
 	please see this paper: http://purl.org/censi/2006/accuracy
 */
 

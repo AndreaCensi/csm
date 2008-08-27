@@ -90,6 +90,8 @@ int main(int argc, const char** argv)
 			} 
 			
 		}
+		
+		ld->tv.tv_sec = num;
 
 
 		JO jo = ld_to_json(ld);

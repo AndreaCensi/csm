@@ -194,7 +194,7 @@ int ld_valid_fields(LDP ld)  {
 		return 0;
 	}
 	double min_fov = deg2rad(20.0); 
-	double max_fov = 2 * M_PI;
+	double max_fov = 2.01 * M_PI;
 	double fov = ld->max_theta - ld->min_theta;
 	if( fov < min_fov || fov > max_fov) {
 		sm_error("Strange FOV: %f rad = %f deg \n", fov, rad2deg(fov));

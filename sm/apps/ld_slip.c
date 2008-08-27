@@ -19,10 +19,22 @@ struct ld_noise_params {
 	int debug;
 };
 
+const char * banner = 
+	"A simple program for adding slip to odometry \n\n"
+		"The 'odometry' field is set to 'true_pose' + noise.\n"
+		"If 'true_pose' is not available, then the 'odometry' \n"
+		"field is set to 'odometry' + noise.\n\n"
+		"Note: this program does *not* simulate the effect of \n"
+		"slip or odometry error in a realistic way; each scan \n"
+		"in the file is considered separately, the error does \n"
+		"not depend on the traveled distance, etc.\n\n";
+
 int main(int argc, const char ** argv) {
 	sm_set_program_name(argv[0]);
 	
 	struct ld_noise_params p;
+	
+	options_banner(banner);
 	
 	struct option* ops = options_allocate(10);
 	options_double(ops, "sigma_theta_deg", &p.sigma_theta_deg, 0.0, 
@@ -38,14 +50,6 @@ int main(int argc, const char ** argv) {
 	
 		
 	if(!options_parse_args(ops, argc, argv)) {
-		fprintf(stderr, "A simple program for adding slip to odometry \n\n"
-			"The 'odometry' field is set to 'true_pose' + noise.\n"
-			"If 'true_pose' is not available, then the 'odometry' \n"
-			"field is set to 'odometry' + noise.\n\n"
-			"Note: this program does *not* simulate the effect of \n"
-			"slip or odometry error in a realistic way; each scan \n"
-			"in the file is considered separately, the error does \n"
-			"not depend on the traveled distance, etc.\n\n");
 		options_print_help(ops, stderr);
 		return -1;
 	}

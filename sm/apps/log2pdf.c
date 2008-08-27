@@ -43,6 +43,12 @@ int log2pdf(log2pdf_params *p);
 
 double offset_theta = 0;
 
+const char* banner = 
+	"This program draws laser scans.\n"
+	"\n"
+	"IMPORTANT: it is likely you have to set one or more parameters. \n"
+	"           the default parameters are OK to draw very long laser logs";
+	
 int main(int argc, const char* argv[]) {
 	sm_set_program_name(argv[0]);
 
@@ -58,6 +64,7 @@ int main(int argc, const char* argv[]) {
 	p.pose_path.width = 0.1;
 	p.pose_path.color = "#f00";
 	
+	options_banner(banner);
 	struct option * ops = options_allocate(100);
 	options_string(ops, "in", &p.input_filename, "stdin", "input file (Carmen or JSON)");
 	options_string(ops, "out", &p.output_filename, "", "output file (if empty, input file + '.pdf')");
