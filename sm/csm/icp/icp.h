@@ -13,7 +13,7 @@ void sm_icp(struct sm_params*params, struct sm_result*res);
 
 /** This is the beef: computing in closed form the next estimate 
     given the correspondences. */
-void compute_next_estimate(struct sm_params*params,
+int compute_next_estimate(struct sm_params*params,
 	const double x_old[3], double x_new[3]);
 
 /** This termination criterium use epsilon_xy and epsilon_th.

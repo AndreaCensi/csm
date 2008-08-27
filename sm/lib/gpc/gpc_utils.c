@@ -1,3 +1,4 @@
+#include "gpc.h"
 #include "gpc_utils.h"
 
 void m_trans(const gsl_matrix*A, gsl_matrix*A_t){
@@ -57,21 +58,41 @@ double m_dot(const gsl_matrix*A,const gsl_matrix*B) {
 	return sum;
 }
 
-double poly_greatest_real_root(unsigned int n, double*a) {
+int poly_greatest_real_root(unsigned int n, const double*a, double *root) {
 	double z[(n-1)*2];
 	gsl_poly_complex_workspace * w  = gsl_poly_complex_workspace_alloc(n);
 	gsl_poly_complex_solve (a, n, w, z);
 	gsl_poly_complex_workspace_free (w);
-	double lambda = 0;
-	unsigned int i;
-	for (i = 0; i < n-1; i++) {
-/*		printf ("z%d = %+.18f %+.18f\n", i, z[2*i], z[2*i+1]);
-		 XXX ==0 is bad */
-		if( (z[2*i+1]==0) && (z[2*i]>lambda))
-			lambda = z[2*i];
+	if(TRACE_ALGO) {
+		printf("Solving the equation\n a = [");
+		for(int i=0;i<n;i++) {
+			printf("%lf ", a[i]);
+		}
+		printf("]\n");
 	}
-/*	printf ("lambda = %+.18f \n", lambda); */
-	return lambda;
+
+	unsigned int i;
+	double lambda = 0; int assigned = 0;
+	for (i = 0; i < n-1; i++) {
+		if(TRACE_ALGO) {
+			printf ("root z%d = %+.18f + %+.18f i \n", i, z[2*i], z[2*i+1]);
+		}
+/*		 XXX ==0 is bad */
+		if( (z[2*i+1]==0) ) 
+			if(!assigned || (z[2*i]>lambda)) {
+				assigned = 1;
+				lambda = z[2*i];
+			}
+	}
+	if(TRACE_ALGO)
+		printf ("lambda = %+.18f \n", lambda); 
+	if(!assigned) {
+		printf("poly_greatest_real_root: Could not find real root for polynomial.\n");
+		return 0;
+	}
+	
+	*root = lambda;
+	return 1;
 }
 
 void m_display(const char*str, gsl_matrix*m) {

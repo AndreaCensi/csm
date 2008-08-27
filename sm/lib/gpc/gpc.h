@@ -36,6 +36,9 @@ struct gpc_corr {
 // (see the attached documentation for details).
 */
 
+
+#define TRACE_ALGO 0
+
 int gpc_solve(int K, const struct gpc_corr*, double *x);
 
 /** if valid[k] is 0, the correspondence is not used */
@@ -46,8 +49,9 @@ int gpc_solve_valid(int K, const struct gpc_corr*,
 
 /* Some utilities functions */
 
-/** Computes error for the correspondence */
-double gpc_error(const struct gpc_corr*co, const double*x);
+	/** Computes error for a single correspondence */
+	double gpc_error(const struct gpc_corr*co, const double*x);
 
+	double gpc_total_error(const struct gpc_corr*co, int n, const double*x);
 #endif
 

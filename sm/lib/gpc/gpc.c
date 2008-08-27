@@ -29,6 +29,7 @@ int gpc_solve(int K, const struct gpc_corr*c, double *x) {
 /*#define MF(matrix) gsl_matrix_free(matrix)*/
 #define MF(matrix) /*gsl_matrix_free(matrix)*/
 
+
 int gpc_solve_valid(int K, const struct gpc_corr*c, const int*valid, 
 	const double*x0, const double *cov_x0,
 	double *x_out) 
@@ -53,6 +54,21 @@ int gpc_solve_valid(int K, const struct gpc_corr*c, const int*valid,
 		double C01 = c[k].C[0][1];
 		double C10 = c[k].C[1][0];
 		double C11 = c[k].C[1][1];
+		
+		if(C01 != C10) {
+			fprintf(stderr, "k=%d; I expect C to be a symmetric matrix.\n");
+			return 0;
+		}
+		
+		double det = C00*C11 - C01*C10;
+		double trace = C00 + C11;
+		int is_semidef_pos = (det >= 0) && (trace>0);
+		if(!is_semidef_pos) {
+			fprintf(stderr, "k=%d; I expect the matrix to be semidef positive. C = [%f,%f;%f %f]\n",k,
+				C00,C01,C10,C11);
+			return 0;
+		}
+		
 		double qx = c[k].q[0];
 		double qy = c[k].q[1];
 		double px = c[k].p[0];
@@ -131,7 +147,7 @@ int gpc_solve_valid(int K, const struct gpc_corr*c, const int*valid,
 	m_inv(mS, mSa);
 	m_scale(m_det(mS), mSa);
 	
-	if(0) {
+	if(TRACE_ALGO) {
 		m_display("mA",mA);
 		m_display("mB",mB);
 		m_display("mD",mD);
@@ -179,16 +195,21 @@ int gpc_solve_valid(int K, const struct gpc_corr*c, const int*valid,
 	double q[5] = {p[0]-(l[0]*l[0]), p[1]-(2*l[1]*l[0]), 
 		p[2]-(l[1]*l[1]+2*l[0]*l[2]), -(2*l[2]*l[1]), -(l[2]*l[2])};
 	
-	if(0) {
-		printf("p = %f %f %f \n", p[2], p[1], p[0]);
-		printf("l = %f %f %f \n", l[2], l[1], l[0]);
-		printf("q = %f %f %f %f %f \n", q[4],  q[3],  q[2], q[1], q[0]);
+	if(TRACE_ALGO) {
+		fprintf(stderr, "p = %f %f %f \n", p[2], p[1], p[0]);
+		fprintf(stderr, "l = %f %f %f \n", l[2], l[1], l[0]);
+		fprintf(stderr, "q = %f %f %f %f %f \n", q[4],  q[3],  q[2], q[1], q[0]);
 	}
 
-	double lambda = poly_greatest_real_root(5,q);
+	double lambda;
 	
-	if(0) {
-		printf("lambda = %f \n", lambda);
+	if(!poly_greatest_real_root(5,q,&lambda)) {
+		fprintf(stderr, "Cannot solve polynomial.\n");
+		return 0;
+	}
+	
+	if(TRACE_ALGO) {
+		fprintf(stderr, "lambda = %f \n", lambda);
 	}	
 	
 	M(W,4,4); gsl_matrix_set_zero(W); gms(W,2,2,1.0); gms(W,3,3,1.0);
@@ -204,8 +225,8 @@ int gpc_solve_valid(int K, const struct gpc_corr*c, const int*valid,
 	x_out[1] = gmg(x,1,0);
 	x_out[2] = atan2(gmg(x,3,0),gmg(x,2,0));
 	
-	if(0) {
-		printf("x =  %f  %f %f deg\n", x_out[0], x_out[1],x_out[2]*180/M_PI);
+	if(TRACE_ALGO) {
+		fprintf(stderr, "x =  %f  %f %f deg\n", x_out[0], x_out[1],x_out[2]*180/M_PI);
 	}
 	
 	MF(mA); MF(mB); MF(mD); MF(mS); MF(mSa);
@@ -219,7 +240,7 @@ int gpc_solve_valid(int K, const struct gpc_corr*c, const int*valid,
 	MF(g1);	MF(g2);
 	MF(g1t);	MF(g2t);
 	MF(mAi);	MF(mBt);
-	return 0;
+	return 1;
 }
 
 
@@ -229,9 +250,26 @@ double gpc_error(const struct gpc_corr*co, const double*x) {
 	double e[2];
 	e[0] = c*(co->p[0]) -s*(co->p[1]) + x[0] - co->q[0];
 	e[1] = s*(co->p[0]) +c*(co->p[1]) + x[1] - co->q[1];
-	return e[0]*e[0]*co->C[0][0]+2*e[0]*e[1]*co->C[0][1]+e[1]*e[1]*co->C[1][1];
+	double this_error = e[0]*e[0]*co->C[0][0]+2*e[0]*e[1]*co->C[0][1]+e[1]*e[1]*co->C[1][1];
+	
+	if(this_error < 0) {
+		fprintf(stderr, "Something fishy: e = [%lf %lf]  C = [%lf,%lf;%lf,%lf]\n",
+			e[0],e[1],co->C[0][0],co->C[0][1],co->C[1][0],co->C[1][1]);
+	}
+	return this_error;
 }
 
+double gpc_total_error(const struct gpc_corr*co, int n, const double*x){
+	double error = 0;
+	for(int i=0;i<n;i++) {
+		error += gpc_error(co+i,x);
+		if(error<0) {
+			fprintf(stderr, "Something fishy!\n");
+		}
+	}
+	return error;
+}
+	
 /*
                [       C00       ]         [       c01       ]
                 [                 ]         [                 ]

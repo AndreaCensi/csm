@@ -21,7 +21,8 @@ double m_dot(const gsl_matrix*A,const gsl_matrix*B);
 void m_inv(const gsl_matrix*A, gsl_matrix*invA);
 double m_det(const gsl_matrix*A);
 
-double poly_greatest_real_root(unsigned int n, double*);
+int poly_greatest_real_root(unsigned int n, const double*a, double *root);
+
 void m_display(const char*str, gsl_matrix*m);
 
 #endif

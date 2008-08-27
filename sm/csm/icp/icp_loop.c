@@ -91,7 +91,13 @@ int icp_loop(struct sm_params*params, const double*q0, double*x_new,
 		}
 
 		/* Compute next estimate based on the correspondences */
-		compute_next_estimate(params, x_old, x_new);
+		if(!compute_next_estimate(params, x_old, x_new)) {
+			sm_error("Cannot compute next estimate.\n");
+			all_is_okay = 0;
+			egsl_pop(); /* loop context */
+			break;			
+		}
+
 		pose_diff_d(x_new, x_old, delta);
 		
 		{
@@ -152,7 +158,7 @@ int termination_criterion(struct sm_params*params, const double*delta){
 	return (a<params->epsilon_xy) && (b<params->epsilon_theta);
 }
 
-void compute_next_estimate(struct sm_params*params, 
+int compute_next_estimate(struct sm_params*params, 
 	const double x_old[3], double x_new[3]) 
 {
 	LDP laser_ref  = params->laser_ref;
@@ -186,11 +192,25 @@ void compute_next_estimate(struct sm_params*params,
 
 			double cos_alpha = normal[0];
 			double sin_alpha = normal[1];
-			
+						
 			c[k].C[0][0] = cos_alpha*cos_alpha;
 			c[k].C[1][0] = 
 			c[k].C[0][1] = cos_alpha*sin_alpha;
 			c[k].C[1][1] = sin_alpha*sin_alpha;
+			
+			/* Note: it seems that because of numerical errors this matrix might be
+			   not semidef positive. */
+			double det = c[k].C[0][0] * c[k].C[1][1] - c[k].C[0][1] * c[k].C[1][0];
+			double trace = c[k].C[0][0] + c[k].C[1][1];
+			
+			int semidef = (det >= 0) && (trace>0);
+			if(!semidef) {
+				printf("%d: Adjusting correspondence weights\n",i);
+				double eps = -det;
+				c[k].C[0][0] += sqrt(eps);
+				c[k].C[1][1] += sqrt(eps);
+			}
+			
 		} else {
 			c[k].p[0] = laser_sens->points[i].p[0];
 			c[k].p[1] = laser_sens->points[i].p[1];
@@ -228,8 +248,21 @@ void compute_next_estimate(struct sm_params*params,
 		 0, 1/(std*std), 0,
 		 0, 0, 0};
 	
-	gpc_solve_valid(k, c, 0, 0, inv_cov_x0, x_new);
 	
+	int ok = gpc_solve_valid(k, c, 0, 0, inv_cov_x0, x_new);
+	if(!ok) {
+		sm_error("gpc_solve_valid failed");
+		return 0;
+	}
+
+	double old_error = gpc_total_error(c, k, x_old);
+	double new_error = gpc_total_error(c, k, x_new);
+
+	if(new_error > old_error) {
+		sm_error("Something's fishy here! Old error: %f  new error: %f \n");
+	}
+	
+	return 1;
 }
 	
 
