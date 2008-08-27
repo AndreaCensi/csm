@@ -10,6 +10,7 @@ struct sm1_params {
 	const char * file2;
 	const char * file_jj;
 	const char * file_output;
+	int debug;
 } p;
 
 
@@ -31,6 +32,10 @@ int main(int argc, const char*argv[]) {
 	options_string(ops, "file_jj", &p.file_jj, "",
 		"File for journaling -- if left empty, journal not open.");
 	options_string(ops, "out", &p.file_output, "stdout", "Output file (JSON structs)");
+
+	options_int(ops, "debug", &p.debug, 0, "Shows debug information");
+
+	
 	
 	sm_options(&params, ops);
 	if(!options_parse_args(ops, argc, argv)) {
@@ -38,6 +43,8 @@ int main(int argc, const char*argv[]) {
 		options_print_help(ops, stderr);
 		return -1;
 	}
+
+	sm_debug_write(p.debug);
 
 	FILE * file1 = open_file_for_reading(p.file1);
 	FILE * file2 = !strcmp(p.file1, p.file2) ? file1 

@@ -72,7 +72,7 @@ int segment_ray_tracing(const double p0[2], const double p1[2], const double eye
 double segment_alpha(const double p0[2], const double p1[2]);
 
 /** A function to print poses and covariances in a friendly way */
-const char* friendly_pose(double*pose);
+const char* friendly_pose(const double*pose);
 
 /** Returns true v is NAN */
 int is_nan(double v);

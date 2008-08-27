@@ -262,7 +262,7 @@ double segment_alpha(const double p0[2], const double p1[2]) {
 
 
 static char tmp_buf[100];
-const char* friendly_pose(double*pose) {
+const char* friendly_pose(const double*pose) {
 	sprintf(tmp_buf, "(%4.2f mm, %4.2f mm, %4.4f deg)",
 		1000*pose[0],1000*pose[1],rad2deg(pose[2]));
 	return tmp_buf;

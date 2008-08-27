@@ -205,7 +205,7 @@ int compute_next_estimate(struct sm_params*params,
 			
 			int semidef = (det >= 0) && (trace>0);
 			if(!semidef) {
-				printf("%d: Adjusting correspondence weights\n",i);
+	/*			printf("%d: Adjusting correspondence weights\n",i);*/
 				double eps = -det;
 				c[k].C[0][0] += sqrt(eps);
 				c[k].C[1][1] += sqrt(eps);
@@ -258,8 +258,12 @@ int compute_next_estimate(struct sm_params*params,
 	double old_error = gpc_total_error(c, k, x_old);
 	double new_error = gpc_total_error(c, k, x_new);
 
-	if(new_error > old_error) {
-		sm_error("Something's fishy here! Old error: %f  new error: %f \n");
+	sm_debug("Old error: %f  x_old= %s \n", old_error, friendly_pose(x_old));
+	sm_debug("New error: %f  x_new= %s \n", old_error, friendly_pose(x_old));
+
+	double epsilon = 0.000001;
+	if(new_error > old_error + epsilon) {
+		sm_error("Something's fishy here! Old error: %lf  new error: %lf  %lf %lf %lf  %lf %lf %lf\n",old_error,new_error,x_old[0],x_old[1],x_old[2],x_new[0],x_new[1],x_new[2]);
 	}
 	
 	return 1;
