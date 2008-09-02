@@ -21,8 +21,8 @@
 #include "gpc.h"
 #include "gpc_utils.h"
 
+/* Note that we use static values here so we don't need to evaluate that all the time */
 #define M(matrix, rows, col) static gsl_matrix*matrix=0; if(!matrix) matrix = gsl_matrix_alloc(rows,col);
-/*#define MF(matrix) gsl_matrix_free(matrix)*/
 #define MF(matrix) /*gsl_matrix_free(matrix)*/
 
 

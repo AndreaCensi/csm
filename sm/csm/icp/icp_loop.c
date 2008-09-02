@@ -28,7 +28,7 @@ int icp_loop(struct sm_params*params, const double*q0, double*x_new,
 		if(JJ) jj_loop_iteration();
 		if(JJ) jj_add_double_array("x_old", x_old, 3);
 
-		egsl_push();
+		egsl_push_named("icp_loop iteration");
 
 		/** Compute laser_sens's points in laser_ref's coordinates
 		    by roto-translating by x_old */
@@ -51,7 +51,7 @@ int icp_loop(struct sm_params*params, const double*q0, double*x_new,
 		if(num_corr < fail_perc * laser_sens->nrays) { /* TODO: arbitrary */
 			sm_error("Failed: before trimming, only %d correspondences.\n",num_corr);
 			all_is_okay = 0;
-			egsl_pop(); /* loop context */
+			egsl_pop_named("icp_loop iteration"); /* loop context */
 			break;
 		}
 
@@ -127,14 +127,17 @@ int icp_loop(struct sm_params*params, const double*q0, double*x_new,
 					break;
 				}
 			}
-			if(loop_detected) break;
+			if(loop_detected) {
+				egsl_pop_named("icp_loop iteration");
+				break;
+			} 
 		}
 	
 		/* This termination criterium is useless when using
 		   the point-to-line-distance; however, we put it here because
 		   one can choose to use the point-to-point distance. */
 		if(termination_criterion(params, delta)) {
-			egsl_pop();
+			egsl_pop_named("icp_loop iteration");
 			break;
 		}
 		
@@ -142,7 +145,7 @@ int icp_loop(struct sm_params*params, const double*q0, double*x_new,
 		copy_d(delta, 3, delta_old);
 		
 		
-		egsl_pop();
+		egsl_pop_named("icp_loop iteration");
 	}
 
 	if(JJ) jj_loop_exit();

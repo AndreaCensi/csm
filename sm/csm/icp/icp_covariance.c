@@ -14,7 +14,7 @@ void compute_covariance_exact(
 	LDP laser_ref, LDP laser_sens, const gsl_vector*x,
 		val *cov0_x, val *dx_dy1, val *dx_dy2)
 {
-	egsl_push();
+	egsl_push_named("compute_covariance_exact");
 	
 	val d2J_dxdy1 = zeros(3,(size_t)laser_ref ->nrays);
 	val d2J_dxdy2 = zeros(3,(size_t)laser_sens->nrays);
@@ -30,7 +30,7 @@ void compute_covariance_exact(
 	int i; 
 	for(i=0;i<laser_sens->nrays;i++) {
 		if(!ld_valid_corr(laser_sens,i)) continue;
-		egsl_push();
+		egsl_push_named("compute_covariance_exact iteration");
 
 		int j1 = laser_sens->corr[i].j1;
 		int j2 = laser_sens->corr[i].j2;
@@ -81,7 +81,7 @@ void compute_covariance_exact(
 		val d2Jk_dtheta_drho_j2 = sc(2.0, m3( tr(v2), dC_drho_j2, v1));
 		add_to_col(d2J_dxdy1, (size_t)j2, comp_col(d2Jk_dt_drho_j2, d2Jk_dtheta_drho_j2));
 
-		egsl_pop();
+		egsl_pop_named("compute_covariance_exact iteration");
 	}
 
 	/* composes matrix  d2J_dx2  from the pieces*/
@@ -101,7 +101,7 @@ void compute_covariance_exact(
 	*dx_dy1 = egsl_promote(edx_dy1);
 	*dx_dy2 = egsl_promote(edx_dy2);
 	
-	egsl_pop();	
+	egsl_pop_named("compute_covariance_exact");	
 	/* now edx_dy1 is not valid anymore, by *dx_dy1 is. */
 }
 

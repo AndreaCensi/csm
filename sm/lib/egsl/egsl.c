@@ -4,13 +4,14 @@
 
 #include <assert.h>
 #include <math.h>
+#include <string.h>
 
 #include "egsl.h"
 #include "egsl_imp.h"
 #define MAX_VALS 1024
 #define MAX_CONTEXTS 1024
 
-#define INVALID (val_from_context_and_index(1000,1000))
+/*#define INVALID (val_from_context_and_index(1000,1000))*/
 
 
 struct egsl_variable {
@@ -18,12 +19,16 @@ struct egsl_variable {
 };
 
 struct egsl_context {
+	char name[256];
 	int nallocated;
 	int nvars;
 	struct egsl_variable vars[MAX_VALS]; 
 };
 
+/* Current context */
 int cid=0;
+/* Maximum number of contexts */
+int max_cid = 0; 
 static struct egsl_context egsl_contexts[MAX_CONTEXTS];
 
 
@@ -80,35 +85,73 @@ gsl_matrix * egsl_gslm(val v) {
 	return v.gslm;
 }
 
+void egsl_push() { egsl_push_named("unnamed context"); }
+void egsl_pop() { egsl_pop_named("unnamed context"); }
 
-void egsl_push() {
+void egsl_push_named(const char*name) {
 	if(egsl_first_time) {
 		int c;
 		for(c=0;c<MAX_CONTEXTS;c++) {
 			egsl_contexts[c].nallocated = 0;
 			egsl_contexts[c].nvars = 0;
+			sprintf(egsl_contexts[c].name, "not yet used");
 		}
 		egsl_first_time  = 0;
 	}
 	cid++;
-	assert(cid<MAX_CONTEXTS);/* "Maximum number of contexts reached"); */
+	if(max_cid < cid) max_cid = cid;
+	
+	if(name != 0) 
+		sprintf(egsl_contexts[cid].name, "%s", name);
+	else
+		sprintf(egsl_contexts[cid].name, "Unnamed context");
+		
+	if(cid >= MAX_CONTEXTS) {
+		fprintf(stderr, "egsl: maximum number of contexts reached \n");
+		egsl_print_stats();
+		assert(0);
+	}
 }
 
-void egsl_pop() {
+void egsl_pop_named(const char*name) {
 	assert(cid>=0);/*, "No egsl_push before?"); */
+	if(name != 0) {
+		if(strcmp(name, egsl_contexts[cid].name)) {
+			fprintf(stderr, "egsl: context mismatch. You want to pop '%s', you are still at '%s'\n",
+				name, egsl_contexts[cid].name);
+			egsl_print_stats();
+			assert(0);
+		}
+	}
+	
 	egsl_contexts[cid].nvars = 0;
+	sprintf(egsl_contexts[cid].name, "Popped");
 	cid--;
 }
+/*
+void egsl_pop_check(int assumed) {
+	if(assumed != cid) {
+		fprintf(stderr, "egsl: You think you are in context %d while you are %d. \n", assumed, cid);
+		if(assumed < cid) 
+			fprintf(stderr, "     It seems you miss %d egsl_pop() somewhere.\n", - assumed + cid);			
+		else
+			fprintf(stderr, "     It seems you did %d egsl_pop() more.\n",  + assumed - cid);			
+		egsl_print_stats();
+	}
+	assert(cid>=0);
+	egsl_contexts[cid].nvars = 0;
+	cid--;
+}*/
 
 void egsl_print_stats() {
 	fprintf(stderr, "egsl: total allocations: %d   cache hits: %d\n",	
 		egsl_total_allocations, egsl_cache_hits);
 /*	printf("egsl: sizeof(val) = %d\n",(int)sizeof(val)); */
-	int c; for(c=0;c<MAX_CONTEXTS;c++) {
-	/*	printf("egsl: context #%d\n ",c);
-	 	if(0==egsl_contexts[c].nallocated) break; */
-		fprintf(stderr, "egsl: context #%d allocations: %d active: %d\n",
-			c,	egsl_contexts[c].nallocated, 	egsl_contexts[c].nvars);
+	int c; for(c=0;c<=max_cid;c++) {
+	/*	printf("egsl: context #%d\n ",c); */
+/*	 	if(0==egsl_contexts[c].nallocated) break; */
+		fprintf(stderr, "egsl: context #%d allocations: %d active: %d name: '%s' \n",
+			c,	egsl_contexts[c].nallocated, egsl_contexts[c].nvars, egsl_contexts[c].name);
 	}
 }
 

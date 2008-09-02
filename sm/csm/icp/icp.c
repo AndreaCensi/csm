@@ -44,7 +44,7 @@ void sm_icp(struct sm_params*params, struct sm_result*res) {
 	
 	if(JJ) jj_context_enter("sm_icp");
 	
-	egsl_push();
+	egsl_push_named("sm_icp");
 	
 			
 	if(params->use_corr_tricks || params->debug_verify_tricks)
@@ -172,7 +172,7 @@ void sm_icp(struct sm_params*params, struct sm_result*res) {
 		gsl_vector_free(best_x);
 	}
 
-	egsl_pop();
+	egsl_pop_named("sm_icp");
 
 	if(JJ) jj_context_exit();
 }

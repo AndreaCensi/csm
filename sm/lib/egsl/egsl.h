@@ -13,8 +13,13 @@ struct egsl_val {
 typedef struct egsl_val val;
 
 /* Core functions */
-void egsl_push(void);
-void egsl_pop(void);
+
+/* Push a new context. */
+void egsl_push();
+void egsl_push_named(const char*name);
+/* Pops a context */
+void egsl_pop();
+void egsl_pop_named(const char*name);
 void egsl_free(void);
 
 double* egsl_atmp(val v, size_t i, size_t j);
