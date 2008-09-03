@@ -80,6 +80,8 @@ int main(int argc, const char** argv)
 			
 			double rho, alpha; int stuff_id;
 			if(env.ray_tracing(ld->true_pose, ld->theta[i] + ld->true_pose[2], rho, alpha, &stuff_id) && (rho<p.max_reading)) {
+				fprintf(stderr, "rho/alpha %f %f\n", rho, alpha);
+
 				ld->valid[i] = 1;
 				ld->readings[i] = rho;
 				
