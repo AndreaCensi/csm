@@ -257,7 +257,7 @@ double segment_alpha(const double p0[2], const double p1[2]) {
 	double arrow[2] = {p1[0]-p0[0],p1[1]-p0[1]};
 	// Normal to segment line
 	double S[2] = { -arrow[1], arrow[0]};
-	return atan2(S[1], S[2]);
+	return atan2(S[1], S[0]);
 }
 
 

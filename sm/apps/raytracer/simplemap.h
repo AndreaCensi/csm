@@ -54,9 +54,6 @@ namespace RayTracer {
 
 		bool ray_tracing(const double p[2], const double direction,  double& out_distance, double &out_alpha, int*stuff_id) const ;
 				
-/*		void ray_tracing(
-			double pose[3], double fov_rad, int nrays, double max_reading,
-			double*reading, double*theta, double*alpha, int*valid, int*stuff_ids);*/
 	};
 	
 
