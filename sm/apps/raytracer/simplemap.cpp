@@ -11,7 +11,7 @@ namespace RayTracer {
 
 		if(found) {
 			alpha = segment_alpha(this->p0, this->p1);
-			fprintf(stderr, "ray_tracing alpha %f\n", alpha);
+			fprintf(stderr, "ray_tracing found %f %f -> %f %f and alpha %f\n", p0[0],p0[1],p1[0],p1[1],alpha);
 
 			if( cos(alpha-direction) < 1 )
 				alpha = alpha + M_PI;
