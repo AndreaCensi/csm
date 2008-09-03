@@ -12,7 +12,8 @@ namespace RayTracer {
 		if(found) {
 			alpha = segment_alpha(this->p0, this->p1);
 	
-			if( cos(alpha-direction) < 1 )
+			/* alpha and direction should have versors with negative dot product */
+			if( cos(alpha)*cos(direction) + sin(alpha)*sin(direction) > 0 )
 				alpha = alpha + M_PI;
 
 			alpha = normalize_0_2PI(alpha);
