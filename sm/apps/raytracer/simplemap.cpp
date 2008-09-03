@@ -33,7 +33,7 @@ namespace RayTracer {
 			
 			double range, alpha;
 			if(s->ray_tracing(p,direction,range,alpha)){
-				if(range<champion_range || champion==-1) {
+				if(champion==-1 || range<champion_range) {
 					champion = i;
 					champion_range = range;
 					champion_alpha = alpha;
