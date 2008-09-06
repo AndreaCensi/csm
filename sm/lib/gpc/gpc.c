@@ -55,15 +55,16 @@ int gpc_solve(int K, const struct gpc_corr*c,
 			fprintf(stderr, "k=%d; I expect C to be a symmetric matrix.\n");
 			return 0;
 		}
-		
+#if GPC_CHECK_SEMIDEF
 		double det = C00*C11 - C01*C10;
 		double trace = C00 + C11;
 		int is_semidef_pos = (det >= 0) && (trace>0);
 		if(!is_semidef_pos) {
-			fprintf(stderr, "k=%d; I expect the matrix to be semidef positive. C = [%f,%f;%f %f]\n",k,
-				C00,C01,C10,C11);
+			fprintf(stderr, "k=%d; I expect the matrix to be semidef positive (det>=0 and trace>0), det = %.20f trace= %.10f C = [%.15f,%.15f;%.15f %.15f]\n",
+				k, det, trace,	C00,C01,C10,C11);
 			return 0;
 		}
+#endif
 		
 		double qx = c[k].q[0];
 		double qy = c[k].q[1];

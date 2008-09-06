@@ -94,7 +94,7 @@ int icp_loop(struct sm_params*params, const double*q0, double*x_new,
 		if(!compute_next_estimate(params, x_old, x_new)) {
 			sm_error("Cannot compute next estimate.\n");
 			all_is_okay = 0;
-			egsl_pop(); /* loop context */
+			egsl_pop_named("icp_loop iteration");
 			break;			
 		}
 
@@ -179,7 +179,6 @@ int compute_next_estimate(struct sm_params*params,
 
 		c[k].valid = 1;
 		
-/*		if(params->use_point_to_line_distance) {*/
 		if(laser_sens->corr[i].type == corr_pl) {
 
 			c[k].p[0] = laser_sens->points[i].p[0];
@@ -203,6 +202,7 @@ int compute_next_estimate(struct sm_params*params,
 			c[k].C[0][1] = cos_alpha*sin_alpha;
 			c[k].C[1][1] = sin_alpha*sin_alpha;
 			
+#if 0
 			/* Note: it seems that because of numerical errors this matrix might be
 			   not semidef positive. */
 			double det = c[k].C[0][0] * c[k].C[1][1] - c[k].C[0][1] * c[k].C[1][0];
@@ -212,10 +212,10 @@ int compute_next_estimate(struct sm_params*params,
 			if(!semidef) {
 	/*			printf("%d: Adjusting correspondence weights\n",i);*/
 				double eps = -det;
-				c[k].C[0][0] += sqrt(eps);
-				c[k].C[1][1] += sqrt(eps);
+				c[k].C[0][0] += 2*sqrt(eps);
+				c[k].C[1][1] += 2*sqrt(eps);
 			}
-			
+#endif			
 		} else {
 			c[k].p[0] = laser_sens->points[i].p[0];
 			c[k].p[1] = laser_sens->points[i].p[1];
@@ -225,23 +225,34 @@ int compute_next_estimate(struct sm_params*params,
 				laser_ref->points[j2].p,
 				laser_sens->points_w[i].p,
 				c[k].q);
-			
-			double factor = 1;
-			if(params->use_ml_weights) {
-				double alpha = laser_ref->true_alpha[j1];
-				if(!is_nan(alpha)) {
-					double pose_theta = x_old[2];
-					/** Incidence of the ray */
-					double beta = alpha - (pose_theta+laser_sens->theta[i]);
-					factor = 1 / square(cos(beta));
-				}
-			} 
-			
-			c[k].C[0][0] = factor;
-		 	c[k].C[1][0] = 
-		 	c[k].C[0][1] = 0;
-		 	c[k].C[1][1] = factor;
+
+			/* Identity matrix */
+			c[k].C[0][0] = 1;
+			c[k].C[1][0] = 0;
+			c[k].C[0][1] = 0;
+			c[k].C[1][1] = 1;
 		}
+		
+		
+		/* Possibly scale the correspondence weight by a factor */
+		double factor = 1;
+		if(params->use_ml_weights) {
+			double alpha = laser_ref->true_alpha[j1];
+			if(!is_nan(alpha)) {
+				double pose_theta = x_old[2];
+				/** Incidence of the ray 
+					Note that alpha is relative to the first scan (not the world)
+					and that pose_theta is the angle of the second scan with 
+					respect to the first, hence it's ok. */
+				double beta = alpha - (pose_theta + laser_sens->theta[i]);
+				factor = 1 / square(cos(beta));
+			}
+		} 
+
+		c[k].C[0][0] *= factor;
+		c[k].C[1][0] *= factor;
+		c[k].C[0][1] *= factor;
+		c[k].C[1][1] *= factor;
 		
 		k++;
 	}
@@ -256,7 +267,7 @@ int compute_next_estimate(struct sm_params*params,
 	
 	int ok = gpc_solve(k, c, 0, inv_cov_x0, x_new);
 	if(!ok) {
-		sm_error("gpc_solve_valid failed");
+		sm_error("gpc_solve_valid failed\n");
 		return 0;
 	}
 
