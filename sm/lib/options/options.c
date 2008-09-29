@@ -20,12 +20,13 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <libgen.h>
-
-
 #include <string.h>
 
-
 #include "options.h"
+
+
+void display_table(FILE*f,  char**table, int rows, int columns, int padding);
+
 
 const char * options_banner_string = "";
 
@@ -147,7 +148,7 @@ int options_parse_stream(struct option*ops, const char*pwd, FILE*file) {
 		/* name continus until nonspace char */
 		while(!isspace(*line)) line++;
 
-		char * value;
+		const char * value;
 		if(*line == 0) value = ""; else {
 			*line = 0; /* terminating 0 for name */
 			line++;

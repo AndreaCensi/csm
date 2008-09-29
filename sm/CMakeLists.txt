@@ -47,7 +47,7 @@ MESSAGE(STATUS "csm_link_flags = ${csm_link_flags}")
 
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${csm_c_flags}")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb -Wall")
 
 # for realpath
 IF("${CMAKE_SYSTEM}" MATCHES "Linux")
@@ -176,6 +176,8 @@ TARGET_LINK_LIBRARIES(csm ${csm_link_flags})
 INSTALL(TARGETS csm ARCHIVE DESTINATION lib LIBRARY DESTINATION lib)
 
 
+IF(0)
+
 INCLUDE_DIRECTORIES(/sw/include)
 LINK_DIRECTORIES(/sw/lib)
 
@@ -183,7 +185,7 @@ ADD_EXECUTABLE(hsm_test00 ./csm/hsm/hsm_test00.c ./csm/hsm/hsm.c)
 TARGET_LINK_LIBRARIES(hsm_test00 csm-static ${csm_link_flags} pgm pnm pbm)
 INSTALL(PROGRAMS hsm_test00 DESTINATION bin)
 
-
+ENDIF(0)
 
 
 SUBDIRS(pkg-config)

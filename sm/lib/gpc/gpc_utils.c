@@ -83,7 +83,7 @@ int poly_greatest_real_root(unsigned int n, const double*a, double *root) {
 	gsl_poly_complex_workspace_free (w);
 	if(TRACE_ALGO) {
 		printf("Solving the equation\n a = [");
-		for(int i=0;i<n;i++) {
+		for(unsigned int i=0;i<n;i++) {
 			printf("%lf ", a[i]);
 		}
 		printf("]\n");
