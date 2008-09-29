@@ -93,8 +93,6 @@ void compute_covariance_exact(
 
 	val ecov0_x = sum(m(edx_dy1,tr(edx_dy1)),m(edx_dy2,tr(edx_dy2)) );
 
-/*	val cov_x = sc(0.01*0.01,ecov0_x); */
-
 	/* With the egsl_promote we save the matrix in the previous
 	   context */
 	*cov0_x = egsl_promote(ecov0_x);
@@ -102,7 +100,7 @@ void compute_covariance_exact(
 	*dx_dy2 = egsl_promote(edx_dy2);
 	
 	egsl_pop_named("compute_covariance_exact");	
-	/* now edx_dy1 is not valid anymore, by *dx_dy1 is. */
+	/* now edx_dy1 is not valid anymore, but *dx_dy1 is. */
 }
 
 

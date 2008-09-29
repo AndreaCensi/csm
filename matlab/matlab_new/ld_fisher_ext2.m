@@ -8,6 +8,7 @@ function I0 = ld_fisher_ext(ld)
 % For details about the Fisher's information matrix for localization,
 % please see this paper: http://purl.org/censi/2006/accuracy
 
+
 I0 = zeros(3,3);
 
 nused = 0;

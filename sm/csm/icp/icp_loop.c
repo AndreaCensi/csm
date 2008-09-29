@@ -101,7 +101,7 @@ int icp_loop(struct sm_params*params, const double*q0, double*x_new,
 		pose_diff_d(x_new, x_old, delta);
 		
 		{
-			sm_debug("killing %d rays valid,  %d corr found -> %d after double cut -> %d after adaptive cut \n", count_equal(laser_sens->valid, laser_sens->nrays, 1), num_corr, num_corr2, num_corr_after);
+			sm_debug("killing. laser_sens has %d/%d rays valid,  %d corr found -> %d after double cut -> %d after adaptive cut \n", count_equal(laser_sens->valid, laser_sens->nrays, 1), laser_sens->nrays, num_corr, num_corr2, num_corr_after);
 			if(JJ) {
 				jj_add_double_array("x_new", x_new, 3);
 				jj_add_double_array("delta", delta, 3);

@@ -10,7 +10,6 @@
 
 #include "icp.h"
 
-#include "../csm_all.h"
 
 void sm_journal_open(const char* file) {
 	file = 0;
@@ -38,9 +37,19 @@ void sm_icp(struct sm_params*params, struct sm_result*res) {
 		return;
 	}
 	
+	sm_debug("sm_icp: laser_sens has %d/%d; laser_ref has %d/%d rays valid\n",
+		count_equal(laser_sens->valid, laser_sens->nrays, 1), laser_sens->nrays,
+		count_equal(laser_ref->valid, laser_ref->nrays, 1), laser_ref->nrays);
+	
+	
 	/** Mark as invalid the rays outside of (min_reading, max_reading] */
 	ld_invalid_if_outside(laser_ref, params->min_reading, params->max_reading);
 	ld_invalid_if_outside(laser_sens, params->min_reading, params->max_reading);
+	
+	sm_debug("sm_icp:  laser_sens has %d/%d; laser_ref has %d/%d rays valid (after removing outside interval [%f, %f])\n",
+		count_equal(laser_sens->valid, laser_sens->nrays, 1), laser_sens->nrays,
+		count_equal(laser_ref->valid, laser_ref->nrays, 1), laser_ref->nrays,
+   	   params->min_reading, params->max_reading);
 	
 	if(JJ) jj_context_enter("sm_icp");
 	

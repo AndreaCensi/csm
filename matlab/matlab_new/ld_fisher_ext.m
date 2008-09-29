@@ -5,6 +5,7 @@ function I0 = ld_fisher_ext(ld, vars)
 %
 % This function computes Fisher's information matrix, in robot coordinates.
 % Uses field 'true_alpha' (and 'theta', 'readings').  
+% If true_alpha is NAN, it tries to use alpha.
 % 
 % For details about the Fisher's information matrix for localization,
 % please see this paper: http://purl.org/censi/2006/accuracy
@@ -13,7 +14,14 @@ I0 = zeros(3,3);
 
 nused = 0;
 for i=1:ld.nrays
-	alpha_i = ld.true_alpha(i);
+	alpha_i = NaN;
+	if isfield(ld, 'true_alpha')
+		alpha_i = ld.true_alpha(i);
+	end
+	if isnan(alpha_i)
+		alpha_i = ld.alpha(i);
+	end
+	
 	r = ld.readings(i);
 
 	if isnan(alpha_i) | isnan(r) | not(ld.valid(i))
@@ -23,8 +31,6 @@ for i=1:ld.nrays
 	phi_i   = ld.theta(i);
 	beta_i  = alpha_i - (phi_i);
 	
-	% dr_dt = v(beta_i)' / cos(beta_i);
-	dr_dt = (v(phi_i) + v(phi_i+pi/2) * tan(beta_i))';
 	dr_dt = v(alpha_i)' / cos(beta_i);
 	dr_dtheta = r * tan(beta_i);
 	
