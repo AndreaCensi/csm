@@ -18,7 +18,10 @@ struct hsm_params {
 	double xc_directions_min_distance_deg;
 
 	double max_translation;
+	int linear_xc_max_npeaks;
+	double linear_xc_peaks_min_distance;
 };
+
 
 struct hsm_hypothesis {
 	double pose[3];
@@ -59,6 +62,7 @@ struct hsm_buffer_struct {
 	int num_linear_cells;
 	int num_angular_cells;	
 	double rho_min, rho_max;
+	double linear_cell_size;
 	
 	/** ht[theta][rho] */
 	double *theta;
@@ -78,11 +82,17 @@ struct hsm_buffer_struct {
 		int hsm_rho2index(hsm_buffer b, double rho, int *rho_index, double *alpha);
 
 
-void hsm_circular_cross_corr_stupid(const double *f1, const double *f2, double*res);
+void hsm_circular_cross_corr_stupid(int n, const double *a, const double *b, double*res);
 void hsm_find_peaks_circ(int n, const double*f, double min_angle_deg, int unidir, int max_peaks, 
 	int*peaks, int* npeaks) ;
 
 void swap_int(int*a,int*b);
-void quicksort_with_indexes(const double*values, int*array, int begin, int end);
+void quicksort_with_indexes(const double*values, int descent, int*array, int begin, int end);
+
+void hsm_find_peaks_linear(int n, const double*f, double min_dist, int max_peaks, 
+	int*peaks, int* npeaks);
+void hsm_find_local_maxima_linear(int n, const double*f, int*maxima, int*nmaxima);
+	 
+void hsm_linear_cross_corr_stupid(int na, const double *a, int nb, const double *b, double*res, int*lags, int min_lag, int max_lag);
 
 #endif

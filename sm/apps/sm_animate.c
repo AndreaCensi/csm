@@ -185,7 +185,7 @@ int draw_animation(anim_params* p, JO jo, const char*filename) {
 		if(p->write_info) {
 			cairo_save(cr);
 				cairo_identity_matrix(cr);
-				cairo_set_font_size (cr, 20);
+				cairo_set_font_size (cr, 20.0f);
 				cairo_select_font_face (cr, "Sans",
 				    CAIRO_FONT_SLANT_NORMAL,
 				    CAIRO_FONT_WEIGHT_NORMAL);

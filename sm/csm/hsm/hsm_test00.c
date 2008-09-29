@@ -29,19 +29,28 @@ int main(int argc, const char**argv) {
 	options_banner(banner);
 	
 	
-	struct option* ops = options_allocate(10);
+	struct option* ops = options_allocate(20);
 	options_string(ops, "in1", &p.file_input1, "stdin", "Input file 1");
 	options_string(ops, "in2", &p.file_input2, "stdin", "Input file 2");
 	options_string(ops, "out", &p.prefix, "test00", "Output file prefix ");
 	options_double(ops, "hsm_linear_cell_size", &p.hsmp.linear_cell_size, 1.0, "Size of a rho cell");
 	options_double(ops, "hsm_angular_cell_size_deg", &p.hsmp.angular_cell_size_deg, 1.0, "Size of angualar cell (deg)");
-
+	options_int(ops, "hsm_num_angular_hypotheses", &p.hsmp.num_angular_hypotheses, 8, "Number of angular hypotheses.");
+	options_double(ops, "hsm_xc_directions_min_distance_deg", &p.hsmp.xc_directions_min_distance_deg, 10.0, "Min distance between directions for cross corr (deg)");
+	options_int(ops, "hsm_xc_ndirections", &p.hsmp.xc_ndirections, 3, "Number of directions for cross corr (deg)");
+	options_double(ops, "hsm_angular_hyp_min_distance_deg", &p.hsmp.angular_hyp_min_distance_deg, 10.0, "Min distance between different angular hypotheses  (deg)");
+	
+	options_int(ops, "hsm_linear_xc_max_npeaks", &p.hsmp.linear_xc_max_npeaks, 3, "Number of peaks per direction for linear translation");
+	options_double(ops, "hsm_linear_xc_peaks_min_distance", &p.hsmp.linear_xc_peaks_min_distance, 5, "Min distance between different peaks in linear correlation");
+	
 	options_int(ops, "debug", &p.debug, 0, "Shows debug information");
 	
 	if(!options_parse_args(ops, argc, argv)) {
 		options_print_help(ops, stderr);
 		return -1;
 	}
+	
+	sm_debug_write(p.debug);
 	
 	FILE * in1 = open_file_for_reading(p.file_input1);
 	FILE * in2 = open_file_for_reading(p.file_input2);
@@ -56,13 +65,15 @@ int main(int argc, const char**argv) {
 	hsm_compute_spectrum(b1);
 	hsm_compute_spectrum(b2);
 	
-/*	hsm_match(&(p.hsmp),b1,b2);*/
+	p.hsmp.max_translation = max(b1->rho_max, b2->rho_max);
+	
+	hsm_match(&(p.hsmp),b1,b2);
 
 	char filename_ht1[256]; sprintf(filename_ht1, "%s_ht1.pgm", p.prefix);
 	char filename_ht2[256]; sprintf(filename_ht2, "%s_ht2.pgm", p.prefix);
 	char filename_hs1[256]; sprintf(filename_hs1, "%s_hs1.pgm", p.prefix);
 	char filename_hs2[256]; sprintf(filename_hs2, "%s_hs2.pgm", p.prefix);
-	char filename_hs_xc[256]; sprintf(filename_hs_xc, "%s_hs1.pgm", p.prefix);
+	char filename_hs_xc[256]; sprintf(filename_hs_xc, "%s_hs_xc.pgm", p.prefix);
 	
 	FILE * file_ht1 = open_file_for_writing(filename_ht1);
 	FILE * file_ht2 = open_file_for_writing(filename_ht2);
