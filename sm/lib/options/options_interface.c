@@ -16,7 +16,7 @@
 struct option* options_allocate(int n) {
 	n += 2; /* better safe than sorry */
 	struct option* ops = malloc(sizeof(struct option)*n);
-	size_t i; for(i=0;i<n;i++) {
+	int i; for(i=0;i<n;i++) {
 		ops[i].name = 0;
 		ops[i].type = (enum option_type) 0xbeef;
 		ops[i].desc = 0;
@@ -26,7 +26,7 @@ struct option* options_allocate(int n) {
 	return ops;
 }
 
-/* XXX farlo meglio */
+/* Find next empty slot in the array. XXX farlo meglio */
 struct option* options_next_empty(struct option*ops) {
 	int i; for(i=0;;i++) {
 		if(ops[i].name == 0)

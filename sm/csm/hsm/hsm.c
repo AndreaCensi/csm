@@ -76,7 +76,18 @@ int hsm_rho2index(hsm_buffer b, double rho, int *rho_index, double *alpha) {
 	return 1;
 }
 
+double max(double a, double b) {
+	return a>b?a:b;
+}
 void hsm_compute_spectrum(hsm_buffer b) {
+	for(int t=0; t<b->num_angular_cells; t++) {
+		b->hs[t] = 0;
+		for(int r=0;r<b->num_linear_cells;r++)
+			b->hs[t] = max(b->hs[t], b->ht[t][r]);
+	}
+}
+
+void hsm_compute_spectrum_norm(hsm_buffer b) {
 	for(int t=0; t<b->num_angular_cells; t++) {
 		b->hs[t] = 0;
 		for(int r=0;r<b->num_linear_cells;r++)

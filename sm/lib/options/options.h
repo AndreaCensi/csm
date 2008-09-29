@@ -15,6 +15,9 @@ extern "C" {
 
 enum option_type { OPTION_STRING=0, OPTION_INT=1, OPTION_DOUBLE=2 };
  
+#define OPTIONS_NAME_MAXSIZE 32
+#define OPTIONS_VALUE_MAXSIZE 256
+
 
 struct option {
 	/** Name of the option (or 0 if this is the last element). */
@@ -87,9 +90,19 @@ int options_valid(struct option*op);
 
 void options_dump(struct option * options, FILE*f, int write_desc);
 
+int options_parse_stream(struct option*ops, const char*pwd, FILE*file);
 
-#define OPTIONS_NAME_MAXSIZE 32
-#define OPTIONS_VALUE_MAXSIZE 256
+/** Our version of strdup. */
+char * strdup_(const char *s);
+/** Return 1 if ok. */
+int get_double(double*p, const char*s);
+/** Return 1 if ok. */
+int get_int(int*p, const char*s);
+
+/* Find next empty slot in the array. XXX farlo meglio */
+struct option* options_next_empty(struct option*ops);
+
+
 
 #ifdef __cplusplus
 }

@@ -42,6 +42,7 @@ char * strdup_(const char *s) {
 	return t;
 }
 
+
 /** Return 1 if ok. */
 int get_int(int*p, const char*s) {
 	int value;
@@ -148,8 +149,9 @@ int options_parse_stream(struct option*ops, const char*pwd, FILE*file) {
 		/* name continus until nonspace char */
 		while(!isspace(*line)) line++;
 
-		const char * value;
-		if(*line == 0) value = ""; else {
+		char empty[5] = "";
+		char * value;
+		if(*line == 0) value = empty; else {
 			*line = 0; /* terminating 0 for name */
 			line++;
 			/* ignore spaces */

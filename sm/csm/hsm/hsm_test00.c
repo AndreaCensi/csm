@@ -56,7 +56,7 @@ int main(int argc, const char**argv) {
 	hsm_compute_spectrum(b1);
 	hsm_compute_spectrum(b2);
 	
-	hsm_match(&(p.hsmp),b1,b2);
+/*	hsm_match(&(p.hsmp),b1,b2);*/
 
 	char filename_ht1[256]; sprintf(filename_ht1, "%s_ht1.pgm", p.prefix);
 	char filename_ht2[256]; sprintf(filename_ht2, "%s_ht2.pgm", p.prefix);
@@ -91,7 +91,7 @@ void write_function_on_image(int n, const double*f, int rows, FILE*out) {
 	int cols = n;
 	gray ** grays = pgm_allocarray(cols, rows);
 	
-	double maxvalue=f[0];
+	double maxvalue=0;
 	for(int i=0;i<n;i++)
 		if(f[i]>0) /* case NAN */
 		maxvalue = GSL_MAX(maxvalue, f[i]);
