@@ -71,7 +71,6 @@ SUBDIRS(csm)
 MACRO(new_executable exec)
 	ADD_EXECUTABLE(${exec} apps/${exec}.c)
 	TARGET_LINK_LIBRARIES(${exec} csm-static ${csm_link_flags})
-	# gpc json-c egsl options)
 	INSTALL(PROGRAMS ${exec} DESTINATION bin)
 ENDMACRO(new_executable exec)
 
@@ -175,6 +174,15 @@ INSTALL(TARGETS csm-static ARCHIVE DESTINATION lib)
 ADD_LIBRARY(csm SHARED ${csm_sources})
 TARGET_LINK_LIBRARIES(csm ${csm_link_flags})
 INSTALL(TARGETS csm ARCHIVE DESTINATION lib LIBRARY DESTINATION lib)
+
+
+INCLUDE_DIRECTORIES(/sw/include)
+LINK_DIRECTORIES(/sw/lib)
+
+ADD_EXECUTABLE(hsm_test00 ./csm/hsm/hsm_test00.c ./csm/hsm/hsm.c)
+TARGET_LINK_LIBRARIES(hsm_test00 csm-static ${csm_link_flags} pgm pnm pbm)
+INSTALL(PROGRAMS hsm_test00 DESTINATION bin)
+
 
 
 

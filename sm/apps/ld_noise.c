@@ -20,7 +20,7 @@ int main(int argc, const char * argv[]) {
 	
 	struct ld_noise_params p;
 	
-	struct option* ops = options_allocate(3);
+	struct option* ops = options_allocate(20);
 	options_double(ops, "discretization", &p.discretization, 0.0, 
 		"Size of discretization (disabled if 0)");
 	options_double(ops, "sigma", &p.sigma, 0.0, 
