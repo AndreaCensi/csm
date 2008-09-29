@@ -52,7 +52,7 @@ int gpc_solve(int K, const struct gpc_corr*c,
 		double C11 = c[k].C[1][1];
 		
 		if(C01 != C10) {
-			fprintf(stderr, "k=%d; I expect C to be a symmetric matrix.\n");
+			fprintf(stderr, "k=%d; I expect C to be a symmetric matrix.\n", k);
 			return 0;
 		}
 #if GPC_CHECK_SEMIDEF
