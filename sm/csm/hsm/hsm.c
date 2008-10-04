@@ -2,7 +2,7 @@
 #include <math.h>
 #include <assert.h>
 #include "hsm.h"
-
+#include <csm/csm_all.h>
 
 hsm_buffer hsm_buffer_alloc(struct hsm_params*p) {
 	hsm_buffer b = (hsm_buffer) malloc(sizeof(struct hsm_buffer_struct));
@@ -34,16 +34,39 @@ hsm_buffer hsm_buffer_alloc(struct hsm_params*p) {
 	
 	b->hs_cross_corr = (double*) calloc((size_t)b->num_angular_cells, sizeof(double));
 	
+	int max_num_results = (int) p->num_angular_hypotheses * pow( (float) p->linear_xc_max_npeaks,  (float) p->xc_ndirections);
+	
+	b->num_valid_results = 0;
+	b->results = (double**) calloc((size_t)max_num_results, sizeof(double*));
+	for(int i=0;i<b->num_angular_cells; i++)
+		b->results[i] = (double*) calloc(3, sizeof(double));
+
+	b->results_quality = (double*) calloc((size_t)max_num_results, sizeof(double));
+
+	double zero[3] = {0,0,0};
+	hsm_compute_ht_base(b, zero);		
+	
 	return b;
 }
 
 void hsm_buffer_free(hsm_buffer b) {
-	
+	/* TODO */
 }
 
-void hsm_compute_ht_point(hsm_buffer b, double x, double y, double weight) {
+void hsm_compute_ht_base(hsm_buffer b, const double base_pose[3]) {
+	b->disp[0] = base_pose[0];
+	b->disp[1] = base_pose[1];
+	b->disp[2] = base_pose[2];
+	b->disp_th_cos = cos(base_pose[2]);
+	b->disp_th_sin = sin(base_pose[2]);
+}
+
+void hsm_compute_ht_point(hsm_buffer b, double x0, double y0, double weight) {
+	double x1 = x0 * b->disp_th_cos - y0 * b->disp_th_sin + b->disp[0];
+	double y1 = x0 * b->disp_th_sin + y0 * b->disp_th_cos + b->disp[1];
+	
 	for(int i=0; i<b->num_angular_cells; i++) {
-		double rho = x * b->cost[i] + y * b->sint[i];
+		double rho = x1 * b->cost[i] + y1 * b->sint[i];
 		int rho_index;
 		double alpha;
 		if(!hsm_rho2index(b, rho, &rho_index, &alpha)) continue;
@@ -58,6 +81,9 @@ void hsm_compute_ht_point(hsm_buffer b, double x, double y, double weight) {
 	}
 }
 
+double mdax(double a, double b) {
+	return a>b?a:b;
+}
 
 /** Returns 0 if out of the buffer. rho_index is the closest cell, 
 	alpha between -0.5 and 0.5 specifies the distance from the center of the cell. */
@@ -77,9 +103,7 @@ int hsm_rho2index(hsm_buffer b, double rho, int *rho_index, double *alpha) {
 	return 1;
 }
 
-double max(double a, double b) {
-	return a>b?a:b;
-}
+
 void hsm_compute_spectrum(hsm_buffer b) {
 	for(int t=0; t<b->num_angular_cells; t++) {
 		b->hs[t] = 0;
@@ -102,9 +126,11 @@ void hsm_match(struct hsm_params*p, hsm_buffer b1, hsm_buffer b2) {
 	assert(b1->num_angular_cells == b2->num_angular_cells);
 	assert(p->max_translation > 0);
 	assert(b1->linear_cell_size > 0);
+	
+	b1->num_valid_results = 0;
 
 	/* Compute cross-correlation */
-	hsm_circular_cross_corr_stupid(b1->num_angular_cells, b1->hs, b2->hs, b1->hs_cross_corr);
+	hsm_circular_cross_corr_stupid(b1->num_angular_cells, b2->hs, b1->hs, b1->hs_cross_corr);
 
 	/* Find peaks in cross-correlation */
 	int peaks[p->num_angular_hypotheses], npeaks;
@@ -123,12 +149,22 @@ void hsm_match(struct hsm_params*p, hsm_buffer b1, hsm_buffer b2) {
 		/* Superimpose the two spectra */
 		double mult[b1->num_angular_cells];
 		for(int r=0;r<b1->num_angular_cells;r++)
-			mult[r] = b2->hs[r] * b1->hs[(r+lag)%b1->num_angular_cells];
+			mult[r] = b1->hs[r] * b2->hs[(r-lag)%b1->num_angular_cells];
 			
 		/* Find directions where both are intense */
 		int directions[p->xc_ndirections], ndirections;
 		hsm_find_peaks_circ(b1->num_angular_cells, b1->hs_cross_corr, p->xc_directions_min_distance_deg, 1, p->xc_ndirections, directions, &ndirections);
 	
+		struct {
+			double angle;
+			int nhypotheses;
+			struct {
+				double delta;
+				double value;
+			} hypotheses[p->linear_xc_max_npeaks];
+		} dirs[ndirections];
+		
+		
 		sm_debug("Using %d (max %d) correlations directions.\n", ndirections, p->xc_ndirections);
 		
 		int max_lag = (int) ceil(p->max_translation / b1->linear_cell_size);
@@ -139,15 +175,20 @@ void hsm_match(struct hsm_params*p, hsm_buffer b1, hsm_buffer b2) {
 		sm_log_push("loop on xc direction");
 		/* For each correlation direction */
 		for(int cd=0;cd<ndirections;cd++) {
+			
+ 			dirs[cd].angle = (directions[cd]) * (2*M_PI/b1->num_angular_cells);
+			
 			/* Do correlation */
 			int    lags  [2*max_lag + 1];
 			double xcorr [2*max_lag + 1];
 			
-			double *f1 = b1->ht[ (directions[cd]+lag)%b1->num_angular_cells];
-			double *f2 = b2->ht[ (directions[cd])%b1->num_angular_cells];
+			double *f1 = b1->ht[ (directions[cd])%b1->num_angular_cells];
+			double *f2 = b2->ht[ (directions[cd]-lag)%b1->num_angular_cells];
 			
 			hsm_linear_cross_corr_stupid(
-				b1->num_linear_cells,f1,b2->num_linear_cells,f2, xcorr, lags, min_lag, max_lag);
+				b2->num_linear_cells,f2, 
+				b1->num_linear_cells,f1,
+				xcorr, lags, min_lag, max_lag);
 
 			/* Find peaks of cross-correlation */
 			int linear_peaks[p->linear_xc_max_npeaks], linear_npeaks;
@@ -158,23 +199,138 @@ void hsm_match(struct hsm_params*p, hsm_buffer b1, hsm_buffer b2) {
 			
 			sm_debug("theta hyp #%d: Found %d (max %d) peaks for correlation.\n",
 				cd, linear_npeaks, p->linear_xc_max_npeaks);
-				
+			
+			dirs[cd].nhypotheses = linear_npeaks;
 			sm_log_push("Considering each peak of linear xc");
 			for(int lp=0;lp<linear_npeaks;lp++) {
 				int lag = lags[linear_peaks[lp]];
 				double value = xcorr[linear_peaks[lp]];
 				double lag_m = lag * b1->linear_cell_size;
 				sm_debug("lag: %d  delta: %f  value: %f \n", lag, lag_m, value);
+				dirs[cd].hypotheses[lp].delta = lag_m;
+				dirs[cd].hypotheses[lp].value = value;
 			}
 			sm_log_pop();
 			
 		} /* xc direction */
 		sm_log_pop();
+		
+		sm_debug("Now doing all combinations. How many are there?");
+		int possible_choices[ndirections];
+		int num_combinations = 1;
+		for(int cd=0;cd<ndirections;cd++) {
+			possible_choices[cd] = dirs[cd].nhypotheses;
+			num_combinations *= dirs[cd].nhypotheses;
+		}
+		sm_debug("Total: %d combinations", num_combinations);
+		sm_log_push("For each combination..");
+		for(int comb=0;comb<num_combinations;comb++) {
+			int choices[ndirections];
+			hsm_generate_combinations(ndirections, possible_choices, comb, choices);
+			
+			/* Linear least squares */
+			double M[2][2]={{0,0},{0,0}}; double Z[2]={0,0};
+			/* heuristic quality value */
+			double sum_values = 0;
+			for(int cd=0;cd<ndirections;cd++) {
+				double angle = dirs[cd].angle;
+				double c = cos(angle), s = sin(angle);
+				double w = dirs[cd].hypotheses[choices[cd]].value;
+				double y = dirs[cd].hypotheses[choices[cd]].delta;
+				
+				M[0][0] += c * c * w;
+				M[1][0] += c * s * w;
+				M[0][1] += c * s * w;
+				M[1][1] += s * s * w;
+				Z[0] += w * c * y;
+				Z[1] += w * s * y;
+				
+				sum_values += w;
+			}
+			
+			double det = M[0][0]*M[1][1]-M[0][1]*M[1][0];
+			double Minv[2][2];
+			Minv[0][0] = M[1][1] * (1/det);
+			Minv[1][1] = M[0][0] * (1/det);
+			Minv[0][1] = -M[0][1] * (1/det);
+			Minv[1][0] = -M[1][0] * (1/det);
+			
+			double t[2] = {
+				Minv[0][0]*Z[0] + Minv[0][1]*Z[1],
+				Minv[1][0]*Z[0] + Minv[1][1]*Z[1]};
+
+			/* copy result in results slot */
+			
+			int k = b1->num_valid_results;
+			b1->results[k][0] = t[0];
+			b1->results[k][1] = t[1];
+			b1->results[k][2] = lag_angle;
+			b1->results_quality[k] = sum_values;
+			b1->num_valid_results++;
+		}
+			
 	} /* theta hypothesis */
 	sm_log_pop();
 	sm_log_pop();
+
+/*	for(int i=0;i<b1->num_valid_results;i++) {
+		printf("#%d %.0fdeg %.1fm %.1fm  quality %f \n",i, 
+			rad2deg(b1->results[i][2]),
+			b1->results[i][0],
+			b1->results[i][1],
+			b1->results_quality[i]);
+	}*/
+
+	
+	/* Sorting based on values */
+	int indexes[b1->num_valid_results];
+	for(int i=0;i<b1->num_valid_results;i++)
+		indexes[i] = i;
+	
+	qsort_r(indexes, b1->num_valid_results, sizeof(int), (void*)b1->results_quality, compare_descending);
+	
+	/* copy in the correct order*/
+	double*results_tmp[b1->num_valid_results];
+	double results_quality_tmp[b1->num_valid_results]; 
+	for(int i=0;i<b1->num_valid_results;i++) {
+		results_tmp[i] = b1->results[i];
+		results_quality_tmp[i] = b1->results_quality[i];
+	}
+
+	for(int i=0;i<b1->num_valid_results;i++) {
+		b1->results[i] = results_tmp[indexes[i]];
+		b1->results_quality[i] = results_quality_tmp[indexes[i]];
+	}
+	
+	for(int i=0;i<b1->num_valid_results;i++) {
+		printf("after #%d %.0fdeg %.1fm %.1fm  quality %f \n",i, 
+			rad2deg(b1->results[i][2]),
+			b1->results[i][0],
+			b1->results[i][1],
+			b1->results_quality[i]);
+	}
 }
 
+
+void hsm_generate_combinations(int nslots, const int possible_choices[], 
+	int i, int i_choice[]) 
+{
+	for(int slot=0;slot<nslots;slot++) {
+		i_choice[slot] = i % possible_choices[slot];
+		i = (i - i % possible_choices[slot]) / possible_choices[slot];
+	}
+}
+
+int compare_ascending(void *f_pt, const void *index_pt1, const void *index_pt2) {
+	int i1 = *( (const int*) index_pt1);
+	int i2 = *( (const int*) index_pt2);
+	double * f = (double*) f_pt;
+	return f[i1] < f[i2] ? -1 : f[i1] == f[i2] ? 0 : 1;
+}
+
+int compare_descending(void *f_pt, const void *index_pt1, const void *index_pt2) {
+	return -compare_ascending(f_pt,index_pt1,index_pt2);
+}
 
 void hsm_find_peaks_circ(int n, const double*f, double min_angle_deg, int unidir, int max_peaks, 
 	int*peaks, int* npeaks) 
@@ -190,8 +346,8 @@ void hsm_find_peaks_circ(int n, const double*f, double min_angle_deg, int unidir
 	sm_debug("Found %d of %d are local maxima.\n", nmaxima, n);
 	
 	/* Sort based on value */
-	quicksort_with_indexes(f, 1, maxima, 0, nmaxima-1);
-	
+	qsort_r(maxima, (size_t) nmaxima, sizeof(int), (void*)f, compare_descending);
+
 	*npeaks = 0;
 
 	sm_log_push("For each maximum");
@@ -249,7 +405,7 @@ void hsm_find_peaks_linear(int n, const double*f, double min_dist, int max_peaks
 	sm_debug("Found %d of %d are local maxima.\n", nmaxima, n);
 	
 	/* Sort based on value */
-	quicksort_with_indexes(f, 1, maxima, 0, nmaxima-1);
+	qsort_r(maxima, (size_t) nmaxima, sizeof(int), (void*)f, compare_descending);
 	
 	*npeaks = 0;
 	sm_log_push("for each maximum");
@@ -312,34 +468,6 @@ void hsm_find_local_maxima_linear(int n, const double*f, int*maxima, int*nmaxima
 	}
 }
 
-void swap_int(int*a,int*b) {
-	int t = *a; *a = *b; *b=t;
-}
-
-/** Code adapted from Wikipedia */
-void quicksort_with_indexes(const double*values, int descent, int*array, int begin, int end) {
-	if (end > begin) {
-		double pivot = values[array[begin]];
-		int l = begin + 1;
-		int r = end+1;
-		while(l < r) {
-			int condition = values[array[l]] < pivot;
-			if(descent) condition = !condition;
-			if (condition) {
-				l++;
-			} else {
-				r--;
-				swap_int(array+l, array+r); 
-			}
-		}
-		l--;
-		swap_int(array+begin, array+l);
-		if(l>begin)
-			quicksort_with_indexes(values, descent, array, begin, l);
-		if(end>r)
-			quicksort_with_indexes(values, descent, array, r, end);
-	}
-}
 
 
 void hsm_circular_cross_corr_stupid(int n, const double *a, const double *b, double*res) {

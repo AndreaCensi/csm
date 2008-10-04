@@ -17,9 +17,10 @@ struct {
 	int debug;
 	
 	struct hsm_params hsmp;
+	
 } p;
 
-hsm_buffer create_ht_for_image(struct hsm_params*p, FILE*in);
+hsm_buffer create_ht_for_image(struct hsm_params*p, FILE*in, const double base[3]);
 void write_ht_on_image(hsm_buffer b, FILE*out);
 void write_function_on_image(int n, const double*f, int rows, FILE*out);
 
@@ -31,7 +32,7 @@ int main(int argc, const char**argv) {
 	
 	struct option* ops = options_allocate(20);
 	options_string(ops, "in1", &p.file_input1, "stdin", "Input file 1");
-	options_string(ops, "in2", &p.file_input2, "stdin", "Input file 2");
+	options_string(ops, "in2", &p.file_input2, "", "Input file 2");
 	options_string(ops, "out", &p.prefix, "test00", "Output file prefix ");
 	options_double(ops, "hsm_linear_cell_size", &p.hsmp.linear_cell_size, 1.0, "Size of a rho cell");
 	options_double(ops, "hsm_angular_cell_size_deg", &p.hsmp.angular_cell_size_deg, 1.0, "Size of angualar cell (deg)");
@@ -41,7 +42,7 @@ int main(int argc, const char**argv) {
 	options_double(ops, "hsm_angular_hyp_min_distance_deg", &p.hsmp.angular_hyp_min_distance_deg, 10.0, "Min distance between different angular hypotheses  (deg)");
 	
 	options_int(ops, "hsm_linear_xc_max_npeaks", &p.hsmp.linear_xc_max_npeaks, 3, "Number of peaks per direction for linear translation");
-	options_double(ops, "hsm_linear_xc_peaks_min_distance", &p.hsmp.linear_xc_peaks_min_distance, 5, "Min distance between different peaks in linear correlation");
+	options_double(ops, "hsm_linear_xc_peaks_min_distance", &p.hsmp.linear_xc_peaks_min_distance, 5.0, "Min distance between different peaks in linear correlation");
 	
 	options_int(ops, "debug", &p.debug, 0, "Shows debug information");
 	
@@ -51,20 +52,35 @@ int main(int argc, const char**argv) {
 	}
 	
 	sm_debug_write(p.debug);
-	
-	FILE * in1 = open_file_for_reading(p.file_input1);
-	FILE * in2 = open_file_for_reading(p.file_input2);
-	if(!in1 | !in2 ) return -2;
 
-	hsm_buffer b1 = create_ht_for_image(&(p.hsmp), in1);
-	hsm_buffer b2 = create_ht_for_image(&(p.hsmp), in2);
 
-	if(!b1 | !b2) return -3;
-	
-	
+	FILE * in1 = open_file_for_reading(p.file_input1);   if(!in1) return -2;
+
+	sm_debug("Computing HT for image %s.\n", p.file_input1);
+
+	hsm_buffer b1 = create_ht_for_image(&(p.hsmp), in1, 0);  if(!b1) return -3;
 	hsm_compute_spectrum(b1);
+
+
+	if(!strcmp(p.file_input2,"")) {
+		p.file_input2 = p.file_input1;
+		p.hsmp.debug_true_x_valid = 1;
+		p.hsmp.debug_true_x[0] = 40;
+		p.hsmp.debug_true_x[1] = -20;
+		p.hsmp.debug_true_x[2] = deg2rad(40.0);
+	} else {
+		p.hsmp.debug_true_x_valid = 0;
+	}
+
+	FILE * in2 = open_file_for_reading(p.file_input2);       if(!in2 ) return -2;
+	sm_debug("Computing HT for image %s.\n", p.file_input2);
+	double *base = p.hsmp.debug_true_x_valid ? p.hsmp.debug_true_x : 0;
+	hsm_buffer b2 = create_ht_for_image(&(p.hsmp), in2, base);     if(!b2) return -3;	
 	hsm_compute_spectrum(b2);
 	
+	
+	
+	sm_debug("Doing scan-matching..\n"); 
 	p.hsmp.max_translation = max(b1->rho_max, b2->rho_max);
 	
 	hsm_match(&(p.hsmp),b1,b2);
@@ -92,9 +108,6 @@ int main(int argc, const char**argv) {
 	write_function_on_image(b1->num_angular_cells, b1->hs_cross_corr, 200, file_hs_xc);
 	
 
-/*	struct hsm_result * res = hsm_matching(&p, b1, b2);
-	
-	hsm_result_free(res);*/
 }
 
 
@@ -148,13 +161,17 @@ void write_ht_on_image(hsm_buffer b, FILE*out) {
 	pgm_freearray(grays,rows);
 }
 
-hsm_buffer create_ht_for_image(struct hsm_params*p, FILE*in) {
+hsm_buffer create_ht_for_image(struct hsm_params*p, FILE*in, const double base[3]) {
 	int cols, rows; gray max;
 	gray **image = pgm_readpgm(in, &cols, &rows, &max);
 	if(!image) { return 0; }
 
 	p->max_norm = 1.1 * hypot(cols/2.0, rows/2.0);
 	hsm_buffer b = hsm_buffer_alloc(p);
+
+	/** Add base displacement if specified */
+	if(base)
+		hsm_compute_ht_base(b, base);
 	
    for (int v=0; v<rows; v++)
 	for (int u=0; u<cols; u++) {
