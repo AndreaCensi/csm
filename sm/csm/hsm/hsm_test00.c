@@ -66,7 +66,7 @@ int main(int argc, const char**argv) {
 		p.file_input2 = p.file_input1;
 		p.hsmp.debug_true_x_valid = 1;
 		p.hsmp.debug_true_x[0] = 40;
-		p.hsmp.debug_true_x[1] = -20;
+		p.hsmp.debug_true_x[1] = 0;
 		p.hsmp.debug_true_x[2] = deg2rad(40.0);
 	} else {
 		p.hsmp.debug_true_x_valid = 0;

@@ -16,7 +16,7 @@ hsm_buffer hsm_buffer_alloc(struct hsm_params*p) {
 	b->hs            =  (double*)  calloc((size_t)b->num_angular_cells, sizeof(double));
 	b->hs_cross_corr =  (double*)  calloc((size_t)b->num_angular_cells, sizeof(double));
 	b->ht            =  (double**) calloc((size_t)b->num_angular_cells, sizeof(double*));
-	
+
 	for(int i=0; i<b->num_angular_cells; i++) {
 		b->ht[i] = (double*) calloc((size_t)b->num_linear_cells, sizeof(double));
 		for(int r=0;r<b->num_linear_cells;r++)
@@ -31,11 +31,11 @@ hsm_buffer hsm_buffer_alloc(struct hsm_params*p) {
 		b->sint[i] = sin(b->theta[i]);
 		b->cost[i] = cos(b->theta[i]);
 	}
-	
+
 	b->hs_cross_corr = (double*) calloc((size_t)b->num_angular_cells, sizeof(double));
-	
+
 	int max_num_results = (int) p->num_angular_hypotheses * pow( (float) p->linear_xc_max_npeaks,  (float) p->xc_ndirections);
-	
+
 	b->num_valid_results = 0;
 	b->results = (double**) calloc((size_t)max_num_results, sizeof(double*));
 	for(int i=0;i<b->num_angular_cells; i++)
@@ -44,8 +44,8 @@ hsm_buffer hsm_buffer_alloc(struct hsm_params*p) {
 	b->results_quality = (double*) calloc((size_t)max_num_results, sizeof(double));
 
 	double zero[3] = {0,0,0};
-	hsm_compute_ht_base(b, zero);		
-	
+	hsm_compute_ht_base(b, zero);
+
 	return b;
 }
 
@@ -64,15 +64,15 @@ void hsm_compute_ht_base(hsm_buffer b, const double base_pose[3]) {
 void hsm_compute_ht_point(hsm_buffer b, double x0, double y0, double weight) {
 	double x1 = x0 * b->disp_th_cos - y0 * b->disp_th_sin + b->disp[0];
 	double y1 = x0 * b->disp_th_sin + y0 * b->disp_th_cos + b->disp[1];
-	
+
 	for(int i=0; i<b->num_angular_cells; i++) {
 		double rho = x1 * b->cost[i] + y1 * b->sint[i];
 		int rho_index;
 		double alpha;
 		if(!hsm_rho2index(b, rho, &rho_index, &alpha)) continue;
-	
+
 		b->ht[i][rho_index] += (1-fabs(alpha)) * weight;
-		
+
 		if( (alpha > 0) && (rho_index < b->num_linear_cells - 1))
 			b->ht[i][rho_index+1] += (fabs(alpha)) * weight;
 
@@ -85,21 +85,22 @@ double mdax(double a, double b) {
 	return a>b?a:b;
 }
 
-/** Returns 0 if out of the buffer. rho_index is the closest cell, 
+/** Returns 0 if out of the buffer. rho_index is the closest cell,
 	alpha between -0.5 and 0.5 specifies the distance from the center of the cell. */
 int hsm_rho2index(hsm_buffer b, double rho, int *rho_index, double *alpha) {
-	*rho_index = 0; *alpha = NAN; 
+	*rho_index = 0; *alpha = NAN;
 	if ( (rho <= b->rho_min) || (rho >= b->rho_max) )
 		return 0;
 
 	/* x belongs to [0, n) */
 	double x = b->num_linear_cells * (rho-b->rho_min) / (b->rho_max-b->rho_min);
-	*rho_index = (int) floor( x );	
+	*rho_index = (int) floor( x );
 	*alpha = (*rho_index+0.5)-x;
-	
+
 	assert(fabs(*alpha) < 0.5);
 	assert(*rho_index >= 0);
 	assert(*rho_index < b->num_linear_cells);
+
 	return 1;
 }
 
@@ -122,11 +123,11 @@ void hsm_compute_spectrum_norm(hsm_buffer b) {
 
 void hsm_match(struct hsm_params*p, hsm_buffer b1, hsm_buffer b2) {
 	sm_log_push("hsm_match");
-	
+
 	assert(b1->num_angular_cells == b2->num_angular_cells);
 	assert(p->max_translation > 0);
 	assert(b1->linear_cell_size > 0);
-	
+
 	b1->num_valid_results = 0;
 
 	/* Compute cross-correlation */
@@ -137,24 +138,24 @@ void hsm_match(struct hsm_params*p, hsm_buffer b1, hsm_buffer b2) {
 	hsm_find_peaks_circ(b1->num_angular_cells, b1->hs_cross_corr, p->angular_hyp_min_distance_deg, 0, p->num_angular_hypotheses, peaks, &npeaks);
 
 	sm_debug("Found %d peaks (max %d) in cross correlation.\n", npeaks, p->num_angular_hypotheses);
-	
+
 	sm_log_push("loop on theta hypotheses");
 	/* lag e' quanto 2 si sposta a destra rispetto a 1 */
 	for(int np=0;np<npeaks;np++) {
 		int lag = peaks[np];
 		double lag_angle = lag * (2*M_PI/b1->num_angular_cells);
-		
+
 		sm_debug("Theta hyp#%d: lag %d, angle %fdeg\n", np, lag, rad2deg(lag_angle));
-		
+
 		/* Superimpose the two spectra */
 		double mult[b1->num_angular_cells];
 		for(int r=0;r<b1->num_angular_cells;r++)
 			mult[r] = b1->hs[r] * b2->hs[(r-lag)%b1->num_angular_cells];
-			
+
 		/* Find directions where both are intense */
 		int directions[p->xc_ndirections], ndirections;
 		hsm_find_peaks_circ(b1->num_angular_cells, b1->hs_cross_corr, p->xc_directions_min_distance_deg, 1, p->xc_ndirections, directions, &ndirections);
-	
+
 		struct {
 			double angle;
 			int nhypotheses;
@@ -163,43 +164,43 @@ void hsm_match(struct hsm_params*p, hsm_buffer b1, hsm_buffer b2) {
 				double value;
 			} hypotheses[p->linear_xc_max_npeaks];
 		} dirs[ndirections];
-		
-		
+
+
 		sm_debug("Using %d (max %d) correlations directions.\n", ndirections, p->xc_ndirections);
-		
+
 		int max_lag = (int) ceil(p->max_translation / b1->linear_cell_size);
 		int min_lag = -max_lag;
 		sm_debug("Max lag: %d cells (max t: %f, cell size: %f)\n",
 			max_lag, p->max_translation, b1->linear_cell_size);
-		
+
 		sm_log_push("loop on xc direction");
 		/* For each correlation direction */
 		for(int cd=0;cd<ndirections;cd++) {
-			
+
  			dirs[cd].angle = (directions[cd]) * (2*M_PI/b1->num_angular_cells);
-			
+
 			/* Do correlation */
 			int    lags  [2*max_lag + 1];
 			double xcorr [2*max_lag + 1];
-			
+
 			double *f1 = b1->ht[ (directions[cd])%b1->num_angular_cells];
 			double *f2 = b2->ht[ (directions[cd]-lag)%b1->num_angular_cells];
-			
+
 			hsm_linear_cross_corr_stupid(
-				b2->num_linear_cells,f2, 
+				b2->num_linear_cells,f2,
 				b1->num_linear_cells,f1,
 				xcorr, lags, min_lag, max_lag);
 
 			/* Find peaks of cross-correlation */
 			int linear_peaks[p->linear_xc_max_npeaks], linear_npeaks;
-			
+
 			hsm_find_peaks_linear(
 				2*max_lag + 1, xcorr, p->linear_xc_peaks_min_distance/b1->linear_cell_size,
 				p->linear_xc_max_npeaks, linear_peaks, &linear_npeaks);
-			
+
 			sm_debug("theta hyp #%d: Found %d (max %d) peaks for correlation.\n",
 				cd, linear_npeaks, p->linear_xc_max_npeaks);
-			
+
 			dirs[cd].nhypotheses = linear_npeaks;
 			sm_log_push("Considering each peak of linear xc");
 			for(int lp=0;lp<linear_npeaks;lp++) {
@@ -212,9 +213,15 @@ void hsm_match(struct hsm_params*p, hsm_buffer b1, hsm_buffer b2) {
 			}
 			sm_log_pop();
 			
+			if(p->debug_true_x_valid) {
+				double true_delta = cos(dirs[cd].angle) * p->debug_true_x[0] + 
+					sin(dirs[cd].angle) * p->debug_true_x[1];
+				sm_debug("true_x    delta = %f \n", true_delta );
+			}
+
 		} /* xc direction */
 		sm_log_pop();
-		
+
 		sm_debug("Now doing all combinations. How many are there?");
 		int possible_choices[ndirections];
 		int num_combinations = 1;
@@ -227,7 +234,7 @@ void hsm_match(struct hsm_params*p, hsm_buffer b1, hsm_buffer b2) {
 		for(int comb=0;comb<num_combinations;comb++) {
 			int choices[ndirections];
 			hsm_generate_combinations(ndirections, possible_choices, comb, choices);
-			
+
 			/* Linear least squares */
 			double M[2][2]={{0,0},{0,0}}; double Z[2]={0,0};
 			/* heuristic quality value */
@@ -237,30 +244,30 @@ void hsm_match(struct hsm_params*p, hsm_buffer b1, hsm_buffer b2) {
 				double c = cos(angle), s = sin(angle);
 				double w = dirs[cd].hypotheses[choices[cd]].value;
 				double y = dirs[cd].hypotheses[choices[cd]].delta;
-				
+
 				M[0][0] += c * c * w;
 				M[1][0] += c * s * w;
 				M[0][1] += c * s * w;
 				M[1][1] += s * s * w;
 				Z[0] += w * c * y;
 				Z[1] += w * s * y;
-				
+
 				sum_values += w;
 			}
-			
+
 			double det = M[0][0]*M[1][1]-M[0][1]*M[1][0];
 			double Minv[2][2];
 			Minv[0][0] = M[1][1] * (1/det);
 			Minv[1][1] = M[0][0] * (1/det);
 			Minv[0][1] = -M[0][1] * (1/det);
 			Minv[1][0] = -M[1][0] * (1/det);
-			
+
 			double t[2] = {
 				Minv[0][0]*Z[0] + Minv[0][1]*Z[1],
 				Minv[1][0]*Z[0] + Minv[1][1]*Z[1]};
 
 			/* copy result in results slot */
-			
+
 			int k = b1->num_valid_results;
 			b1->results[k][0] = t[0];
 			b1->results[k][1] = t[1];
@@ -268,30 +275,30 @@ void hsm_match(struct hsm_params*p, hsm_buffer b1, hsm_buffer b2) {
 			b1->results_quality[k] = sum_values;
 			b1->num_valid_results++;
 		}
-			
+
 	} /* theta hypothesis */
 	sm_log_pop();
 	sm_log_pop();
 
 /*	for(int i=0;i<b1->num_valid_results;i++) {
-		printf("#%d %.0fdeg %.1fm %.1fm  quality %f \n",i, 
+		printf("#%d %.0fdeg %.1fm %.1fm  quality %f \n",i,
 			rad2deg(b1->results[i][2]),
 			b1->results[i][0],
 			b1->results[i][1],
 			b1->results_quality[i]);
 	}*/
 
-	
+
 	/* Sorting based on values */
 	int indexes[b1->num_valid_results];
 	for(int i=0;i<b1->num_valid_results;i++)
 		indexes[i] = i;
-	
-	qsort_r(indexes, b1->num_valid_results, sizeof(int), (void*)b1->results_quality, compare_descending);
-	
+
+	qsort_r(indexes, (size_t) b1->num_valid_results, sizeof(int), (void*)b1->results_quality, compare_descending);
+
 	/* copy in the correct order*/
 	double*results_tmp[b1->num_valid_results];
-	double results_quality_tmp[b1->num_valid_results]; 
+	double results_quality_tmp[b1->num_valid_results];
 	for(int i=0;i<b1->num_valid_results;i++) {
 		results_tmp[i] = b1->results[i];
 		results_quality_tmp[i] = b1->results_quality[i];
@@ -301,19 +308,26 @@ void hsm_match(struct hsm_params*p, hsm_buffer b1, hsm_buffer b2) {
 		b1->results[i] = results_tmp[indexes[i]];
 		b1->results_quality[i] = results_quality_tmp[indexes[i]];
 	}
-	
+
 	for(int i=0;i<b1->num_valid_results;i++) {
-		printf("after #%d %.0fdeg %.1fm %.1fm  quality %f \n",i, 
-			rad2deg(b1->results[i][2]),
-			b1->results[i][0],
-			b1->results[i][1],
-			b1->results_quality[i]);
+		char near[256]="";
+		double *x = b1->results[i];
+		if(p->debug_true_x_valid) {
+			double err_th = rad2deg(fabs(p->debug_true_x[2]-x[2]));
+			double err_m = hypot(p->debug_true_x[0]-x[0],
+				p->debug_true_x[1]-x[1]);
+			sprintf(near, "th err %4d  err_m  %5f",(int)err_th,err_m);
+		}
+		printf("after #%d %3.0fdeg %3.1fm %.1fm  quality %5.0f \t%s\n",i,
+			rad2deg(x[2]),
+			x[0],
+			x[1],b1->results_quality[i], near);
 	}
 }
 
 
-void hsm_generate_combinations(int nslots, const int possible_choices[], 
-	int i, int i_choice[]) 
+void hsm_generate_combinations(int nslots, const int possible_choices[],
+	int i, int i_choice[])
 {
 	for(int slot=0;slot<nslots;slot++) {
 		i_choice[slot] = i % possible_choices[slot];
@@ -332,19 +346,19 @@ int compare_descending(void *f_pt, const void *index_pt1, const void *index_pt2)
 	return -compare_ascending(f_pt,index_pt1,index_pt2);
 }
 
-void hsm_find_peaks_circ(int n, const double*f, double min_angle_deg, int unidir, int max_peaks, 
-	int*peaks, int* npeaks) 
+void hsm_find_peaks_circ(int n, const double*f, double min_angle_deg, int unidir, int max_peaks,
+	int*peaks, int* npeaks)
 {
 	sm_log_push("hsm_find_peaks_circ");
-	
+
 	assert(max_peaks>0);
-	
+
 	/* Find all local maxima for the function */
 	int maxima[n], nmaxima;
 	hsm_find_local_maxima_circ(n,f,maxima,&nmaxima);
 
 	sm_debug("Found %d of %d are local maxima.\n", nmaxima, n);
-	
+
 	/* Sort based on value */
 	qsort_r(maxima, (size_t) nmaxima, sizeof(int), (void*)f, compare_descending);
 
@@ -361,27 +375,27 @@ void hsm_find_peaks_circ(int n, const double*f, double min_angle_deg, int unidir
 		for(int a=0;a<*npeaks;a++) {
 			int other = peaks[a];
 			double other_angle = other * (2*M_PI/n);
-			
+
 			if(hsm_is_angle_between_smaller_than_deg(candidate_angle,other_angle,min_angle_deg)) {
 				acceptable = 0; break;
 			}
-			
+
 			/* If unidir, check also +M_PI */
 			if(unidir)
 			if(hsm_is_angle_between_smaller_than_deg(candidate_angle+M_PI,other_angle,min_angle_deg)) {
 				acceptable = 0; break;
 			}
-			
+
 		}
-		
-		sm_debug("%saccepting candidate %d; lag = %d value = %f\n", 
+
+		sm_debug("%saccepting candidate %d; lag = %d value = %f\n",
 			acceptable?"":"not ", m, maxima[m], f[maxima[m]]);
 
 		if(acceptable) {
 			peaks[*npeaks] = candidate;
 			(*npeaks) ++;
 		}
-		
+
 		if(*npeaks>=max_peaks) break;
 	}
 	sm_log_pop();
@@ -391,22 +405,22 @@ void hsm_find_peaks_circ(int n, const double*f, double min_angle_deg, int unidir
 }
 
 
-void hsm_find_peaks_linear(int n, const double*f, double min_dist, int max_peaks, 
-	int*peaks, int* npeaks) 
+void hsm_find_peaks_linear(int n, const double*f, double min_dist, int max_peaks,
+	int*peaks, int* npeaks)
 {
 	sm_log_push("hsm_find_peaks_linear");
 
 	assert(max_peaks>0);
-	
+
 	/* Find all local maxima for the function */
 	int maxima[n], nmaxima;
 	hsm_find_local_maxima_linear(n,f,maxima,&nmaxima);
 
 	sm_debug("Found %d of %d are local maxima.\n", nmaxima, n);
-	
+
 	/* Sort based on value */
 	qsort_r(maxima, (size_t) nmaxima, sizeof(int), (void*)f, compare_descending);
-	
+
 	*npeaks = 0;
 	sm_log_push("for each maximum");
 	/* Only retain a subset of these */
@@ -417,20 +431,20 @@ void hsm_find_peaks_linear(int n, const double*f, double min_dist, int max_peaks
 		int acceptable = 1;
 		for(int a=0;a<*npeaks;a++) {
 			int other = peaks[a];
-			
+
 			if(abs(other-candidate)<min_dist) {
 				acceptable = 0; break;
 			}
 		}
-		
-		sm_debug("%s accepting candidate %d; lag = %d value = %f\n", 
+
+		sm_debug("%s accepting candidate %d; lag = %d value = %f\n",
 			acceptable?"":"not", m, maxima[m], f[maxima[m]]);
 
 		if(acceptable) {
 			peaks[*npeaks] = candidate;
 			(*npeaks) ++;
 		}
-		
+
 		if(*npeaks>=max_peaks) break;
 	}
 	sm_log_pop("");
@@ -444,7 +458,7 @@ int hsm_is_angle_between_smaller_than_deg(double angle1, double angle2, double t
 	double dot = cos(angle1)*cos(angle2) + sin(angle1)*sin(angle2);
 	return (dot > cos(threshold_deg * M_PI/180));
 }
-	
+
 void hsm_find_local_maxima_circ(int n, const double*f, int*maxima, int*nmaxima) {
 	*nmaxima = 0;
 	for(int i=0;i<n;i++) {
@@ -484,7 +498,7 @@ void hsm_circular_cross_corr_stupid(int n, const double *a, const double *b, dou
 
 void hsm_linear_cross_corr_stupid(int na, const double *a, int nb, const double *b, double*res, int*lags, int min_lag, int max_lag) {
 	/* Two copies of f1 */
-	
+
 	for(int l=min_lag;l<=max_lag;l++) {
 		lags[l-min_lag] = l;
 		res[l-min_lag] = 0;
