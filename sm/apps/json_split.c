@@ -1,16 +1,16 @@
 #include <options/options.h>
-
+#include <string.h>
 #include <csm/csm_all.h>
 
 int main(int argc, const char * argv[]) {
 	sm_set_program_name(argv[0]);
 	
 	const char*input_filename;
-	const char*output_pattern;
+	const char*output_pattern_op;
 	
 	struct option* ops = options_allocate(3);
 	options_string(ops, "in", &input_filename, "stdin", "input file (JSON)");
-	options_string(ops, "out", &output_pattern, "./ld_split^02d.json", "output pattern; printf() pattern, but write '^' instead of '%'");
+	options_string(ops, "out", &output_pattern_op, "./ld_split^02d.json", "output pattern; printf() pattern, but write '^' instead of '%'");
 	
 	if(!options_parse_args(ops, argc, argv)) {
 		fprintf(stderr, "%s : splits a JSON file into many files."
@@ -22,7 +22,8 @@ int main(int argc, const char * argv[]) {
 	
 	/* Substitute "$" with "%" */
 	
-	char *f = (char*)output_pattern;
+	char output_pattern[256]; strcpy(output_pattern, output_pattern_op);
+	char *f = output_pattern;
 	while(*f) {
 		if(*f=='^') *f='%';
 		f++;

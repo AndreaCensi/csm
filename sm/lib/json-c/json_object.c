@@ -180,7 +180,8 @@ static struct json_object* json_object_new(enum json_type o_type)
 
 /* type checking functions */
 
-int json_object_is_type(struct json_object *this, enum json_type type)
+/*int json_object_is_type(struct json_object *this, enum json_type type)*/
+int json_object_is_type(struct json_object *this, int type)
 {
 	if(!this && json_type_null == type) return 1;
   return (this->o_type == type);

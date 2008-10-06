@@ -89,7 +89,7 @@ void json_tokener_reset(struct json_tokener *tok)
   tok->err = json_tokener_success;
 }
 
-struct json_object* json_tokener_parse(char *str)
+struct json_object* json_tokener_parse(const char *str)
 {
   struct json_tokener* tok;
   struct json_object* obj;
@@ -131,7 +131,7 @@ char* json_c_strndup(const char* str, size_t n)
 #define obj_field_name tok->stack[tok->depth].obj_field_name
 
 struct json_object* json_tokener_parse_ex(struct json_tokener *tok,
-					  char *str, int len)
+					  const char *str, int len)
 {
   struct json_object *obj = NULL;
   char c;

@@ -46,11 +46,11 @@ void jj_context_enter(const char*context_name) {
 
 
 void jj_must_be_hash() {
-	assert(json_object_is_type(jj_stack_top(), json_type_object));	
+	assert(json_object_is_type(jj_stack_top(), (enum json_type) json_type_object));	
 }
 
 void jj_must_be_array() {
-	assert(json_object_is_type(jj_stack_top(), json_type_array));	
+	assert(json_object_is_type(jj_stack_top(), (enum json_type)  json_type_array));	
 }
 
 void jj_context_exit() {
@@ -67,7 +67,7 @@ void jj_loop_enter(const char*loop_name) {
 
 void jj_loop_iteration() {
 	JO this_iteration = json_object_new_object();
-	if(!json_object_is_type(jj_stack_top(), json_type_array)) {
+	if(!json_object_is_type(jj_stack_top(), (enum json_type) json_type_array)) {
 		jj_stack_pop();
 		jj_must_be_array();
 	}
@@ -76,7 +76,7 @@ void jj_loop_iteration() {
 }
 
 void jj_loop_exit() {
-	if(!json_object_is_type(jj_stack_top(), json_type_array))
+	if(!json_object_is_type(jj_stack_top(), (enum json_type) json_type_array))
 		jj_stack_pop();
 		
 	jj_must_be_array();

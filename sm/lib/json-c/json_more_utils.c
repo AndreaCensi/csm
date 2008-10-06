@@ -98,7 +98,7 @@ JO json_read_stream(FILE*f) {
 
 
 
-struct json_object* json_tokener_parse_len(char *str, int len) {
+struct json_object* json_tokener_parse_len(const char *str, int len) {
   struct json_tokener* tok;
   struct json_object* obj;
 
@@ -128,7 +128,7 @@ int jo_read_double_array(JO s, const char*name, double*p, int n, double when_nul
 
 /* Returns 0 if jo is not a double array, or its length is not n */
 int jo_read_from_double_array (JO jo, double *p, int n, double when_null) {
-	if(!json_object_is_type(jo, json_type_array)) {
+	if(!json_object_is_type(jo, (enum json_type) json_type_array)) {
 		mc_error("This is not an array: '%s'\n",json_object_to_json_string(jo));
 		return 0;
 	}
@@ -148,10 +148,10 @@ int jo_read_from_double_array (JO jo, double *p, int n, double when_null) {
 		if(!v)
 			p[i] = when_null;
 		else
-		 	if(json_object_is_type(v, json_type_double)) {
+		 	if(json_object_is_type(v, (enum json_type) json_type_double)) {
 				p[i] = json_object_get_double(v);
 			} else
-			if(json_object_is_type(v, json_type_int)) {
+			if(json_object_is_type(v, (enum json_type) json_type_int)) {
 				p[i] = json_object_get_int(v);
 			} else
 			p[i] = when_null;
@@ -170,7 +170,7 @@ int jo_read_int_array(JO s, const char*name, int*p, int n, int when_null) {
 /*		mc_error("Field '%s' not found.\n", name); */
 		return 0;
 	}
-	if(!json_object_is_type(jo, json_type_array)) {
+	if(!json_object_is_type(jo, (enum json_type) json_type_array)) {
 		mc_error("This is not an array: '%s'\n",json_object_to_json_string(jo));
 		return 0;
 	}
@@ -182,7 +182,7 @@ int jo_read_int_array(JO s, const char*name, int*p, int n, int when_null) {
 	}
 	for(i=0;i<n;i++) {
 		JO v = json_object_array_get_idx(jo, i);
-		if(!v || !json_object_is_type(v, json_type_int))
+		if(!v || !json_object_is_type(v, (enum json_type) json_type_int))
 			p[i] = when_null;
 		else
 			p[i] = json_object_get_int(v);
@@ -219,7 +219,7 @@ int json_to_int(JO jo, int*ptr) {
 		return 0;
 	}
 	
-	if(!json_object_is_type(jo, json_type_int)) {
+	if(!json_object_is_type(jo, (enum json_type) json_type_int)) {
 		mc_error("I was looking for a int, instead got '%s'.\n",
 		         json_object_to_json_string(jo));
 		return 0;
@@ -231,10 +231,10 @@ int json_to_int(JO jo, int*ptr) {
 }
 
 int json_to_double(JO jo, double*ptr) {
-	if(json_object_is_type(jo, json_type_double)) {
+	if(json_object_is_type(jo, (enum json_type) json_type_double)) {
 		*ptr = json_object_get_double(jo);
 		return 1;
-	} else if(json_object_is_type(jo, json_type_int)) {
+	} else if(json_object_is_type(jo, (enum json_type) json_type_int)) {
 		*ptr = json_object_get_int(jo);
 		return 1;
 	} else{
@@ -252,7 +252,7 @@ int jo_read_int(JO jo, const char*name, int*p) {
 }
 
 double convert_to_double(JO jo) {
-	if(json_object_is_type(jo, json_type_double)) 
+	if(json_object_is_type(jo, (enum json_type) json_type_double)) 
 		return json_object_get_double(jo);
 	else 
 		return NAN;
@@ -274,7 +274,7 @@ int jo_read_double(JO jo, const char*name, double*p) {
 int jo_read_string(JO jo, const char*name,  char*dest_string, size_t max_len) {
 	JO v = json_object_object_get(jo, name);
 	if(!v) return 0;
-	if(json_object_is_type(v, json_type_string))  {
+	if(json_object_is_type(v, (enum json_type) json_type_string))  {
 		strncpy(dest_string, json_object_get_string(v), max_len);
 		return 1;
 	} else {
@@ -304,7 +304,7 @@ void jo_add_double(JO root, const char*name, double v) {
 }
 
 JO json_parse(const char*str) {
-	return json_tokener_parse_len((char*)str, (int)strlen(str));
+	return json_tokener_parse_len(str, (int)strlen(str));
 }
 
 const char* json_write(JO jo) {
