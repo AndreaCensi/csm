@@ -1,0 +1,15 @@
+{
+	"objects": [
+		{ "type": "square",  "corners": [ [0.0, 0.0], [1.0, 1.0] ]},
+		{ "type": "line", "points": [ [0.0, 0.0], [0.0, 0.4], [0.1, 0.4] ]}
+	],
+
+	"materials": {
+		"default": {},
+		"glass": {}
+	},
+
+	"sensors": {
+		"bias": []
+	}
+}
