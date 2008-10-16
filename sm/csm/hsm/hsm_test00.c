@@ -41,7 +41,7 @@ int main(int argc, const char**argv) {
 	options_int(ops, "hsm_xc_ndirections", &p.hsmp.xc_ndirections, 3, "Number of directions for cross corr (deg)");
 	options_double(ops, "hsm_angular_hyp_min_distance_deg", &p.hsmp.angular_hyp_min_distance_deg, 10.0, "Min distance between different angular hypotheses  (deg)");
 	
-	options_int(ops, "hsm_linear_xc_max_npeaks", &p.hsmp.linear_xc_max_npeaks, 3, "Number of peaks per direction for linear translation");
+	options_int(ops, "hsm_linear_xc_max_npeaks", &p.hsmp.linear_xc_max_npeaks, 5, "Number of peaks per direction for linear translation");
 	options_double(ops, "hsm_linear_xc_peaks_min_distance", &p.hsmp.linear_xc_peaks_min_distance, 5.0, "Min distance between different peaks in linear correlation");
 	
 	options_int(ops, "debug", &p.debug, 0, "Shows debug information");

@@ -222,7 +222,7 @@ void hsm_match(struct hsm_params*p, hsm_buffer b1, hsm_buffer b2) {
 		} /* xc direction */
 		sm_log_pop();
 
-		sm_debug("Now doing all combinations. How many are there?");
+		sm_debug("Now doing all combinations. How many are there?\n");
 		int possible_choices[ndirections];
 		int num_combinations = 1;
 		for(int cd=0;cd<ndirections;cd++) {
