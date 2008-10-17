@@ -2,6 +2,7 @@
 #include <math.h>
 #include <assert.h>
 #include "hsm.h"
+#include <time.h>
 #include <csm/csm_all.h>
 
 hsm_buffer hsm_buffer_alloc(struct hsm_params*p) {
