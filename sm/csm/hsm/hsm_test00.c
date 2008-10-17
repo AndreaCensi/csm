@@ -65,8 +65,8 @@ int main(int argc, const char**argv) {
 	if(!strcmp(p.file_input2,"")) {
 		p.file_input2 = p.file_input1;
 		p.hsmp.debug_true_x_valid = 1;
-		p.hsmp.debug_true_x[0] = 40;
-		p.hsmp.debug_true_x[1] = 0;
+		p.hsmp.debug_true_x[0] = 0;
+		p.hsmp.debug_true_x[1] = 50;
 		p.hsmp.debug_true_x[2] = deg2rad(40.0);
 	} else {
 		p.hsmp.debug_true_x_valid = 0;
@@ -173,13 +173,16 @@ hsm_buffer create_ht_for_image(struct hsm_params*p, FILE*in, const double base[3
 	if(base)
 		hsm_compute_ht_base(b, base);
 	
+	int npoints = 0;
    for (int v=0; v<rows; v++)
 	for (int u=0; u<cols; u++) {
 		double x = u - cols/2;
 		double y = v - rows/2;
 		if(image[v][u]==0) continue;
 		hsm_compute_ht_point(b, x, y, ((double)image[v][u])/max);
+		npoints ++;
 	}
+	sm_debug("Used %d points.\n", npoints);
     /* write the modified image to stdout */
 /*    pgm_writepgm(stdout, image, cols, rows, max, 1); */
     pgm_freearray(image, rows);

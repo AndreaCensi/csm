@@ -62,9 +62,9 @@ void hsm_compute_ht_base(hsm_buffer b, const double base_pose[3]) {
 }
 
 void hsm_compute_ht_point(hsm_buffer b, double x0, double y0, double weight) {
+
 	double x1 = x0 * b->disp_th_cos - y0 * b->disp_th_sin + b->disp[0];
 	double y1 = x0 * b->disp_th_sin + y0 * b->disp_th_cos + b->disp[1];
-
 	for(int i=0; i<b->num_angular_cells; i++) {
 		double rho = x1 * b->cost[i] + y1 * b->sint[i];
 		int rho_index;
@@ -143,20 +143,21 @@ void hsm_match(struct hsm_params*p, hsm_buffer b1, hsm_buffer b2) {
 	/* lag e' quanto 2 si sposta a destra rispetto a 1 */
 	for(int np=0;np<npeaks;np++) {
 		int lag = peaks[np];
-		double lag_angle = lag * (2*M_PI/b1->num_angular_cells);
+		double theta_hypothesis = lag * (2*M_PI/b1->num_angular_cells);
 
-		sm_debug("Theta hyp#%d: lag %d, angle %fdeg\n", np, lag, rad2deg(lag_angle));
+		sm_debug("Theta hyp#%d: lag %d, angle %fdeg\n", np, lag, rad2deg(theta_hypothesis));
 
 		/* Superimpose the two spectra */
 		double mult[b1->num_angular_cells];
 		for(int r=0;r<b1->num_angular_cells;r++)
-			mult[r] = b1->hs[r] * b2->hs[(r-lag)%b1->num_angular_cells];
+			mult[r] = b1->hs[r] * b2->hs[pos_mod(r-lag, b1->num_angular_cells)];
 
 		/* Find directions where both are intense */
 		int directions[p->xc_ndirections], ndirections;
 		hsm_find_peaks_circ(b1->num_angular_cells, b1->hs_cross_corr, p->xc_directions_min_distance_deg, 1, p->xc_ndirections, directions, &ndirections);
 
 		struct {
+			/* Direction of cross correlation */
 			double angle;
 			int nhypotheses;
 			struct {
@@ -177,14 +178,16 @@ void hsm_match(struct hsm_params*p, hsm_buffer b1, hsm_buffer b2) {
 		/* For each correlation direction */
 		for(int cd=0;cd<ndirections;cd++) {
 
- 			dirs[cd].angle = (directions[cd]) * (2*M_PI/b1->num_angular_cells);
+ 			dirs[cd].angle = theta_hypothesis + (directions[cd]) * (2*M_PI/b1->num_angular_cells);
 
 			/* Do correlation */
 			int    lags  [2*max_lag + 1];
 			double xcorr [2*max_lag + 1];
 
-			double *f1 = b1->ht[ (directions[cd])%b1->num_angular_cells];
-			double *f2 = b2->ht[ (directions[cd]-lag)%b1->num_angular_cells];
+			int i1 = pos_mod(directions[cd]        , b1->num_angular_cells);
+			int i2 = pos_mod(directions[cd] + lag  , b1->num_angular_cells);
+			double *f1 = b1->ht[i1];
+			double *f2 = b2->ht[i2];
 
 			hsm_linear_cross_corr_stupid(
 				b2->num_linear_cells,f2,
@@ -229,7 +232,7 @@ void hsm_match(struct hsm_params*p, hsm_buffer b1, hsm_buffer b2) {
 			possible_choices[cd] = dirs[cd].nhypotheses;
 			num_combinations *= dirs[cd].nhypotheses;
 		}
-		sm_debug("Total: %d combinations", num_combinations);
+		sm_debug("Total: %d combinations\n", num_combinations);
 		sm_log_push("For each combination..");
 		for(int comb=0;comb<num_combinations;comb++) {
 			int choices[ndirections];
@@ -271,7 +274,7 @@ void hsm_match(struct hsm_params*p, hsm_buffer b1, hsm_buffer b2) {
 			int k = b1->num_valid_results;
 			b1->results[k][0] = t[0];
 			b1->results[k][1] = t[1];
-			b1->results[k][2] = lag_angle;
+			b1->results[k][2] = theta_hypothesis;
 			b1->results_quality[k] = sum_values;
 			b1->num_valid_results++;
 		}
@@ -463,8 +466,8 @@ void hsm_find_local_maxima_circ(int n, const double*f, int*maxima, int*nmaxima) 
 	*nmaxima = 0;
 	for(int i=0;i<n;i++) {
 		double val = f[i];
-		double left = f[(i-1)%n];
-		double right = f[(i+1)%n];
+		double left  = f[ pos_mod(i-1,n) ];
+		double right = f[ pos_mod(i+1,n) ];
 		if( (val>0) && (val>left) && (val>right))
 			maxima[(*nmaxima)++] = i;
 	}
@@ -497,19 +500,32 @@ void hsm_circular_cross_corr_stupid(int n, const double *a, const double *b, dou
 
 
 void hsm_linear_cross_corr_stupid(int na, const double *a, int nb, const double *b, double*res, int*lags, int min_lag, int max_lag) {
-	/* Two copies of f1 */
-
+	assert(a); 
+	assert(b);
+	assert(res);
+	assert(lags);
+	
 	for(int l=min_lag;l<=max_lag;l++) {
 		lags[l-min_lag] = l;
-		res[l-min_lag] = 0;
-		for(int j=0; (j<nb) && (j+l<na);j++)
-			res[l-min_lag] += b[j] * a[j+l];
+		
+		double r = 0;
+		for(int j=0; (j<nb) && (j+l<na);j++) {
+			// j + l >= 0
+			if(j+l>=0)
+			r += b[j] * a[j+l];
+		}
+	
+		res[l-min_lag] = r;
+
 	}
 }
 
 
 
-
+/** Positive modulo */
+int pos_mod(int a, int b) {
+	return ((a%b)+b)%b;
+}
 
 
 

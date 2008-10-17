@@ -142,7 +142,8 @@ typedef struct hsm_buffer_struct* hsm_buffer;
 	void hsm_generate_combinations(int nslots, const int possible_choices[], 
 		int i, int i_choice[]) ;
 
-
+	/* a mod b >= 0 */
+	int pos_mod(int a, int b);
 
 	/** used with qsort_r */
 	int compare_ascending(void *f_pt, const void *index_pt1, const void *index_pt2);
