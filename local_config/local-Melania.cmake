@@ -8,8 +8,9 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-long-double")
 SET(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -Wno-long-double")
 
 # 
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mtune=7450 -mcpu=7450  -fomit-frame-pointer -O3")
-
+#SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mtune=7450 -mcpu=7450  -fomit-frame-pointer -O3")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mtune=7450 -mcpu=7450  -O2")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-math-errno  -fno-trapping-math -fno-signaling-nans")
 #SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-math-errno -funsafe-math-optimizations -fno-trapping-math -fno-signaling-nans")
 
