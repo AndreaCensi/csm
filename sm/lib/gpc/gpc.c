@@ -248,7 +248,7 @@ int gpc_solve(int K, const struct gpc_corr*c,
 	*/
 	
 	double lambda;
-	if(!poly_greatest_real_root(5,q,&lambda)) return 0;
+	if(!poly_greatest_real_root(5, q, &lambda)) return 0;
 	
 	M(W,4,4); gsl_matrix_set_zero(W); gms(W,2,2,1.0); gms(W,3,3,1.0);
 	M(x,4,1);
@@ -263,9 +263,6 @@ int gpc_solve(int K, const struct gpc_corr*c,
 	x_out[1] = gmg(x,1,0);
 	x_out[2] = atan2(gmg(x,3,0),gmg(x,2,0));
 
-	
-	
-		
 	if(TRACE_ALGO) {
 		fprintf(stderr, "x =  %f  %f %f deg\n", x_out[0], x_out[1],x_out[2]*180/M_PI);
 	}
