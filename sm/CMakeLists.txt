@@ -178,7 +178,7 @@ TARGET_LINK_LIBRARIES(csm ${csm_link_flags})
 INSTALL(TARGETS csm ARCHIVE DESTINATION lib LIBRARY DESTINATION lib)
 
 
-IF(1)
+IF(COMPILE_HSM)
 
 INCLUDE_DIRECTORIES(/sw/include)
 LINK_DIRECTORIES(/sw/lib)
@@ -187,7 +187,7 @@ ADD_EXECUTABLE(hsm_test00 ./csm/hsm/hsm_test00.c ./csm/hsm/hsm.c)
 TARGET_LINK_LIBRARIES(hsm_test00 csm-static ${csm_link_flags} pgm pnm pbm)
 INSTALL(PROGRAMS hsm_test00 DESTINATION bin)
 
-ENDIF(1)
+ENDIF(COMPILE_HSM)
 
 
 SUBDIRS(pkg-config)

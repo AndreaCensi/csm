@@ -150,7 +150,6 @@ void ld_cluster_curv(LDP ld) {
 	if(JJ) jj_context_enter("ld_cluster_curv");
 	int n = ld->nrays;
 	
-	JO log = jo_new();
 	
 	if(JJ) jj_add_int_array("a00valid", ld->valid, n);
 	if(JJ) jj_add_double_array("a01theta", ld->theta, n);
