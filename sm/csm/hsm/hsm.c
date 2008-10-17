@@ -123,7 +123,9 @@ void hsm_compute_spectrum_norm(hsm_buffer b) {
 
 void hsm_match(struct hsm_params*p, hsm_buffer b1, hsm_buffer b2) {
 	sm_log_push("hsm_match");
-
+	/* Let's measure the time */
+	clock_t hsm_match_start = clock();
+	
 	assert(b1->num_angular_cells == b2->num_angular_cells);
 	assert(p->max_translation > 0);
 	assert(b1->linear_cell_size > 0);
@@ -281,7 +283,6 @@ void hsm_match(struct hsm_params*p, hsm_buffer b1, hsm_buffer b2) {
 
 	} /* theta hypothesis */
 	sm_log_pop();
-	sm_log_pop();
 
 /*	for(int i=0;i<b1->num_valid_results;i++) {
 		printf("#%d %.0fdeg %.1fm %.1fm  quality %f \n",i,
@@ -321,11 +322,21 @@ void hsm_match(struct hsm_params*p, hsm_buffer b1, hsm_buffer b2) {
 				p->debug_true_x[1]-x[1]);
 			sprintf(near, "th err %4d  err_m  %5f",(int)err_th,err_m);
 		}
+		if(i<10)
 		printf("after #%d %3.0fdeg %3.1fm %.1fm  quality %5.0f \t%s\n",i,
 			rad2deg(x[2]),
 			x[0],
 			x[1],b1->results_quality[i], near);
 	}
+	
+	
+	/* How long did it take? */
+	clock_t hsm_match_stop = clock();
+	int ticks = hsm_match_stop-hsm_match_start;
+	double ctime = ((double)ticks) / CLOCKS_PER_SEC;
+	sm_debug("Time: %f sec (%d ticks)\n", ctime, ticks);
+	
+	sm_log_pop();
 }
 
 
