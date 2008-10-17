@@ -1,3 +1,4 @@
+#include <string.h>
 #include <pgm.h>
 #include <options/options.h>
 

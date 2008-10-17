@@ -298,7 +298,7 @@ void hsm_match(struct hsm_params*p, hsm_buffer b1, hsm_buffer b2) {
 	for(int i=0;i<b1->num_valid_results;i++)
 		indexes[i] = i;
 
-	qsort_r(indexes, (size_t) b1->num_valid_results, sizeof(int), (void*)b1->results_quality, compare_descending);
+	qsort_descending(indexes, (size_t) b1->num_valid_results, b1->results_quality);
 
 	/* copy in the correct order*/
 	double*results_tmp[b1->num_valid_results];
@@ -349,17 +349,6 @@ void hsm_generate_combinations(int nslots, const int possible_choices[],
 	}
 }
 
-int compare_ascending(void *f_pt, const void *index_pt1, const void *index_pt2) {
-	int i1 = *( (const int*) index_pt1);
-	int i2 = *( (const int*) index_pt2);
-	double * f = (double*) f_pt;
-	return f[i1] < f[i2] ? -1 : f[i1] == f[i2] ? 0 : 1;
-}
-
-int compare_descending(void *f_pt, const void *index_pt1, const void *index_pt2) {
-	return -compare_ascending(f_pt,index_pt1,index_pt2);
-}
-
 void hsm_find_peaks_circ(int n, const double*f, double min_angle_deg, int unidir, int max_peaks,
 	int*peaks, int* npeaks)
 {
@@ -374,7 +363,7 @@ void hsm_find_peaks_circ(int n, const double*f, double min_angle_deg, int unidir
 	sm_debug("Found %d of %d are local maxima.\n", nmaxima, n);
 
 	/* Sort based on value */
-	qsort_r(maxima, (size_t) nmaxima, sizeof(int), (void*)f, compare_descending);
+	qsort_descending(maxima, (size_t) nmaxima, f);
 
 	*npeaks = 0;
 
@@ -433,7 +422,7 @@ void hsm_find_peaks_linear(int n, const double*f, double min_dist, int max_peaks
 	sm_debug("Found %d of %d are local maxima.\n", nmaxima, n);
 
 	/* Sort based on value */
-	qsort_r(maxima, (size_t) nmaxima, sizeof(int), (void*)f, compare_descending);
+	qsort_descending(maxima, (size_t) nmaxima,  f);
 
 	*npeaks = 0;
 	sm_log_push("for each maximum");
@@ -529,6 +518,22 @@ void hsm_linear_cross_corr_stupid(int na, const double *a, int nb, const double 
 		res[l-min_lag] = r;
 
 	}
+}
+
+
+const double *qsort_descending_values = 0;
+
+int compare_descending(const void *index_pt1, const void *index_pt2) {
+	int i1 = *( (const int*) index_pt1);
+	int i2 = *( (const int*) index_pt2);
+	double * f = qsort_descending_values;
+	return f[i1] < f[i2] ? +1 : f[i1] == f[i2] ? 0 : -1;
+}
+
+void qsort_descending(int *indexes, size_t nmemb, const double*values)
+{
+	qsort_descending_values = values;
+	qsort(indexes, nmemb, sizeof(int), compare_descending);
 }
 
 

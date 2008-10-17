@@ -113,6 +113,8 @@ typedef struct hsm_buffer_struct* hsm_buffer;
 	/** Computes the spectrum in the buffer */
 	void hsm_compute_spectrum(hsm_buffer);	
 
+	void hsm_compute_spectrum_norm(hsm_buffer b);
+	
 	/** Finds the local maxima for a circular function. 
 	    @maxima is a pointer to a struct of size n 
 	    @nmaxima returns the number of maxima found */
@@ -145,10 +147,11 @@ typedef struct hsm_buffer_struct* hsm_buffer;
 	/* a mod b >= 0 */
 	int pos_mod(int a, int b);
 
-	/** used with qsort_r */
-	int compare_ascending(void *f_pt, const void *index_pt1, const void *index_pt2);
+	/** Sorts the indexes based on the values */
+	void qsort_descending(int *indexes, size_t nmemb, const double*values);
+	
+	/* used by qsort_descending */
+	int compare_descending(const void *index_pt1, const void *index_pt2);
 
-	/** used with qsort_r */
-	int compare_descending(void *f_pt, const void *index_pt1, const void *index_pt2);
 
 #endif

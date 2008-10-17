@@ -3,16 +3,7 @@
 #include <options/options.h>
 #include <csm/csm_all.h>
 
-int ld_equal_readings(LDP ld1, LDP ld2, double epsilon) {
-	int i;
-	for(i=0;i<ld1->nrays;i++) {
-		if(!ld_valid_ray(ld1,i) || !ld_valid_ray(ld2,i)) continue;
-		
-		if(fabs(ld1->readings[i]-ld2->readings[i]) > epsilon)
-			return 0;
-	}
-	return 1;
-}
+int ld_equal_readings(LDP ld1, LDP ld2, double epsilon);
 
 int main(int argc, const char*argv[]) {
 	sm_set_program_name(argv[0]);
@@ -71,4 +62,17 @@ int main(int argc, const char*argv[]) {
 	}
 
 	return num_invalid;
+}
+
+
+
+int ld_equal_readings(LDP ld1, LDP ld2, double epsilon) {
+	int i;
+	for(i=0;i<ld1->nrays;i++) {
+		if(!ld_valid_ray(ld1,i) || !ld_valid_ray(ld2,i)) continue;
+		
+		if(fabs(ld1->readings[i]-ld2->readings[i]) > epsilon)
+			return 0;
+	}
+	return 1;
 }

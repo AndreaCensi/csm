@@ -20,18 +20,7 @@ struct {
 
 extern void sm_options(struct sm_params*p, struct option*ops);
 
-void spit(LDP ld, FILE * stream) {
-	switch(p.format) {
-		case(0): {
-			ld_write_as_json(ld, stream);
-			break;
-		}
-		case(1): {
-			/* XXX: to implement */
-			break;
-		}
-	}
-}
+void spit(LDP ld, FILE * stream);
 
 int main(int argc, const char*argv[]) {
 	sm_set_program_name(argv[0]);
@@ -153,4 +142,18 @@ int main(int argc, const char*argv[]) {
 	ld_free(laser_ref);
 	
 	return 0;
+}
+
+
+void spit(LDP ld, FILE * stream) {
+	switch(p.format) {
+		case(0): {
+			ld_write_as_json(ld, stream);
+			break;
+		}
+		case(1): {
+			/* XXX: to implement */
+			break;
+		}
+	}
 }

@@ -10,6 +10,7 @@ struct {
 } p;
 
 void ld_smooth(LDP ld, int neighbours, double scale_rad);
+void convolve(const int*valid,const double*original, int n, double*dest, double*filter, int filter_len);
 
 int main(int argc, const char * argv[]) {
 	sm_set_program_name(argv[0]);

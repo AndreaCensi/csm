@@ -2,6 +2,7 @@
 #include <csm/csm_all.h>
 
 void ld_linearize(LDP ld);
+double weighted_mean(double *x, double *weight, int n);
 
 int main(int argc, const char * argv[]) {
 	sm_set_program_name(argv[0]);

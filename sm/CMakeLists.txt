@@ -98,6 +98,8 @@ new_executable(ld_linearize)
 
 new_executable(json2matlab)
 
+new_executable(ld_exp_tro1)
+
 # this are some random tests
 # new_executable(ld_stats)
 # new_executable(ld_correct)
