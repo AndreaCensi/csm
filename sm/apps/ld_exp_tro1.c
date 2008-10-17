@@ -17,6 +17,8 @@ struct ld_exp_tro1_params {
 	const char* file_output1;
 	const char* file_output2;
 	
+	int num_per_scan;
+	
 	int debug;
 };
 
@@ -40,7 +42,9 @@ int main(int argc, const char ** argv) {
 	options_double(ops, "max_xy_error", &p.max_xy_error, 10.0, "Maximum error for x,y (m)");
 	options_double(ops, "max_theta_error_deg", &p.max_theta_error_deg, 10.0, "Maximum error for orientation (deg)");
 	options_int   (ops, "seed", &p.seed, 0, "Seed for random number generator (if 0, use GSL_RNG_SEED env. variable).");
-	
+
+	options_int(ops, "num_per_scan", &p.num_per_scan, 10, "Number of trials for each scan.");
+
 	options_string(ops, "in", &p.file_input, "stdin", "Input file ");
 	options_string(ops, "out1", &p.file_output1, "stdout", "Output file for first scan");
 	options_string(ops, "out2", &p.file_output2, "stdout", "Output file for second scan");
@@ -84,21 +88,23 @@ int main(int argc, const char ** argv) {
 			continue;
 		}
 		
-		ld->true_pose[0] = 0;
-		ld->true_pose[1] = 0;
-		ld->true_pose[2] = 0;
-		
-		ld->odometry[0] = 0;
-		ld->odometry[1] = 0;
-		ld->odometry[2] = 0;
-		
-		ld_write_as_json(ld, out1);
+		for(int n=0; n < p.num_per_scan; n++) {					
+			ld->true_pose[0] = 0;
+			ld->true_pose[1] = 0;
+			ld->true_pose[2] = 0;
+			
+			ld->odometry[0] = 0;
+			ld->odometry[1] = 0;
+			ld->odometry[2] = 0;
+			
+			ld_write_as_json(ld, out1);
 
-		ld->odometry[0] = 2*(gsl_rng_uniform(rng)-0.5) * p.max_xy_error;
-		ld->odometry[1] = 2*(gsl_rng_uniform(rng)-0.5) * p.max_xy_error;
-		ld->odometry[2] = 2*(gsl_rng_uniform(rng)-0.5) * deg2rad(p.max_theta_error_deg);
-		
-		ld_write_as_json(ld, out2);
+			ld->odometry[0] = 2*(gsl_rng_uniform(rng)-0.5) * p.max_xy_error;
+			ld->odometry[1] = 2*(gsl_rng_uniform(rng)-0.5) * p.max_xy_error;
+			ld->odometry[2] = 2*(gsl_rng_uniform(rng)-0.5) * deg2rad(p.max_theta_error_deg);
+			
+			ld_write_as_json(ld, out2);
+		}
 
 		ld_free(ld);
 	}

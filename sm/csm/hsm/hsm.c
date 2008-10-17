@@ -358,7 +358,7 @@ void hsm_find_peaks_circ(int n, const double*f, double min_angle_deg, int unidir
 
 	/* Find all local maxima for the function */
 	int maxima[n], nmaxima;
-	hsm_find_local_maxima_circ(n,f,maxima,&nmaxima);
+	hsm_find_local_maxima_circ(n, f, maxima, &nmaxima);
 
 	sm_debug("Found %d of %d are local maxima.\n", nmaxima, n);
 
@@ -435,7 +435,7 @@ void hsm_find_peaks_linear(int n, const double*f, double min_dist, int max_peaks
 		for(int a=0;a<*npeaks;a++) {
 			int other = peaks[a];
 
-			if(abs(other-candidate)<min_dist) {
+			if(abs(other-candidate) < min_dist) {
 				acceptable = 0; break;
 			}
 		}
@@ -448,7 +448,7 @@ void hsm_find_peaks_linear(int n, const double*f, double min_dist, int max_peaks
 			(*npeaks) ++;
 		}
 
-		if(*npeaks>=max_peaks) break;
+		if(*npeaks >= max_peaks) break;
 	}
 	sm_log_pop("");
 	sm_debug("Found %d (max %d) maxima.\n", *npeaks, max_peaks);
@@ -526,7 +526,7 @@ const double *qsort_descending_values = 0;
 int compare_descending(const void *index_pt1, const void *index_pt2) {
 	int i1 = *( (const int*) index_pt1);
 	int i2 = *( (const int*) index_pt2);
-	double * f = qsort_descending_values;
+	const double * f = qsort_descending_values;
 	return f[i1] < f[i2] ? +1 : f[i1] == f[i2] ? 0 : -1;
 }
 

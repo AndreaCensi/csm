@@ -293,8 +293,9 @@ double gpc_error(const struct gpc_corr*co, const double*x) {
 	e[1] = s*(co->p[0]) +c*(co->p[1]) + x[1] - co->q[1];
 	double this_error = e[0]*e[0]*co->C[0][0]+2*e[0]*e[1]*co->C[0][1]+e[1]*e[1]*co->C[1][1];
 	
+	if(0) /* due to limited numerical precision, error might be negative */
 	if(this_error < 0) {
-		fprintf(stderr, "Something fishy: e = [%lf %lf]  C = [%lf,%lf;%lf,%lf]\n",
+		fprintf(stderr, "Something fishy: error = %lf e = [%lf %lf]  C = [%lf,%lf;%lf,%lf]\n", this_error,
 			e[0],e[1],co->C[0][0],co->C[0][1],co->C[1][0],co->C[1][1]);
 	}
 	return this_error;
@@ -305,9 +306,10 @@ double gpc_total_error(const struct gpc_corr*co, int n, const double*x){
 	for(int i=0;i<n;i++) {
 		if(!co[i].valid) continue;
 		error += gpc_error(co+i,x);
-		if(error<0) {
-			fprintf(stderr, "Something fishy!\n");
-		}
+	}
+	if(0) /* due to limited numerical precision, error might be negative */
+	if(error<0) {
+		fprintf(stderr, "Something fishy!\n");
 	}
 	return error;
 }

@@ -279,7 +279,7 @@ int compute_next_estimate(struct sm_params*params,
 
 	double epsilon = 0.000001;
 	if(new_error > old_error + epsilon) {
-		sm_error("Something's fishy here! Old error: %lf  new error: %lf  %lf %lf %lf  %lf %lf %lf\n",old_error,new_error,x_old[0],x_old[1],x_old[2],x_new[0],x_new[1],x_new[2]);
+		sm_error("Something's fishy here! Old error: %lf  new error: %lf  x_old %lf %lf %lf x_new %lf %lf %lf\n",old_error,new_error,x_old[0],x_old[1],x_old[2],x_new[0],x_new[1],x_new[2]);
 	}
 	
 	return 1;
