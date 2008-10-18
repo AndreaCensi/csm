@@ -51,7 +51,23 @@ hsm_buffer hsm_buffer_alloc(struct hsm_params*p) {
 }
 
 void hsm_buffer_free(hsm_buffer b) {
-	/* TODO */
+	
+	free(b->hs);
+	for(int i=0; i<b->num_angular_cells; i++)
+		free(b->ht[i]);
+	free(b->ht);
+	
+	free(b->theta);
+	free(b->sint);
+	free(b->cost);
+	
+	free(b->hs_cross_corr);
+	for(int i=0;i<b->num_angular_cells; i++)
+		free(b->results[i]);
+	free(b->results);
+
+	free(b->results_quality);
+	free(b);
 }
 
 void hsm_compute_ht_base(hsm_buffer b, const double base_pose[3]) {
@@ -70,7 +86,9 @@ void hsm_compute_ht_point(hsm_buffer b, double x0, double y0, double weight) {
 		double rho = x1 * b->cost[i] + y1 * b->sint[i];
 		int rho_index;
 		double alpha;
-		if(!hsm_rho2index(b, rho, &rho_index, &alpha)) continue;
+		if(!hsm_rho2index(b, rho, &rho_index, &alpha)) {
+			continue;
+		}
 
 		b->ht[i][rho_index] += (1-fabs(alpha)) * weight;
 
@@ -95,10 +113,13 @@ int hsm_rho2index(hsm_buffer b, double rho, int *rho_index, double *alpha) {
 
 	/* x belongs to [0, n) */
 	double x = b->num_linear_cells * (rho-b->rho_min) / (b->rho_max-b->rho_min);
+	
+	if(x==b->num_linear_cells) x*=0.99999;
+	
 	*rho_index = (int) floor( x );
 	*alpha = (*rho_index+0.5)-x;
 
-	assert(fabs(*alpha) < 0.5);
+	assert(fabs(*alpha) <= 0.5001);
 	assert(*rho_index >= 0);
 	assert(*rho_index < b->num_linear_cells);
 
@@ -133,7 +154,7 @@ void hsm_match(struct hsm_params*p, hsm_buffer b1, hsm_buffer b2) {
 
 	b1->num_valid_results = 0;
 
-	/* Compute cross-correlation */
+	/* Compute cross-correlation of spectra */
 	hsm_circular_cross_corr_stupid(b1->num_angular_cells, b2->hs, b1->hs, b1->hs_cross_corr);
 
 	/* Find peaks in cross-correlation */
@@ -141,6 +162,12 @@ void hsm_match(struct hsm_params*p, hsm_buffer b1, hsm_buffer b2) {
 	hsm_find_peaks_circ(b1->num_angular_cells, b1->hs_cross_corr, p->angular_hyp_min_distance_deg, 0, p->num_angular_hypotheses, peaks, &npeaks);
 
 	sm_debug("Found %d peaks (max %d) in cross correlation.\n", npeaks, p->num_angular_hypotheses);
+
+	if(npeaks == 0) {
+		sm_error("Cross correlation of spectra has 0 peaks.\n");
+		sm_log_pop();
+		return;
+	}
 
 	sm_log_push("loop on theta hypotheses");
 	/* lag e' quanto 2 si sposta a destra rispetto a 1 */
@@ -281,6 +308,7 @@ void hsm_match(struct hsm_params*p, hsm_buffer b1, hsm_buffer b2) {
 			b1->results_quality[k] = sum_values;
 			b1->num_valid_results++;
 		}
+		sm_log_pop();
 
 	} /* theta hypothesis */
 	sm_log_pop();

@@ -97,7 +97,11 @@ int main(int argc, const char*argv[]) {
 			pose_diff_d(params.laser_sens->true_pose, 
 				params.laser_ref->true_pose, true_x);
 			double true_e[3];
-			int i=0;for(;i<3;i++) true_e[i] = result.x[i] - true_x[i];
+			
+			
+			pose_diff_d(result.x, true_x, true_e);
+		/*	int i=0;for(;i<3;i++) true_e[i] = result.x[i] - true_x[i];*/
+			
 			jo_add_double_array(jo, "true_x", true_x, 3);
 			jo_add_double_array(jo, "true_e", true_e, 3);
 			

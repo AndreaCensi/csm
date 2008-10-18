@@ -3,7 +3,7 @@
 #include <csm/csm_all.h>
 
 void hsm_add_options(struct option* ops, struct hsm_params*p) {
-	options_double(ops, "hsm_linear_cell_size", &p->linear_cell_size, 1.0, "HSM: Size of a rho cell");
+	options_double(ops, "hsm_linear_cell_size", &p->linear_cell_size, 0.03, "HSM: Size of a rho cell");
 	options_double(ops, "hsm_angular_cell_size_deg", &p->angular_cell_size_deg, 1.0, "HSM: Size of angualar cell (deg)");
 	options_int(ops, "hsm_num_angular_hypotheses", &p->num_angular_hypotheses, 8, "HSM: Number of angular hypotheses.");
 	options_double(ops, "hsm_xc_directions_min_distance_deg", &p->xc_directions_min_distance_deg, 10.0, "HSM: Min distance between directions for cross corr (deg)");
@@ -14,13 +14,62 @@ void hsm_add_options(struct option* ops, struct hsm_params*p) {
 	options_double(ops, "hsm_linear_xc_peaks_min_distance", &p->linear_xc_peaks_min_distance, 5.0, "HSM: Min distance between different peaks in linear correlation");
 }
 
+hsm_buffer hsm_compute_ht_for_scan(LDP ld, struct hsm_params*p, const double base[3]);
 
+
+hsm_buffer hsm_compute_ht_for_scan(LDP ld, struct hsm_params*p, const double base[3]) {
+	
+	/** Find maximum reading for the points */
+	double max_reading = max_in_array(ld->readings, ld->nrays);
+	p->max_norm = norm_d(base) + max_reading;
+	
+	hsm_buffer b = hsm_buffer_alloc(p);
+	hsm_compute_ht_base(b, base);
+	
+	ld_compute_cartesian(ld);
+	int np = 0;
+	for(int i=0; i<ld->nrays; i++) {
+		if(!ld_valid_ray(ld, i)) continue;
+		
+		hsm_compute_ht_point(b, ld->points[i].p[0], ld->points[i].p[1], 1.0);
+		
+		np++;
+	}
+	
+	sm_debug("Computed HT with %d points.\n", np);
+	return b;
+}
+	
 void sm_hsm(struct sm_params* params, struct sm_result* res) {
 	
+/*	params->first_guess[0]=0;
+	params->first_guess[1]=0;
+/*	params->first_guess[2]=0;*/
+	
+	double zero[3] = {0,0,0};
+	hsm_buffer b1 = hsm_compute_ht_for_scan(params->laser_ref, &(params->hsm), zero);
+	hsm_buffer b2 = hsm_compute_ht_for_scan(params->laser_sens,&(params->hsm),  params->first_guess);
+
+	hsm_compute_spectrum(b1);
+	hsm_compute_spectrum(b2);
+
+	params->hsm.max_translation = max(b1->rho_max, b2->rho_max);
+	
+	hsm_match(&(params->hsm),b1,b2);
+
+
+	if(b1->num_valid_results)	{
+		res->valid = 1;
+		pose_diff_d(params->first_guess, b1->results[0], res->x);
+		res->error = 0;
+		res->iterations = 0;
+		res->nvalid = 0;
+	} else {
+		sm_error("HSM did not produce any result.\n");
+		res->valid = 0;
+	}
 	
 	
-	
-	
-	
-	
+	hsm_buffer_free(b1);
+	hsm_buffer_free(b2);
 }

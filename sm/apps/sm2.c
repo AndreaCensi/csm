@@ -90,6 +90,7 @@ int main(int argc, const char*argv[]) {
 	int count=-1;
 	LDP laser_sens;
 	while( (laser_sens = ld_read_smart(file_in)) ) {
+		
 		count++;
 		if(!ld_valid_fields(laser_sens))  {
 			sm_error("Invalid laser data in (#%d in file).\n", count);

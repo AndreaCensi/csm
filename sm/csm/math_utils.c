@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <gsl/gsl_nan.h>
 
 #include "csm_all.h"
@@ -266,4 +267,14 @@ const char* friendly_pose(const double*pose) {
 	sprintf(tmp_buf, "(%4.2f mm, %4.2f mm, %4.4f deg)",
 		1000*pose[0],1000*pose[1],rad2deg(pose[2]));
 	return tmp_buf;
+}
+
+
+double max_in_array(const double*v, int n) {
+	assert(n>0);
+	double m = v[0];
+	int i; 
+	for(i=0;i<n;i++)
+		if(v[i]>m) m = v[i];
+	return m;
 }

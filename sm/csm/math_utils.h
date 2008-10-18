@@ -86,6 +86,8 @@ int count_equal(const int*v, int n, int value);
 /** Normalizes an angle in the 0-2PI range */
 double normalize_0_2PI(double angle);
 
+/** Maximum value in the array */
+double max_in_array(const double*v, int n);
 
 #endif
 
