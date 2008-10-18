@@ -1,6 +1,8 @@
 #ifndef H_SCAN_MATCHING_LIB
 #define H_SCAN_MATCHING_LIB
 
+#include "hsm/hsm.h"
+#include "hsm/hsm_interface.h"
 #include "laser_data.h"
 
 #include <gsl/gsl_vector.h>
@@ -94,6 +96,8 @@ struct sm_params {
 	double gpm_extend_range_deg; 
 	int gpm_interval;
 
+
+	struct hsm_params hsm;
 };
 
 

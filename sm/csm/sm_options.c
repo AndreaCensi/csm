@@ -111,4 +111,6 @@ void sm_options(struct sm_params*p, struct option*ops) {
 	options_int(ops, "use_ml_weights", &(p->use_ml_weights), 0,
 	"If 1, the field 'true_alpha' is used to compute the incidence beta, and the factor (1/cos^2(beta)) used to weight the correspondence.");
 
+
+	hsm_add_options(ops, &p->hsm);
 }

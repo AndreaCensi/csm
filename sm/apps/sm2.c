@@ -34,7 +34,7 @@ int main(int argc, const char*argv[]) {
 	options_string(ops, "out_stats", &p.file_out_stats, "", "Output file (stats) ");
 	options_string(ops, "file_jj", &p.file_jj, "",
 		"File for journaling -- if left empty, journal not open.");
-	options_int(ops, "algo", &p.algo, 0, "Which algorithm to use (0:icp 1:gpm-stripped) ");
+	options_int(ops, "algo", &p.algo, 0, "Which algorithm to use (0:(pl)ICP 1:gpm-stripped 2:HSM) ");
 	
 	options_int(ops, "debug", &p.debug, 0, "Shows debug information");
 	
@@ -113,6 +113,8 @@ int main(int argc, const char*argv[]) {
 				sm_icp(&params, &result); break;
 			case(1):
 				sm_gpm(&params, &result); break;
+			case(2):
+				sm_hsm(&params, &result); break;
 			default:
 				sm_error("Unknown algorithm to run: %d.\n",p.algo);
 				return -1;

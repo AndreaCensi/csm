@@ -132,6 +132,13 @@ SET(csm_sources
 ./csm/icp/icp_loop.c
 ./csm/icp/icp_outliers.c
 ./csm/icp/icp_debug.c
+./csm/mbicp/mbicp_interface.c      
+./csm/mbicp/MbICP.c      
+./csm/mbicp/calcul.c     
+./csm/mbicp/percolate.c  
+./csm/mbicp/sp_matrix.c
+./csm/hsm/hsm.c
+./csm/hsm/hsm_interface.c
 ./csm/json_journal.c
 ./csm/laser_data.c
 ./csm/laser_data_carmen.c

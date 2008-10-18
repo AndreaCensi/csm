@@ -5,7 +5,7 @@
 #include <csm/csm_all.h>
 
 #include "hsm.h"
-
+#include "hsm_interface.h"
 
 const char * banner = 
 	"Reads an image, computes HT, de-computes it \n\n";
@@ -35,16 +35,8 @@ int main(int argc, const char**argv) {
 	options_string(ops, "in1", &p.file_input1, "stdin", "Input file 1");
 	options_string(ops, "in2", &p.file_input2, "", "Input file 2");
 	options_string(ops, "out", &p.prefix, "test00", "Output file prefix ");
-	options_double(ops, "hsm_linear_cell_size", &p.hsmp.linear_cell_size, 1.0, "Size of a rho cell");
-	options_double(ops, "hsm_angular_cell_size_deg", &p.hsmp.angular_cell_size_deg, 1.0, "Size of angualar cell (deg)");
-	options_int(ops, "hsm_num_angular_hypotheses", &p.hsmp.num_angular_hypotheses, 8, "Number of angular hypotheses.");
-	options_double(ops, "hsm_xc_directions_min_distance_deg", &p.hsmp.xc_directions_min_distance_deg, 10.0, "Min distance between directions for cross corr (deg)");
-	options_int(ops, "hsm_xc_ndirections", &p.hsmp.xc_ndirections, 3, "Number of directions for cross corr (deg)");
-	options_double(ops, "hsm_angular_hyp_min_distance_deg", &p.hsmp.angular_hyp_min_distance_deg, 10.0, "Min distance between different angular hypotheses  (deg)");
 	
-	options_int(ops, "hsm_linear_xc_max_npeaks", &p.hsmp.linear_xc_max_npeaks, 5, "Number of peaks per direction for linear translation");
-	options_double(ops, "hsm_linear_xc_peaks_min_distance", &p.hsmp.linear_xc_peaks_min_distance, 5.0, "Min distance between different peaks in linear correlation");
-	
+		hsm_add_options(ops, &p.hsmp);
 	options_int(ops, "debug", &p.debug, 0, "Shows debug information");
 	
 	if(!options_parse_args(ops, argc, argv)) {

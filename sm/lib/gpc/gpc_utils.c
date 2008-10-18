@@ -93,7 +93,7 @@ int poly_greatest_real_root(unsigned int n, const double*a, double *root) {
 	double lambda = 0; int assigned = 0;
 	for (i = 0; i < n-1; i++) {
 		if(TRACE_ALGO) {
-			printf ("root z%d = %+.18f + %+.18f i \n", i, z[2*i], z[2*i+1]);
+			fprintf (stderr, "root z%d = %+.18f + %+.18f i \n", i, z[2*i], z[2*i+1]);
 		}
 /*		 XXX ==0 is bad */
 		if( (z[2*i+1]==0) ) /* real root */
@@ -103,9 +103,17 @@ int poly_greatest_real_root(unsigned int n, const double*a, double *root) {
 			}
 	}
 	if(TRACE_ALGO)
-		printf ("lambda = %+.18f \n", lambda); 
+		fprintf (stderr, "lambda = %+.18f \n", lambda); 
 	if(!assigned) {
-		printf("poly_greatest_real_root: Could not find real root for polynomial.\n");
+		fprintf(stderr, "poly_greatest_real_root: Could not find real root for polynomial.\n");
+		fprintf(stderr, "polynomial coefficients : ");
+		for (i = 0; i < n; i++)
+			fprintf(stderr, " %lf ", a[i]);
+		fprintf(stderr, "\nRoots:\n");
+		
+		for (i = 0; i < n-1; i++)
+			fprintf (stderr, "root z%d = %+.18f + %+.18f i \n", i, z[2*i], z[2*i+1]);
+
 		return 0;
 	}
 	
