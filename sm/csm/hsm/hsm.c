@@ -6,6 +6,13 @@
 #include <csm/csm_all.h>
 
 hsm_buffer hsm_buffer_alloc(struct hsm_params*p) {
+	assert(p->max_norm>0);
+	assert(p->linear_cell_size>0);
+	assert(p->angular_cell_size_deg>0);
+	assert(p->num_angular_hypotheses >0);
+	assert(p->linear_xc_max_npeaks>0);
+	assert(p->xc_ndirections>0);
+	
 	hsm_buffer b = (hsm_buffer) malloc(sizeof(struct hsm_buffer_struct));
 
 	b->num_angular_cells = (int) ceil(360.0 / p->angular_cell_size_deg);
@@ -35,14 +42,14 @@ hsm_buffer hsm_buffer_alloc(struct hsm_params*p) {
 
 	b->hs_cross_corr = (double*) calloc((size_t)b->num_angular_cells, sizeof(double));
 
-	int max_num_results = (int) p->num_angular_hypotheses * pow( (float) p->linear_xc_max_npeaks,  (float) p->xc_ndirections);
+	b->max_num_results = (int) p->num_angular_hypotheses * pow( (float) p->linear_xc_max_npeaks,  (float) p->xc_ndirections);
 
 	b->num_valid_results = 0;
-	b->results = (double**) calloc((size_t)max_num_results, sizeof(double*));
-	for(int i=0;i<b->num_angular_cells; i++)
+	b->results = (double**) calloc((size_t)b->max_num_results, sizeof(double*));
+	for(int i=0;i<b->max_num_results; i++)
 		b->results[i] = (double*) calloc(3, sizeof(double));
 
-	b->results_quality = (double*) calloc((size_t)max_num_results, sizeof(double));
+	b->results_quality = (double*) calloc((size_t)b->max_num_results, sizeof(double));
 
 	double zero[3] = {0,0,0};
 	hsm_compute_ht_base(b, zero);
@@ -62,7 +69,7 @@ void hsm_buffer_free(hsm_buffer b) {
 	free(b->cost);
 	
 	free(b->hs_cross_corr);
-	for(int i=0;i<b->num_angular_cells; i++)
+	for(int i=0;i<b->max_num_results; i++)
 		free(b->results[i]);
 	free(b->results);
 
@@ -186,6 +193,10 @@ void hsm_match(struct hsm_params*p, hsm_buffer b1, hsm_buffer b2) {
 		int directions[p->xc_ndirections], ndirections;
 		hsm_find_peaks_circ(b1->num_angular_cells, b1->hs_cross_corr, p->xc_directions_min_distance_deg, 1, p->xc_ndirections, directions, &ndirections);
 
+		if(ndirections<2) {
+			sm_error("Too few directions.\n");
+		}
+		
 		struct {
 			/* Direction of cross correlation */
 			double angle;
@@ -208,7 +219,9 @@ void hsm_match(struct hsm_params*p, hsm_buffer b1, hsm_buffer b2) {
 		/* For each correlation direction */
 		for(int cd=0;cd<ndirections;cd++) {
 
- 			dirs[cd].angle = theta_hypothesis + (directions[cd]) * (2*M_PI/b1->num_angular_cells);
+ 			dirs[cd].angle =  theta_hypothesis + (directions[cd]) * (2*M_PI/b1->num_angular_cells);
+
+			printf(" cd %d angle = %d deg\n", cd, (int) rad2deg(dirs[cd].angle));
 
 			/* Do correlation */
 			int    lags  [2*max_lag + 1];
@@ -346,10 +359,11 @@ void hsm_match(struct hsm_params*p, hsm_buffer b1, hsm_buffer b2) {
 		char near[256]="";
 		double *x = b1->results[i];
 		if(p->debug_true_x_valid) {
-			double err_th = rad2deg(fabs(p->debug_true_x[2]-x[2]));
+			double err_th = rad2deg(fabs(angleDiff(p->debug_true_x[2],x[2])));
 			double err_m = hypot(p->debug_true_x[0]-x[0],
 				p->debug_true_x[1]-x[1]);
-			sprintf(near, "th err %4d  err_m  %5f",(int)err_th,err_m);
+			const char * ast = (i == 0) && (err_th > 2) ? "   ***** " : "";
+			sprintf(near, "th err %4d  err_m  %5f %s",(int)err_th ,err_m,ast);
 		}
 		if(i<10)
 		printf("after #%d %3.0fdeg %3.1fm %.1fm  quality %5.0f \t%s\n",i,

@@ -66,6 +66,9 @@ struct hsm_buffer_struct {
 
 	/** Results */
 	
+		/** Size of results array */
+		int max_num_results;
+		
 		/** Number of valid entries in the results array */
 		int num_valid_results;
 
