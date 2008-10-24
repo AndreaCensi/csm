@@ -23,6 +23,14 @@ SET(csm_sources
 	icp/icp_outliers.c
 	icp/icp_covariance.c
 	icp/icp_debug.c
+	
+	mbicp/mbicp_interface.c      
+	mbicp/MbICP.c      
+	mbicp/calcul.c     
+	mbicp/percolate.c  
+	mbicp/sp_matrix.c
+	hsm/hsm.c
+	hsm/hsm_interface.c
 
 	gpm/gpm.c
 )
@@ -31,20 +39,7 @@ IF(CAIRO_FOUND)
 	SET(csm_sources ${csm_sources} laser_data_cairo.c)
 ENDIF(CAIRO_FOUND)
 
-# ADD_LIBRARY(csm SHARED  ${csm_sources})
- 
-# # SET_TARGET_PROPERTIES(csm PROPERTIES STATIC_LIBRARY_FLAGS  " -static ")
- # TARGET_LINK_LIBRARIES(csm json-c egsl gpc options)
- # TARGET_LINK_LIBRARIES(csm ${GSL_LIBRARIES})
- # 
- # IF(CAIRO_FOUND)
- # 	TARGET_LINK_LIBRARIES(csm  ${CAIRO_LIBRARY})
- # ENDIF(CAIRO_FOUND)
- # 
- # INSTALL(TARGETS csm 
- # 	ARCHIVE DESTINATION lib
- # 	LIBRARY DESTINATION lib)
- # 
+
 foreach(dir . hsm mbicp icp gpm)
 FILE(GLOB csm_headers "${dir}/*.h")
 foreach(header ${csm_headers}  ${other_headers})

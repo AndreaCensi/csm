@@ -89,13 +89,13 @@ void hsm_compute_ht_point(hsm_buffer b, double x0, double y0, double weight) {
 
 	double x1 = x0 * b->disp_th_cos - y0 * b->disp_th_sin + b->disp[0];
 	double y1 = x0 * b->disp_th_sin + y0 * b->disp_th_cos + b->disp[1];
+	
 	for(int i=0; i<b->num_angular_cells; i++) {
 		double rho = x1 * b->cost[i] + y1 * b->sint[i];
 		int rho_index;
 		double alpha;
-		if(!hsm_rho2index(b, rho, &rho_index, &alpha)) {
+		if(!hsm_rho2index(b, rho, &rho_index, &alpha)) 
 			continue;
-		}
 
 		b->ht[i][rho_index] += (1-fabs(alpha)) * weight;
 
@@ -250,11 +250,11 @@ void hsm_match(struct hsm_params*p, hsm_buffer b1, hsm_buffer b2) {
 			dirs[cd].nhypotheses = linear_npeaks;
 			sm_log_push("Considering each peak of linear xc");
 			for(int lp=0;lp<linear_npeaks;lp++) {
-				int lag = lags[linear_peaks[lp]];
+				int linear_xc_lag = lags[linear_peaks[lp]];
 				double value = xcorr[linear_peaks[lp]];
-				double lag_m = lag * b1->linear_cell_size;
-				sm_debug("lag: %d  delta: %f  value: %f \n", lag, lag_m, value);
-				dirs[cd].hypotheses[lp].delta = lag_m;
+				double linear_xc_lag_m = linear_xc_lag * b1->linear_cell_size;
+				sm_debug("lag: %d  delta: %f  value: %f \n", linear_xc_lag, linear_xc_lag_m, value);
+				dirs[cd].hypotheses[lp].delta = linear_xc_lag_m;
 				dirs[cd].hypotheses[lp].value = value;
 			}
 			sm_log_pop();
