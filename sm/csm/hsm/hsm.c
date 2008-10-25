@@ -94,8 +94,9 @@ void hsm_compute_ht_point(hsm_buffer b, double x0, double y0, double weight) {
 		double rho = x1 * b->cost[i] + y1 * b->sint[i];
 		int rho_index;
 		double alpha;
-		if(!hsm_rho2index(b, rho, &rho_index, &alpha)) 
+		if(!hsm_rho2index(b, rho, &rho_index, &alpha)) {
 			continue;
+		}
 
 		b->ht[i][rho_index] += (1-fabs(alpha)) * weight;
 
@@ -366,10 +367,9 @@ void hsm_match(struct hsm_params*p, hsm_buffer b1, hsm_buffer b2) {
 			sprintf(near, "th err %4d  err_m  %5f %s",(int)err_th ,err_m,ast);
 		}
 		if(i<10)
-		printf("after #%d %3.0fdeg %3.1fm %.1fm  quality %5.0f \t%s\n",i,
-			rad2deg(x[2]),
+		printf("after #%d %3.1fm %.1fm %3.0fdeg quality %5.0f \t%s\n",i,
 			x[0],
-			x[1],b1->results_quality[i], near);
+			x[1], rad2deg(x[2]), b1->results_quality[i], near);
 	}
 	
 	

@@ -60,7 +60,7 @@ int main(int argc, const char**argv) {
 	if(!strcmp(p.file_input2,"")) {
 		p.file_input2 = p.file_input1;
 		p.hsmp.debug_true_x_valid = 1;
-		p.hsmp.debug_true_x[0] = 0;
+		p.hsmp.debug_true_x[0] = 20;
 		p.hsmp.debug_true_x[1] = 50;
 		p.hsmp.debug_true_x[2] = 0; /*deg2rad(40.0);*/
 	} else {

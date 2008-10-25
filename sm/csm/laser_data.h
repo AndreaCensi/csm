@@ -84,7 +84,7 @@ void ld_alloc(LDP, int nrays);
 /** This does NOT free the pointer. Don't use -- use ld_alloc_new()/ld_free() instead. */
 void ld_dealloc(LDP);
 
-/** Fills the "points" field */
+/** Fills the x,y fields in "points" by transforming (theta, reading) to cartesian */
 void ld_compute_cartesian(LDP);
 
 /** Computes the "points_w" coordinates by roto-translating "points" */

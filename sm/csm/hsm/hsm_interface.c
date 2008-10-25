@@ -56,8 +56,8 @@ int hsm_compute_ht_for_scan(LDP ld, struct hsm_params*p, const double base[3], h
 void sm_hsm(struct sm_params* params, struct sm_result* res) {
 	res->valid = 0;
 	
-	params->first_guess[0]=0;
-	params->first_guess[1]=0.4;
+	params->first_guess[0]=0.2;
+	params->first_guess[1]=0;
 	params->first_guess[2]=0;
 	
 
