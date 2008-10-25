@@ -3,6 +3,8 @@
 
 #include <options/options.h>
 
+#include "hsm.h"
+
 struct sm_params;
 struct sm_result;
 

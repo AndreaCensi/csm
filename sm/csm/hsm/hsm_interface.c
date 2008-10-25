@@ -1,6 +1,7 @@
 #include <options/options.h>
 #include <assert.h>
-#include <csm/csm_all.h>
+
+#include "../csm_all.h"
 
 void hsm_add_options(struct option* ops, struct hsm_params*p) {
 	options_double(ops, "hsm_linear_cell_size", &p->linear_cell_size, 0.03, "HSM: Size of a rho cell");
