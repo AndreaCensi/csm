@@ -37,7 +37,7 @@ int main(int argc, const char**argv) {
 	options_string(ops, "out", &p.prefix, "test00", "Output file prefix ");
 	
 	hsm_add_options(ops, &p.hsmp);
-	p.hsmp.linear_cell_size = 1;
+	p.hsmp.linear_cell_size = 1; /* 1 pixel */
 		
 	options_int(ops, "debug", &p.debug, 0, "Shows debug information");
 	
