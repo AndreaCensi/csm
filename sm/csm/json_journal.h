@@ -3,7 +3,18 @@
 
 #include <stdio.h>
 
+#include <json-c/json.h>
+#include <json-c/json_more_utils.h>
+
 #include "laser_data_json.h"
+
+
+/** This is a collection of functions for debugging purposes only.
+    It's a little cryptic, but if you don't understand them, don't worry.
+
+	The information used by this is used primarily to create the
+	icp animation videos.
+*/
 
 /** Public interface */
 

@@ -4,7 +4,6 @@
 #include <sys/time.h>
 #include <stdio.h>
 
-
 struct correspondence;
 
 typedef struct {

@@ -21,32 +21,12 @@
 #ifndef MbICP2
 #define MbICP2
 
-//#include "MbICP.h"
 #include "TData.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// ---------------------------------------------------------------
-// ---------------------------------------------------------------
-// Types definition
-// ---------------------------------------------------------------
-// ---------------------------------------------------------------
-
-
-// ************************
-// Associations information
-
-/*
-typedef struct{
-  float rx,ry,nx,ny,dist;		// Point (nx,ny), static corr (rx,ry), dist
-  int numDyn;					// Number of dynamic associations
-  float unknown;				// Unknown weight
-  int index;					// Index within the original scan
-  int L,R;
-}TAsoc;
-*/
 
 // ************************
 // Scan inner matching parameters
@@ -119,16 +99,6 @@ typedef struct{
 
 }TSMparams;
 
-// ************************
-// Structure to store the scans in polar and cartesian coordinates
-
-/*
-typedef struct {
-  int numPuntos;
-  Tpf laserC[MAXLASERPOINTS];  // Cartesian coordinates
-  Tpfp laserP[MAXLASERPOINTS]; // Polar coordinates
-}Tscan;
-*/
 
 // ---------------------------------------------------------------
 // ---------------------------------------------------------------

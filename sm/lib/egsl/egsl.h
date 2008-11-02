@@ -4,6 +4,11 @@
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_matrix.h>
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct egsl_val {
 	gsl_matrix * gslm;
 	int cid : 16;
@@ -87,4 +92,10 @@ void egsl_print_stats(void);
 /** Private implementations things */
 void egsl_expect_size(val v, size_t rows, size_t cols);
 void egsl_error(void);
+
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif

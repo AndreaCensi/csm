@@ -1,8 +1,10 @@
 #ifndef H_MATH_UTILS_GSL
 #define H_MATH_UTILS_GSL
 
-#include <egsl/egsl.h>
 #include <gsl/gsl_math.h>
+#include <egsl/egsl.h>
+
+#include "laser_data.h"
 
 #define gvg gsl_vector_get
 #define gvs gsl_vector_set

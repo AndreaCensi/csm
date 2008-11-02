@@ -52,8 +52,6 @@ typedef struct {
 }Tscan;
 
 
-
-
 // Associations information
 typedef struct{
   float rx,ry,nx,ny,dist;				// Point (nx,ny), static corr (rx,ry), dist 
