@@ -16,3 +16,4 @@
 #ifdef __cplusplus
 	#define restrict /* nothing */
 #endif
+
