@@ -1,6 +1,8 @@
-void csm_mbicp() {
+
+void sm_mbcip(struct sm_params*input, struct sm_result*output) {
 	
-} 
+}
+
 /*
 void mbicp_add_options(struct option* ops, struct hsm_params*p) {
 	#define prefix "mbicp_"

@@ -1,12 +1,13 @@
 #ifndef H_SCAN_MATCHING_LIB
 #define H_SCAN_MATCHING_LIB
 
+#include <gsl/gsl_vector.h>
+#include <gsl/gsl_matrix.h>
+
 #include "hsm/hsm.h"
 #include "hsm/hsm_interface.h"
 #include "laser_data.h"
 
-#include <gsl/gsl_vector.h>
-#include <gsl/gsl_matrix.h>
 
 
 struct sm_params {
@@ -120,6 +121,8 @@ struct sm_result {
 
 void sm_icp(struct sm_params*input, struct sm_result*output);
 void sm_gpm(struct sm_params*input, struct sm_result*output);
+void sm_hsm(struct sm_params*input, struct sm_result*output);
+void sm_mbcip(struct sm_params*input, struct sm_result*output);
 
 
 
