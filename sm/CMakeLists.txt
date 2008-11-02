@@ -1,5 +1,8 @@
 PROJECT (CSM C CXX)
 
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/lib)
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
+
 cmake_minimum_required(VERSION 2.4)
 #set(csm_c_flags "")
 
@@ -39,8 +42,6 @@ ENDIF(CAIRO_FOUND)
 
 
 
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/lib)
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 
 
 MESSAGE(STATUS "csm_c_flags = ${csm_c_flags}")
@@ -194,7 +195,8 @@ INCLUDE_DIRECTORIES(/sw/include)
 LINK_DIRECTORIES(/sw/lib)
 
 ADD_EXECUTABLE(hsm_test00 ./csm/hsm/hsm_test00.c ./csm/hsm/hsm.c)
-TARGET_LINK_LIBRARIES(hsm_test00 csm-static ${csm_link_flags} pgm pnm pbm)
+#TARGET_LINK_LIBRARIES(hsm_test00 csm-static ${csm_link_flags} pgm pnm pbm)
+	TARGET_LINK_LIBRARIES(hsm_test00 csm-static ${csm_link_flags} netpbm)
 INSTALL(PROGRAMS hsm_test00 DESTINATION bin)
 
 ENDIF(COMPILE_HSM)
