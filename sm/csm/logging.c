@@ -52,7 +52,7 @@ void sm_error(const char *msg, ...)
 		fprintf(stderr, XTERM_ERROR);
 		
 	if(sm_program_name) 
-		fputs(sm_program_name, stderr);
+		fprintf(stderr, "%s: ", sm_program_name);
 	
 	sm_write_context();
 	
@@ -72,7 +72,7 @@ void sm_info(const char *msg, ...)
 	check_for_xterm_color();
 	
 	if(sm_program_name) 
-		fputs(sm_program_name, stderr);
+		fprintf(stderr, "%s: ", sm_program_name);
 	
 	sm_write_context();
 	
@@ -94,7 +94,7 @@ void sm_debug(const char *msg, ...)
 		fprintf(stderr, XTERM_DEBUG);
 	
 	if(sm_program_name) 
-		fputs(sm_program_name, stderr);
+		fprintf(stderr, "%s: ", sm_program_name);
 
 	sm_write_context();
 

@@ -1,4 +1,4 @@
-
+# overlook is a MacBook with Leopard
 
 #SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-long-double")
 #SET(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -Wno-long-double")
@@ -24,3 +24,4 @@ SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fstrict-aliasing")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pedantic")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wmissing-prototypes ")
 
+SET(COMPILE_HSM 1)

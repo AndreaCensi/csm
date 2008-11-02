@@ -270,6 +270,28 @@ int options_set(struct option*o, const char*value) {
 			}
 			return 1;
 		}
+
+		case(OPTION_ALTERNATIVE): {
+			int * value_pointer = (int*) o->value_pointer;
+			struct option_alternative * a = o->alternative;
+			for(; a->label; a++) {
+				if( !strcasecmp(a->label, value) ) {
+					*value_pointer = a->value;
+					return 1;
+				}
+			}
+			fprintf(stderr, "Could not recognize '%s' as one of the alternative for %s: ", 
+				value, o->name);
+			
+			for(a = o->alternative; a->label; a++) {
+				fprintf(stderr, "\"%s\"", a->label);
+				if( (a+1)->label ) 	fprintf(stderr, ", ");
+			}
+			fprintf(stderr, ".\n");
+			return 0;
+		}
+		
+		
 		
 		default: {
 			/* XXX ERROR */
@@ -314,20 +336,56 @@ void options_dump(struct option * options, FILE*f, int write_desc) {
 	char**table = malloc(sizeof(char*)*nrows*3);
 
 	int row = 0;
-	table[row*3 +0] = strdup_("Option name");
-	table[row*3 +1] = strdup_("Default");
-	table[row*3 +2] = strdup_("Description");
-	row++;
-	table[row*3 +0] = strdup_("-----------");
-	table[row*3 +1] = strdup_("-------");
-	table[row*3 +2] = strdup_("-----------");
-	row++;
+	if(write_desc) {
+		table[row*3 +0] = strdup_("Option name");
+		table[row*3 +1] = strdup_("Default");
+		table[row*3 +2] = strdup_("Description");
+		row++;
+		table[row*3 +0] = strdup_("-----------");
+		table[row*3 +1] = strdup_("-------");
+		table[row*3 +2] = strdup_("-----------");
+		row++;
+	} else {
+		table[row*3 +0] = strdup_("");
+		table[row*3 +1] = strdup_("");
+		table[row*3 +2] = strdup_("");
+		row++;
+		table[row*3 +0] = strdup_("");
+		table[row*3 +1] = strdup_("");
+		table[row*3 +2] = strdup_("");
+		row++;
+	}
 	
 	int i;
 	for (i=0;i<n;i++) {
 		table[row*3 +0] = strdup_(options[i].name);
 		table[row*3 +1] = strdup_(options_value_as_string(options+i));
 		table[row*3 +2] = write_desc ? strdup_(options[i].desc) : strdup_(""); 
+
+		if( write_desc)
+		if(options[i].type == OPTION_ALTERNATIVE) {
+			char extended[1000];
+			strcat(extended, options[i].desc);
+			strcat(extended, "  Possible options are: ");
+	
+			struct option_alternative * a = options[i].alternative;
+			for(; a->label; a++) {
+				strcat(extended, "\"");
+				strcat(extended, a->label);
+				strcat(extended, "\"");
+				if(a->desc) {
+				strcat(extended, ": ");
+				strcat(extended, a->desc);
+				} else {
+				}
+				if((a+1)->label)
+					strcat(extended, ", ");
+			}	
+			strcat(extended, ".");
+			
+			table[row*3 +2] =  strdup_(extended);	
+		}
+		
 		row ++;
 	}
 
@@ -364,7 +422,7 @@ const char*options_value_as_string(struct option*o) {
 
 		case(OPTION_STRING): {
 			char** value_pointer = (char**) o->value_pointer;
-			sprintf(options_value_as_string_buf, "%s", *value_pointer);
+			sprintf(options_value_as_string_buf, "%s", *value_pointer); /* should I add "" ? */
 			break;
 		}
 		
@@ -373,6 +431,17 @@ const char*options_value_as_string(struct option*o) {
 			sprintf(options_value_as_string_buf, "%g", *value_pointer);
 			break;
 		}
+		
+		case(OPTION_ALTERNATIVE): {
+			int * value_pointer = (int*) o->value_pointer;
+			struct option_alternative * a = o->alternative;
+			for(; a->label; a++) {
+				if( a->value == *value_pointer )
+					sprintf(options_value_as_string_buf, "%s", a->label);
+			}
+			break;
+		}
+		
 		default: 
 		strcpy(options_value_as_string_buf, "?");
 	} /* switch */	

@@ -46,6 +46,19 @@ void options_int(struct option*ops, const char* name, int *p, int def_value, con
 	*p = def_value;
 }
 
+void options_alternative(struct option*ops, const char*name, struct option_alternative* alt,
+ 	int*value, const char*desc) {
+	struct option* o =  options_next_empty(ops);
+	o->name = strdup_(name);
+	o->value_pointer = value;
+	o->set_pointer = 0;
+	o->desc = strdup_(desc);
+	o->type = OPTION_ALTERNATIVE;
+	o->alternative = alt;
+	*value = alt[0].value;
+}
+
+
 void options_double (struct option*ops, const char* name, double *p, double def_value, const char*desc){
 	struct option* o =  options_next_empty(ops);
 	o->name = strdup_(name);

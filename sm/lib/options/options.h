@@ -7,13 +7,40 @@
 extern "C" {
 #endif
 
-/**
- *  Utility functions to parse command line arguments.
- *
- *  See options_example.c.
- */
 
-enum option_type { OPTION_STRING=0, OPTION_INT=1, OPTION_DOUBLE=2 };
+/** User-friendly interface */
+	/* Sets the banner for the help message. (pointer is kept) */
+	void options_banner(const char*message);
+
+	struct option;
+	struct option_alternative;
+
+	struct option* options_allocate(int n);
+
+	void options_int    (struct option*, const char* name,  
+		int *p,  int def_value, const char*desc);
+
+	void options_double (struct option*, const char* name,  
+		double *p, double def_value, const char*desc);
+
+	void options_string (struct option*, const char* name, 
+		const char** p,const char*def_balue,const char*desc);
+
+	void options_alternative(struct option*, const char*name, struct option_alternative*alt,
+	 	int*value, const char*desc);
+
+	/** Returns 0 on error */
+	int options_parse_args(struct option*ops, int argc, const char* argv[]);
+
+	/** Returns 0 on error */
+	int options_parse_file(struct option*ops, const char*pwd, const char*file);
+
+	void options_print_help(struct option*ops, FILE*where);
+
+
+/** Internal use */
+
+enum option_type { OPTION_STRING=0, OPTION_INT=1, OPTION_DOUBLE=2, OPTION_ALTERNATIVE=3 };
  
 #define OPTIONS_NAME_MAXSIZE 32
 #define OPTIONS_VALUE_MAXSIZE 256
@@ -31,45 +58,31 @@ struct option {
 	 *  the option has no parameters. Ex: in "--port 2000", "--port"
 	 *  is the name and "2000" is the value. value_pointer is interpreted
 	 *  according to the value of "type".
-	 *   type=   INT:	value_pointer is a "int *"
-	 *   type=STRING:	value_pointer is a "char **"
-	 *   type=DOUBLE:	value_pointer is a "double *"
+	 *   type=OPTION_INT:	value_pointer is a "int *"
+	 *   type=OPTION_STRING:	value_pointer is a "char **"
 	 *      A new string is allocated using malloc():
 	 *          *(value_pointer) = malloc( ... )
 	 *      and you should free it yourself.
+	 *   type=OPTION_DOUBLE:	value_pointer is a "double *"
+	 *   type=OPTION_ALTERNATIVE:	value_pointer is a "int *"
+	 *    and alternatives is set.
 	 */
 	void * value_pointer;
 
 
 	/** If not NULL, it is set to 1 if the option is found. */
 	int * set_pointer;
+	
+	/** used only for OPTION_ALTERNATIVE */
+	struct option_alternative * alternative;
 };
 
+struct option_alternative { 
+	const char *label;
+	int value;
+	const char *desc;
+}; 
 
-/** User-friendly interface */
-
-/* Sets the banner for the help message. (pointer is kept) */
-void options_banner(const char*message);
-
-struct option* options_allocate(int n);
-
-void options_int    (struct option*, const char* name,  
-	int *p,  int def_value, const char*desc);
-
-void options_double (struct option*, const char* name,  
-	double *p, double def_value, const char*desc);
-	
-void options_string (struct option*, const char* name, 
-	const char** p,const char*def_balue,const char*desc);
-
-/** Returns 0 on error */
-int options_parse_args(struct option*ops, int argc, const char* argv[]);
-/** Returns 0 on error */
-int options_parse_file(struct option*ops, const char*pwd, const char*file);
-
-void options_print_help(struct option*ops, FILE*where);
-
-/** Internal use */
 
 /** Finds an option in the array. Returns 0 if not found. */
 struct option * options_find(struct option*ops, const char * name);
@@ -98,7 +111,6 @@ char * strdup_(const char *s);
 int get_double(double*p, const char*s);
 /** Return 1 if ok. */
 int get_int(int*p, const char*s);
-
 /* Find next empty slot in the array. XXX farlo meglio */
 struct option* options_next_empty(struct option*ops);
 
