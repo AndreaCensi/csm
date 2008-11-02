@@ -3,7 +3,7 @@
 #include <time.h>
 #include <assert.h>
 #include <time.h>
-#include <csm/csm_all.h>
+#include "../csm_all.h"
 
 #include "hsm.h"
 

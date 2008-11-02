@@ -123,3 +123,4 @@ void sm_hsm(struct sm_params* params, struct sm_result* res) {
 	hsm_buffer_free(b1);
 	hsm_buffer_free(b2);
 }
+
