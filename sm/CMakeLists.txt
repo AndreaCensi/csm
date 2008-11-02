@@ -1,3 +1,5 @@
+PROJECT (CSM C CXX)
+
 cmake_minimum_required(VERSION 2.4)
 #set(csm_c_flags "")
 
@@ -48,6 +50,7 @@ MESSAGE(STATUS "csm_link_flags = ${csm_link_flags}")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${csm_c_flags}")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb -Wall")
+
 
 # for realpath
 IF("${CMAKE_SYSTEM}" MATCHES "Linux")
@@ -198,3 +201,28 @@ ENDIF(COMPILE_HSM)
 
 
 SUBDIRS(pkg-config)
+
+if(0)
+#
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${csm_c_flags} -Wall")
+
+FILE(GLOB_RECURSE csm_headers csm/*.h)
+FILE(GLOB_RECURSE lib_headers lib/*.h)
+
+foreach(header ${csm_headers} ${lib_headers})
+	GET_FILENAME_COMPONENT(header_base ${header} NAME_WE)
+	GET_FILENAME_COMPONENT(header_dir ${header} PATH)
+
+#	MESSAGE("Ciao ${header_base} ${header_dir}")
+	
+	CONFIGURE_FILE(header_test.c.in ${header_dir}/${header_base}_header_test.cpp @ONLY)	
+	ADD_EXECUTABLE(${header_base}_header_test ${header_dir}/${header_base}_header_test.cpp)
+	SET_TARGET_PROPERTIES(${header_base}_header_test  PROPERTIES LINKER_LANGUAGE CXX)
+	TARGET_LINK_LIBRARIES(${header_base}_header_test  csm-static ${csm_link_flags})
+
+	CONFIGURE_FILE(header_test.c.in ${header_dir}/${header_base}_header_test2.c @ONLY)	
+	ADD_EXECUTABLE(${header_base}_header_test2 ${header_dir}/${header_base}_header_test2.c)
+	TARGET_LINK_LIBRARIES(${header_base}_header_test2  csm-static ${csm_link_flags})
+	
+endforeach(header ${csm_headers} ${lib_headers})
+endif(0)

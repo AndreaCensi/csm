@@ -12,6 +12,8 @@
 #ifndef _json_object_private_h_
 #define _json_object_private_h_
 
+#include "json_object.h"
+
 typedef void (json_object_delete_fn)(struct json_object *o);
 typedef int (json_object_to_json_string_fn)(struct json_object *o,
 					    struct printbuf *pb);

@@ -1,3 +1,6 @@
+#ifndef H_LASER_DATA_INLINE
+#define H_LASER_DATA_INLINE
+
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_vector.h>
 
@@ -48,3 +51,6 @@ INLINE int ld_next_valid_down(LDP ld, int i){
 INLINE int ld_valid_corr(LDP ld, int i) {
 	return ld->corr[i].valid;
 }
+
+#endif
+

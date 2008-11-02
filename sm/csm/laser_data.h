@@ -4,6 +4,8 @@
 #include <sys/time.h>
 #include <stdio.h>
 
+#include "restrict.h"
+
 struct correspondence;
 
 typedef struct {

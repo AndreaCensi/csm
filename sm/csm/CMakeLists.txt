@@ -42,8 +42,10 @@ ENDIF(CAIRO_FOUND)
 
 foreach(dir . hsm mbicp icp gpm)
 FILE(GLOB csm_headers "${dir}/*.h")
-foreach(header ${csm_headers}  ${other_headers})
+foreach(header ${csm_headers} )
  	INSTALL(FILES ${header} DESTINATION include/csm/${dir})
 endforeach(header ${csm_headers})
 endforeach(dir . csm)
+
+
 

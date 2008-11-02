@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 2.4)
 
-PROJECT (CSM C)
-
 SET(local_prefix "local_config/local-")
 FIND_PROGRAM(HOSTNAME hostname PATHS $ENV{PATH})
 IF(HOSTNAME)

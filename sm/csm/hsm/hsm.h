@@ -1,7 +1,7 @@
 #ifndef H_CSM_HSM
 #define H_CSM_HSM
 
-
+#include <stdlib.h>
 /** Public interface */
 
 struct hsm_params {

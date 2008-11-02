@@ -2,6 +2,7 @@
 #define H_GPM_STRIPPED_DOWN
 
 #include <gsl/gsl_vector.h>
+#include <gsl/gsl_histogram.h>
 #include "../csm_all.h"
 
 void ght_find_theta_range(LDP laser_ref, LDP laser_sens,
