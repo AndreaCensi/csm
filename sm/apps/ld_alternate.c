@@ -1,4 +1,4 @@
-#include <csm/csm_all.h>
+#include "../csm/csm_all.h"
 
 int main(int argc, const char ** argv) {
 	sm_set_program_name(argv[0]);

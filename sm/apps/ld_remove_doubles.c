@@ -1,7 +1,8 @@
 #include <time.h>
 
 #include <options/options.h>
-#include <csm/csm_all.h>
+
+#include "../csm/csm_all.h"
 
 int ld_equal_readings(LDP ld1, LDP ld2, double epsilon);
 

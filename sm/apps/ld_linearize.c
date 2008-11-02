@@ -1,5 +1,5 @@
 #include <options/options.h>
-#include <csm/csm_all.h>
+#include "../csm/csm_all.h"
 
 void ld_linearize(LDP ld);
 double weighted_mean(double *x, double *weight, int n);

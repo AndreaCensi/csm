@@ -3,7 +3,7 @@
 #include <libgen.h>
 
 #include <options/options.h>
-#include <csm/csm_all.h>
+#include "../csm/csm_all.h"
 
 struct {
 	const char * file_in;

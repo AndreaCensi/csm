@@ -1,9 +1,9 @@
+#include <libgen.h>
 #include <math.h>
 
 #include <options/options.h>
-#include <csm/csm_all.h>
+#include "../csm/csm_all.h"
 
-#include <libgen.h>
 
 struct ld_fisher_params {
 	double sigma;

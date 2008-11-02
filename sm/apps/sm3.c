@@ -1,7 +1,7 @@
 #include <time.h>
 #include <string.h>
 
-#include <csm/csm_all.h>
+#include "../csm/csm_all.h"
 
 #include <options/options.h>
 

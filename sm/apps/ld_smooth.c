@@ -1,5 +1,6 @@
 #include <options/options.h>
-#include <csm/csm_all.h>
+
+#include "../csm/csm_all.h"
 
 struct {
 	/** Scale factor */

@@ -11,9 +11,10 @@
 
 #include <options/options.h>
 
-#include <csm/csm_all.h>
-#include <csm/laser_data_drawing.h>
-#include <csm/laser_data_cairo.h>
+#include "../csm/csm_all.h"
+#include "../csm/laser_data_drawing.h"
+#include "../csm/laser_data_cairo.h"
+
 
 typedef struct {
 	const char*use;

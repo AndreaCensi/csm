@@ -1,8 +1,8 @@
 #include <math.h>
 #include <options/options.h>
 
-#include <csm/csm_all.h>
-#include <csm/laser_data_drawing.h>
+#include "../csm/csm_all.h"
+#include "../csm/laser_data_drawing.h"
 
 /** Two scans are the same if they have the same timestamp. */
 int same_scan(LDP ld1, LDP ld2);

@@ -5,7 +5,8 @@
 #include <math.h>
 #include <options/options.h>
 
-#include <csm/csm_all.h>
+
+#include "../csm/csm_all.h"
 
 struct {
 	double interval;

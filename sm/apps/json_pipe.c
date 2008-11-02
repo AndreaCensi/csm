@@ -1,4 +1,4 @@
-#include <csm/csm_all.h>
+#include "../csm/csm_all.h"
 #include <options/options.h>
 
 int main(int argc, const char * argv[]) {

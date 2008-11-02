@@ -5,7 +5,7 @@
 #include <math.h>
 #include <options/options.h>
 
-#include <csm/csm_all.h>
+#include "../csm/csm_all.h"
 
 struct ld_exp_tro1_params {
 	int seed;

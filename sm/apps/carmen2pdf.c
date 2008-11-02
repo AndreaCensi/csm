@@ -11,7 +11,8 @@
 
 #include <options/options.h>
 
-#include <csm/csm_all.h>
+#include "../csm/csm_all.h"
+
 
 typedef enum { Invalid = 0, Odometry = 1, Estimate = 2, True_pose = 3 } reference;
 const char*reference_name[4] = { "invalid","odometry","estimate","true_pose"};

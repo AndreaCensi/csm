@@ -1,4 +1,4 @@
-#include <csm/csm.h>
+#include "../csm/csm_all.h"
 
 int main() {
 	JO jo; /* the monkey */

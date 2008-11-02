@@ -1,6 +1,7 @@
 #include <time.h>
 
-#include <csm/csm_all.h>
+#include "../csm/csm_all.h"
+
 
 extern int distance_counter;
 int main(int argc, const char*argv[]) {
