@@ -19,9 +19,39 @@ struct sm1_params {
 extern int distance_counter;
 extern void sm_options(struct sm_params*p, struct option*ops);
 
+const char *sm1_banner = 
 
+"There are TWO ways to define the input to this program.\n"
+"                                                       \n"
+"Say that in file A there are the scans   \n"
+"                                                       \n"
+"   A1 A2 A3 A4 ...  \n"
+"                                                       \n"
+"and in file B there are the scans  \n"
+"                                                       \n"
+"   B1 B2 B3 B4 ...  \n"
+"                                                       \n"
+"With this command line:  \n"
+"                                                       \n"
+"    sm1 --file1 A --file2 B  \n"
+"                                                       \n"
+"the matchings will be:  \n"
+"                                                       \n"
+"    (A1, B1), (A2, B2), etc.\n"
+"                                                       \n"
+"While with this command line:\n"
+"                                                       \n"
+"    sm1 --file1 A --file2 A\n"
+"                                                       \n"
+"the matchings will be \n"
+"                                                       \n"
+"    (A1, A2), (A3, A4), (A5, A6), ... \n"
+"                                                       \n";
+	
+	
 int main(int argc, const char*argv[]) {
 	sm_set_program_name(argv[0]);
+	options_banner(sm1_banner);
 	
 	struct sm_params params;
 	struct sm_result result;
