@@ -114,7 +114,7 @@ int main(int argc, const char*argv[]) {
 	}
 	
 	fclose(file1);
-	fclose(file2);
+	if(file2 != file1) fclose(file2);
 	fclose(out);
 	
 	

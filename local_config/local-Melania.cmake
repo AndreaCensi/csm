@@ -29,4 +29,4 @@ SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pedantic")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wmissing-prototypes ")
 
 
-SET(COMPILE_HSM 1)
+SET(COMPILE_HSM 0)
