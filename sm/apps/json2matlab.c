@@ -47,14 +47,16 @@ int main(int argc, const char * argv[]) {
 	const char * out_filename;
 	const char * function;
 	int complete_script;
+	int debug;
 	
 	options_banner(banner);
 	
-	struct option* ops = options_allocate(5);
+	struct option* ops = options_allocate(8);
 	options_string(ops, "in", &input_filename, "stdin", "input file (JSON)");
 	options_string(ops, "out", &out_filename, "stdout", "output file (MATLAB)");
 	options_string(ops, "function", &function, "", "Matlab function name (if empty, use basename of out)");
 	options_int(ops, "complete_script", &complete_script, 1, "Write complete script 'function  res = ...'");
+	options_int(ops, "debug", &debug, 1, "Shows debug information");
 	
 	if(argc == 2 && (argv[1][0] != '-')) { 
 		/* one parameter */
@@ -73,6 +75,8 @@ int main(int argc, const char * argv[]) {
 		if(!options_parse_args(ops, argc, argv))
 			return -1;
 	}
+
+	sm_debug_write(debug);
 
 	if(!strcmp(function,"")) {
 		int len = strlen(out_filename) + 4;

@@ -44,8 +44,9 @@ void my_basename_no_suffix(const char *file, char*dest) {
   if(!end || end<start) end = start + strlen(start);
 
   strncpy(dest, start, (size_t) (end-start));
-  dest[end-file] = '\0';
-//	sm_debug("start: '%s' end: '%s' base_no_suffix: '%s'\n", start, end, dest);
+  dest[end-start] = '\0';
+
+/*  printf("start: '%s' end: '%s' base_no_suffix: '%s'\n", start, end, dest);*/
 }
 
 void my_no_suffix(const char *file, char*dest) {

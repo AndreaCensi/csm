@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.4)
 
-project(map)
+project(raytracer)
 
 
 find_package(PkgConfig REQUIRED)
@@ -17,7 +17,6 @@ IF(${CSM_FOUND})
 ELSE(${CSM_FOUND})	
 	MESSAGE(FATAL_ERROR "CSM not found. Check that the environment variable PKG_CONFIG_PATH includes the path containing the file 'csm.pc'.")
 ENDIF(${CSM_FOUND})		
-
 
 
 set(raytracer_SRCS
