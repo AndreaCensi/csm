@@ -97,8 +97,17 @@ int main(int argc, const char*argv[]) {
 	LDP ld1, ld2;
 	while(1) {
 		ld1 = ld_from_json_stream(file1);
+		if(!ld1) {
+			if(feof(file1)) break;
+			sm_error("Invalid data in file1 '%s' \n", p.file1);
+			return 2;
+		}
 		ld2 = ld_from_json_stream(file2);
-		if(!ld1 || !ld2) break;
+		if(!ld2) {
+			if(feof(file2)) break;
+			sm_error("Invalid data in file2 '%s' \n", p.file2);
+			return 3;
+		}
 		
 		params.laser_ref = ld1;
 		params.laser_sens = ld2;

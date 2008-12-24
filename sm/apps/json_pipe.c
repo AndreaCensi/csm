@@ -15,9 +15,15 @@ int main(int argc, const char * argv[]) {
 		return -1;
 	}
 	
-	JO jo; 
 	
-	while((jo = json_read_stream(stdin))) {
+	while(1) { 
+		JO jo = json_read_stream(stdin);
+		if(!jo) {
+			if(feof(stdin)) break;
+			sm_error("Malformed JSON\n");
+			return -1;
+		}
+		
 		const char * s = json_object_to_json_string(jo);
 		int i; for(i=0;i<n;i++) {
 			puts(s); puts("\n");

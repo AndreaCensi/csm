@@ -223,7 +223,8 @@ LDP ld_from_json_stream(FILE*file) {
 	
 	jo = json_read_stream(file);
 	if(!jo) {
-		sm_error("Invalid JSON found.\n");
+		if(!feof(file))
+			sm_error("Invalid JSON found.\n");
 		return 0;
 	}
 
