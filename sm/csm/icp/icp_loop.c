@@ -234,11 +234,22 @@ int compute_next_estimate(struct sm_params*params,
 		}
 		
 		
-		/* Possibly scale the correspondence weight by a factor */
 		double factor = 1;
+		
+		/* Scale the correspondence weight by a factor concerning the 
+		   information in this reading. */
 		if(params->use_ml_weights) {
-			double alpha = laser_ref->true_alpha[j1];
-			if(!is_nan(alpha)) {
+			int have_alpha = 0;
+			double alpha = 0;
+			if(!is_nan(laser_ref->true_alpha[j1])) {
+				alpha = laser_ref->true_alpha[j1];
+				have_alpha = 1;
+			} else if(laser_ref->alpha_valid[j1]) {
+				alpha = laser_ref->alpha[j1];;
+				have_alpha = 1;
+			} else have_alpha = 0;
+			
+			if(have_alpha) {
 				double pose_theta = x_old[2];
 				/** Incidence of the ray 
 					Note that alpha is relative to the first scan (not the world)
@@ -246,9 +257,31 @@ int compute_next_estimate(struct sm_params*params,
 					respect to the first, hence it's ok. */
 				double beta = alpha - (pose_theta + laser_sens->theta[i]);
 				factor = 1 / square(cos(beta));
+			} else {
+				static int warned_before = 0;
+				if(!warned_before) {
+					sm_error("Param use_ml_weights was active, but not valid alpha[] or true_alpha[]." 
+					          "Perhaps, if this is a single ray not having alpha, you should mark it as inactive.\n");						
+					sm_error("Writing laser_ref: \n");						
+					ld_write_as_json(laser_ref, stderr);
+					warned_before = 1;
+				}
 			}
 		} 
 
+		if(params->use_sigma_weights) {
+			if(!is_nan(laser_sens->readings_sigma[i])) {
+				factor *= 1 / square(laser_sens->readings_sigma[i]);
+			} else {
+				static int warned_before = 0;
+				if(!warned_before) {
+					sm_error("Param use_sigma_weights was active, but the field readings_sigma[] was not filled in.\n");						
+					sm_error("Writing laser_sens: \n");						
+					ld_write_as_json(laser_sens, stderr);
+				}
+			}
+		}
+		
 		c[k].C[0][0] *= factor;
 		c[k].C[1][0] *= factor;
 		c[k].C[0][1] *= factor;

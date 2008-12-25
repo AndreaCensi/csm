@@ -13,10 +13,13 @@ struct ld_noise_params {
 	double sigma;
 	const char* file_input;
 	const char* file_output;
+	int lambertian;
 };
 
 int main(int argc, const char * argv[]) {
 	sm_set_program_name(argv[0]);
+	
+	options_banner("ld_noise: Adds noise to readings in a scan");
 	
 	struct ld_noise_params p;
 	
@@ -25,6 +28,8 @@ int main(int argc, const char * argv[]) {
 		"Size of discretization (disabled if 0)");
 	options_double(ops, "sigma", &p.sigma, 0.0, 
 		"Std deviation of gaussian noise (disabled if 0)");
+	options_int(ops, "lambertian", &p.lambertian, 0, 
+		"Use lambertian model cov = sigma^2 / cos(beta^2) where beta is the incidence. Need have alpha or true_alpha.");
 	options_int(ops, "seed", &p.seed, 0, 
 		"Seed for random number generator (if 0, use GSL_RNG_SEED env. variable).");
 	options_string(ops, "in", &p.file_input, "stdin", "Input file ");
@@ -61,8 +66,40 @@ int main(int argc, const char * argv[]) {
 			if(!ld->valid[i]) continue;
 			
 			double * reading = ld->readings + i;
-			if(p.sigma > 0)
-				*reading += gsl_ran_gaussian(rng, p.sigma);
+			if(p.sigma > 0) {
+				double add_sigma = p.sigma;
+				
+				if(p.lambertian) {
+
+					int have_alpha = 0;
+					double alpha = 0;
+					if(!is_nan(ld->true_alpha[i])) {
+						alpha = ld->true_alpha[i];
+						have_alpha = 1;
+					} else if(ld->alpha_valid[i]) {
+						alpha = ld->alpha[i];;
+						have_alpha = 1;
+					} else have_alpha = 0;
+
+					if(have_alpha) {
+						double beta = alpha - ld->theta[i];
+					    add_sigma = p.sigma / cos(beta);
+					} else {
+						sm_error("Because lambertian is active, I need either true_alpha[] or alpha[]");
+						ld_write_as_json(ld, stderr);
+						return -1;
+					}
+					
+				} 
+				
+			   *reading += gsl_ran_gaussian(rng, add_sigma);
+				
+				if(is_nan(ld->readings_sigma[i])) {
+					ld->readings_sigma[i] = add_sigma;
+				} else {
+					ld->readings_sigma[i] = sqrt(square(add_sigma) + square(ld->readings_sigma[i]));
+				}
+			}
 			if(p.discretization > 0)
 				*reading -= fmod(*reading , p.discretization);
 		}

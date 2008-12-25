@@ -145,7 +145,7 @@ JO ld_to_json(LDP ld) {
 
 	jo_add_double_array(jo, "theta",     ld->theta, n);
 	jo_add_double_array(jo, "readings",   ld->readings, n);
-	jo_add_double_array_if_not_nan(jo, "cov_readings", ld->cov_readings, n);
+	jo_add_double_array_if_not_nan(jo, "readings_sigma", ld->readings_sigma, n);
 
 	jo_add_int_array(jo, "valid",   ld->valid, n);
 
@@ -175,20 +175,31 @@ LDP json_to_ld(JO jo) {
 	}
 	
 	LDP ld = ld_alloc_new(n);
+	
 	jo_read_double(jo, "min_theta", &ld->min_theta);
 	jo_read_double(jo, "max_theta", &ld->max_theta);	
+	/* XXX add more checks */
 	jo_read_double_array(jo, "theta", ld->theta, n, NAN);	
 	jo_read_double_array(jo, "readings", ld->readings, n, NAN);	
-	jo_read_double_array(jo, "cov_readings", ld->cov_readings, n, NAN);	
+
+	if(jo_has_field(jo,"readings_sigma") && !jo_read_double_array(jo, "readings_sigma", ld->readings_sigma, n, NAN))
+		{ sm_error("Error while reading field 'readings_sigma'.\n"); return 0; }
 
 	jo_read_int_array(jo, "valid",     ld->valid, n, 0);
 	jo_read_int_array(jo, "cluster",   ld->cluster, n, -1);
 
-	jo_read_double_array(jo, "alpha",     ld->alpha, n, NAN);
-	jo_read_double_array(jo, "cov_alpha", ld->cov_alpha, n, NAN);
-	jo_read_int_array(jo, "alpha_valid",   ld->alpha_valid, n, 0);
+	if(jo_has_field(jo,"alpha") && !jo_read_double_array(jo, "alpha",ld->alpha, n, NAN)) 
+		{ sm_error("Error while reading field alpha.\n"); return 0; }
+		
+	if(jo_has_field(jo,"cov_alpha") && !jo_read_double_array(jo, "cov_alpha", ld->cov_alpha, n, NAN))
+		{ sm_error("Error while reading field cov_alpha.\n"); return 0; }
+	
+	if(jo_has_field(jo,"alpha_valid") && !jo_read_int_array(jo, "alpha_valid",   ld->alpha_valid, n, 0)) 
+		{ sm_error("Error while reading field alpha_valid.\n"); return 0; }
 
-	jo_read_double_array(jo, "true_alpha",     ld->true_alpha, n, NAN);
+	if(jo_has_field(jo,"true_alpha") && !jo_read_double_array(jo, "true_alpha", ld->true_alpha, n, NAN))
+		{ sm_error("Error while reading field true_alpha.\n"); return 0; }
+		
 	
 	jo_read_double_array(jo, "odometry", ld->odometry, 3, NAN);
 	jo_read_double_array(jo, "estimate", ld->estimate, 3, NAN);	

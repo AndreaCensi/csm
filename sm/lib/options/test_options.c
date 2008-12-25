@@ -13,7 +13,7 @@ struct params {
 struct option_alternative alt[4] = { 
    {"PLICP", 3, "a new algorithm"}, 
    {"ICP",   4, "the standard"}, 
-   {"MbICP", 5, "good for rations"}, {0,0,0}
+   {"MbICP", 5, "good for rotations"}, {0,0,0}
 };
 
 int main(int argc, const char*argv[]) {

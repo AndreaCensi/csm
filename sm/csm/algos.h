@@ -76,8 +76,13 @@ struct sm_params {
 	/** If 1, the field "true_alpha" is used to compute the incidence
 	    beta, and the factor (1/cos^2(beta)) used to weight the impact
 	    of each correspondence. This works fabolously if doing localization,
-	    that is the first scan has no noise.*/
+	    that is the first scan has no noise.
+		If "true_alpha" is not available, it uses "alpha".
+	*/
 	int use_ml_weights;
+	
+	/* If 1, the field "readings_sigma" is used to weight the correspondence by 1/sigma^2 */
+	int use_sigma_weights;
 	
 	/** Use the method in http://purl.org/censi/2006/icpcov to compute
 	    the matching covariance. */

@@ -114,6 +114,9 @@ struct json_object* json_tokener_parse_len(const char *str, int len) {
   return obj;
 }
 
+int jo_has_field(JO s, const char*name) {
+	return json_object_object_get(s, name) != 0;
+}
 
 
 int jo_read_double_array(JO s, const char*name, double*p, int n, double when_null) {

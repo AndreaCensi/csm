@@ -36,7 +36,7 @@ void ld_alloc(LDP ld, int nrays) {
 	
 	ld->valid        = alloc_int_array(nrays, 0);
 	ld->readings     = alloc_double_array(nrays, GSL_NAN);
-	ld->cov_readings = alloc_double_array(nrays, GSL_NAN);
+	ld->readings_sigma = alloc_double_array(nrays, GSL_NAN);
 	ld->theta        = alloc_double_array(nrays, GSL_NAN);
 	
 	ld->min_theta = GSL_NAN;
@@ -92,7 +92,7 @@ void ld_free(LDP ld) {
 void ld_dealloc(struct laser_data*ld){	
 	free(ld->valid);
 	free(ld->readings);
-	free(ld->cov_readings);
+	free(ld->readings_sigma);
 	free(ld->theta);
 	free(ld->cluster);
 	free(ld->alpha);

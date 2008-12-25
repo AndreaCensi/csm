@@ -46,6 +46,7 @@ void ld_getbb(LDP  ld, double*x0, double*y0, double*x1, double*y1,
 
 int main(int argc, const char*argv[]) {
 	sm_set_program_name(argv[0]);
+	fprintf(stderr, "carmen2pdf:\t *** Please use log2pdf instead. ***\n\n");
 
 	struct params p;
 	
@@ -57,7 +58,7 @@ int main(int argc, const char*argv[]) {
 	options_double(ops, "horizon", &p.horizon, 8.0, "horizon of the laser (m)");
 	options_double(ops, "padding", &p.padding, 0.2, "padding around bounding box (m)");
 	options_double(ops, "dimension", &p.dimension, 500.0, "dimension of the image (points)");
-	options_int(ops, "draw_confidence", &p.draw_confidence, 0, " Draws confidence (cov_readings[i]) ");
+	options_int(ops, "draw_confidence", &p.draw_confidence, 0, " Draws confidence (readings_sigma[i]) ");
 	options_double(ops, "confidence_mult", &p.confidence_mult, 3.0, " 3-sigma ");
 	options_double(ops, "offset_theta_deg", &p.offset_theta_deg, 0.0, " rotate entire map by this angle (deg) ");
 
@@ -292,9 +293,9 @@ void carmen2pdf(struct params p) {
 				double interval[ld->nrays];
 				double big_interval = 0.3;
 				for(i=0;i<ld->nrays;i++) { if(draw_info[i].valid==0) continue;
-					double cov = ld->cov_readings[i];
+					double sigma = ld->readings_sigma[i];
 					if(!is_nan(cov)) {
-						interval[i] = p.confidence_mult * sqrt(cov);
+						interval[i] = p.confidence_mult * sigma;
 					} else interval[i] = big_interval;
 				}
 

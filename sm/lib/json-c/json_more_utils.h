@@ -29,6 +29,9 @@ JO json_read_stream(FILE*);
     Returns 0 on error. XXX: does not support unicode. */
 int json_stream_skip(FILE*);
 
+/** Return true if there is a field */
+int jo_has_field(JO s, const char*name);
+
 JO jo_new_double_array(const double *v, int n);
 JO jo_new_int_array   (const int    *v, int n);
 

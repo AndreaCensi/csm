@@ -109,8 +109,11 @@ void sm_options(struct sm_params*p, struct option*ops) {
 	options_double(ops, "max_reading", &(p->max_reading), 1000.0, "Don't use readings longer than max_reading (m)");
 	
 	options_int(ops, "use_ml_weights", &(p->use_ml_weights), 0,
-	"If 1, the field 'true_alpha' is used to compute the incidence beta, and the factor (1/cos^2(beta)) used to weight the correspondence.");
+  	    "If 1, the field 'true_alpha' (or 'alpha') in the first scan is used to compute the incidence beta, and the factor (1/cos^2(beta)) used to weight the correspondence.");
 
+	options_int(ops, "use_sigma_weights", &(p->use_sigma_weights), 0,
+		"If 1, the field 'readings_sigma' in the second scan is used to weight the correspondence by 1/sigma^2");
+		
 
 	hsm_add_options(ops, &p->hsm);
 }

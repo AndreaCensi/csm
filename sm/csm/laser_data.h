@@ -29,7 +29,7 @@ struct laser_data {
 	double * restrict cov_alpha;
 	int    * restrict alpha_valid;
 
-	double * restrict cov_readings;
+	double * restrict readings_sigma;
 
 	double * restrict true_alpha;
 	
