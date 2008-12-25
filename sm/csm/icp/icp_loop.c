@@ -186,6 +186,7 @@ int compute_next_estimate(struct sm_params*params,
 			c[k].q[0] = laser_ref->points[j1].p[0];
 			c[k].q[1] = laser_ref->points[j1].p[1];
 
+			/** TODO: here we could use the estimated alpha */
 			double diff[2];
 			diff[0] = laser_ref->points[j1].p[0]-laser_ref->points[j2].p[0];
 			diff[1] = laser_ref->points[j1].p[1]-laser_ref->points[j2].p[1];
@@ -268,7 +269,8 @@ int compute_next_estimate(struct sm_params*params,
 				}
 			}
 		} 
-
+		
+		/* Weight the points by the sigma in laser_sens */
 		if(params->use_sigma_weights) {
 			if(!is_nan(laser_sens->readings_sigma[i])) {
 				factor *= 1 / square(laser_sens->readings_sigma[i]);
