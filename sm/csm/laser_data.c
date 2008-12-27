@@ -245,6 +245,11 @@ int ld_valid_fields(LDP ld)  {
 			return 0;
 		}
 		
+		if(!is_nan(ld->readings_sigma[i]) && ld->readings_sigma[i] < 0) {
+			sm_error("Ray #%d: has invalid readings_sigma %f \n", i, ld->readings_sigma[i]);
+			return 0;
+		}
+		
 	}
 	/* Checks that there is at least 10% valid rays */
 	int num_valid   = count_equal(ld->valid, ld->nrays, 1);

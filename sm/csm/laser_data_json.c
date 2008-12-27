@@ -234,8 +234,12 @@ LDP ld_from_json_stream(FILE*file) {
 	
 	jo = json_read_stream(file);
 	if(!jo) {
-		if(!feof(file))
+		if(!feof(file)) {
+			fprintf(stderr, " (!)\n");
 			sm_error("Invalid JSON found.\n");
+		}
+		fprintf(stderr, " EOF\n");
+		
 		return 0;
 	}
 
@@ -246,7 +250,7 @@ LDP ld_from_json_stream(FILE*file) {
 	}
 	jo_free(jo);
 	
-	fprintf(stderr, "j");
+	fprintf(stderr, "l");
 	
 	return ld;
 }

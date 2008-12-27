@@ -11,6 +11,8 @@ struct raytracer_params {
 
 
 bool load_env_from_json(Environment& env, JO jo);
+double cosine_between_angles(double a1, double a2);
+
 
 int main(int argc, const char** argv)
 {
@@ -84,7 +86,14 @@ int main(int argc, const char** argv)
 				ld->valid[i] = 1;
 				ld->readings[i] = rho;
 				
-				ld->true_alpha[i] = normalize_0_2PI(alpha-ld->true_pose[2]);
+				double relative_alpha = alpha-ld->true_pose[2];
+
+				/* Make sure alpha points out of the wall */
+				if( cosine_between_angles(relative_alpha, ld->theta[i]) > 0) {
+					relative_alpha += M_PI;
+				}
+				
+				ld->true_alpha[i] = normalize_0_2PI(relative_alpha);
 
 			} else {
 				ld->valid[i] = 0;
@@ -130,6 +139,10 @@ int main(int argc, const char** argv)
 			return false; \
 		}
 		
+double cosine_between_angles(double a1, double a2) {
+	return cos(a1)*cos(a2)+sin(a1)*sin(a2);
+}
+
 
 bool load_env_from_json(Environment& env, JO jo_map) {
 	jo_expect_object(jo_map);

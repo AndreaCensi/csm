@@ -82,7 +82,8 @@ int main(int argc, const char * argv[]) {
 					} else have_alpha = 0;
 
 					if(have_alpha) {
-						double beta = alpha - ld->theta[i];
+						/* Recall that alpha points outside the surface */
+						double beta = (alpha+M_PI) - ld->theta[i];
 					    add_sigma = p.sigma / cos(beta);
 					} else {
 						sm_error("Because lambertian is active, I need either true_alpha[] or alpha[]");
