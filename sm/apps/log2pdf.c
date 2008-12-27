@@ -48,7 +48,7 @@ const char* banner =
 	"This program draws laser scans.\n"
 	"\n"
 	"IMPORTANT: it is likely you have to set one or more parameters. \n"
-	"           the default parameters are OK to draw very long laser logs";
+	"           the default parameters are OK to draw very long laser logs\n\n";
 	
 int main(int argc, const char* argv[]) {
 	sm_set_program_name(argv[0]);

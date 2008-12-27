@@ -88,6 +88,12 @@ void lds_add_options(ld_style*lds, struct option*ops,
 	options_double(ops, cat(prefix, "normals_length"), &(lds->normals_length), 
 		lds->normals_length, cat(desc_prefix, "Length of normals sticks (meters)"));
 
+	ls_add_options(&(lds->sigma), ops, cat(prefix, "sigma_"),  cat(desc_prefix, "Sigma | "));
+
+	options_double(ops, cat(prefix, "sigma_multiplier"), &(lds->sigma_multiplier), 
+		lds->sigma_multiplier, cat(desc_prefix, "Multiplier for sigma"));
+
+
 	options_double(ops, cat(prefix, "connect_threshold"), &(lds->connect_threshold), 
 		lds->connect_threshold, cat(desc_prefix, "Threshold under which points are connected (m)."));
 	options_double(ops, cat(prefix, "horizon"), &(lds->horizon), 
@@ -226,6 +232,27 @@ void cr_ld_draw_normals(cairo_t*cr, LDP ld, double length) {
 	cairo_stroke (cr);
 }
 
+void cr_ld_draw_sigma(cairo_t*cr, LDP ld, double multiplier) {
+	int i; for(i=0;i<ld->nrays;i++) {
+		if(!ld_valid_ray(ld, i) || is_nan(ld->readings_sigma[i])) continue;
+
+		double theta = ld->theta[i];
+		double length = ld->readings_sigma[i] * multiplier;
+		
+		double x0 = ld->readings[i] * cos(theta);
+		double y0 = ld->readings[i] * sin(theta);
+		double x1 = x0 + cos(theta) * length;
+		double y1 = y0 + sin(theta) * length;
+		double x2 = x0 - cos(theta) * length;
+		double y2 = y0 - sin(theta) * length;
+
+		cairo_move_to(cr, x1, y1);
+		cairo_line_to(cr, x2, y2);
+	}
+	cairo_stroke (cr);
+}
+
+
 void cr_ld_draw(cairo_t* cr, LDP ld, ld_style *p) {
 	if(p->rays.draw) {
 		cr_set_style(cr, &(p->rays));
@@ -245,6 +272,11 @@ void cr_ld_draw(cairo_t* cr, LDP ld, ld_style *p) {
 	if(p->normals.draw) {
 		cr_set_style(cr, &(p->normals));
 		cr_ld_draw_normals(cr, ld, p->normals_length);
+	}
+
+	if(p->sigma.draw) {
+		cr_set_style(cr, &(p->sigma));
+		cr_ld_draw_sigma(cr, ld, p->sigma_multiplier);
 	}
 	
 	if(p->pose.draw) {
@@ -282,6 +314,10 @@ void lds_set_defaults(ld_style*lds) {
 	
 	lds->normals_length = 0.10;
 	ls_set_defaults(&(lds->normals));
+
+	lds->sigma_multiplier = 3;
+	ls_set_defaults(&(lds->sigma));
+	lds->sigma.draw = 0;
 	
 	lds->connect_threshold = 0.20;
 	lds->horizon = 10;
