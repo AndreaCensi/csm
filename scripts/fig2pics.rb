@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 
+# 2009-05-03: starting tagging versions before copying over
 #
 # 2007-08-22: sostituto \usepackage{times} a \usepackage{ae,aecompl}
 #
