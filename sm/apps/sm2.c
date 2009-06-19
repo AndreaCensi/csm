@@ -123,7 +123,8 @@ int main(int argc, const char*argv[]) {
 		
 		if(!result.valid){
 			sm_error("One ICP matching failed. Because I process recursively, I will stop here.\n");
-			break;
+			ld_free(laser_ref);
+			return 2;
 		}
 		
 		/* Add the result to the previous estimate */
