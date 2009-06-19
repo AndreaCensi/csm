@@ -10,13 +10,20 @@ int main(int argc, const char*argv[]) {
 	sm_set_program_name(argv[0]);
 	
 	double epsilon;
+	int debug;
+	
 	
 	struct option* ops = options_allocate(3);
-	options_double(ops, "epsilon", &epsilon, 0.0001, "epsilon");
+	options_double(ops, "epsilon", &epsilon, 0.0001, "minimum difference between rays to be used");
+	
+	
 	if(!options_parse_args(ops, argc, argv)) {
 		options_print_help(ops, stderr);
 		return -1;
 	}
+	
+	sm_debug_write(debug);
+	
 	
 	/* Read first scan */
 	LDP laser_ref=0, laser_sens;
