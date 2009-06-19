@@ -15,6 +15,8 @@ struct {
 	/* which algorithm to run */
 	int algo;
 	
+	int recover_from_error;
+	
 	int debug;
 } p;
 
@@ -37,6 +39,7 @@ int main(int argc, const char*argv[]) {
 	options_int(ops, "algo", &p.algo, 0, "Which algorithm to use (0:(pl)ICP 1:gpm-stripped 2:HSM) ");
 	
 	options_int(ops, "debug", &p.debug, 0, "Shows debug information");
+	options_int(ops, "recover_from_error", &p.recover_from_error, 0, "If true, tries to recover from an ICP matching error");
 	
 	
 	p.format = 0;
@@ -122,26 +125,40 @@ int main(int argc, const char*argv[]) {
 		}
 		
 		if(!result.valid){
-			sm_error("One ICP matching failed. Because I process recursively, I will stop here.\n");
-			ld_free(laser_ref);
-			return 2;
-		}
+			if(p.recover_from_error) {
+				sm_info("One ICP matching failed. Because you passed  -recover_from_error, I will try to recover."
+				" Note, however, that this might not be good in some cases. \n");
+				sm_info("The recover is that the displacement is set to 0. No result stats is output. \n");
+				
+				/* For the first scan, set estimate = odometry */
+				copy_d(laser_ref->estimate, 3, laser_sens->estimate);
+				
+				ld_free(laser_ref); laser_ref = laser_sens;
+				
+			} else {
+				sm_error("One ICP matching failed. Because I process recursively, I will stop here.\n");
+				sm_error("Use the option -recover_from_error if you want to try to recover.\n");
+				ld_free(laser_ref);
+				return 2;
+			}
+		} else {
 		
-		/* Add the result to the previous estimate */
-		oplus_d(laser_ref->estimate, result.x, laser_sens->estimate);
+			/* Add the result to the previous estimate */
+			oplus_d(laser_ref->estimate, result.x, laser_sens->estimate);
 
-		/* Write the corrected log */
-		spit(laser_sens, file_out);
+			/* Write the corrected log */
+			spit(laser_sens, file_out);
 
-		/* Write the statistics (if required) */
-		if(file_out_stats) {
-			JO jo = result_to_json(&params, &result);
-			fputs(jo_to_string(jo), file_out_stats);
-			fputs("\n", file_out_stats);
-			jo_free(jo);
+			/* Write the statistics (if required) */
+			if(file_out_stats) {
+				JO jo = result_to_json(&params, &result);
+				fputs(jo_to_string(jo), file_out_stats);
+				fputs("\n", file_out_stats);
+				jo_free(jo);
+			}
+
+			ld_free(laser_ref); laser_ref = laser_sens;
 		}
-
-		ld_free(laser_ref); laser_ref = laser_sens;
 	}
 	ld_free(laser_ref);
 	
