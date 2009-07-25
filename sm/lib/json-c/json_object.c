@@ -357,15 +357,23 @@ int json_object_get_int(struct json_object *this)
   }
 }
 
+const char *float_format = "%e";
+
+void json_set_float_format(const char*f) {
+    float_format = f;
+}
 
 /* json_object_double */
 
 static int json_object_double_to_json_string(struct json_object* this,
 					     struct printbuf *pb)
 {
+#define AC_BETTER_PRECISION
 #ifdef AC_BETTER_PRECISION
+//#warning json: Using better precision in printing floats
 	if( ((int) this->o.c_double) !=  this->o.c_double)
-		return sprintbuf(pb, "%25.18Lg", this->o.c_double);
+//		return sprintbuf(pb, "%g", this->o.c_double);
+	    return sprintbuf(pb, float_format, this->o.c_double);
 	else
 		return sprintbuf(pb, "%d.0", (int) this->o.c_double);
 #else

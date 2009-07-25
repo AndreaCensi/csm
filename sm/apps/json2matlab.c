@@ -128,7 +128,7 @@ void jo_write_as_matlab(JO jo, FILE*out) {
 			fprintf(out, "%d", json_object_get_int(jo));		
 			return;
 
-		case json_type_double:
+		case json_type_double: 
 			fprintf(out, "%lg", json_object_get_double(jo));		
 			return;
 		

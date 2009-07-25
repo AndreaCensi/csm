@@ -46,6 +46,9 @@ enum json_type {
 
 /* reference counting functions */
 
+
+
+
 /**
  * Increment the reference count of json_object
  * @param obj the json_object instance
@@ -306,5 +309,7 @@ extern struct json_object* json_object_new_string_len(const char *s, int len);
  * @returns a string
  */
 extern char* json_object_get_string(struct json_object *obj);
+
+extern void json_set_float_format(const char*f);
 
 #endif
