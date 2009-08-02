@@ -4,12 +4,13 @@
 int main(int argc, const char * argv[]) {
 	sm_set_program_name(argv[0]);
 	
-	int period;
+    int period; int phase;
 	const char*input_filename;
 	const char*output_filename;
 	
 	struct option* ops = options_allocate(3);
 	options_int(ops, "period", &period, 1, "Period of objects to extract.");
+	options_int(ops, "phase", &phase, 0, "Phase (=0 starts with the first object)");
 	options_string(ops, "in", &input_filename, "stdin", "input file (JSON)");
 	options_string(ops, "out", &output_filename, "stdout", "output file (JSON)");
 	
@@ -40,9 +41,9 @@ int main(int argc, const char * argv[]) {
 			return -1;
 		}
 		
-		if(count % period == 0) {
+		if( (count - phase) % period == 0) {
 			const char * s = json_object_to_json_string(jo);
-			puts(s); puts("\n");
+			fputs(s,output_stream); fputs("\n",output_stream);
 		} 
 		
 		jo_free(jo);
