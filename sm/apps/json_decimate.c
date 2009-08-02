@@ -34,9 +34,9 @@ int main(int argc, const char * argv[]) {
 	
 	int count = 0;
 	while(1) { 
-		JO jo = json_read_stream(stdin);
+		JO jo = json_read_stream(input_stream);
 		if(!jo) {
-			if(feof(stdin)) break;
+			if(feof(input_stream)) break;
 			sm_error("Malformed JSON\n");
 			return -1;
 		}

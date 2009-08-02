@@ -8,6 +8,8 @@ function res = ld_plot(ld, params)
 %		params.rototranslated (= true); if true, the scan is drawn
 %			rototranslated at ld.estimate, else is drawn at 0;
 %		params.rototranstated_odometry = false;
+%
+%   ld.dr -> tangent vector
 	
 	ld.points = [ cos(ld.theta') .* ld.readings'; sin(ld.theta').* ld.readings'];
 	
@@ -108,3 +110,26 @@ function res = ld_plot(ld, params)
 			plotVectors( reference, [from to] , color);
 		end
 	end
+	
+	if isfield(ld,'dr')
+    	% disegno normali
+		maxLength = 0.3;
+		
+		dr = ld.dr / max(abs(ld.dr)) * maxLength;
+		
+		for i=1:ld.nrays
+			theta = ld.theta(i);
+    		readings = ld.readings(i);
+    		alpha = ld.alpha(i);
+    		
+    		%len = [cos(theta);sin(theta)]' *  [cos(alpha);sin(alpha)] * dr(i);
+    		%dir = alpha;
+    		len = dr(i);
+    		dir = theta;
+    		
+    		from = readings*[cos(theta);sin(theta)];
+    	    to = from + [cos(dir);sin(dir)] * len;
+			plotVectors( reference, [from to] , 'g-');
+		end
+	end
+	

@@ -22,7 +22,12 @@ ld.points = [ cos(ld.theta') .* ld.readings'; sin(ld.theta').* ld.readings'];
 n = size(ld.points,2);
 
 for i=1:n
-
+    if ld.valid(i) == 0
+        ld.alpha(i) = nan;
+		ld.alpha_valid(i) = 0;
+		ld.alpha_error(i) = nan;
+	    continue;
+    end
 
 	if i==1 
 		min_dist = norm(ld.points(:,i)-ld.points(:,i+1));
@@ -31,7 +36,7 @@ for i=1:n
 			min_dist = norm(ld.points(:,i)-ld.points(:,i-1));
 		else
 			min_dist = min( norm(ld.points(:,i)-ld.points(:,i-1)), ...
-								 norm(ld.points(:,i)-ld.points(:,i+1)));
+				 norm(ld.points(:,i)-ld.points(:,i+1)));
 		end
 	end
 	
@@ -49,6 +54,7 @@ for i=1:n
 	
 	imin=i;
 	for j=max(1,i-1):-1:max(1,i-MAX)
+	
 		d = norm( ld.points(:,j)- ld.points(:,j+1) );
 		if d > THRESHOLD * min_dist
 			break;
@@ -56,8 +62,6 @@ for i=1:n
 		imin=j;
 	end
 	
-%	imin = max(1, i-3);
-%	imax = min(n, i+3);
 	
 	ni=imax-imin+1;
 
@@ -96,6 +100,11 @@ for i=1:n
 		alpha = theta - atan(fd0/f0);
 		alpha_var =  fd0_var * (( f0 / (f0.^2 + fd0.^2) ).^2) ...
 		            + var *  (( fd0 / (f0.^2 + fd0.^2) ).^2) ;
+		
+		if isnan(alpha)
+		    fprintf('bug here... \n')
+		    pause
+		end
 		
 		ld.alpha(i) =  alpha-pi; % rivolta verso dentro
 		ld.alpha_valid(i) = 1;
