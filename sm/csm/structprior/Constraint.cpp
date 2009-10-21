@@ -16,7 +16,7 @@ void Constraint::SetType(int t)
 	type = t;
 }
 
-Values Constraint::ApplyConstraint(int* indices, double* params)
+Values Constraint::ApplyConstraint(double alphas[], double params[])
 {
 	Values v;
 	double err = 0;
@@ -26,6 +26,7 @@ Values Constraint::ApplyConstraint(int* indices, double* params)
 	{
 		case EQUAL_TO_EITHER:
 		{
+			
 			
 			break;
 		}

@@ -24,6 +24,7 @@ int main(int argc, const char** argv)
 	}
 	
 	
+	// the types of constraints we want to apply (i.e. depending on the environment...)
 	std::vector<int> cons_types;
 	cons_types.push_back(EQUAL_TO_EITHER);
 	//cons_types.push_back(LOCK_DIFF);

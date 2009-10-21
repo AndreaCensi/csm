@@ -29,7 +29,7 @@ protected:
 	int type;
 // class methods
 public:
-	Values ApplyConstraint(int* indices, double* params = NULL);
+	Values ApplyConstraint(double alphas[], double params[] = NULL);
 	void SetType(int t);
 };
 
