@@ -159,6 +159,8 @@ SET(csm_sources
 ./csm/orientation.c
 ./csm/sm_options.c
 ./csm/utils.c
+./csm/structprior/ConstraintManager.cpp
+./csm/structprior/Constraint.cpp
 ./lib/egsl/egsl.c
 ./lib/egsl/egsl_conversions.c
 ./lib/egsl/egsl_misc.c
@@ -202,6 +204,17 @@ ADD_EXECUTABLE(hsm_test00 ./csm/hsm/hsm_test00.c ./csm/hsm/hsm.c)
 INSTALL(PROGRAMS hsm_test00 DESTINATION bin)
 
 ENDIF(COMPILE_HSM)
+
+IF(COMPILE_STRUCTPRIOR)
+
+INCLUDE_DIRECTORIES(/sw/include)
+LINK_DIRECTORIES(/sw/lib)
+
+ADD_EXECUTABLE(structprior ./csm/structprior/structprior_test.cpp)
+	TARGET_LINK_LIBRARIES(structprior csm-static)
+INSTALL(PROGRAMS structprior DESTINATION bin)
+
+ENDIF(COMPILE_STRUCTPRIOR)
 
 
 SUBDIRS(pkg-config)

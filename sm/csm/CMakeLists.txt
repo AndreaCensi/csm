@@ -31,6 +31,9 @@ SET(csm_sources
 	mbicp/sp_matrix.c
 	hsm/hsm.c
 	hsm/hsm_interface.c
+	
+	structprior/ConstraintManager.cpp
+	structprior/Constraint.cpp
 
 	gpm/gpm.c
 )
@@ -40,7 +43,7 @@ IF(CAIRO_FOUND)
 ENDIF(CAIRO_FOUND)
 
 
-foreach(dir . hsm mbicp icp gpm)
+foreach(dir . hsm mbicp icp gpm structprior)
 FILE(GLOB csm_headers "${dir}/*.h")
 foreach(header ${csm_headers} )
  	INSTALL(FILES ${header} DESTINATION include/csm/${dir})
