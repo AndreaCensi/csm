@@ -11,7 +11,7 @@
 struct Values{
 
 	double error;
-	double grad;
+	double grad[];
 
 };
 
