@@ -10,14 +10,19 @@ int main(int argc, const char** argv)
 	if (argc < 2)
 	{
 		sm_error("Provide input file's name as an argument\n");
-		return 0;
+		return -1;
 	}
 
-	const char* file_name = argv[0];
+	const char* file_name = argv[1];
 	FILE* input_file = fopen(file_name, "r");
+	
 
 	LDP laserdata;
-	laserdata = ld_read_smart(input_file);
+	if(!(laserdata = ld_read_smart(input_file))) {
+		sm_error("Could not read scan.\n");
+		return -1;
+	}
+	
 	
 	std::vector<int> cons_types;
 	cons_types.push_back(EQUAL_TO_EITHER);
@@ -30,6 +35,6 @@ int main(int argc, const char** argv)
 
 
 
-	return 1;
+	return 0;
 	
 }

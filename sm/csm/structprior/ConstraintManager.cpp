@@ -34,9 +34,9 @@ void ConstraintManager::ClearConstraints()
 void ConstraintManager::ApplyConstraints()
 {
 	//add as many types of constraints as wished
-	bool equal_to_either_active = false;
+	bool equal_to_either_active = true;
 	bool apply_equal_to_either = false;
-	bool lock_diff_active = false;
+	bool lock_diff_active = true;
 	bool apply_lock_diff = false;
 	
 	int n = laser_data->nrays;
@@ -46,12 +46,14 @@ void ConstraintManager::ApplyConstraints()
 		if (equal_to_either_active && constraint_types_to_apply[i] == EQUAL_TO_EITHER)
 		{
 			apply_equal_to_either = true;
+			equal_to_either_active = false;
 			continue;
 		}
 		
 		if (lock_diff_active && constraint_types_to_apply[i] == LOCK_DIFF)
 		{
 			apply_lock_diff = true;
+			lock_diff_active = false;
 			continue;
 		}
 		
@@ -69,9 +71,11 @@ void ConstraintManager::ApplyConstraints()
 			{
 				Constraint* c = new Constraint(EQUAL_TO_EITHER);
 				int* ind;
-				ind[0] = i-j; ind[1] =i; ind[2] =i+j;							
-				e += c->ApplyConstraint(ind);
-				constraints.push_back(c);
+				ind[0] = i-j; ind[1] =i; ind[2] =i+j;
+				Values v = c->ApplyConstraint(ind);
+				constraints.push_back(c);							
+				e += v.error;
+				
 			}
 			
 		}
@@ -80,19 +84,22 @@ void ConstraintManager::ApplyConstraints()
 	
 	if(apply_lock_diff)				//add lock_diff constraints
 	{
-		Constraint* c = new Constraint(LOCK_DIFF);
 		for (int i=0;i<n-1;i++)
 		{
 			int* ind;
 			ind[0] = i; ind[1]=i+1;
 			double* p;
 			p[0] = PI/2; p[1] = lock_diff_threshold;
-			constraints.push_back(c);
-			e+= c->ApplyConstraint(ind,p);
+			Constraint* c1 = new Constraint(LOCK_DIFF);
+			Values v = c1->ApplyConstraint(ind,p);
+			constraints.push_back(c1);							
+			e += v.error;
 			p[0] = -PI/2;
-			e+= c->ApplyConstraint(ind,p);
-			constraints.push_back(c);
-	
+			Constraint* c2 = new Constraint(LOCK_DIFF);
+			v = c2->ApplyConstraint(ind,p);
+			constraints.push_back(c2);							
+			e += v.error;
+
 		}
 	}
 	

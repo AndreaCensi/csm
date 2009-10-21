@@ -16,9 +16,11 @@ void Constraint::SetType(int t)
 	type = t;
 }
 
-double Constraint::ApplyConstraint(int* indices, double* params)
+Values Constraint::ApplyConstraint(int* indices, double* params)
 {
+	Values v;
 	double err = 0;
+	double grd = 0;
 	
 	switch(type)
 	{
@@ -36,5 +38,8 @@ double Constraint::ApplyConstraint(int* indices, double* params)
 	
 	}
 
-	return err;
+	v.error = err;
+	v.grad = grd;
+
+	return v;
 }

@@ -8,6 +8,13 @@
 
 #include <csm/csm_all.h>
 
+struct Values{
+
+	double error;
+	double grad;
+
+};
+
 
 class Constraint
 {
@@ -22,7 +29,7 @@ protected:
 	int type;
 // class methods
 public:
-	double ApplyConstraint(int* indices, double* params = NULL);
+	Values ApplyConstraint(int* indices, double* params = NULL);
 	void SetType(int t);
 };
 
