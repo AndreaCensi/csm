@@ -1,12 +1,11 @@
 #include "ConstraintManager.h"
 
 
-ConstraintManager::ConstraintManager(LDP ld, std::vector<int> constraint_types)
+ConstraintManager::ConstraintManager(std::vector<int> constraint_types)
 {
 	equal_to_either_num = 10;
 	lock_diff_threshold = deg2rad(5);
 	
-	laser_data = ld;
 	constraint_types_to_apply = constraint_types;
 
 }
@@ -31,7 +30,7 @@ void ConstraintManager::ClearConstraints()
 
 }
 
-void ConstraintManager::ApplyConstraints()
+void ConstraintManager::ApplyConstraintsAlphas(std::vector<double> x_vector)
 {
 	//add as many types of constraints as wished
 	bool equal_to_either_active = true;
@@ -39,8 +38,9 @@ void ConstraintManager::ApplyConstraints()
 	bool lock_diff_active = true;
 	bool apply_lock_diff = false;
 	
-	int n = laser_data->nrays;
+	int n = x_vector.size();
 	
+	//***************************************************************************
 	// select the types of constraints we want to apply
 	for (int i=0;i< constraint_types_to_apply.size();i++)
 	{
@@ -59,22 +59,22 @@ void ConstraintManager::ApplyConstraints()
 		}
 		
 	}
-	
+	//***************************************************************************
 	if(apply_equal_to_either)		//add equal_to_either constraints
 	{
-		
+		//this all could be substituted by a function ApplyEqualToEither
 		for (int i=equal_to_either_num-1;i<n-equal_to_either_num;i++)
 		{
 			
 			int mb = min (i-1, n-i-1);
 			mb = min (mb, equal_to_either_num-1);
-			for (int j=0; j< mb;j++)
+			for (int j=0; j< mb;j++)				//constraints with no consecutive points
 			{
 				Constraint* c = new Constraint(EQUAL_TO_EITHER);
 				double* alpha_values;
-				alpha_values[0]= laser_data->alpha[i-j]; 
-				alpha_values[1]= laser_data->alpha[i]; 
-				alpha_values[2]= laser_data->alpha[i+j];
+				alpha_values[0]= x_vector[i-j]; 
+				alpha_values[1]= x_vector[i]; 
+				alpha_values[2]= x_vector[i+j];
 				Values v = c->ApplyConstraint(alpha_values);
 				constraints.push_back(c);							
 				e += v.error;
@@ -84,7 +84,7 @@ void ConstraintManager::ApplyConstraints()
 		}
 
 	}
-	
+	//***************************************************************************
 	if(apply_lock_diff)				//add lock_diff constraints
 	{
 		for (int i=0;i<n-1;i++)
@@ -92,8 +92,8 @@ void ConstraintManager::ApplyConstraints()
 			int* ind;
 			ind[0] = i; ind[1]=i+1;
 			double* alpha_values;
-			alpha_values[0]= laser_data->alpha[i]; 
-			alpha_values[1]= laser_data->alpha[i+1];
+			alpha_values[0]= x_vector[i]; 
+			alpha_values[1]= x_vector[i+1];
 			double* p;
 			p[0] = PI/2; p[1] = lock_diff_threshold;
 			Constraint* c1 = new Constraint(LOCK_DIFF);

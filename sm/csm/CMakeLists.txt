@@ -34,6 +34,7 @@ SET(csm_sources
 	
 	structprior/ConstraintManager.cpp
 	structprior/Constraint.cpp
+	structprior/MeasurementsLikelihood.cpp
 
 	gpm/gpm.c
 )

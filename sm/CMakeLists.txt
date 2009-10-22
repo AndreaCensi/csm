@@ -161,6 +161,7 @@ SET(csm_sources
 ./csm/utils.c
 ./csm/structprior/ConstraintManager.cpp
 ./csm/structprior/Constraint.cpp
+./csm/structprior/MeasurementsLikelihood.cpp
 ./lib/egsl/egsl.c
 ./lib/egsl/egsl_conversions.c
 ./lib/egsl/egsl_misc.c

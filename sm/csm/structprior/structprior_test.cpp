@@ -2,6 +2,7 @@
 #include <csm/csm_all.h>
 
 #include "ConstraintManager.h"
+#include "MeasurementsLikelihood.h"
 
 
 int main(int argc, const char** argv) 
@@ -29,10 +30,12 @@ int main(int argc, const char** argv)
 	cons_types.push_back(EQUAL_TO_EITHER);
 	//cons_types.push_back(LOCK_DIFF);
 
-	ConstraintManager cons_manager(laserdata, cons_types);
-	cons_manager.ApplyConstraints();
+	ConstraintManager cons_manager(cons_types);
 	
-	//minimizer.Minimize(x,cons_manager.constraints...)...
+	MeasurementsLikelihood f(L2);
+
+	
+	//minimizer.Minimize(laserdata,f,cons_manager...)...
 
 
 
