@@ -32,7 +32,8 @@ int main(int argc, const char** argv)
 
 	ConstraintManager cons_manager(cons_types);
 	
-	MeasurementsLikelihood f(L2);
+	int number_of_measurements = laserdata->nrays;
+	MeasurementsLikelihood f(L2,number_of_measurements);
 
 	
 	//minimizer.Minimize(laserdata,f,cons_manager...)...

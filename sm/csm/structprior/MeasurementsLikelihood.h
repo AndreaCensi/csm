@@ -7,27 +7,25 @@
 #include <csm/csm_all.h>
 #include <vector>
 
-struct LValues{
 
-	double error;
-	double grad[];
-
-};
 
 class MeasurementsLikelihood
 {
 public:
 //constructors
-	MeasurementsLikelihood(int likelihood_function);
+	MeasurementsLikelihood(int likelihood_function, int measurements_number);
 	virtual ~MeasurementsLikelihood(void);	
 	//class variables
 protected:
+   LDP laser_data;
 	int function_type;
 public:
-	std::vector<LValues> values_vector;
+	double error;
+	std::vector<double> grad;
+	std::vector<std::vector<double> > hess;
 	//methods
 public:
-	void ComputeLikelihoods(std::vector<double> x_vector);
+	void ComputeAlphaLikelihoods(std::vector<double> x_vector, std::vector<double> alphas0, std::vector<double> alphas_covs );
 	
 
 };
