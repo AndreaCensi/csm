@@ -17,7 +17,9 @@ public:
 	MeasurementsLikelihood measurements_likelihood;
 	ConstraintManager constraint_manager;
 //methods
-	void OptimizeAlphas();
+	std::vector<double> OptimizeAlphas();
+	void OptimizeRanges();
+	void OptimizePoses();
 
 };
 #endif

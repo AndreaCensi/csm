@@ -17,10 +17,8 @@ public:
 	MeasurementsLikelihood(int likelihood_function, int measurements_number);
 	virtual ~MeasurementsLikelihood(void);	
 	//class variables
-protected:
-   LDP laser_data;
-	int function_type;
 public:
+	int function_type;
 	double error;
 	std::vector<double> grad;
 	std::vector<std::vector<double> > hess;
