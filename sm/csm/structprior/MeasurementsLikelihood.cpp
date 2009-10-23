@@ -1,5 +1,11 @@
 #include "MeasurementsLikelihood.h"
 
+MeasurementsLikelihood::MeasurementsLikelihood()
+{
+	sm_debug("MeasurementsLikelihood should take parameters");
+
+}
+
 MeasurementsLikelihood::MeasurementsLikelihood(int likelihood_function, int measurements_number)
 {
 	function_type = likelihood_function;

@@ -1,6 +1,12 @@
 #include "ConstraintManager.h"
 
 
+ConstraintManager::ConstraintManager()
+{
+	sm_debug("ConstraintManager should take parameters");
+
+}
+
 ConstraintManager::ConstraintManager(std::vector<int> constraint_types)
 {
 	equal_to_either_num = 10;

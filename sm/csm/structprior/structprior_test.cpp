@@ -36,8 +36,8 @@ int main(int argc, const char** argv)
 	int number_of_measurements = laserdata->nrays;
 	MeasurementsLikelihood f(L2,number_of_measurements);
 
-	Minimizer minimizer;
-	//minimizer.Minimize(laserdata,f,cons_manager...)...
+	Minimizer minimizer(laserdata,f,cons_manager);
+	minimizer.Minimize();
 
 
 

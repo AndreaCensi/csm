@@ -10,6 +10,7 @@ class ConstraintManager
 {
 public:
 //constructors
+	ConstraintManager();
 	ConstraintManager(std::vector<int> constraint_types);
 	virtual ~ConstraintManager(void);
 

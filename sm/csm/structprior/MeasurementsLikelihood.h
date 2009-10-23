@@ -13,6 +13,7 @@ class MeasurementsLikelihood
 {
 public:
 //constructors
+	MeasurementsLikelihood();
 	MeasurementsLikelihood(int likelihood_function, int measurements_number);
 	virtual ~MeasurementsLikelihood(void);	
 	//class variables
