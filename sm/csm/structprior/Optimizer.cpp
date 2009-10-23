@@ -13,7 +13,7 @@ Optimizer::~Optimizer(void)
 
 }
 
-void Optimizer::Optimizer()
+void Optimizer::OptimizeAlphas()
 {
 
 }

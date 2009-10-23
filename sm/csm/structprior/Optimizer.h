@@ -5,7 +5,7 @@
 #include "MeasurementsLikelihood.h"
 #include "ConstraintManager.h"
 
-class Minimizer
+class Optimizer
 {
 
 //constructors
