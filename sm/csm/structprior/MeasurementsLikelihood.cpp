@@ -3,6 +3,7 @@
 MeasurementsLikelihood::MeasurementsLikelihood(int likelihood_function, int measurements_number)
 {
 	function_type = likelihood_function;
+	
 	error = 0;
 	grad.resize(measurements_number);
 	hess.resize(measurements_number);
@@ -27,7 +28,7 @@ void MeasurementsLikelihood::ComputeAlphaLikelihoods(std::vector<double> x_vecto
 	if (hess.size() != 0)
 		hess.clear();
 		
-	// may be redundant, it's added in case some measurements are pre-discarded
+	// may be redundant, it's added in case some measurements are pre-discarded or something
 	grad.resize(n);
 	hess.resize(n);
 	for (int i=0;i<n;i++)
@@ -60,8 +61,6 @@ void MeasurementsLikelihood::ComputeAlphaLikelihoods(std::vector<double> x_vecto
 				}
 			}
 			
-			
-			
 		}
 		
 	
@@ -72,6 +71,47 @@ void MeasurementsLikelihood::ComputeAlphaLikelihoods(std::vector<double> x_vecto
 	
 	
 	}
+	
+}
+
+
+void MeasurementsLikelihood::ComputeRangeLikelihoods(std::vector<double> x_vector, std::vector<double> ranges0, std::vector<double> ranges_covs)
+{
+
+	if (function_type == L2)
+	{
+	
+	
+	
+	
+	
+	}
+	
+	
+	
+	if (function_type == L1)
+	{
+	
+	
+	
+	
+	
+	}
+	
+	
+
+
+
 
 
 }
+
+
+
+
+
+
+
+
+
+

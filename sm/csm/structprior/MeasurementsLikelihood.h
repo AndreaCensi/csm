@@ -25,8 +25,8 @@ public:
 	std::vector<std::vector<double> > hess;
 	//methods
 public:
-	void ComputeAlphaLikelihoods(std::vector<double> x_vector, std::vector<double> alphas0, std::vector<double> alphas_covs );
-	
+	void ComputeAlphaLikelihoods(std::vector<double> x_vector, std::vector<double> alphas0, std::vector<double> alphas_covs);
+	void ComputeRangeLikelihoods(std::vector<double> x_vector, std::vector<double> ranges0, std::vector<double> ranges_covs);
 
 };
 
