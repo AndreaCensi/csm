@@ -49,7 +49,7 @@ std::vector<double> Optimizer::OptimizeAlphas()
 			measurements_likelihood.ComputeAlphaLikelihoods(x,alpha0_vector,covs_vector);
 			
 			double err_k;
-			x = NewtonStep(x,err_k);
+			x = NewtonStep(x,lambda,err_k);
 			
 			/*int size = measurements_likelihood.grad.size();
 			double gradient[size];
@@ -127,7 +127,7 @@ std::vector<double> Optimizer::OptimizeRanges()
 
 }*/
 
-std::vector<double> Optimizer::NewtonStep(std::vector<double> xv, double &err )
+std::vector<double> Optimizer::NewtonStep(std::vector<double> xv,double lambda_parameter,double &err )
 {
 		std::vector<double> x_return;
 		x_return = xv;
@@ -135,7 +135,7 @@ std::vector<double> Optimizer::NewtonStep(std::vector<double> xv, double &err )
 		double gradient[size];
 		for (int i=0;i<size;i++)
 		{
-			gradient[i] = constraint_manager.grad[i] + lambda*measurements_likelihood.grad[i];  
+			gradient[i] = constraint_manager.grad[i] + lambda_parameter*measurements_likelihood.grad[i];  
 		}
 		
 		int size_h = measurements_likelihood.hess.size();
@@ -146,7 +146,7 @@ std::vector<double> Optimizer::NewtonStep(std::vector<double> xv, double &err )
 		for(int i=0;i<size_h;i++)
 			for(int j=0;j<size_h;j++)
 		{
-				hessian[ne] = constraint_manager.hess[i][j] + lambda*measurements_likelihood.hess[i][j];
+				hessian[ne] = constraint_manager.hess[i][j] + lambda_parameter*measurements_likelihood.hess[i][j];
 				ne++;
 		}
 		

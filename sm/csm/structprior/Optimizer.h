@@ -21,7 +21,7 @@ public:
 	std::vector<double> OptimizeRanges();
 	//std::vector<Pose> OptimizePoses();
 	
-	std::vector<double> NewtonStep(std::vector<double> xv, double &err);
+	std::vector<double> NewtonStep(std::vector<double> xv, double lambda_parameter, double &err);
 
 };
 #endif
