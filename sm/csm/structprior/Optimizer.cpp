@@ -48,7 +48,10 @@ std::vector<double> Optimizer::OptimizeAlphas()
 			constraint_manager.ApplyConstraintsAlphas(x);
 			measurements_likelihood.ComputeAlphaLikelihoods(x,alpha0_vector,covs_vector);
 			
-			int size = measurements_likelihood.grad.size();
+			double err_k;
+			x = NewtonStep(x,err_k);
+			
+			/*int size = measurements_likelihood.grad.size();
 			double gradient[size];
 			for (int i=0;i<size;i++)
 			{
@@ -91,7 +94,7 @@ std::vector<double> Optimizer::OptimizeAlphas()
 			
 			
 			gsl_permutation_free (p);
-       	gsl_vector_free (dx);
+       	gsl_vector_free (dx);*/
        	
        	if (err_k < 0.000000001)
        		lambda = lambda * 0.1;
@@ -108,6 +111,8 @@ std::vector<double> Optimizer::OptimizeAlphas()
 	
 	
 	}
+	
+	return x;
 
 }
 
@@ -121,3 +126,57 @@ std::vector<double> Optimizer::OptimizeRanges()
 
 
 }*/
+
+std::vector<double> Optimizer::NewtonStep(std::vector<double> xv, double &err )
+{
+		std::vector<double> x_return;
+		x_return = xv;
+		int size = measurements_likelihood.grad.size();
+		double gradient[size];
+		for (int i=0;i<size;i++)
+		{
+			gradient[i] = constraint_manager.grad[i] + lambda*measurements_likelihood.grad[i];  
+		}
+		
+		int size_h = measurements_likelihood.hess.size();
+		if (size_h != size)
+			sm_error("Gradient and Hessian dimensions must agree\n");
+		double hessian[size_h*size_h];
+		int ne = 0;
+		for(int i=0;i<size_h;i++)
+			for(int j=0;j<size_h;j++)
+		{
+				hessian[ne] = constraint_manager.hess[i][j] + lambda*measurements_likelihood.hess[i][j];
+				ne++;
+		}
+		
+		gsl_matrix_view h = gsl_matrix_view_array(hessian,size_h,size_h);
+		gsl_vector_view g = gsl_vector_view_array(gradient,size);		
+		
+		gsl_vector *dx = gsl_vector_alloc (4);
+    
+      int s;
+  
+      gsl_permutation * p = gsl_permutation_alloc (size_h);
+  
+      gsl_linalg_LU_decomp (&h.matrix, p, &s);
+  
+      gsl_linalg_LU_solve (&h.matrix, p, &g.vector, dx);
+
+		for (int i=0;i<size;i++)
+		{
+			x_return[i]-= gsl_vector_get(dx,i);
+		}
+		
+		
+		const gsl_vector* const_g = &g.vector;
+		gsl_blas_ddot (const_g, dx, &err);
+		
+		
+		gsl_permutation_free (p);
+    	gsl_vector_free (dx);
+    	
+    	return x_return;
+
+
+}

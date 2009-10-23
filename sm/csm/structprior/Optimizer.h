@@ -20,6 +20,8 @@ public:
 	std::vector<double> OptimizeAlphas();
 	std::vector<double> OptimizeRanges();
 	//std::vector<Pose> OptimizePoses();
+	
+	std::vector<double> NewtonStep(std::vector<double> xv, double &err);
 
 };
 #endif
