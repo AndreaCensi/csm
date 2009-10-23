@@ -16,6 +16,9 @@ public:
 
 //class variables
 	double e;
+	std::vector<double> grad;
+	std::vector<std::vector<double> > hess;
+	
 	std::vector<Constraint*> constraints;
 protected:
 	std::vector<int> constraint_types_to_apply;

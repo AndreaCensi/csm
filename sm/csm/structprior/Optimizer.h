@@ -18,8 +18,8 @@ public:
 	ConstraintManager constraint_manager;
 //methods
 	std::vector<double> OptimizeAlphas();
-	void OptimizeRanges();
-	void OptimizePoses();
+	std::vector<double> OptimizeRanges();
+	//std::vector<Pose> OptimizePoses();
 
 };
 #endif

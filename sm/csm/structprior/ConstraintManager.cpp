@@ -84,6 +84,8 @@ void ConstraintManager::ApplyConstraintsAlphas(std::vector<double> x_vector)
 				Values v = c->ApplyConstraint(alpha_values);
 				constraints.push_back(c);							
 				e += v.error;
+				//update grad
+				//update hess?
 				
 			}
 			
@@ -111,6 +113,8 @@ void ConstraintManager::ApplyConstraintsAlphas(std::vector<double> x_vector)
 			v = c2->ApplyConstraint(alpha_values,p);
 			constraints.push_back(c2);							
 			e += v.error;
+			//update grad
+			//update hess?
 
 		}
 	}
