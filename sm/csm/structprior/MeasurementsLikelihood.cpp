@@ -34,7 +34,7 @@ void MeasurementsLikelihood::ComputeAlphaLikelihoods(std::vector<double> x_vecto
 	if (hess.size() != 0)
 		hess.clear();
 		
-	// may be redundant, it's added in case some measurements are pre-discarded or something
+	// may be redundant, it's added in case some measurements are pre-discarded or something (measurements outside the model...)
 	grad.resize(n);
 	hess.resize(n);
 	for (int i=0;i<n;i++)

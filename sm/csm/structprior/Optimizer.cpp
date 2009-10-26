@@ -17,6 +17,15 @@ Optimizer::~Optimizer(void)
 
 }
 
+/*void Optimizer::ScanLevelOptimization()
+{
+	OptimizeAlphas();
+	OptimizeRanges();
+	
+	
+
+}*/
+
 std::vector<double> Optimizer::OptimizeAlphas()
 {
 	std::vector<double> x;
