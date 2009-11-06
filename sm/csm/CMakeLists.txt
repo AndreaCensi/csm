@@ -32,10 +32,6 @@ SET(csm_sources
 	hsm/hsm.c
 	hsm/hsm_interface.c
 	
-	structprior/ConstraintManager.cpp
-	structprior/Constraint.cpp
-	structprior/MeasurementsLikelihood.cpp
-
 	gpm/gpm.c
 )
 
