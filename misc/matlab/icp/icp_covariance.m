@@ -1,5 +1,24 @@
 
 function res = icp_covariance(params, current_estimate, P, valids, jindexes)
+	% res = icp_covariance(params, current_estimate, P, valids, jindexes)
+	%
+	% Compute the covariance of the ICP estimate.
+	%
+	% params.laser_sens  laser data structure describing sensor scan 
+	% params.laser_ref   laser data structure describing reference scan
+	%
+	%   Fields used:
+	%     laser_*.nrays    number of rays
+	%     laser_*.points   2xnrays vector of readings in cartesian coordinates
+	%
+	% params.sigma       sigma of noise on readings
+	% current_estimate   solution found by ICP: pose of laser_sens in laser_ref reference frame
+	% valids             nrays x 1 vector: valids(i) == 1 if the i-th point in laser_sens has valid correspondences
+	% jindexes           nrays x 2  correspondences:  jindexes(i,1), jindexes(i,2) are the indices
+	%                    of the closest points in laser_ref of the i-th point in laser_sens
+	% 
+	%  P                 unused (probably legacy from some old code)
+	%  
 	k=1; 
 	
 	Etot = 0;
@@ -21,8 +40,11 @@ function res = icp_covariance(params, current_estimate, P, valids, jindexes)
 	dgE_di = zeros(3, params.laser_sens.nrays);
 	dgE_dj = zeros(3, params.laser_ref.nrays);
 	
+	% let's iterate on the "valid" points of laser_sens
 	for a=find(valids)
+		% index of point in laser_sens
 		i = a;
+		% indices of the two corresponding points in laser_ref
 		j1 = jindexes(i,1);
 		j2 = jindexes(i,2);
 		
@@ -124,9 +146,9 @@ function res = icp_covariance(params, current_estimate, P, valids, jindexes)
 	
 	res.sm_cov_bengtsson_improved =  s2 * inv( MMtot );
 	
-	fprintf('ECCOLE: improved:');
+	fprintf('Bengtsson, improved:');
 	res.sm_cov_bengtsson_improved 
-	fprintf('ECCOLE: original:')
+	fprintf('Bengtsson, original:')
 	res.sm_cov_bengtsson 
 	
 	%res
