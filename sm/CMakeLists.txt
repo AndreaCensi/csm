@@ -98,6 +98,7 @@ new_executable(ld_remove_doubles)
 new_executable(ld_alternate)
 new_executable(ld_recover)
 
+new_executable(ld_purify)
 new_executable(ld_select)
 new_executable(ld_cluster_curv)
 new_executable(ld_linearize)

@@ -24,26 +24,10 @@ int main(int argc, const char ** argv) {
 	struct option* ops = options_allocate(3);
 	options_double(ops, "interval", &p.interval, sqrt(2.0), " 1 = no resampling");
 		
-	options_int(ops, "seed", &p.seed, 0, 
-		"Seed for random number generator (if 0, use GSL_RNG_SEED env. variable).");
-		
 	if(!options_parse_args(ops, argc, argv)) {
-/*		fprintf(stderr, "A simple program for adding slip to odometry \n\n"
-			"The 'odometry' field is set to 'true_pose' + noise.\n"
-			"If 'true_pose' is not available, then the 'odometry' \n"
-			"field is set to 'odometry' + noise.\n\n"
-			"Note: this program does *not* simulate the effect of \n"
-			"slip or odometry error in a realistic way; each scan \n"
-			"in the file is considered separately, the error does \n"
-			"not depend on the traveled distance, etc.\n\n");*/
 		options_print_help(ops, stderr);
 		return -1;
 	}
-
-	gsl_rng_env_setup();
-	rng = gsl_rng_alloc (gsl_rng_ranlxs0);
-	if(p.seed != 0)
-	gsl_rng_set(rng, (unsigned int) p.seed);
 
 	int count = -1;
 	LDP ld;
@@ -73,27 +57,33 @@ int main(int argc, const char ** argv) {
 
 LDP ld_resample(LDP ld) {
 	/* FIXME magic number */
-	int n = (int) (floor(ld->nrays / p.interval))-4;
+	int n = (int) (floor(ld->nrays / p.interval));
 	
 	LDP ld2 = ld_alloc_new(n);	
 	int k;
 	for(k=0;k<n;k++) {
 		double index = k * p.interval;
 		int i = (int) floor(index);
+		int j = i + 1;
 		double a = 1 - (index - i);
-
-		ld2->theta[k] = a * ld->theta[i] + (1-a) * ld->theta[i+1];
-
-		if(is_nan(ld2->theta[k])) {
-			sm_debug("Hey, k=%d theta[%d]=%f theta[%d]=%f\n",
-				k,i,ld->theta[i],i+1,ld->theta[i+1]);
-		}
+	
 		
-		if(!ld->valid[i] || !ld->valid[i+1]) {
+		if(  (j>= ld->nrays) || !ld->valid[i] || !ld->valid[j]) {
 			ld2->valid[k] = 0;
 			ld2->readings[k] = NAN;
+			ld2->alpha_valid[k] = 0;
+			ld2->alpha[k] = NAN;
+			ld2->theta[k] = ld->theta[i];
 		} else {
-			ld2->readings[k] = a * ld->readings[i] + (1-a) * ld->readings[i+1];
+			ld2->theta[k] = a * ld->theta[i] + (1-a) * ld->theta[j];
+			
+	
+			if(is_nan(ld2->theta[k])) {
+				sm_debug("Hey, k=%d theta[%d]=%f theta[%d]=%f\n",
+					k,i,ld->theta[i],j,ld->theta[j]);
+			}
+
+			ld2->readings[k] = a * ld->readings[i] + (1-a) * ld->readings[j];
 			ld2->valid[k] = 1;
 		}
 		

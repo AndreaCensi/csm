@@ -230,7 +230,7 @@ int ld_valid_fields(LDP ld)  {
 		} else {
 			/* ray not valid, but checking theta anyway */
 			if(is_nan(th)) {
-				sm_error("Ray #%d: valid = %d  but theta = %f",
+				sm_error("Ray #%d: valid = %d  but theta = %f\n",
 					i,  ld->valid[i], th);
 				return 0;
 			}
