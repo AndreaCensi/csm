@@ -27,7 +27,7 @@ int main(int argc, const char * argv[]) {
 	
 	int i; for(i=0;i<nth;i++) {
 		if(!json_stream_skip(input_stream)) {
-			fprintf(stderr, "Could not skip %d-th object\n", i);
+			sm_error("Could not skip %d-th object\n", i);
 			return -2;
 		}
 	}

@@ -13,11 +13,13 @@ struct sm1_params {
 	int debug;
 	
 	int algo;
+	int write_post_mortem;
 } p;
 
 
 extern int distance_counter;
 extern void sm_options(struct sm_params*p, struct option*ops);
+
 
 const char *sm1_banner = 
 
@@ -67,9 +69,8 @@ int main(int argc, const char*argv[]) {
 	options_int(ops, "algo", &p.algo, 0, "Which algorithm to use (0:(pl)ICP 1:gpm-stripped 2:HSM) ");
 
 	options_int(ops, "debug", &p.debug, 0, "Shows debug information");
+	options_int(ops, "write_post_mortem", &p.write_post_mortem, 1, "In case of failure, writes a post mortem.");
 
-	
-	
 	sm_options(&params, ops);
 	if(!options_parse_args(ops, argc, argv)) {
 		fprintf(stderr, "\n\nUsage:\n");
@@ -84,7 +85,6 @@ int main(int argc, const char*argv[]) {
 		: open_file_for_reading(p.file2);
 	if(!file1 || !file2) return -1;
 	
-	
 	FILE * out = open_file_for_writing(p.file_output);
 	if(!out) return -2;
 	
@@ -95,7 +95,10 @@ int main(int argc, const char*argv[]) {
 	}
 	
 	LDP ld1, ld2;
+	int count = 0;
 	while(1) {
+		count++;
+		
 		ld1 = ld_from_json_stream(file1);
 		if(!ld1) {
 			if(feof(file1)) break;
@@ -112,6 +115,15 @@ int main(int argc, const char*argv[]) {
 		params.laser_ref = ld1;
 		params.laser_sens = ld2;
 
+		if(	any_nan(params.laser_ref->odometry,3) ||  
+			any_nan(params.laser_sens->odometry,3) ) {
+				sm_error("The 'odometry' field is set to NaN so I don't know how to get an initial guess. I usually use the difference in the odometry fields to obtain the initial guess.\n");
+				sm_error(" (file %s) laser_ref->odometry = %s \n", p.file1, friendly_pose(params.laser_ref->odometry) );
+				sm_error(" (file %s) laser_sens->odometry = %s \n", p.file2, friendly_pose(params.laser_sens->odometry) );
+				sm_error(" I will quit it here. \n");
+				return 3;
+		}
+		
 		pose_diff_d( params.laser_sens->odometry,  
 		/* o minus */ params.laser_ref->odometry,
 			/* = */ params.first_guess);
@@ -129,6 +141,40 @@ int main(int argc, const char*argv[]) {
 				return -1;
 		}
 		
+		if(p.write_post_mortem && !result.valid) {
+			char casename[256];
+			sprintf(casename, "sm1_failure_matching%d", count);
+			sm_error("sm1: matching #%d failed. Writing a special case %s.\n", count, casename );
+//			save_testcase(&params)
+			
+			char file_config[256],file1[256],file2[256],file_jj[256],script[256];
+			
+			sprintf(file_config, "%s.config", casename);
+			sprintf(file1, "%s_laser_ref.json", casename);
+			sprintf(file2, "%s_laser_sens.json", casename);
+			sprintf(file_jj, "%s.journal", casename);
+			sprintf(script, "%s.sh", casename);
+			
+			FILE * f = fopen(file_config, "w");
+			options_dump(ops,f,0);
+			fclose(f);
+
+			f = fopen(file1, "w");
+			ld_write_as_json(params.laser_ref,f);
+			fclose(f);
+			
+			f = fopen(file2, "w");
+			ld_write_as_json(params.laser_sens,f);
+			fclose(f);
+			
+			f = fopen(script, "w");
+			fprintf(f, "#!/bin/bash\n");
+			fprintf(f, "%s -config %s -file1 %s -file2 %s -debug 1 -file_jj %s -write_post_mortem 0 \n", 
+				argv[0], file_config, file1, file2, file_jj);
+			fprintf(f, "sm_animate -in %s -out %s_anim.pdf \n", file_jj, casename);
+			fclose(f);
+		}
+		
 		
 		JO jo = result_to_json(&params, &result);
 
@@ -136,7 +182,6 @@ int main(int argc, const char*argv[]) {
 			pose_diff_d(params.laser_sens->true_pose, 
 				params.laser_ref->true_pose, true_x);
 			double true_e[3];
-			
 			
 			pose_diff_d(result.x, true_x, true_e);
 		/*	int i=0;for(;i<3;i++) true_e[i] = result.x[i] - true_x[i];*/

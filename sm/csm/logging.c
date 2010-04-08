@@ -33,7 +33,8 @@ void check_for_xterm_color() {
 	
 	const char * term = getenv("TERM");
 	if(!term) term = "unavailable";
-	xterm_color_available = !strcmp(term, "xterm-color") || !strcmp(term, "xterm");;
+	xterm_color_available = !strcmp(term, "xterm-color") || !strcmp(term, "xterm") 
+		|| !strcmp(term, "rxvt");
 /*	sm_info("Terminal type: '%s', colors: %d\n", term, xterm_color_available); */
 }
 

@@ -104,6 +104,16 @@ int main(int argc, const char*argv[]) {
 		params.laser_sens = laser_sens;
 
 		/* Set first guess as the difference in odometry */
+		
+		if(	any_nan(params.laser_ref->odometry,3) ||  
+			any_nan(params.laser_sens->odometry,3) ) {
+				sm_error("The 'odometry' field is set to NaN so I don't know how to get an initial guess. I usually use the difference in the odometry fields to obtain the initial guess.\n");
+				sm_error("  laser_ref->odometry = %s \n",  friendly_pose(params.laser_ref->odometry) );
+				sm_error("  laser_sens->odometry = %s \n", friendly_pose(params.laser_sens->odometry) );
+				sm_error(" I will quit it here. \n");
+				return -3;
+		}
+		
 		double odometry[3];
 		pose_diff_d(laser_sens->odometry, laser_ref->odometry, odometry);
 		double ominus_laser[3], temp[3];

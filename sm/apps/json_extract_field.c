@@ -9,10 +9,12 @@ int main(int argc, const char * argv[]) {
 	const char*input_filename;
 	const char*output_filename;
 	const char*field;
+	int exit_on_error;
 	
 	struct option* ops = options_allocate(3);
 	options_string(ops, "in", &input_filename, "stdin", "input file (JSON)");
 	options_string(ops, "out", &output_filename, "stdout", "output file (JSON)");
+	options_int(ops, "exit_on_error", &exit_on_error, 0, "if true, exit if object has no field");
 	options_string(ops, "field", &field, "field_name", "field to extract from structure");
 	
 	if(!options_parse_args(ops, argc, argv)) {
@@ -27,8 +29,10 @@ int main(int argc, const char * argv[]) {
 	
 	if(!input_stream || !output_stream) return -1;
 	
-	
+	int n=0;
 	while(1) {
+		n++;
+		
 		JO jo = json_read_stream(input_stream);
 		if(!jo) {
 			if(feof(input_stream)) break;
@@ -38,8 +42,13 @@ int main(int argc, const char * argv[]) {
 		
 		JO jo_field = jo_get(jo, field);
 		if(!jo_field) {
-			sm_error("Field '%s' not found in structure.\n", field);
-			return -1;
+			if(exit_on_error) {
+				sm_error("object #%d: field '%s' not found in structure.\n", n, field);
+				return -1;
+			} else {
+				sm_error("object #%d: field '%s' not found in structure.\n", n, field);
+				continue;
+			}
 		}
 		
 		jo_write_plain(jo_field, output_stream);
@@ -64,7 +73,7 @@ void jo_write_plain(JO jo, FILE* out) {
 		}
 		case json_type_double: {
 			double v = json_object_get_double(jo);
-			fprintf(out, "%f", v);
+			fprintf(out, "%g", v);
 			break;
 		}
 		case json_type_string: {

@@ -76,6 +76,7 @@ int main(int argc, const char** argv)
 	while( (jo = json_read_stream(input)) ) {
 		char filename[100];
 		sprintf(filename, p.file_output, count);
+		sm_info("Writing frame %s \n", p.file_output);
 		if(!draw_animation(&p, jo, filename))
 			return -2;
 		count++;
@@ -151,31 +152,32 @@ int draw_animation(anim_params* p, JO jo, const char*filename) {
 		jo_read_double_array(iteration, "x_old", x_old, 3, NAN);
 		jo_read_double_array(iteration, "x_new", x_new, 3, NAN);
 
-		JO corr0 = jo_get(iteration, "corr0");
-		JO corr1 = jo_get(iteration, "corr1");
-		JO corr2 = jo_get(iteration, "corr2");
-		if(!corr1 || !corr2 || !corr0) {
-			sm_error("Iteration %d: could not read correspondences (field 'corr<i>'). Probably ICP failed here?\n", it);
-			break;
-		}
 
 		cairo_save(cr);
 			cr_ld_draw(cr, laser_ref, &(p->laser_ref_s));
 
 			ld_compute_world_coords(laser_sens, x_old);
 
-			cr_set_style(cr, &(p->corr));
-			cairo_set_source_rgb (cr, 1.0, 0.0, 0.0);
-			json_to_corr(corr0, laser_sens->corr, laser_sens->nrays);
-			cr_ld_draw_corr(cr, laser_ref, laser_sens);
 
-			cairo_set_source_rgb (cr, 1.0, 0.0, 1.0);
-			json_to_corr(corr1, laser_sens->corr, laser_sens->nrays);
-			cr_ld_draw_corr(cr, laser_ref, laser_sens);
+			JO corr0 = jo_get(iteration, "corr0");
+			JO corr1 = jo_get(iteration, "corr1");
+			JO corr2 = jo_get(iteration, "corr2");
+			if(!corr1 || !corr2 || !corr0) {
+				sm_error("Iteration %d: could not read correspondences (field 'corr<i>'). Probably ICP failed here?\n", it);
+			} else {
+				cr_set_style(cr, &(p->corr));
+				cairo_set_source_rgb (cr, 1.0, 0.0, 0.0);
+				json_to_corr(corr0, laser_sens->corr, laser_sens->nrays);
+				cr_ld_draw_corr(cr, laser_ref, laser_sens);
 
-			cairo_set_source_rgb (cr, 0.0, 1.0, 0.0);
-			json_to_corr(corr2, laser_sens->corr, laser_sens->nrays);
-			cr_ld_draw_corr(cr, laser_ref, laser_sens);
+				cairo_set_source_rgb (cr, 1.0, 0.0, 1.0);
+				json_to_corr(corr1, laser_sens->corr, laser_sens->nrays);
+				cr_ld_draw_corr(cr, laser_ref, laser_sens);
+
+				cairo_set_source_rgb (cr, 0.0, 1.0, 0.0);
+				json_to_corr(corr2, laser_sens->corr, laser_sens->nrays);
+				cr_ld_draw_corr(cr, laser_ref, laser_sens);
+			}
 
 			cr_set_reference(cr, x_old);
 			cr_ld_draw(cr, laser_sens, &(p->laser_sens_s));

@@ -18,7 +18,7 @@ void visibilityTest(LDP laser_ref, const gsl_vector*u) {
 			      gvg(u,0)-laser_ref->points[j].p[0]);
 	}
 	
-	sm_debug("visibility: Found outliers: ");
+	sm_debug("\tvisibility: Found outliers: ");
 	int invalid = 0;
 	for(j=1;j<laser_ref->nrays;j++) {
 		if(!ld_valid_ray(laser_ref,j)||!ld_valid_ray(laser_ref,j-1)) continue;
@@ -67,7 +67,7 @@ void kill_outliers_double(struct sm_params*params) {
 			nkilled ++;
 		}
 	}
-	sm_debug("kill_outliers_double: killed %d correspondences\n",nkilled);
+	sm_debug("\tkill_outliers_double: killed %d correspondences\n",nkilled);
 }
 	
 /** 
@@ -150,7 +150,7 @@ void kill_outliers_trim(struct sm_params*params,  double*total_error) {
 	if(JJ) jj_add_double("error_limit_adaptive", error_limit2);
 	if(JJ) jj_add_double("error_limit", error_limit);
 	
-	sm_debug("icp_outliers: maxPerc %f error_limit: fix %f adaptive %f \n",
+	sm_debug("\ticp_outliers: maxPerc %f error_limit: fix %f adaptive %f \n",
 		params->outliers_maxPerc,error_limit1,error_limit2);
 
 	*total_error = 0;
