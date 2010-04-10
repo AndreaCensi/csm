@@ -257,6 +257,9 @@ int jo_read_int(JO jo, const char*name, int*p) {
 double convert_to_double(JO jo) {
 	if(json_object_is_type(jo, (enum json_type) json_type_double)) 
 		return json_object_get_double(jo);
+	else if(json_object_is_type(jo, (enum json_type) json_type_int)) {
+		return json_object_get_int(jo);
+	}
 	else 
 		return NAN;
 }

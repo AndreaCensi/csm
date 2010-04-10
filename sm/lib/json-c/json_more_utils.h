@@ -44,6 +44,7 @@ void jo_add_string       (JO parent, const char*name, const char*v);
 
 /** Return 0 if there isn't a field called 'name' */
 int jo_read_int          (JO parent, const char*name, int*p) ;
+/** This also tolerates an integer */
 int jo_read_double       (JO parent, const char*name, double*p);
 
 /* Returns 0 if there isn't a field called "name", or it's not an array, or 
