@@ -1,10 +1,11 @@
 PROJECT (CSM C CXX)
 
+
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/lib)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 
 cmake_minimum_required(VERSION 2.4)
-#set(csm_c_flags "")
+set(csm_link_flags "-L.")
 
 SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -14,11 +15,16 @@ IF(GSL_FOUND)
 	MESSAGE(STATUS "   GSL_LIBRARIES = ${GSL_LIBRARIES}")
 	MESSAGE(STATUS "   GSL_INCLUDE_DIR = ${GSL_INCLUDE_DIR}")
 	MESSAGE(STATUS "   CMAKE_GSL_CXX_FLAGS = ${CMAKE_GSL_CXX_FLAGS}")
-	MESSAGE(STATUS "   GSL_LINK_DIRECTORIES = ${GSL_LINK_DIRECTORIES}")
-	
- 	set(csm_c_flags "${csm_c_flags} -I${GSL_INCLUDE_DIR}")
-#	set(csm_link_flags "${csm_link_flags} -L${GSL_LINK_DIRECTORIES} ${GSL_LIBRARIES}")
-	set(csm_link_flags "-L${GSL_LINK_DIRECTORIES} ${GSL_LIBRARIES}")
+	MESSAGE(STATUS "   GSL_LINK_DIRECTORIES = '${GSL_LINK_DIRECTORIES}'")
+
+ 	
+	set(csm_c_flags "${csm_c_flags} -I${GSL_INCLUDE_DIR}")
+	if(GSL_LINK_DIRECTORIES)	
+#		set(csm_link_flags "${csm_link_flags}
+		set(csm_link_flags "${csm_link_flags} -L${GSL_LINK_DIRECTORIES}")
+	endif(GSL_LINK_DIRECTORIES)	
+
+	set(csm_link_flags "${csm_link_flags} ${GSL_LIBRARIES}")
 	
 ELSE(GSL_FOUND)
 	MESSAGE(FATAL_ERROR "GSL not found.")
