@@ -31,16 +31,12 @@ struct sm_params {
 	/** A threshold for stopping. */
 	double epsilon_theta;
 	
-	/** dubious parameter */
+	/** Maximum distance for a correspondence to be valid */
 	double max_correspondence_dist;
-	
-	/** Noise in the scan */
-	double sigma;
-	
-	/** Use smart tricks for finding correspondences. */
+	/** Use smart tricks for finding correspondences. Only influences speed; not convergence. */
 	int use_corr_tricks;
 	
-	/** Restart if error under threshold */
+	/** Restart if error under threshold (0 or 1)*/
 	int restart;
 		/** Threshold for restarting */
 		double restart_threshold_mean_error;
@@ -50,24 +46,41 @@ struct sm_params {
 		double restart_dtheta;
 	
 
-	/** For now, a very simple max-distance clustering algorithm is used */
-	double clustering_threshold;
-	/** Number of neighbour rays used to estimate the orientation.*/
-	int orientation_neighbourhood;
+	/* Functions concerning discarding correspondences.
+	   THESE ARE MAGIC NUMBERS -- and they need to be tuned. */
 
-	/** Discard correspondences based on the angles */
-	int do_alpha_test;
-	double do_alpha_test_thresholdDeg;
-
-	/** Percentage of correspondences to consider */
+	/** Percentage of correspondences to consider: if 0.9,
+	    always discard the top 10% of correspondences with more error */
 	double outliers_maxPerc;
 
-	double outliers_adaptive_order; /* 0.7 */
-	double outliers_adaptive_mult; /* 2 */
+	/** Parameters describing a simple adaptive algorithm for discarding.
+	    1) Order the errors.
+		2) Choose the percentile according to outliers_adaptive_order.
+		   (if it is 0.7, get the 70% percentile)
+		3) Define an adaptive threshold multiplying outliers_adaptive_mult
+		   with the value of the error at the chosen percentile.
+		4) Discard correspondences over the threshold.
+		
+		This is useful to be conservative; yet remove the biggest errors.
+	*/
+		double outliers_adaptive_order; /* 0.7 */
+		double outliers_adaptive_mult; /* 2 */
 
+	/** Do not allow two different correspondences to share a point */
 	int outliers_remove_doubles; 
 
 
+	
+	/* Functions that compute and use point orientation for defining matches. */
+		/** For now, a very simple max-distance clustering algorithm is used */
+		double clustering_threshold;
+		/** Number of neighbour rays used to estimate the orientation.*/
+		int orientation_neighbourhood;
+		/** Discard correspondences based on the angles */
+		int do_alpha_test;
+		double do_alpha_test_thresholdDeg;
+		
+		
 	int do_visibility_test;
 
 	/** If 1, use PlICP; if 0, use vanilla ICP. */
@@ -95,27 +108,37 @@ struct sm_params {
 	    the first estimate given the odometry. */
 	double laser[3]; 
 
+	/** Noise in the scan */
+	double sigma;
+
+
 	/** mark as invalid ( = don't use ) rays outside of this interval */
 	double min_reading, max_reading;
 	
+	/* Parameters specific to GPM (unfinished :-/ ) */
 	double gpm_theta_bin_size_deg;
 	double gpm_extend_range_deg; 
 	int gpm_interval;
-
-
+	/* Parameter specific to HSM (unfinished :-/ ) */
 	struct hsm_params hsm;
 };
 
 
 struct sm_result {
+	/** 1 if the result is valid */
 	int valid;
 	
+	/** Scan matching result (x,y,theta) */
 	double x[3];
 	
+	/** Number of iterations done */
 	int iterations;
+	/** Number of valid correspondence in the end */
 	int nvalid;
+	/** Total correspondence error */
 	double error;
 	
+	/** Fields used for covariance computation */
 	#ifndef RUBY
 		gsl_matrix *cov_x_m;	
 		gsl_matrix *dx_dy1_m;
@@ -127,6 +150,8 @@ struct sm_result {
 void sm_icp(struct sm_params*input, struct sm_result*output);
 void sm_gpm(struct sm_params*input, struct sm_result*output);
 void sm_hsm(struct sm_params*input, struct sm_result*output);
+
+/* Unfinished, untested :-/ */
 void sm_mbcip(struct sm_params*input, struct sm_result*output);
 
 
