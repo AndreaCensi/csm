@@ -2,10 +2,10 @@
 #maruku=ruby -I~/maruku/lib ~/maruku/bin/maruku
 maruku=maruku
 
-out=out/csm_manual.pdf out/csm_manual.html
+out=csm_manual.pdf csm_manual.html
 
 all: $(out)
-
+	cp $(out) ..
 
 src=\
   preamble.txt \
@@ -15,14 +15,14 @@ src=\
   install-ruby.txt \
   laserdata.txt \
   formats.txt \
-  examples.txt 
+  examples.txt \
+  embedding.txt
 
 
 %: tmp_%
 	cp $< $@
 
-out/csm_manual.txt: $(src)
-	mkdir -p out
+csm_manual.txt: $(src)
 	cat $^ > $@
 
 %.pdf: %.txt
