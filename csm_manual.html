@@ -637,13 +637,39 @@ using namespace CSM;</code></pre>
 <li><code>params-&gt;laser_sens</code>: pointer of a structure of type <code>laser_data</code> representing the second scan.</li>
 
 <li><code>params-&gt;first_guess</code>: first guess (x,y,theta).</li>
+
+<li><code>use_point_to_line_distance</code>: 1 for PLICP, 0 for ICP.</li>
+
+<li><code>use_corr_tricks</code>: use the tricks described in the PLICP paper.</li>
 </ul>
 
-<p>Parameters that influence stopping:</p>
+<p>Parameters that influence stopping and restarting:</p>
 
 <ul>
 <li><code>max_iterations</code>: maximum number of iterations</li>
 
 <li><code>epsilon_xy</code>, <code>epsilon_theta</code>: stop if change below these thresholds</li>
+
+<li><code>restart*</code>: whether to add some noise and restart if the match is not satisfactory. Useful for getting out of local minima but expensive.</li>
 </ul>
+
+<p>Parameters that influence correspondence establishment:</p>
+
+<ul>
+<li><code>max_angular_correction_deg</code>, <code>max_linear_correction</code>.</li>
+
+<li><code>max_correspondence_dist</code></li>
+</ul>
+
+<p>Parameters that influence correspondence pruning:</p>
+
+<ul>
+<li><code>outliers_maxPerc</code></li>
+
+<li><code>outliers_adaptive_*</code></li>
+
+<li><code>outliers_remove_doubles</code></li>
+</ul>
+
+<p>See the file <code>&lt;csm/algos.h&gt;</code> for a description of the above parameters, and the other minor parameters.</p>
 </body></html>

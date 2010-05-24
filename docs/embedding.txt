@@ -100,13 +100,30 @@ We now briefly discuss the main parameters.
 * ``params->laser_sens``:  pointer of a structure of type ``laser_data`` representing
    the second scan.
 * ``params->first_guess``: first guess (x,y,theta).
+* ``use_point_to_line_distance``: 1 for PLICP, 0 for ICP.
+* ``use_corr_tricks``: use the tricks described in the PLICP paper.
 
-
-Parameters that influence stopping:
+Parameters that influence stopping and restarting:
 
 * ``max_iterations``: maximum number of iterations
 * ``epsilon_xy``, ``epsilon_theta``: stop if change below these thresholds
+* ``restart*``: whether to add some noise and restart if the match
+  is not satisfactory. Useful for getting out of local minima but
+  expensive.
 
+Parameters that influence correspondence establishment:
+
+* ``max_angular_correction_deg``, ``max_linear_correction``.
+* ``max_correspondence_dist``
+
+Parameters that influence correspondence pruning:
+
+* ``outliers_maxPerc``
+* ``outliers_adaptive_*``
+* ``outliers_remove_doubles``
+
+See the file ``<csm/algos.h>`` for a description of the above parameters,
+and the other minor parameters.
 
 
 

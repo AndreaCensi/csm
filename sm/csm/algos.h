@@ -9,7 +9,6 @@
 #include "laser_data.h"
 
 
-
 struct sm_params {
 	/** First scan ("ref"erence scan) */
 	LDP laser_ref;
@@ -110,7 +109,6 @@ struct sm_params {
 
 	/** Noise in the scan */
 	double sigma;
-
 
 	/** mark as invalid ( = don't use ) rays outside of this interval */
 	double min_reading, max_reading;
