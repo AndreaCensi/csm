@@ -1,0 +1,10 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: csmpp
+Description: C++ wrapper to CSM
+Requires: csm
+Version: @csmpp_version@
+Libs: @csmpp_link_flags@ -L${libdir} -l@csmpp_link_flags@
+Cflags: @csmpp_c_flags@ -I${includedir}

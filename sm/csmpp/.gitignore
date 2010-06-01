@@ -1,0 +1,6 @@
+libcsmpp-static.a
+libcsmpp.dylib
+csmpp.pc
+cmake_install.cmake
+Makefile
+CMakeCache.txt
