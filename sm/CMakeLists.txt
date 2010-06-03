@@ -71,7 +71,7 @@ SUBDIRS(lib/json-c)
 SUBDIRS(lib/egsl)
 SUBDIRS(lib/gpc)
 SUBDIRS(csm)
-
+SUBDIRS(csmpp)
 
 
 

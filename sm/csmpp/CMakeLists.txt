@@ -5,7 +5,7 @@ SET(csmpp_version 0.1)
 # Require we have pkgconfig installed
 find_package(PkgConfig REQUIRED)
 # Tell pkgconfig to look for CSM
-pkg_check_modules(CSM REQUIRED csm)
+#pkg_check_modules(CSM REQUIRED csm)
 
 # Look for CSM
 IF(${CSM_FOUND})
@@ -13,18 +13,16 @@ IF(${CSM_FOUND})
 	MESSAGE("CSM_LIBRARIES: ${CSM_LIBRARIES}")
 	MESSAGE("CSM_INCLUDE_DIRS: ${CSM_INCLUDE_DIRS}")
 	MESSAGE("CSM_LDFLAGS: " ${CSM_LDFLAGS})
-
-
 	INCLUDE_DIRECTORIES(${CSM_INCLUDE_DIRS}) # important! 
 	LINK_DIRECTORIES(${CSM_LIBRARY_DIRS})    # important! 
 ELSE(${CSM_FOUND})	
-	MESSAGE(FATAL_ERROR "CSM not found. Check that the environment variable PKG_CONFIG_PATH includes the path containing the file 'csm.pc'.")
+	#MESSAGE(FATAL_ERROR "CSM not found. Check that the environment variable PKG_CONFIG_PATH includes the path containing the file 'csm.pc'.")
 ENDIF(${CSM_FOUND})
  
 # Name of generated libraries
 SET(dynamic_lib csmpp)
 SET(static_lib csmpp-static)
-SET(csmpp_sources csmpp.cpp)
+SET(csmpp_sources csmpp.cpp csmpp.h)
 
 SET(csmpp_c_flags "")
 SET(csmpp_link_flags  ${CSM_LDFLAGS} )
