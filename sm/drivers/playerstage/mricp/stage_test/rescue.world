@@ -1,0 +1,70 @@
+resolution     0.047
+interval_sim 100  # milliseconds per update step
+interval_real 100 # real-time milliseconds per update step
+include "pioneer.inc"
+#include "homer.inc"
+include "map.inc"
+size [47 20 2]
+#size [33 38]
+window
+( 
+  size [ 1000 500] 
+  center [0 0 0] 
+  show_data 1
+)
+
+map
+(
+  name "CAS AREA"
+  #size [15.5 11.4]
+  #bitmap "bitmaps/casarea.pnm"
+  bitmap "casarea.jpeg"
+  #bitmap "semi-cas.jpeg"
+  #bitmap "cas.png"
+  #bitmap_resolution 0.044
+  size [46.53 19.74 2]  # casarea
+  #size [13.332 10.78] # semi-cas
+  #size [32.192 37.184 ] # cas
+)
+
+define hokuyolaser1 laser
+(
+  range_min 0.0
+  range_max 4.0
+  fov 240.0
+  samples 768
+  color "LightBlue"
+  size [0.05 0.05 2]
+  pose [0 0 0 0]
+)
+
+
+define hokuyolaser2 laser
+(
+  range_min 0.0
+  range_max 4.0
+  fov 240.0
+  samples 768
+  color "LightBlue"
+  size [ 0.05 0.05 2]
+  pose [-0.2 0 0 180 ]
+)
+
+define sicklaser laser
+(
+  range_min 0.0
+  range_max 8.0
+  fov 184.0
+  samples 183
+  color "LightBlue"
+  size [0.14 0.14 2]
+  pose [0.4 -0.15 0 0 ]
+)
+
+pioneer2dx
+( 
+   name "robot"
+   pose [14.2 -4.6 0 180]
+   hokuyolaser1()
+)
+
