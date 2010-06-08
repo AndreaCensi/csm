@@ -61,7 +61,7 @@ SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb -Wall")
 
 # for realpath
 IF("${CMAKE_SYSTEM}" MATCHES "Linux")
-	ADD_DEFINITIONS(-DLINUX)
+        ADD_DEFINITIONS(-DLINUX)
 ENDIF("${CMAKE_SYSTEM}" MATCHES "Linux")
 
 ########### Options ########## 
@@ -72,7 +72,7 @@ SUBDIRS(lib/egsl)
 SUBDIRS(lib/gpc)
 SUBDIRS(csm)
 SUBDIRS(csmpp)
-
+SUBDIRS(drivers/playerstage/mricp)
 
 
 

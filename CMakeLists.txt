@@ -18,7 +18,7 @@ IF(HOSTNAME)
 	IF(extension)
 		SET(local "${local_prefix}${host}-${extension}.cmake")
 	ENDIF(extension)
-	
+
 	IF(EXISTS ${local})
 		MESSAGE(STATUS "Including local configuration ${local}.")
 		INCLUDE(${local})

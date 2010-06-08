@@ -60,6 +60,7 @@
 #include "map.h"
 #include "lasermodel.h"
 #include "Timer.h"
+#include "csm_all.h"
 
 using namespace std;
 using namespace Geom2D;
@@ -239,98 +240,178 @@ Tarek Taha - Centre of Autonomous Systems - University of Technology Sydney
 /////////////////////////////////////////////////////////////
 typedef struct laser_range
 {
-	int begins;
-	int ends;
+    int begins;
+    int ends;
 } laser_ranges_t;
 bool is_file(string fname)
 {
-	//cout<<fname<<endl;
-	struct stat stat_buf;
- 	if (stat(fname.c_str(),&stat_buf) != 0) return false;
-  	return (stat_buf.st_mode & S_IFMT) == S_IFREG;
+    //cout<<fname<<endl;
+    struct stat stat_buf;
+    if (stat(fname.c_str(),&stat_buf) != 0) return false;
+    return (stat_buf.st_mode & S_IFMT) == S_IFREG;
 }
 bool is_directory(string fname)
 {
-	struct stat stat_buf;
-  	if (stat(fname.c_str(),&stat_buf) != 0) return false;
-  	return (stat_buf.st_mode & S_IFMT) == S_IFDIR;
+    struct stat stat_buf;
+    if (stat(fname.c_str(),&stat_buf) != 0) return false;
+    return (stat_buf.st_mode & S_IFMT) == S_IFDIR;
 }
+/*
+LDP PlayerLaserSet2LDP(vector<Point> laserSet)
+{
+    int nrays=laserSet.size();
+    LDP ld = ld_alloc_new(nrays);
+    double fov = M_PI;
+    double min_reading = 0;
+    double max_reading = 80;
+
+    if(nrays == 769)
+    {
+        min_reading = 0.001;
+        max_reading = 4;
+        fov = deg2rad(270.0);
+    }
+
+    ld->min_theta = -fov/2;
+    ld->max_theta = +fov/2;
+
+    for(int i=0;i<nrays;i++)
+    {
+        double reading;
+        ld->valid[i] = (reading > min_reading) && (reading < max_reading);
+        ld->readings[i] = ld->valid[i] ? reading : NAN;
+        ld->theta[i] = ld->min_theta + i *(ld->max_theta-ld->min_theta) / (ld->nrays-1);
+        // bad hokuyo!!
+        if(nrays == 769)
+        {
+            if(i>725 || i<44)
+            {
+                ld->valid[i] = 0;
+                ld->readings[i] = NAN;
+            }
+        }
+    }
+
+    ld->estimate[0] = ;
+    ld->estimate[1] = ;
+    ld->estimate[2] = ;
+    ld->odometry[0] = ;
+    ld->odometry[1] = ;
+    ld->odometry[2] = ;
+
+   static int warn_format = 1;
+
+    int inc; int sec=-1, usec=-1;
+    int res = sscanf(line + cur, "%d %s %d%n", &sec, ld->hostname, &usec,  &inc);
+    if(3 == res)
+    {
+        ld->tv.tv_sec = sec;
+        ld->tv.tv_usec = usec;
+        if(warn_format)
+            sm_info("Reading timestamp as 'sec hostname usec'.\n");
+    }
+    else
+    {
+        double v1=-1, v2=-1;
+        res = sscanf(line + cur, "%lf %s %lf%n", &v1, ld->hostname, &v2,  &inc);
+        if(3 == res)
+        {
+            ld->tv.tv_sec = (int) floor(v1);
+            ld->tv.tv_usec = floor( (v1 - floor(v1)) * 1e6 );
+
+            if(warn_format)
+                sm_info("Reading timestamp as doubles (discarding second one).\n");
+
+        }
+        else
+        {
+            ld->tv.tv_sec = 0;
+            ld->tv.tv_usec = 0;
+            if(warn_format)
+                sm_info("I could not read timestamp+hostname; ignoring (I will warn only once for this).\n");
+        }
+    }
+    return ld;
+}
+*/
 class MrIcp : public ThreadedDriver
- {
-	// Must implement the following methods.
-  	public :
-	    virtual int MainSetup();
-	    virtual void MainQuit();
-	    virtual int ProcessMessage(QueuePointer& resp_queue, player_msghdr * hdr, void * data);
-	// Constructor
-	public:  	MrIcp(ConfigFile* cf, int section);
-	// Main function for device thread.
-    private:
-    		virtual void Main();
-			int  HandleConfigs(QueuePointer& resp_queue,player_msghdr * hdr,void * data);
-			int  HandleCommands(QueuePointer& resp_queue,player_msghdr * hdr,void * data);
-			int  HandleData(QueuePointer& resp_queue, player_msghdr * hdr, void * data);
- 		 	void RefreshData();     //refreshs and sends data
- 		 	void AddToMap(vector <Point> points_to_add,Pose p); // Add points to Map
- 		 	void ResetMap();		// Reset the Map and empty all the point cloud
- 		 	Point TransformToGlobal(Point ,Pose p);
- 		 	Pose  TransformToGlobal(Pose ,Pose p);
-			Point ConvertToPixel(Point p);
-			Point ConvertPixel(Point p);
- 		 	int  InRange(double angle,int laser_index);
- 		 	void BuildMap();
- 		 	int SetupLaser(int);
-			void SetupPositionDriver();
-			void GenerateLocalMap(Pose pse);
-			void ConnectPatches();
-			mapgrid_t ComputeRangeProb(double range,bool);
-			int ProcessMapInfoReq(QueuePointer& resp_queue,player_msghdr * hdr,void * data);
-			int ProcessMapDataReq(QueuePointer& resp_queue,player_msghdr * hdr,void * data);
-	// Position interface / IN
-  	private:
-  			player_devaddr_t          position_in_addr;
-			player_position2d_geom_t  geom;
-			Device  			     *position_device;
-	// Position interface / OUT
-  	private:
-  			player_devaddr_t         position_out_addr;
-  		 	player_position2d_data_t position_out_data;
-	// Lasers interfaces
-  	private:
-			// Supports MAXLASERS Lasers
-  			player_devaddr_t       laser_addr[MAXLASERS];
-			player_laser_geom_t    *laser_geom;
-			// Used to communicate with the laser Driver
-			Device                 *laser_device[MAXLASERS];
-	// Map interface
-  	private:
-  			player_devaddr_t 	   map_addr;
-  		 	player_map_data_t 	   map_data;
-			player_map_info_t      map_info;
-	// Variables
-	public :
-			FILE *file,*config_file;
-			char * map_path;
-			int   robot_id,scan_count,nit,nu,map_number,number_of_lasers,
-				  range_count[MAXLASERS],sparse_scans_rate;
-			// defines a set of ranges (max 10) for each attached laser
-		 	laser_range range[MAXLASERS][MAXRANGES];
-			float maxr,minr,period,map_resolution,gate1,gate2,map_size,map_saving_period,
-				  use_max_range,local_map_margine;
-		    float PoseX,PoseY,PoseTheta; // Laser Pose
-			double px, py, pa,speed,turn_rate,delta_time,start_in,free_space_prob;
-			bool log,debug,interpolate,sample_initialized,
-			     playerv_debug,position_in_exists,use_odom,reset_timer,warning_misalign;
-			struct timeval last_time[MAXLASERS],current_time,laser_timestamp,position_timestamp,
-				   loop_start,loop_end,map_timestamp,last_delta,map_current,map_saved;
-			ICP icp;
-			Pose laser_pose[MAXLASERS],pose_1,pose_2,delta_pose,global_pose,global_pose_prev,
-				 global_diff,relative_pose,P;
-			vector<Point> laser_set,laser_set_1,laser_set_2,local_map,occ_laser_set,map_points;
-			MAP *map;
-			MricpTimer delta_t_estimation;
-                        CanonicalScanMatcher csm;
+{
+    // Must implement the following methods.
+public :
+    virtual int MainSetup();
+    virtual void MainQuit();
+    virtual int ProcessMessage(QueuePointer& resp_queue, player_msghdr * hdr, void * data);
+    MrIcp(ConfigFile* cf, int section);
+    // Main function for device thread.
+private:
+    virtual void Main();
+    int  HandleConfigs(QueuePointer& resp_queue,player_msghdr * hdr,void * data);
+    int  HandleCommands(QueuePointer& resp_queue,player_msghdr * hdr,void * data);
+    int  HandleData(QueuePointer& resp_queue, player_msghdr * hdr, void * data);
+    void RefreshData();     //refreshs and sends data
+    void AddToMap(vector <Point> points_to_add,Pose p); // Add points to Map
+    void ResetMap();		// Reset the Map and empty all the point cloud
+    Point TransformToGlobal(Point ,Pose p);
+    Pose  TransformToGlobal(Pose ,Pose p);
+    Point ConvertToPixel(Point p);
+    Point ConvertPixel(Point p);
+    int  InRange(double angle,int laser_index);
+    void BuildMap();
+    int SetupLaser(int);
+    void SetupPositionDriver();
+    void GenerateLocalMap(Pose pse);
+    void ConnectPatches();
+    mapgrid_t ComputeRangeProb(double range,bool);
+    int ProcessMapInfoReq(QueuePointer& resp_queue,player_msghdr * hdr,void * data);
+    int ProcessMapDataReq(QueuePointer& resp_queue,player_msghdr * hdr,void * data);
+    // Position interface / IN
+private:
+    player_devaddr_t          position_in_addr;
+    player_position2d_geom_t  geom;
+    Device  			     *position_device;
+    // Position interface / OUT
+private:
+    player_devaddr_t         position_out_addr;
+    player_position2d_data_t position_out_data;
+    // Lasers interfaces
+private:
+    // Supports MAXLASERS Lasers
+    player_devaddr_t       laser_addr[MAXLASERS];
+    player_laser_geom_t    *laser_geom;
+    // Used to communicate with the laser Driver
+    Device                 *laser_device[MAXLASERS];
+    // Map interface
+private:
+    player_devaddr_t 	   map_addr;
+    player_map_data_t 	   map_data;
+    player_map_info_t      map_info;
+    // Variables
+public :
+    FILE *file,*config_file;
+    char * map_path;
+    int   robot_id,scan_count,nit,nu,map_number,number_of_lasers,
+    range_count[MAXLASERS],sparse_scans_rate;
+    // defines a set of ranges (max 10) for each attached laser
+    laser_range range[MAXLASERS][MAXRANGES];
+    float maxr,minr,period,map_resolution,gate1,gate2,map_size,map_saving_period,
+    use_max_range,local_map_margine;
+    float PoseX,PoseY,PoseTheta; // Laser Pose
+    double px, py, pa,speed,turn_rate,delta_time,start_in,free_space_prob;
+    bool log,debug,interpolate,sample_initialized,
+    playerv_debug,position_in_exists,use_odom,reset_timer,warning_misalign;
+    struct timeval last_time[MAXLASERS],current_time,laser_timestamp,position_timestamp,
+    loop_start,loop_end,map_timestamp,last_delta,map_current,map_saved;
+    ICP icp;
+    Pose laser_pose[MAXLASERS],pose_1,pose_2,delta_pose,global_pose,global_pose_prev,
+    global_diff,relative_pose,P;
+    vector<Point> laser_set,laser_set_1,laser_set_2,local_map,occ_laser_set,map_points;
+    MAP *map;
+    MricpTimer delta_t_estimation;
+    CanonicalScanMatcher csm;
+    LDP refLaserScan;
+    LDP laserScan;
 };
+
 Driver* MrIcp_Init(ConfigFile* cf, int section) // Create and return a new instance of this driver
 {
   	return ((Driver*) (new MrIcp(cf, section)));
@@ -354,129 +435,129 @@ extern "C"
 
 MrIcp::MrIcp(ConfigFile* cf, int section)  : ThreadedDriver(cf, section)
 {
-	char config_temp[40];
-	this->maxr =             cf->ReadFloat(section,"MAXR",7.8);
-	this->start_in =         cf->ReadFloat(section,"start_in",2);
-	this->minr =             cf->ReadFloat(section,"MINR",0.05);
-	this->period =           cf->ReadFloat(section,"period",0.1);
-	this->map_resolution =   cf->ReadFloat(section,"map_resolution",0.05); // In METERS
-	this->map_size = 	     cf->ReadFloat(section,"map_size",20);         // In METERS
-	this->nit =              cf->ReadInt  (section,"NIT",10);
-	this->robot_id =         cf->ReadInt  (section,"robot_id",0);
-	this->number_of_lasers = cf->ReadInt  (section,"number_of_lasers",1);
-	this->gate1 =            cf->ReadFloat(section,"gate1",0.5);
-	this->gate2 =            cf->ReadFloat(section,"gate2",0.05);
-	this->interpolate =      cf->ReadInt  (section, "interpolate", 1);
-	this->map_path	=(char *)cf->ReadString(section,"map_path","maps/");
-	this->debug = 			 cf->ReadInt(section,"debug",0);
-	this->warning_misalign = icp.warning_misalign = cf->ReadInt(section,"warning",1);
-	this->log =   			 cf->ReadInt(section,  "log",0);
-	this->use_odom = 		 cf->ReadInt(section,  "use_odom",0);
-	this->playerv_debug =    cf->ReadInt(section,  "playerv_debug",0);
-	this->use_max_range =    cf->ReadFloat(section,  "use_max_range",0);
-	this->sparse_scans_rate= cf->ReadInt(section,  "sparse_scans_rate",1);
-	this->free_space_prob =  cf->ReadFloat(section,"free_space_prob",0.4);
-	this->map_saving_period= cf->ReadFloat(section,"map_saving_period",10);
+    char config_temp[40];
+    this->maxr =             cf->ReadFloat(section,"MAXR",7.8);
+    this->start_in =         cf->ReadFloat(section,"start_in",2);
+    this->minr =             cf->ReadFloat(section,"MINR",0.05);
+    this->period =           cf->ReadFloat(section,"period",0.1);
+    this->map_resolution =   cf->ReadFloat(section,"map_resolution",0.05); // In METERS
+    this->map_size = 	     cf->ReadFloat(section,"map_size",20);         // In METERS
+    this->nit =              cf->ReadInt  (section,"NIT",10);
+    this->robot_id =         cf->ReadInt  (section,"robot_id",0);
+    this->number_of_lasers = cf->ReadInt  (section,"number_of_lasers",1);
+    this->gate1 =            cf->ReadFloat(section,"gate1",0.5);
+    this->gate2 =            cf->ReadFloat(section,"gate2",0.05);
+    this->interpolate =      cf->ReadInt  (section, "interpolate", 1);
+    this->map_path	=(char *)cf->ReadString(section,"map_path","maps/");
+    this->debug = 			 cf->ReadInt(section,"debug",0);
+    this->warning_misalign = icp.warning_misalign = cf->ReadInt(section,"warning",1);
+    this->log =   			 cf->ReadInt(section,  "log",0);
+    this->use_odom = 		 cf->ReadInt(section,  "use_odom",0);
+    this->playerv_debug =    cf->ReadInt(section,  "playerv_debug",0);
+    this->use_max_range =    cf->ReadFloat(section,  "use_max_range",0);
+    this->sparse_scans_rate= cf->ReadInt(section,  "sparse_scans_rate",1);
+    this->free_space_prob =  cf->ReadFloat(section,"free_space_prob",0.4);
+    this->map_saving_period= cf->ReadFloat(section,"map_saving_period",10);
 
-	if (sparse_scans_rate <= 0 )
-	{
-		cout <<"\nSparse Scans Rate should be positive integer > 0";
-		exit(1);
-	}
-	if(free_space_prob < 0 || free_space_prob >1)
-	{
-		cout <<"\nFree space probability should be between 0 and 1";
-		exit(1);
-	}
-	for(int k = 0; k < number_of_lasers ; k++)
-	{
-		snprintf(config_temp,40,"%s%d%s","laser",k,"_ranges");
-		// Expects you to provide "laserx_ranges" (where x is the laser index)
-		// in the configuration file
-		this->range_count[k] =	 cf->GetTupleCount(section,config_temp);
-		if ((range_count[k]%2)!=0)
-		{
-			cout<<"\n ERROR: Number of tuples in the ranges for Laser:"<<k<< "should be even !!!";
-			exit(1);
-		}
-		int index=0;
-		for(int i=0;i<range_count[k];i+=2)
-		{
-			this->range[k][index].begins =	 cf->ReadTupleInt(section,config_temp,i ,-90);
-			this->range[k][index].ends   =	 cf->ReadTupleInt(section,config_temp,i+1,90);
-			if(this->range[k][index].begins > this->range[k][index].ends)
-			{
-				cout<<"\n ERROR: the beginning range SHOULd be less than the end range !!!";
-				exit(1);
-			}
-			cout<<"\n Laser:"<<k<<" Range:"<<index<<" begins:"<<range[k][index].begins;
-			cout<<" ends:"<<range[k][index].ends;
-			index ++;
-		}
-		range_count[k]/=2;
-	}
+    if (sparse_scans_rate <= 0 )
+    {
+        cout <<"\nSparse Scans Rate should be positive integer > 0";
+        exit(1);
+    }
+    if(free_space_prob < 0 || free_space_prob >1)
+    {
+        cout <<"\nFree space probability should be between 0 and 1";
+        exit(1);
+    }
+    for(int k = 0; k < number_of_lasers ; k++)
+    {
+        snprintf(config_temp,40,"%s%d%s","laser",k,"_ranges");
+        // Expects you to provide "laserx_ranges" (where x is the laser index)
+        // in the configuration file
+        this->range_count[k] =	 cf->GetTupleCount(section,config_temp);
+        if ((range_count[k]%2)!=0)
+        {
+            cout<<"\n ERROR: Number of tuples in the ranges for Laser:"<<k<< "should be even !!!";
+            exit(1);
+        }
+        int index=0;
+        for(int i=0;i<range_count[k];i+=2)
+        {
+            this->range[k][index].begins =	 cf->ReadTupleInt(section,config_temp,i ,-90);
+            this->range[k][index].ends   =	 cf->ReadTupleInt(section,config_temp,i+1,90);
+            if(this->range[k][index].begins > this->range[k][index].ends)
+            {
+                cout<<"\n ERROR: the beginning range SHOULd be less than the end range !!!";
+                exit(1);
+            }
+            cout<<"\n Laser:"<<k<<" Range:"<<index<<" begins:"<<range[k][index].begins;
+            cout<<" ends:"<<range[k][index].ends;
+            index ++;
+        }
+        range_count[k]/=2;
+    }
     // Adding position interface
     // Do we create a robot position interface?
     if(cf->ReadDeviceAddr(&(this->position_out_addr), section, "provides", PLAYER_POSITION2D_CODE, -1, NULL) == 0)
     {
-		if (this->AddInterface(this->position_out_addr))
-	  	{
-	    	this->SetError(-1);
-	    	return;
-	  	}
-  	  	if(this->debug)
-			cout<<"\n Position out Interface Loaded";
-  	}
-  	// Adding MAP interface
-  	// Do we create a MAP interface?
+        if (this->AddInterface(this->position_out_addr))
+        {
+            this->SetError(-1);
+            return;
+        }
+        if(this->debug)
+            cout<<"\n Position out Interface Loaded";
+    }
+    // Adding MAP interface
+    // Do we create a MAP interface?
     if(cf->ReadDeviceAddr(&(this->map_addr), section, "provides", PLAYER_MAP_CODE, -1, NULL) == 0)
     {
-		if (this->AddInterface(this->map_addr))
-	  	{
-	    	this->SetError(-1);
-	    	return;
-	  	}
-		if(this->debug)
-			cout<<"\n MAP Interface Loaded";
-  	}
-  	// Adding LASER interfaces
+        if (this->AddInterface(this->map_addr))
+        {
+            this->SetError(-1);
+            return;
+        }
+        if(this->debug)
+            cout<<"\n MAP Interface Loaded";
+    }
+    // Adding LASER interfaces
     if(this->debug)
     	cout<<"N of Lasers:"<<number_of_lasers;
-	for(int i=0; i<this->number_of_lasers;i++)
-	{
-  		if(cf->ReadDeviceAddr(&this->laser_addr[i], section, "requires", PLAYER_LASER_CODE,-1, NULL) == 0)
-  		{
-			SetupLaser(i); // Here we initialize the talk to the laser driver
-			cout<<"\n LASER Interface Loaded Success index:"<<i; fflush(stdout);
-	  		if(this->debug)
-				cout<<"\n LASER Interface Loaded";
-  		}
-  		else
-		{
-			cout<<"\n Error Reading Laser on index:"<<i;
-			fflush(stdout);
-	    	this->SetError(-1);
-	    	return;
-		}
-	}
-   // Adding position interface
-   // Do we create a position interface?
-	if (cf->ReadDeviceAddr(&this->position_in_addr, section, "requires",PLAYER_POSITION2D_CODE, -1, NULL) == 0)
-	{
-		SetupPositionDriver();
-		if(this->debug)
-			cout<<"\n Position IN Interface Loaded";
-	}
-  	else
-  	{
-  		if (this->use_odom)
-  		  		cout<<"\n Can't use odom when you don't have an underlying position driver !!!";
-  		position_in_exists = false;
-  		this->position_device = NULL;
-  	}
-	if(this->debug)
-		cout<<"\n	--->>>Gate1 ="<<gate1<<" Gate2="<<gate2<<" NIT="<<nit<<" MAXR="<<maxr<<" MINR="<<minr<<endl;
-  	return;
+    for(int i=0; i<this->number_of_lasers;i++)
+    {
+        if(cf->ReadDeviceAddr(&this->laser_addr[i], section, "requires", PLAYER_LASER_CODE,-1, NULL) == 0)
+        {
+            SetupLaser(i); // Here we initialize the talk to the laser driver
+            cout<<"\n LASER Interface Loaded Success index:"<<i; fflush(stdout);
+            if(this->debug)
+                cout<<"\n LASER Interface Loaded";
+        }
+        else
+        {
+            cout<<"\n Error Reading Laser on index:"<<i;
+            fflush(stdout);
+            this->SetError(-1);
+            return;
+        }
+    }
+    // Adding position interface
+    // Do we create a position interface?
+    if (cf->ReadDeviceAddr(&this->position_in_addr, section, "requires",PLAYER_POSITION2D_CODE, -1, NULL) == 0)
+    {
+        SetupPositionDriver();
+        if(this->debug)
+            cout<<"\n Position IN Interface Loaded";
+    }
+    else
+    {
+        if (this->use_odom)
+            cout<<"\n Can't use odom when you don't have an underlying position driver !!!";
+        position_in_exists = false;
+        this->position_device = NULL;
+    }
+    if(this->debug)
+        cout<<"\n	--->>>Gate1 ="<<gate1<<" Gate2="<<gate2<<" NIT="<<nit<<" MAXR="<<maxr<<" MINR="<<minr<<endl;
+    return;
 }
 
 int MrIcp::MainSetup()
@@ -701,179 +782,180 @@ int MrIcp::ProcessMessage(QueuePointer& resp_queue, player_msghdr * hdr, void * 
  */
 int MrIcp::HandleData(QueuePointer& resp_queue, player_msghdr * hdr, void * idata)
 {
-  	struct timeval currtime;
-  	double t1,t2, min_angle, scan_res,r,b,time_diff;
-	Point p;
-	//Clear the previous Laser set used for the occupance grid generation
-	occ_laser_set.clear();
-	laser_set.clear();
-  	if(Message::MatchMessage(hdr, PLAYER_MSGTYPE_DATA,PLAYER_POSITION2D_DATA_STATE, this->position_in_addr))
-  	{
-  		player_position2d_data_t* data = reinterpret_cast<player_position2d_data_t*> (idata);
-  		// Compute new robot pose from Underlying Position Interface.
-  		P.p.x = data->pos.px;
-  		P.p.y = data->pos.py;
-  		P.phi = data->pos.pa;
-		if(this->debug)
-			cout<<"\n	--->>> Odom pose from Position:0 XYTheta=["<<P.p.x<<"]["<<P.p.y<<"]["<<P.phi<<"]";
-		return 0;
-  	}
-  	for(int index=0;index<number_of_lasers;index++)
-  	{
-		if(Message::MatchMessage(hdr, PLAYER_MSGTYPE_DATA,PLAYER_LASER_DATA_SCAN, this->laser_addr[index]))
-		{
-			gettimeofday(&currtime,NULL);
-			t1 = ((double) currtime.tv_sec  + (double) currtime.tv_usec/1e6);
-			t2 = ((double) last_time[index].tv_sec + (double) last_time[index].tv_usec/1e6);
-		    time_diff = t1 -t2;
-		  	if (time_diff < 0.1)
-		  	{
-		  		if(this->debug)
-		  			cout<<"\n	--->>> Time Since Last Read is= "<<(t1-t2)<<" msec";
-		    	continue;
-		  	}
-		  	this->last_time[index] = currtime;
-	  		player_laser_data_t* data = reinterpret_cast<player_laser_data_t*> (idata);
-	  		min_angle = data->min_angle;
-	  		scan_res  = data->resolution;
-	  		this->scan_count = data->ranges_count;
-		    if(this->debug)
-		    	cout<<"\n Scan Count="<<this->scan_count;
-		  	for(int i=0;i < scan_count ;i++)
-		  	{
-		    	// convert to mm, then m, according to given range resolution
-			    r = data->ranges[i];
-		    	b = min_angle + (i * scan_res); 		    // compute bearing
-		    	//cout<<"\n Bearing:"<<RTOD(b);
-		    	if(InRange(b,index)!=0)
-		    		continue;
-			    // Transfer from Polar to Cartesian coordinates
-		    	p.x = r * cos(b);
-		    	p.y = r * sin(b);
-		    	p.laser_index = index;
-		    	// Transfer all the laser Reading into the Robot Coordinate System
-		    	p = TransformToGlobal(p,laser_pose[index]);
-				// Filter max ranges for alignment and use all for Occ-grid
-		    	if (this->use_max_range!=0)
-		    	{
-			    	if (r >= this->minr && r <= this->maxr && (i%sparse_scans_rate)==0)
-		  				laser_set.push_back(p);
-		  			occ_laser_set.push_back(p);
-		  		}
-		  		else
-		  		{
-		    		// Use only informative data for the scan allignement and Occ-grid
-			    	if (r >= this->minr && r <= this->maxr)
-			    	{
-			    		// Get samples according to sparse resolution
-			    		if ((i%sparse_scans_rate)==0)
-		  					laser_set.push_back(p);
-		  				// Use All the samples for OG-Map
-		  				occ_laser_set.push_back(p);
-			    	}
-		  		}
-		  	}
-			return 0;
-		}
-  	}
-  	return -1;
+    struct timeval currtime;
+    double t1,t2, min_angle, scan_res,r,b,time_diff;
+    Point p;
+    //Clear the previous Laser set used for the occupance grid generation
+    occ_laser_set.clear();
+    laser_set.clear();
+    if(Message::MatchMessage(hdr, PLAYER_MSGTYPE_DATA,PLAYER_POSITION2D_DATA_STATE, this->position_in_addr))
+    {
+        player_position2d_data_t* data = reinterpret_cast<player_position2d_data_t*> (idata);
+        // Compute new robot pose from Underlying Position Interface.
+        P.p.x = data->pos.px;
+        P.p.y = data->pos.py;
+        P.phi = data->pos.pa;
+        if(this->debug)
+            cout<<"\n	--->>> Odom pose from Position:0 XYTheta=["<<P.p.x<<"]["<<P.p.y<<"]["<<P.phi<<"]";
+        return 0;
+    }
+    for(int index=0;index<number_of_lasers;index++)
+    {
+        if(Message::MatchMessage(hdr, PLAYER_MSGTYPE_DATA,PLAYER_LASER_DATA_SCAN, this->laser_addr[index]))
+        {
+            gettimeofday(&currtime,NULL);
+            t1 = ((double) currtime.tv_sec  + (double) currtime.tv_usec/1e6);
+            t2 = ((double) last_time[index].tv_sec + (double) last_time[index].tv_usec/1e6);
+            time_diff = t1 -t2;
+            if (time_diff < 0.1)
+            {
+                if(this->debug)
+                    cout<<"\n	--->>> Time Since Last Read is= "<<(t1-t2)<<" msec";
+                continue;
+            }
+            this->last_time[index] = currtime;
+            player_laser_data_t* data = reinterpret_cast<player_laser_data_t*> (idata);
+            min_angle = data->min_angle;
+            scan_res  = data->resolution;
+            this->scan_count = data->ranges_count;
+            if(this->debug)
+                cout<<"\n Scan Count="<<this->scan_count;
+            for(int i=0;i < scan_count ;i++)
+            {
+                // convert to mm, then m, according to given range resolution
+                r = data->ranges[i];
+                b = min_angle + (i * scan_res); 		    // compute bearing
+                //cout<<"\n Bearing:"<<RTOD(b);
+                if(InRange(b,index)!=0)
+                    continue;
+                // Transfer from Polar to Cartesian coordinates
+                p.x = r * cos(b);
+                p.y = r * sin(b);
+                p.laser_index = index;
+                // Transfer all the laser Reading into the Robot Coordinate System
+                p = TransformToGlobal(p,laser_pose[index]);
+                // Filter max ranges for alignment and use all for Occ-grid
+                if (this->use_max_range!=0)
+                {
+                    if (r >= this->minr && r <= this->maxr && (i%sparse_scans_rate)==0)
+                        laser_set.push_back(p);
+                    occ_laser_set.push_back(p);
+                }
+                else
+                {
+                    // Use only informative data for the scan allignement and Occ-grid
+                    if (r >= this->minr && r <= this->maxr)
+                    {
+                        // Get samples according to sparse resolution
+                        if ((i%sparse_scans_rate)==0)
+                            laser_set.push_back(p);
+                        // Use All the samples for OG-Map
+                        occ_laser_set.push_back(p);
+                    }
+                }
+            }
+            return 0;
+        }
+    }
+    return -1;
 };
+
 int MrIcp::HandleConfigs(QueuePointer &resp_queue,player_msghdr * hdr,void * data)
 {
-	// Handle Position REQ
-	// I didn't like the stupid MessageMatch Method
-	// check for position config requests
-	if(
-	   (hdr->type == (uint8_t)PLAYER_MSGTYPE_REQ) && (hdr->addr.host   == position_out_addr.host)   &&
-	   (hdr->addr.robot  == position_out_addr.robot) &&  (hdr->addr.interf == position_out_addr.interf) &&
-       (hdr->addr.index  == position_out_addr.index)
-       )
+    // Handle Position REQ
+    // I didn't like the stupid MessageMatch Method
+    // check for position config requests
+    if(
+            (hdr->type == (uint8_t)PLAYER_MSGTYPE_REQ) && (hdr->addr.host   == position_out_addr.host)   &&
+            (hdr->addr.robot  == position_out_addr.robot) &&  (hdr->addr.interf == position_out_addr.interf) &&
+            (hdr->addr.index  == position_out_addr.index)
+            )
     {
-		switch (hdr->subtype)
-		{
-		case PLAYER_POSITION2D_REQ_GET_GEOM:
-			/* Return the robot geometry. */
-		    if(hdr->size != 0)
-		    {
-		      PLAYER_WARN("Arg get robot geom is wrong size; ignoring");
-		      return(-1);
-			}
-	  		if(position_in_exists)
-	  		{
-		    	this->Publish(this->position_out_addr, resp_queue,PLAYER_MSGTYPE_RESP_ACK,PLAYER_POSITION2D_REQ_GET_GEOM, (void*)&geom);
-			    return 0;
-	  		}
-	  		else // Default Value if Position:0 not found
-	  		{
-			    geom.pose.px = 0.3;
-			    geom.pose.py = 0.0;
-			    geom.pose.pyaw = 0.0;
-		    	geom.size.sl = 1.2;
-		    	geom.size.sw = 0.65;
-		    	this->Publish(this->position_out_addr, resp_queue,PLAYER_MSGTYPE_RESP_ACK,PLAYER_POSITION2D_REQ_GET_GEOM,
-			    			  (void*)&geom, sizeof(geom), NULL);
-			    return 0;
-	  		}
-			return -1;
-		case PLAYER_POSITION2D_REQ_SET_ODOM:
-		    if(hdr->size != sizeof(player_position2d_set_odom_req_t))
-		    {
-		      puts("Arg get robot geom is wrong size; ignoring");
-		      return(-1);
-			}
-	    	player_position2d_set_odom_req_t * set_odom_req;
-	    	set_odom_req = (player_position2d_set_odom_req_t*) data;
-	    	this->Publish(this->position_in_addr, resp_queue,PLAYER_MSGTYPE_REQ,PLAYER_POSITION2D_REQ_SET_ODOM,
-		    			  (void*)set_odom_req, sizeof(set_odom_req), NULL);
-			break;
+        switch (hdr->subtype)
+        {
+        case PLAYER_POSITION2D_REQ_GET_GEOM:
+            /* Return the robot geometry. */
+            if(hdr->size != 0)
+            {
+                PLAYER_WARN("Arg get robot geom is wrong size; ignoring");
+                return(-1);
+            }
+            if(position_in_exists)
+            {
+                this->Publish(this->position_out_addr, resp_queue,PLAYER_MSGTYPE_RESP_ACK,PLAYER_POSITION2D_REQ_GET_GEOM, (void*)&geom);
+                return 0;
+            }
+            else // Default Value if Position:0 not found
+            {
+                geom.pose.px = 0.3;
+                geom.pose.py = 0.0;
+                geom.pose.pyaw = 0.0;
+                geom.size.sl = 1.2;
+                geom.size.sw = 0.65;
+                this->Publish(this->position_out_addr, resp_queue,PLAYER_MSGTYPE_RESP_ACK,PLAYER_POSITION2D_REQ_GET_GEOM,
+                              (void*)&geom, sizeof(geom), NULL);
+                return 0;
+            }
+            return -1;
+        case PLAYER_POSITION2D_REQ_SET_ODOM:
+            if(hdr->size != sizeof(player_position2d_set_odom_req_t))
+            {
+                puts("Arg get robot geom is wrong size; ignoring");
+                return(-1);
+            }
+            player_position2d_set_odom_req_t * set_odom_req;
+            set_odom_req = (player_position2d_set_odom_req_t*) data;
+            this->Publish(this->position_in_addr, resp_queue,PLAYER_MSGTYPE_REQ,PLAYER_POSITION2D_REQ_SET_ODOM,
+                          (void*)set_odom_req, sizeof(set_odom_req), NULL);
+            break;
 		case PLAYER_POSITION2D_REQ_RESET_ODOM:
-		    	/* reset position to 0,0,0: no args */
-			    if(hdr->size != 0)
-			    {
-			      PLAYER_WARN("Arg to reset position request is wrong size; ignoring");
-			      return(-1);
-			    }
-				else
-				ResetMap();
-			    this->Publish(this->position_out_addr, resp_queue,PLAYER_MSGTYPE_RESP_ACK, PLAYER_POSITION2D_REQ_RESET_ODOM);
-			    return(0);
-		case PLAYER_POSITION2D_REQ_MOTOR_POWER:
-			    /* motor state change request
+            /* reset position to 0,0,0: no args */
+            if(hdr->size != 0)
+            {
+                PLAYER_WARN("Arg to reset position request is wrong size; ignoring");
+                return(-1);
+            }
+            else
+                ResetMap();
+            this->Publish(this->position_out_addr, resp_queue,PLAYER_MSGTYPE_RESP_ACK, PLAYER_POSITION2D_REQ_RESET_ODOM);
+            return(0);
+        case PLAYER_POSITION2D_REQ_MOTOR_POWER:
+            /* motor state change request
 			     *   1 = enable motors
 			     *   0 = disable motors (default)
 			     */
-			    if(hdr->size != sizeof(player_position2d_power_config_t))
-			    {
-			      PLAYER_WARN("Arg to motor state change request wrong size; ignoring");
-			      return(-1);
-			    }
-		    	this->Publish(this->position_in_addr, resp_queue,PLAYER_MSGTYPE_REQ,PLAYER_POSITION2D_REQ_SET_ODOM,
-		    			  (void*)data, sizeof(data), NULL);
+            if(hdr->size != sizeof(player_position2d_power_config_t))
+            {
+                PLAYER_WARN("Arg to motor state change request wrong size; ignoring");
+                return(-1);
+            }
+            this->Publish(this->position_in_addr, resp_queue,PLAYER_MSGTYPE_REQ,PLAYER_POSITION2D_REQ_SET_ODOM,
+                          (void*)data, sizeof(data), NULL);
 
-	        	break;
-		default:
-				PLAYER_WARN("\nreceived unknown config type ");
-	    		return -1;
-		}
-  	}
-	// check for MAP config requests
-	if(
-	   (hdr->type == (uint8_t)PLAYER_MSGTYPE_REQ) && (hdr->addr.host   == map_addr.host)   &&
-	   (hdr->addr.robot  == map_addr.robot) &&  (hdr->addr.interf == map_addr.interf) &&
-       (hdr->addr.index  == map_addr.index)
-       )
+            break;
+        default:
+            PLAYER_WARN("\nreceived unknown config type ");
+            return -1;
+        }
+    }
+    // check for MAP config requests
+    if(
+            (hdr->type == (uint8_t)PLAYER_MSGTYPE_REQ) && (hdr->addr.host   == map_addr.host)   &&
+            (hdr->addr.robot  == map_addr.robot) &&  (hdr->addr.interf == map_addr.interf) &&
+            (hdr->addr.index  == map_addr.index)
+            )
     {
     	switch(hdr->subtype)
-  		{
-    		case PLAYER_MAP_REQ_GET_INFO:
-      			return ProcessMapInfoReq(resp_queue,hdr,data);
-		    case PLAYER_MAP_REQ_GET_DATA:
-		      	return ProcessMapDataReq(resp_queue,hdr,data);
-		    default:
-		    	return -1;
-  		}
-  	}
-  	return -1;
+        {
+        case PLAYER_MAP_REQ_GET_INFO:
+            return ProcessMapInfoReq(resp_queue,hdr,data);
+        case PLAYER_MAP_REQ_GET_DATA:
+            return ProcessMapDataReq(resp_queue,hdr,data);
+        default:
+            return -1;
+        }
+    }
+    return -1;
 }
 int  MrIcp::HandleCommands(QueuePointer& resp_queue,player_msghdr * hdr,void * data)
 {
@@ -1134,110 +1216,110 @@ mapgrid_t MrIcp::ComputeRangeProb(double range,bool free)
 }
 void MrIcp::AddToMap(vector<Point> laser_data,Pose pose)
 {
-	Point p,pixel_point,d,in_p;
-	Pose relative_laser_pose;
-	double dist,color_prob,gradient;
-	double x_free,x_occ,x_unknown,range,normalizer;
-  	mapgrid_t sensor_prob;
-	int steps;
-	for(unsigned int i=0;i<laser_data.size();i++)
-	{
-		p = TransformToGlobal(laser_data[i],pose);
-		pixel_point = ConvertToPixel(p);
-		if(pixel_point.x > (map_size*2.0/map_resolution)-1 || pixel_point.y >(2.0*map_size/map_resolution) - 2 // -2 because the last row will hold the meta data
-		|| pixel_point.x < 0 || pixel_point.y < 0)
-		{
-			//cout<<"\n	--->>> Map Size Limitations Exceeded Creating New Patch <<<---";
-			cout<<"\n	--->>> Map Size Limitations , New Data Ignored <<<---";
-			//ResetMap();
-			fflush(stdout);
-			return;
-		}
-		// Round the pose to the closest resolution
-//		p.x = map_resolution*rint(p.x/map_resolution);
-//		p.y = map_resolution*rint(p.y/map_resolution);
-		// line parameters
-		relative_laser_pose = TransformToGlobal(laser_pose[laser_data[i].laser_index],pose);
-		d.x = p.x - relative_laser_pose.p.x; // Ray distance X in meters
-		d.y = p.y - relative_laser_pose.p.y; // Ray distance Y in meters
-		// Ray Total length meters
-		dist = sqrt(d.x * d.x + d.y * d.y);
-		steps = (int) floor(dist / map_resolution) + 1;
-		d.x /= (steps);
-		d.y /= (steps);
-		// Traverse the line segment and update the grid
-		Point temp;
-		// The free Cells
-		for (int j = 0; j < steps; j++)
-		{
-		  in_p.x = relative_laser_pose.p.x + d.x * j;
-		  in_p.y = relative_laser_pose.p.y + d.y * j;
-		  temp = ConvertToPixel(in_p);
-		  // Prior Probability Knowledge
-		  x_free = this->map->occ_grid[(int)(temp.x)][(int)(temp.y)].prob_free;
-		  x_occ  = this->map->occ_grid[(int)(temp.x)][(int)(temp.y)].prob_occ;
-		  x_unknown = 1 - (x_free + x_occ);
-		  range = sqrt(pow(in_p.x - relative_laser_pose.p.x,2)+pow(in_p.y - relative_laser_pose.p.y,2));
-		  // Range Sensor Probability
-		  // Bayesian Update
-		  if (dist > this->maxr)
-		  {
-		  	if(range > this->use_max_range)
-		  		break;
-		  	sensor_prob.prob_free = free_space_prob;
-		  	sensor_prob.prob_occ  = (1 - free_space_prob)/2.0;
-		  }
-		  else
-		  {
-		 	sensor_prob = ComputeRangeProb(range,1);
-		  }
- 	  	  normalizer  = x_free*sensor_prob.prob_free + x_occ*sensor_prob.prob_occ +
-		  			    x_unknown*(1-(sensor_prob.prob_free + sensor_prob.prob_occ ));
-		  this->map->occ_grid[(int)(temp.x)][(int)(temp.y)].prob_free = x_free*sensor_prob.prob_free/normalizer;
-		  this->map->occ_grid[(int)(temp.x)][(int)(temp.y)].prob_occ  = x_occ *sensor_prob.prob_occ/normalizer;
-		  //cout<<"\n Prob OCC ="<<x_occ *sensor_prob.prob_occ/normalizer<<" Prob Free="<<x_free*sensor_prob.prob_free/normalizer;
-		  // Draw the Probability Gradient into the buffer
-		  color_prob =  this->map->occ_grid[(int)(temp.x)][(int)(temp.y)].prob_occ;
-		  if(color_prob>1 || color_prob<0)
-		  {
-		  	cout <<"\n WTF : UNEXPECTED Probability !!! "<< color_prob;
-		  }
-		  gradient = 255.0 - color_prob * 255.0;
-		  map->DrawPixel((int)(gradient),(int)(gradient),(int)(gradient),(int)temp.x,(int)temp.y);
-		}
-		// The end point is occupied
-		if (dist < this->maxr)
-		{
-		  	in_p.x = p.x;
-		  	in_p.y = p.y;
-		  	temp = in_p;
-		  	temp = ConvertToPixel(in_p);
-		  	// Prior Probability
-		  	x_free = this->map->occ_grid[(int)(temp.x)][(int)(temp.y)].prob_free;
-		  	x_occ  = this->map->occ_grid[(int)(temp.x)][(int)(temp.y)].prob_occ;
-		  	x_unknown = 1 - (x_free + x_occ);
-		  	range = sqrt(pow(in_p.x - relative_laser_pose.p.x,2)+pow(in_p.y - relative_laser_pose.p.y,2));
-		  	// Range Sensor Probability
-		  	sensor_prob = ComputeRangeProb(range,0);
-		  	normalizer = x_free*sensor_prob.prob_free + x_occ*sensor_prob.prob_occ +
-		  			   x_unknown*(1-(sensor_prob.prob_free + sensor_prob.prob_occ ));
-		  	// Bayesian Update
-		  	this->map->occ_grid[(int)(temp.x)][(int)(temp.y)].prob_free = x_free*sensor_prob.prob_free/normalizer;
-		  	this->map->occ_grid[(int)(temp.x)][(int)(temp.y)].prob_occ  = x_occ *sensor_prob.prob_occ/normalizer;
-			//cout<<"\n Prob OCC ="<<x_occ *sensor_prob.prob_occ/normalizer<<" Prob Free="<<x_free*sensor_prob.prob_free/normalizer;
-		  	// Draw the Probability Gradient into the buffer
-			color_prob =  this->map->occ_grid[(int)(temp.x)][(int)(temp.y)].prob_occ;
-			gradient = 255.0 - color_prob * 255.0;
-			//cout<<" Gradient= "<<gradient;
-			map->DrawPixel((int)(gradient),(int)(gradient),(int)(gradient),(int)temp.x,(int)temp.y);
-			// Add the Point to the global set
-			if (! this->map->occ_grid[(int)(pixel_point.x)][(int)(pixel_point.y)].added)
-			{
-				this->map->occ_grid[(int)(pixel_point.x)][(int)(pixel_point.y)].added = true;
-				this->map_points.push_back(p);
-			}
-		}
-	}
+    Point p,pixel_point,d,in_p;
+    Pose relative_laser_pose;
+    double dist,color_prob,gradient;
+    double x_free,x_occ,x_unknown,range,normalizer;
+    mapgrid_t sensor_prob;
+    int steps;
+    for(unsigned int i=0;i<laser_data.size();i++)
+    {
+        p = TransformToGlobal(laser_data[i],pose);
+        pixel_point = ConvertToPixel(p);
+        if(pixel_point.x > (map_size*2.0/map_resolution)-1 || pixel_point.y >(2.0*map_size/map_resolution) - 2 // -2 because the last row will hold the meta data
+           || pixel_point.x < 0 || pixel_point.y < 0)
+        {
+            //cout<<"\n	--->>> Map Size Limitations Exceeded Creating New Patch <<<---";
+            cout<<"\n	--->>> Map Size Limitations , New Data Ignored <<<---";
+            //ResetMap();
+            fflush(stdout);
+            return;
+        }
+        // Round the pose to the closest resolution
+        //		p.x = map_resolution*rint(p.x/map_resolution);
+        //		p.y = map_resolution*rint(p.y/map_resolution);
+        // line parameters
+        relative_laser_pose = TransformToGlobal(laser_pose[laser_data[i].laser_index],pose);
+        d.x = p.x - relative_laser_pose.p.x; // Ray distance X in meters
+        d.y = p.y - relative_laser_pose.p.y; // Ray distance Y in meters
+        // Ray Total length meters
+        dist = sqrt(d.x * d.x + d.y * d.y);
+        steps = (int) floor(dist / map_resolution) + 1;
+        d.x /= (steps);
+        d.y /= (steps);
+        // Traverse the line segment and update the grid
+        Point temp;
+        // The free Cells
+        for (int j = 0; j < steps; j++)
+        {
+            in_p.x = relative_laser_pose.p.x + d.x * j;
+            in_p.y = relative_laser_pose.p.y + d.y * j;
+            temp = ConvertToPixel(in_p);
+            // Prior Probability Knowledge
+            x_free = this->map->occ_grid[(int)(temp.x)][(int)(temp.y)].prob_free;
+            x_occ  = this->map->occ_grid[(int)(temp.x)][(int)(temp.y)].prob_occ;
+            x_unknown = 1 - (x_free + x_occ);
+            range = sqrt(pow(in_p.x - relative_laser_pose.p.x,2)+pow(in_p.y - relative_laser_pose.p.y,2));
+            // Range Sensor Probability
+            // Bayesian Update
+            if (dist > this->maxr)
+            {
+                if(range > this->use_max_range)
+                    break;
+                sensor_prob.prob_free = free_space_prob;
+                sensor_prob.prob_occ  = (1 - free_space_prob)/2.0;
+            }
+            else
+            {
+                sensor_prob = ComputeRangeProb(range,1);
+            }
+            normalizer  = x_free*sensor_prob.prob_free + x_occ*sensor_prob.prob_occ +
+                          x_unknown*(1-(sensor_prob.prob_free + sensor_prob.prob_occ ));
+            this->map->occ_grid[(int)(temp.x)][(int)(temp.y)].prob_free = x_free*sensor_prob.prob_free/normalizer;
+            this->map->occ_grid[(int)(temp.x)][(int)(temp.y)].prob_occ  = x_occ *sensor_prob.prob_occ/normalizer;
+            //cout<<"\n Prob OCC ="<<x_occ *sensor_prob.prob_occ/normalizer<<" Prob Free="<<x_free*sensor_prob.prob_free/normalizer;
+            // Draw the Probability Gradient into the buffer
+            color_prob =  this->map->occ_grid[(int)(temp.x)][(int)(temp.y)].prob_occ;
+            if(color_prob>1 || color_prob<0)
+            {
+                cout <<"\n WTF : UNEXPECTED Probability !!! "<< color_prob;
+            }
+            gradient = 255.0 - color_prob * 255.0;
+            map->DrawPixel((int)(gradient),(int)(gradient),(int)(gradient),(int)temp.x,(int)temp.y);
+        }
+        // The end point is occupied
+        if (dist < this->maxr)
+        {
+            in_p.x = p.x;
+            in_p.y = p.y;
+            temp = in_p;
+            temp = ConvertToPixel(in_p);
+            // Prior Probability
+            x_free = this->map->occ_grid[(int)(temp.x)][(int)(temp.y)].prob_free;
+            x_occ  = this->map->occ_grid[(int)(temp.x)][(int)(temp.y)].prob_occ;
+            x_unknown = 1 - (x_free + x_occ);
+            range = sqrt(pow(in_p.x - relative_laser_pose.p.x,2)+pow(in_p.y - relative_laser_pose.p.y,2));
+            // Range Sensor Probability
+            sensor_prob = ComputeRangeProb(range,0);
+            normalizer = x_free*sensor_prob.prob_free + x_occ*sensor_prob.prob_occ +
+                         x_unknown*(1-(sensor_prob.prob_free + sensor_prob.prob_occ ));
+            // Bayesian Update
+            this->map->occ_grid[(int)(temp.x)][(int)(temp.y)].prob_free = x_free*sensor_prob.prob_free/normalizer;
+            this->map->occ_grid[(int)(temp.x)][(int)(temp.y)].prob_occ  = x_occ *sensor_prob.prob_occ/normalizer;
+            //cout<<"\n Prob OCC ="<<x_occ *sensor_prob.prob_occ/normalizer<<" Prob Free="<<x_free*sensor_prob.prob_free/normalizer;
+            // Draw the Probability Gradient into the buffer
+            color_prob =  this->map->occ_grid[(int)(temp.x)][(int)(temp.y)].prob_occ;
+            gradient = 255.0 - color_prob * 255.0;
+            //cout<<" Gradient= "<<gradient;
+            map->DrawPixel((int)(gradient),(int)(gradient),(int)(gradient),(int)temp.x,(int)temp.y);
+            // Add the Point to the global set
+            if (! this->map->occ_grid[(int)(pixel_point.x)][(int)(pixel_point.y)].added)
+            {
+                this->map->occ_grid[(int)(pixel_point.x)][(int)(pixel_point.y)].added = true;
+                this->map_points.push_back(p);
+            }
+        }
+    }
 };
 // Only get the Existing Map points that are useful for Allignement
 void MrIcp::GenerateLocalMap(Pose pse)
