@@ -49,6 +49,8 @@ TARGET_LINK_LIBRARIES(mricp
   ${GTK_LIBRARIES}
   ${GDKPIXBUF_LIBRARIES}
   ${CSM_LIBRARY_DIRS}
+  /home/blackcoder/workspace/csm-git/sm/csmpp/libcsmpp.so
+  /home/blackcoder/workspace/csm-git/sm/libcsm.so
 )
 
 INCLUDE_DIRECTORIES(

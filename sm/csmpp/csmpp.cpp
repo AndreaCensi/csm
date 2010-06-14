@@ -20,11 +20,17 @@ CanonicalScanMatcher::~CanonicalScanMatcher()
 {
 }
 
-bool CanonicalScanMatcher::scanMatch(LDP refScan, LDP secondScan)
+sm_result CanonicalScanMatcher::scanMatch(LDP refScan, LDP laserScan)
 {
 
     params.setLaserRef(refScan);
-    params.setLaserSen(secondScan);
+    params.setLaserSen(laserScan);
+    double odometry[3];
+    double ominus_laser[3], temp[3];    
+    pose_diff_d(laserScan->odometry, refScan->odometry, odometry);
+    ominus_d(params.getParams()->laser, ominus_laser);
+    oplus_d(ominus_laser, odometry, temp);
+    oplus_d(temp, params.getParams()->laser, params.getParams()->first_guess);
 
     switch(matchingAlgorithm)
     {
@@ -39,10 +45,10 @@ bool CanonicalScanMatcher::scanMatch(LDP refScan, LDP secondScan)
         break;
     default:
         sm_error("Unknown algorithm to run: %d.\n",matchingAlgorithm);
-        return false;
+        return matchingResult;
     }
-
-    return true;
+    oplus_d(refScan->estimate, matchingResult.x, laserScan->estimate);
+    return matchingResult;
 }
 
 void CanonicalScanMatcher::setShowDebug(bool state)

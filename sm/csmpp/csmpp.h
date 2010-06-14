@@ -282,7 +282,7 @@ public:
     void setSMParameters(SMParameters parameters);
     void setShowDebug(bool);
     void setRecoverFromError(bool);
-    bool scanMatch(LDP refScan, LDP secondScan);
+    sm_result scanMatch(LDP refScan, LDP laserScan);
 private:
     int matchingAlgorithm;
     bool showDebug;
