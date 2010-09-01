@@ -80,6 +80,19 @@ struct sm_params {
 		double do_alpha_test_thresholdDeg;
 		
 		
+	/** I believe this trick is documented in one of the papers by Guttman (but I can't find
+	    the reference). Or perhaps I was told by him directly. 
+		
+		If you already have a guess of the solution, you can compute the polar angle
+		of the points of one scan in the new position. If the polar angle is not a monotone
+		function of the readings index, it means that the surface is not visible in the 
+		next position. If it is not visible, then we don't use it for matching.
+		
+		This is confusing without a picture! To understand what's going on, make a drawing
+		in which a surface is not visible in one of the poses.
+	
+		Implemented in the function visibilityTest().
+	*/	
 	int do_visibility_test;
 
 	/** If 1, use PlICP; if 0, use vanilla ICP. */
