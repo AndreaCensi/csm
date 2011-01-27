@@ -1,82 +1,53 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<head>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-
-	<title>AndreaCensi/csm @ GitHub</title>
-	
-	<style type="text/css">
-		body {
-  		margin-top: 1.0em;
-  		background-color: #d7f4c7;
-		  font-family: "Helvetica,Arial,FreeSans";
-  		color: #000000;
-    }
-    #container {
-      margin: 0 auto;
-      width: 700px;
-    }
-		h1 { font-size: 3.8em; color: #280b38; margin-bottom: 3px; }
-		h1 .small { font-size: 0.4em; }
-		h1 a { text-decoration: none }
-		h2 { font-size: 1.5em; color: #280b38; }
-    h3 { text-align: center; color: #280b38; }
-    a { color: #280b38; }
-    .description { font-size: 1.2em; margin-bottom: 30px; margin-top: 30px; font-style: italic;}
-    .download { float: right; }
-		pre { background: #000; color: #fff; padding: 15px;}
-    hr { border: 0; width: 80%; border-bottom: 1px solid #aaa}
-    .footer { text-align:center; padding-top:30px; font-style: italic; }
-	</style>
-	
-</head>
-
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC
+    "-//W3C//DTD XHTML 1.1 plus MathML 2.0 plus SVG 1.1//EN"
+    "http://www.w3.org/2002/04/xhtml-math-svg/xhtml-math-svg.dtd">
+<html xmlns:svg='http://www.w3.org/2000/svg' xml:lang='en' xmlns='http://www.w3.org/1999/xhtml'>
+<head><meta content='application/xhtml+xml;charset=utf-8' http-equiv='Content-type' /><title>The C(anonical) Scan Matcher</title></head>
 <body>
-  <a href="http://github.com/AndreaCensi/csm"><img style="position: absolute; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub" /></a>
+<h1 id='the_canonical_scan_matcher'>The C(anonical) Scan Matcher</h1>
 
-  <div id="container">
+<p><img src='sm_plicp_zoom_crop.gif' alt='PL-ICP' style='float: right; margin:1em;' /></p>
 
-    <div class="download">
-      <a href="http://github.com/AndreaCensi/csm/zipball/master">
-        <img border="0" width="90" src="http://github.com/images/modules/download/zip.png"></a>
-      <a href="http://github.com/AndreaCensi/csm/tarball/master">
-        <img border="0" width="90" src="http://github.com/images/modules/download/tar.png"></a>
-    </div>
+<h3 id='news'>News</h3>
 
-    <h1><a href="http://github.com/AndreaCensi/csm">csm</a>
-      <span class="small">by <a href="http://github.com/AndreaCensi">AndreaCensi</a></span></h1>
+<ul>
+<li>Fall 2010: <a href='http://www.ros.org/wiki/canonical_scan_matcher'>CSM has been integrated and packaged</a> for <a href='http://www.ros.org/'>ROS</a> by <a href='http://robotics.ccny.cuny.edu/blog/People/Dryanovski'>Ivan Dryanovski</a>.</li>
+</ul>
 
-    <div class="description">
-      The C(canonical) Scan Matcher
-    </div>
+<h3 id='download'>Download</h3>
 
-    <h2>License</h2>
-<p>LGPL</p>
-<h2>Authors</h2>
-<p>Andrea Censi (andrea@cds.caltech.edu)<br/></p>
-<h2>Contact</h2>
-<p>Andrea Censi (andrea@cds.caltech.edu)<br/>      </p>
+<ul>
+<li>
+<p>CSM can be download from GitHub (.zip package available) at the url:</p>
 
+<p><a href='http://github.com/AndreaCensi/csm'>http://github.com/AndreaCensi/csm</a></p>
+</li>
+</ul>
 
-    <h2>Download</h2>
-    <p>
-      You can download this project in either
-      <a href="http://github.com/AndreaCensi/csm/zipball/master">zip</a> or
-      <a href="http://github.com/AndreaCensi/csm/tarball/master">tar</a> formats.
-    </p>
-    <p>You can also clone the project with <a href="http://git-scm.com">Git</a>
-      by running:
-      <pre>$ git clone git://github.com/AndreaCensi/csm</pre>
-    </p>
+<h3 id='documentation__getting_started'>Documentation / getting started</h3>
 
-    <div class="footer">
-      get the source code on GitHub : <a href="http://github.com/AndreaCensi/csm">AndreaCensi/csm</a>
-    </div>
+<p>Please see the manual contained in &#8220;csm_manual.pdf&#8221;. See below for a quick description.</p>
 
-  </div>
+<p><strong>What is this.</strong> I created this package:</p>
 
-  
-</body>
-</html>
+<ul>
+<li>
+<p>To have a well-documented reference implementation of <a href='http://purl.org/censi/2007/plicp'>PL-ICP</a>. If you are only interested in the core algorithm of PL-ICP, a <a href='http://purl.org/censi/2007/gpc'>separate concise implementation in C/Matlab/Ruby</a> is available.</p>
+</li>
+
+<li>
+<p>To have a <strong>trustworthy</strong> scan matcher to be used in the experiments for some papers on <a href='http://purl.org/censi/2006/icpcov'>ICP covariance</a>, <a href='http://purl.org/censi/2006/accuracy'>the Cramer-Rao bound for range finders</a>, and <a href='http://purl.org/censi/2007/calib'>robot calibration</a>. For batch experiments, it&#8217;s also useful that it&#8217;s pretty fast.</p>
+</li>
+
+<li>
+<p>To have a collection of utilies for command line (UNIX-style) manipulation of laser data, and creating <a href='../plicp/laserazosSM3.log.pdf'>beautiful maps</a> and animations.</p>
+</li>
+</ul>
+
+<p>The package contains also a Ruby wrapper for the C library, and additional Ruby and a Matlab implementations of the same algorithm. These are not as usable or documented as the C version.</p>
+
+<p><strong>What it is NOT</strong>: Note that this is not a full-featured SLAM solution: this only does pairwise scan-matching between scans (but it&#8217;s really good at it!). If you are looking for a more complete SLAM solution, please see the projects listed in the <a href='http://www.openslam.org'>OpenSLAM</a> page; in particular you can have a look at <a href='http://www.openslam.org/gmapping.html'>GMapping</a>. Many pointers to other SLAM software can be found on the pages of the Euron SLAM summer schools: <a href='http://www.cas.kth.se/SLAM/'>2002 (Stockholm)</a>, <a href='http://www.laas.fr/SLAM/'>2004 (Toulouse)</a>, <a href='http://www.robots.ox.ac.uk/~SSS06/Website/index.html'>2006 (Oxford)</a>. Other related projects are <a href='http://carmen.sourceforge.net/'>Carmen</a> and <a href='http://playerstage.sourceforge.net/'>Stage</a>.</p>
+<hr />
+<p>Please link to this page using the url <a href='http://purl.org/censi/2007/csm'>http://purl.org/censi/2007/csm</a>.</p>
+</body></html>
