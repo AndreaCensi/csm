@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC
+    "-//W3C//DTD XHTML 1.1 plus MathML 2.0 plus SVG 1.1//EN"
+    "http://www.w3.org/2002/04/xhtml-math-svg/xhtml-math-svg.dtd">
+<html xmlns:svg='http://www.w3.org/2000/svg' xml:lang='en' xmlns='http://www.w3.org/1999/xhtml'>
+<head><meta content='application/xhtml+xml;charset=utf-8' http-equiv='Content-type' /><title>The C(anonical) Scan Matcher</title></head>
+<body>
+<h1 id='the_canonical_scan_matcher'>The C(anonical) Scan Matcher</h1>
+
+<p><img src='sm_plicp_zoom_crop.gif' alt='PL-ICP' style='float: right; margin:1em;' /></p>
+
+<h3 id='news'>News</h3>
+
+<ul>
+<li>Fall 2010: <a href='http://www.ros.org/wiki/canonical_scan_matcher'>CSM has been integrated and packaged</a> for <a href='http://www.ros.org/'>ROS</a> by <a href='http://robotics.ccny.cuny.edu/blog/People/Dryanovski'>Ivan Dryanovski</a>.</li>
+</ul>
+
+<h3 id='download'>Download</h3>
+
+<ul>
+<li>
+<p>CSM can be download from GitHub (.zip package available) at the url:</p>
+
+<p><a href='http://github.com/AndreaCensi/csm'>http://github.com/AndreaCensi/csm</a></p>
+</li>
+</ul>
+
+<h3 id='documentation__getting_started'>Documentation / getting started</h3>
+
+<p>Please see the manual contained in &#8220;csm_manual.pdf&#8221;. See below for a quick description.</p>
+
+<p><strong>What is this.</strong> I created this package:</p>
+
+<ul>
+<li>
+<p>To have a well-documented reference implementation of <a href='http://purl.org/censi/2007/plicp'>PL-ICP</a>. If you are only interested in the core algorithm of PL-ICP, a <a href='http://purl.org/censi/2007/gpc'>separate concise implementation in C/Matlab/Ruby</a> is available.</p>
+</li>
+
+<li>
+<p>To have a <strong>trustworthy</strong> scan matcher to be used in the experiments for some papers on <a href='http://purl.org/censi/2006/icpcov'>ICP covariance</a>, <a href='http://purl.org/censi/2006/accuracy'>the Cramer-Rao bound for range finders</a>, and <a href='http://purl.org/censi/2007/calib'>robot calibration</a>. For batch experiments, it&#8217;s also useful that it&#8217;s pretty fast.</p>
+</li>
+
+<li>
+<p>To have a collection of utilies for command line (UNIX-style) manipulation of laser data, and creating <a href='../plicp/laserazosSM3.log.pdf'>beautiful maps</a> and animations.</p>
+</li>
+</ul>
+
+<p>The package contains also a Ruby wrapper for the C library, and additional Ruby and a Matlab implementations of the same algorithm. These are not as usable or documented as the C version.</p>
+
+<p><strong>What it is NOT</strong>: Note that this is not a full-featured SLAM solution: this only does pairwise scan-matching between scans (but it&#8217;s really good at it!). If you are looking for a more complete SLAM solution, please see the projects listed in the <a href='http://www.openslam.org'>OpenSLAM</a> page; in particular you can have a look at <a href='http://www.openslam.org/gmapping.html'>GMapping</a>. Many pointers to other SLAM software can be found on the pages of the Euron SLAM summer schools: <a href='http://www.cas.kth.se/SLAM/'>2002 (Stockholm)</a>, <a href='http://www.laas.fr/SLAM/'>2004 (Toulouse)</a>, <a href='http://www.robots.ox.ac.uk/~SSS06/Website/index.html'>2006 (Oxford)</a>. Other related projects are <a href='http://carmen.sourceforge.net/'>Carmen</a> and <a href='http://playerstage.sourceforge.net/'>Stage</a>.</p>
+<hr />
+<p>Please link to this page using the url <a href='http://purl.org/censi/2007/csm'>http://purl.org/censi/2007/csm</a>.</p>
+</body></html>
