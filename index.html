@@ -2,18 +2,92 @@
 <!DOCTYPE html PUBLIC
     "-//W3C//DTD XHTML 1.1 plus MathML 2.0 plus SVG 1.1//EN"
     "http://www.w3.org/2002/04/xhtml-math-svg/xhtml-math-svg.dtd">
-<html xmlns:svg='http://www.w3.org/2000/svg' xml:lang='en' xmlns='http://www.w3.org/1999/xhtml'>
+<html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en' xmlns:svg='http://www.w3.org/2000/svg'>
 <head><meta content='application/xhtml+xml;charset=utf-8' http-equiv='Content-type' /><title>The C(anonical) Scan Matcher</title></head>
 <body>
 <h1 id='the_canonical_scan_matcher'>The C(anonical) Scan Matcher</h1>
 
-<p><img src='sm_plicp_zoom_crop.gif' alt='PL-ICP' style='float: right; margin:1em;' /></p>
+<p><img alt='PL-ICP' src='sm_plicp_zoom_crop.gif' style='float: right; margin:1em;' /></p>
 
 <h3 id='news'>News</h3>
 
 <ul>
-<li>Fall 2010: <a href='http://www.ros.org/wiki/canonical_scan_matcher'>CSM has been integrated and packaged</a> for <a href='http://www.ros.org/'>ROS</a> by <a href='http://robotics.ccny.cuny.edu/blog/People/Dryanovski'>Ivan Dryanovski</a>.</li>
+<li>
+<p>Fall 2010: <a href='http://www.ros.org/wiki/canonical_scan_matcher'>CSM has been integrated and packaged</a> for <a href='http://www.ros.org/'>ROS</a> by <a href='http://robotics.ccny.cuny.edu/blog/People/Dryanovski'>Ivan Dryanovski</a>.</p>
+
+<h3 id='overview'>Overview</h3>
+</li>
 </ul>
+
+<p>This is a pure C implementation of a very fast variation of ICP using a point-to-line metric optimized for range-finder scan matching.</p>
+
+<p>The method is described in the paper:</p>
+<div class='pub-ref-desc'>
+    <img src='http://purl.org/censi/web/media/paper-icons/plicp.jpg' class='icon' /><p class='pub-ref-short'><span class='author'>
+<p>
+<p>A.C..</p>
+</p>
+</span>
+<span class='title'>
+<p>
+<p>An ICP variant using a point-to-line metric.</p>
+</p>
+</span>
+<span class='booktitle'>
+<p>
+<p>In</p>
+</p>
+<em>
+<p>
+<p>Proceedings of the IEEE International Conference on Robotics and Automation (ICRA)</p>
+</p>
+</em>
+<p>
+<p>. Pasadena, CA, May 2008.</p>
+</p>
+</span>
+<span class='links'><span class='pdf'><a href='http://purl.org/censi/research/2008-icra-plicp.pdf'><img src='/media/pdf.gif' style='border:0; margin-bottom:-6px' />
+<p>
+<p>pdf</p>
+</p>
+</a></span><span class='doi'><a href='http://dx.doi.org/10.1109/ROBOT.2008.4543181'>
+<p>
+<p>doi</p>
+</p>
+</a></span><span class='url'><a href='http://purl.org/censi/2007/plicp'><img src='/media/web.gif' style='border:0; margin-bottom:-6px; height: 17px' />
+<p>
+<p>supp. material</p>
+</p>
+</a></span><span class='slides'><a href='http://purl.org/censi/research/2008-icra-plicp-slides.pdf'><img src='/media/slides2.gif' style='border:0; margin-bottom:-6px; height: 17px;' />
+<p>
+<p>slides</p>
+</p>
+</a></span></span><a href='javascript:void(0)' class='pub-ref-bibtex-link' onclick='javascript:$("#censi08plicp").toggle();'>
+<p>
+<p>bibtex</p>
+</p>
+</a>
+    <pre id='censi08plicp' style='display: none;' class='pub-ref-bibtex'>
+<pre><code>
+<p>author = &#8220;Censi, Andrea&#8221;, doi = &#8220;10.1109/ROBOT.2008.4543181&#8221;, title = &#8220;An {ICP} variant using a point-to-line metric&#8221;, url = &#8220;http://purl.org/censi/2007/plicp&#8221;, booktitle = &#8220;Proceedings of the {IEEE} International Conference on Robotics and Automation ({ICRA})&#8221;, year = &#8220;2008&#8221;, month = &#8220;May&#8221;, slides = &#8220;http://purl.org/censi/research/2008-icra-plicp-slides.pdf&#8221;, address = &#8220;Pasadena, CA&#8221;, pdf = &#8220;http://purl.org/censi/research/2008-icra-plicp.pdf&#8221;, abstract = &#8220;This paper describes PLICP, an ICP (Iterative Closest/Corresponding Point) variant that uses a point-to-line metric, and an exact closed-form for minimizing such metric. The resulting algorithm has some interesting properties: it converges quadratically, and in a finite number of steps. The method is validated against vanilla ICP, IDC (Iterative Dual Correspondences), and MbICP (Metric-Based ICP) by reproducing the experiments performed in Minguez et al. (2006). The experiments suggest that PLICP is more precise, and requires less iterations. However, it is less robust to very large initial displacement errors. The last part of the paper is devoted to purely algorithmic optimization of the correspondence search; this allows for significant speed-up of the computation. The source code is available for download.&#8221; }</p>
+</code></pre>
+</pre>
+</p><div class='desc'><p>
+<p>
+<p>An extremely fast and precise ICP variant for range-finder scan matching, which converges quadratically in a finite number of steps.</p>
+</p>
+<a href='http://purl.org/censi/2007/plicp'>
+<p>
+<p>The implementation is available</p>
+</p>
+</a>
+<p>
+<p>and included also in ROS.</p>
+</p>
+</p>
+</div>
+</div>
+<p>The package also contains two methods for estimating the uncertainty of scan matching. Those are described in the following papers:</p>
 
 <h3 id='download'>Download</h3>
 
