@@ -66,7 +66,7 @@ const char* gsl_friendly_pose(gsl_vector*v) {
 	return friendly_pose(v->data);
 }
 
-static char egsl_tmp_buf[100];
+static char egsl_tmp_buf[1024];
 const char* egsl_friendly_pose(val v) {
 	sprintf(egsl_tmp_buf, "(%4.2f mm, %4.2f mm, %4.4f deg)",
 		1000*egsl_atv(v,0),
