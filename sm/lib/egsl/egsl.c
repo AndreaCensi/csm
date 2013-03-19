@@ -99,18 +99,19 @@ void egsl_push_named(const char*name) {
 		egsl_first_time  = 0;
 	}
 	cid++;
+	
+	if(cid >= MAX_CONTEXTS) {
+		fprintf(stderr, "egsl: maximum number of contexts reached \n");
+		egsl_print_stats();
+		assert(0);
+	}
+
 	if(max_cid < cid) max_cid = cid;
 	
 	if(name != 0) 
 		sprintf(egsl_contexts[cid].name, "%s", name);
 	else
 		sprintf(egsl_contexts[cid].name, "Unnamed context");
-		
-	if(cid >= MAX_CONTEXTS) {
-		fprintf(stderr, "egsl: maximum number of contexts reached \n");
-		egsl_print_stats();
-		assert(0);
-	}
 }
 
 void egsl_pop_named(const char*name) {
@@ -147,7 +148,7 @@ void egsl_print_stats() {
 	fprintf(stderr, "egsl: total allocations: %d   cache hits: %d\n",	
 		egsl_total_allocations, egsl_cache_hits);
 /*	printf("egsl: sizeof(val) = %d\n",(int)sizeof(val)); */
-	int c; for(c=0;c<=max_cid;c++) {
+	int c; for(c=0;c<=max_cid&&c<MAX_CONTEXTS;c++) {
 	/*	printf("egsl: context #%d\n ",c); */
 /*	 	if(0==egsl_contexts[c].nallocated) break; */
 		fprintf(stderr, "egsl: context #%d allocations: %d active: %d name: '%s' \n",
