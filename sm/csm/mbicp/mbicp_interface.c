@@ -1,3 +1,4 @@
+#include "../csm_all.h"
 
 void sm_mbcip(struct sm_params*input, struct sm_result*output) {
 	
