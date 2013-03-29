@@ -200,6 +200,9 @@ void hsm_match(struct hsm_params*p, hsm_buffer b1, hsm_buffer b2) {
 			sm_error("Too few directions.\n");
 		}
 		
+		#define MAX_NPEAKS 1024
+		assert(p->linear_xc_max_npeaks<MAX_NPEAKS);
+
 		struct {
 			/* Direction of cross correlation */
 			double angle;
@@ -207,7 +210,8 @@ void hsm_match(struct hsm_params*p, hsm_buffer b1, hsm_buffer b2) {
 			struct {
 				double delta;
 				double value;
-			} hypotheses[p->linear_xc_max_npeaks];
+			// } hypotheses[p->linear_xc_max_npeaks];
+			} hypotheses[MAX_NPEAKS];
 		} dirs[ndirections];
 
 
