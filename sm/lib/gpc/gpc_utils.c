@@ -96,7 +96,7 @@ int poly_greatest_real_root(unsigned int n, const double*a, double *root) {
 			fprintf (stderr, "root z%d = %+.18f + %+.18f i \n", i, z[2*i], z[2*i+1]);
 		}
 /*		 XXX ==0 is bad */
-		if( (z[2*i+1]==0) ) /* real root */
+		if( z[2*i+1]==0 ) /* real root */
 			if(!assigned || (z[2*i]>lambda)) {
 				assigned = 1;
 				lambda = z[2*i];
