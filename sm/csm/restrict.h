@@ -1,6 +1,12 @@
 /* Some preprocessor magic for having fast inline functions. */
+#include <gsl/gsl_matrix.h>
+
+#ifndef INLINE
 #define INLINE static inline
+#endif
+#ifndef INLINE_DECL
 #define INLINE_DECL static inline
+#endif
 
 /* Some preprocessor magic for the "restrict" keyword:
 	http://www.cellperformance.com/mike_acton/2006/05/demystifying_the_restrict_keyw.html */
