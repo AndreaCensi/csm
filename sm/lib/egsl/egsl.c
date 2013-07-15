@@ -299,5 +299,13 @@ double egsl_atm(val v1, size_t i, size_t j){
 	return *egsl_atmp(v1, i, j);
 }
 
-
+void egsl_free(void){
+	int c;
+	for(c=0;c<=max_cid;c++) {
+		for(int i=egsl_contexts[c].nvars; i<egsl_contexts[c].nallocated; i++){
+			gsl_matrix_free(egsl_contexts[c].vars[i].gsl_m);
+		}
+	egsl_contexts[c].nallocated = egsl_contexts[c].nvars;
+	} 
+}
 
