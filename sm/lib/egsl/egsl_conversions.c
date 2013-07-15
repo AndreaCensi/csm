@@ -60,5 +60,5 @@ gsl_matrix* egsl_v2gslm(val v){
 	gsl_matrix * m = egsl_gslm(v); 
 	gsl_matrix * m2 = gsl_matrix_alloc(m->size1,m->size2);
 	gsl_matrix_memcpy(m2,m);
-	return m;
+	return m2;
 }

@@ -175,10 +175,11 @@ void sm_icp(struct sm_params*params, struct sm_result*res) {
 		res->iterations = iterations;
 		res->nvalid = nvalid;
 
-		gsl_vector_free(x_new);
-		gsl_vector_free(x_old);
 		gsl_vector_free(best_x);
 	}
+	gsl_vector_free(x_new);
+	gsl_vector_free(x_old);
+
 
 	egsl_pop_named("sm_icp");
 
