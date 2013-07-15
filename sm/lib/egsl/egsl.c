@@ -190,12 +190,33 @@ val egsl_alloc(size_t rows, size_t columns) {
 }
 
 val egsl_alloc_in_context(int context, size_t rows, size_t columns) {
-	egsl_total_allocations++;
-	struct egsl_context *c = egsl_contexts+context;
+	struct egsl_context*c = egsl_contexts+context;
+	
+	if(c->nvars>=MAX_VALS) {
+		fprintf(stderr,"Limit reached, in context %d, nvars is %d\n",context,c->nvars);
+		egsl_error();
+	}
 	int index = c->nvars;
-	c->vars[index].gsl_m = gsl_matrix_alloc((size_t)rows,(size_t)columns);
-	c->nvars++;
-	return assemble_val(context,index,c->vars[index].gsl_m);
+	if(index<c->nallocated) {
+		gsl_matrix*m = c->vars[index].gsl_m;
+		if(m->size1 == rows && m->size2 == columns) {
+			egsl_cache_hits++;
+			c->nvars++;
+			return assemble_val(context,index,c->vars[index].gsl_m);
+		} else {
+			gsl_matrix_free(m);
+			egsl_total_allocations++;			
+			c->vars[index].gsl_m = gsl_matrix_alloc((size_t)rows,(size_t)columns);
+			c->nvars++;
+			return assemble_val(context,index,c->vars[index].gsl_m);
+		}
+	} else {
+		egsl_total_allocations++;
+		c->vars[index].gsl_m = gsl_matrix_alloc((size_t)rows,(size_t)columns);
+		c->nvars++;
+		c->nallocated++;
+		return assemble_val(context,index,c->vars[index].gsl_m);
+	}
 }
 
 /** Creates a copy of v in the previous context. */
