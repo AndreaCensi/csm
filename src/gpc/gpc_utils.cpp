@@ -84,7 +84,7 @@ double m_dot(const gsl_matrix*A,const gsl_matrix*B) {
 //}
 
 
-int poly_greatest_real_root(unsigned int n, const double*a, double *root) {
+int poly_greatest_real_root(int n, const double*a, double *root) {
 //	unsigned int i;
 //
 //	double z[(n-1)*2];
@@ -115,7 +115,7 @@ int poly_greatest_real_root(unsigned int n, const double*a, double *root) {
 //	}
 
     Eigen::VectorXd poly_coeffs(n);
-    for(unsigned int i=0; i<n; i++){
+    for(int i=0; i<n; i++){
       poly_coeffs(i) = a[i];
     }
     if(n!=5){

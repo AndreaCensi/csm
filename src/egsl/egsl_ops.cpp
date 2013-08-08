@@ -17,7 +17,7 @@ val egsl_compose_col(val v1, val v2){
 	egsl_expect_size(v2, 0, m1->cols());
 	val v3 = egsl_alloc(m1->rows()+m2->rows(),m1->cols());
 	gsl_matrix *m3 = egsl_gslm(v3);
-	size_t i,j;
+	int i,j;
 	for(j=0;j<m1->cols();j++) {
 		for(i=0;i<m1->rows();i++)
 			gsl_matrix_set(m3, i, j, gsl_matrix_get(m1,i,j));
@@ -34,7 +34,7 @@ val egsl_compose_row(val v1, val v2){
 	egsl_expect_size(v2, m1->rows(), 0);
 	val v3 = egsl_alloc(m1->rows(), m1->cols() + m2->cols());
 	gsl_matrix *m3 = egsl_gslm(v3);
-	size_t i,j;
+	int i,j;
 	for(i=0;i<m1->rows();i++) {
 		for(j=0;j<m1->cols();j++)
 			gsl_matrix_set(m3, i, j, gsl_matrix_get(m1,i,j));
@@ -59,7 +59,7 @@ void egsl_add_to_col(val v1, size_t j, val v2) {
 
 /*	printf("m1 size = %d,%d j = %d\n",m1->rows(),m1->cols(),j); */
 	egsl_expect_size(v2, m1->rows(), 1);
-	size_t i;
+	int i;
 	for(i=0;i<m1->rows();i++) {
 		*gsl_matrix_ptr(m1, i, j) += gsl_matrix_get(m2,i,0);
 	}

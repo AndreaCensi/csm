@@ -26,7 +26,7 @@ double m_det(const gsl_matrix*A);
 /* Returns the real part of the roots in roots */
 //int poly_real_roots(unsigned int n, const double*a, double *roots);
 
-int poly_greatest_real_root(unsigned int n, const double*a, double *root);
+int poly_greatest_real_root(int n, const double*a, double *root);
 
 void m_display(const char*str, gsl_matrix*m);
 

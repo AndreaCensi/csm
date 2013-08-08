@@ -171,7 +171,7 @@ val egsl_alloc(size_t rows, size_t columns) {
 	int index = c->nvars;
 	if(index<c->nallocated) {
 		gsl_matrix*m = c->vars[index].gsl_m;
-		if(m->rows() == rows && m->cols() == columns) {
+		if((size_t) m->rows() == rows && (size_t) m->cols() == columns) {
 			egsl_cache_hits++;
 			c->nvars++;
 			return assemble_val(cid,index,c->vars[index].gsl_m);
@@ -204,7 +204,7 @@ val egsl_alloc_in_context(int context, size_t rows, size_t columns) {
     int index = c->nvars;
     if(index<c->nallocated) {
         gsl_matrix*m = c->vars[index].gsl_m;
-        if(m->rows() == rows && m->cols() == columns) {
+        if((size_t) m->rows() == rows && (size_t) m->cols() == columns) {
             egsl_cache_hits++;
             c->nvars++;
             return assemble_val(context,index,c->vars[index].gsl_m);
@@ -256,7 +256,7 @@ val egsl_promote(val v) {
 void egsl_expect_size(val v, size_t rows, size_t cols) {
 	gsl_matrix * m = egsl_gslm(v);
 
-	int bad = (rows && (m->rows()!=rows)) || (cols && (m->cols()!=cols));
+	int bad = (rows && ((size_t) m->rows()!=rows)) || (cols && ((size_t) m->cols()!=cols));
 	if(bad) {
 		fprintf(stderr, "Matrix size is %d,%d while I expect %d,%d",
 			(int)m->rows(),(int)m->cols(),(int)rows,(int)cols);
@@ -268,7 +268,7 @@ void egsl_expect_size(val v, size_t rows, size_t cols) {
 
 void egsl_print(const char*str, val v) {
 	gsl_matrix * m = egsl_gslm(v);
-	size_t i,j;
+	int i,j;
 	int context = its_context(v);
 	int var_index = its_var_index(v);
 	fprintf(stderr, "%s =  (%d x %d)  context=%d index=%d\n",
@@ -300,7 +300,7 @@ double* egsl_atmp(val v, size_t i, size_t j) {
 double egsl_norm(val v1){
 	egsl_expect_size(v1, 0, 1);
 	double n=0;
-	size_t i;
+	int i;
 	gsl_matrix * m = egsl_gslm(v1);
 	for(i=0;i<m->rows();i++) {
 		double v = gsl_matrix_get(m,i,0);
@@ -320,7 +320,6 @@ double egsl_atv(val v1,  size_t i){
 
 void egsl_free_unused_memory(){
   int c;
-  int freecounter = 0;
   for(c=0;c<=max_cid;c++) {
     for(int i=egsl_contexts[c].nvars; i<egsl_contexts[c].nallocated; i++){
       gsl_matrix_free(egsl_contexts[c].vars[i].gsl_m);

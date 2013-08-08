@@ -34,7 +34,7 @@ gsl_vector * vector_from_array(unsigned int n, double *x) {
 //}
 
 void vector_to_array(const gsl_vector*v, double*x){
-	size_t i;
+	int i;
 	for(i=0;i<v->size();i++)
 		x[i] = gvg(v,i);
 }
