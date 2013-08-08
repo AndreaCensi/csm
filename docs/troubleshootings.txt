@@ -1,8 +1,0 @@
-## Known problems and troubleshootings ##
-
-### Usage of `-ffast-math` ###
-
-Use of `-ffast-math` is ok for computations. However, output routines do not work as expected. In particular, invalid JSON is generated, because it can't distinguish `NaN` values.
-
-To make sure that it's all ok, there is a test program called `test_math_utils_sanity` that checks for good behaviour with NaN values.
-

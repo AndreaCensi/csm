@@ -1,3 +1,0 @@
-* add FAQ from email w/Tarek
-* add link to algos.h in the manual
-* publish gh-pages
