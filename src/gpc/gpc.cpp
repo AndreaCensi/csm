@@ -25,7 +25,7 @@ using namespace std;
 //New version: have static Eigen variables and use pointers to these for compatibility
 #define TAGME(name, tag) name##tag
 #define M(matrix, rows, col) static Eigen::MatrixXd TAGME(matrix,_mem)(rows, col); static gsl_matrix* matrix=&TAGME(matrix,_mem);
-#define MF(matrix)
+#define MF(matrix) (void)(matrix)
 
 
 int gpc_solve(int K, const std::vector<gpc_corr>& c,
