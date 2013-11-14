@@ -4,7 +4,7 @@
 #include "csm_all.h"
 
 int minmax(int from, int to, int x) {
-	return std::max(std::min(x,to),from);
+	return (std::max)((std::min)(x,to),from);
 }
 
 void possible_interval(
@@ -186,7 +186,7 @@ double dist_to_segment_d(const double a[2], const double b[2], const double x[2]
 		/* the projection is inside the segment */
 		return distance;
 	} else 
-		return sqrt(std::min( distance_squared_d(a,x), distance_squared_d(b,x)));
+		return sqrt((std::min)( distance_squared_d(a,x), distance_squared_d(b,x)));
 }
 
 int count_equal(const int*v, int n, int value) {

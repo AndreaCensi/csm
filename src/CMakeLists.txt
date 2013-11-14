@@ -8,6 +8,13 @@ set(CMAKE_C_FLAGS_RELEASE "-O3")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall") 
 
+if(WIN32)
+  add_definitions(-DWINDOWS)
+  if(MSVC)
+    # SSE2 optimizations
+    ADD_DEFINITIONS("/arch:SSE2")
+  endif()
+endif()
 
 #SET(CMAKE_BUILD_TYPE Debug)
 SET(CMAKE_BUILD_TYPE RelWithDebInfo)

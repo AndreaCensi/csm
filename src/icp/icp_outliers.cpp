@@ -59,7 +59,7 @@ void kill_outliers_double(struct sm_params*params) {
 		if(!ld_valid_corr(laser_sens, i)) continue;
 		int j1 = laser_sens->corr[i].j1;
 		dist2_i[i] = laser_sens->corr[i].dist2_j1;
-		dist2_j[j1] = std::min(dist2_j[j1], dist2_i[i]);
+		dist2_j[j1] = (std::min)(dist2_j[j1], dist2_i[i]);
 	}
 	
 	int nkilled = 0;
@@ -121,7 +121,7 @@ void kill_outliers_trim(struct sm_params*params,  double*total_error) {
 	/* two errors limits are defined: */
 		/* In any case, we don't want more than outliers_maxPerc% */
 		int order = (int)floor(k*(params->outliers_maxPerc));
-			order = std::max(0, std::min(order, k-1));
+			order = (std::max)(0, (std::min)(order, k-1));
 
 	/* The dists for the correspondence are sorted
 	   in ascending order */
@@ -131,10 +131,10 @@ void kill_outliers_trim(struct sm_params*params,  double*total_error) {
 		/* Then we take a order statics (o*K) */
 		/* And we say that the error must be less than alpha*dist(o*K) */
 		int order2 = (int)floor(k*params->outliers_adaptive_order);
-			order2 = std::max(0, std::min(order2, k-1));
+			order2 = (std::max)(0, (std::min)(order2, k-1));
 		double error_limit2 = params->outliers_adaptive_mult*dist2[order2];
 	
-	double error_limit = std::min(error_limit1, error_limit2);
+	double error_limit = (std::min)(error_limit1, error_limit2);
 	
 #if 0
 	double error_limit1_ho = hoare_selection(dist2_copy, 0, k-1, order);
