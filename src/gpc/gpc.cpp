@@ -1,19 +1,5 @@
 /* GPC: A library for the solution of General Point Correspondence problems.
   Copyright (C) 2006 Andrea Censi (andrea at censi dot org)
-
-  This program is free software; you can redistribute it and/or
-  modify it under the terms of the GNU General Public License
-  as published by the Free Software Foundation; either version 2
-  of the License, or (at your option) any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 #include <math.h>
@@ -39,7 +25,7 @@ using namespace std;
 //New version: have static Eigen variables and use pointers to these for compatibility
 #define TAGME(name, tag) name##tag
 #define M(matrix, rows, col) static Eigen::MatrixXd TAGME(matrix,_mem)(rows, col); static gsl_matrix* matrix=&TAGME(matrix,_mem);
-#define MF(matrix)
+#define MF(matrix) (void)(matrix)
 
 
 int gpc_solve(int K, const std::vector<gpc_corr>& c,

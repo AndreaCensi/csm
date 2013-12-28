@@ -160,8 +160,8 @@ void sm_icp(struct sm_params*params, struct sm_result*res) {
 				//egsl_print_spectrum("cov0_x", cov0_x);
 		
 				val fim = ld_fisher0(laser_ref);
-				val ifim = inv(fim);
 				egsl_print("fim", fim);
+				//val ifim = inv(fim);
 				//egsl_print_spectrum("ifim", ifim);
 			}
 		}
