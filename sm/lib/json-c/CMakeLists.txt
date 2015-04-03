@@ -24,6 +24,7 @@ TARGET_LINK_LIBRARIES(test2 json-c)
 
 
 FILE(GLOB json_headers "*.h")
+SET(json_headers ${json_headers} ${CMAKE_BINARY_DIR}/config.h)
 INSTALL(FILES ${json_headers} DESTINATION include/json-c)
 
 
@@ -78,4 +79,4 @@ MY_CHECK_FUNCTION_EXISTS(vprintf HAVE_VPRINTF)
 MY_CHECK_FUNCTION_EXISTS(vsnprintf HAVE_VSNPRINTF)
 MY_CHECK_FUNCTION_EXISTS(vsyslog HAVE_VSYSLOG)
 
-CONFIGURE_FILE(config.h.cmake ${CMAKE_CURRENT_SOURCE_DIR}/config.h)
+CONFIGURE_FILE(config.h.cmake ${CMAKE_BINARY_DIR}/config.h)
