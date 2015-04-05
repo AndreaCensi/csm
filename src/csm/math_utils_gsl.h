@@ -33,7 +33,7 @@
 
 /** Returns Fisher's information matrix. You still have to multiply
     it by (1/sigma^2). */
-val ld_fisher0(LDP ld);
+//val ld_fisher0(LDP ld);
 
 
 #endif
