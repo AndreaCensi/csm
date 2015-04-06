@@ -155,15 +155,15 @@ void sm_icp(struct sm_params*params, struct sm_result*res) {
 			res->dx_dy1_m = egsl_v2gslm(dx_dy1);
 			res->dx_dy2_m = egsl_v2gslm(dx_dy2);
 		
-			if(0) {
+			//if(0) {
 				//egsl_print("cov0_x", cov0_x);
 				//egsl_print_spectrum("cov0_x", cov0_x);
 		
-				val fim = ld_fisher0(laser_ref);
-				egsl_print("fim", fim);
+				//val fim = ld_fisher0(laser_ref);
+				//egsl_print("fim", fim);
 				//val ifim = inv(fim);
 				//egsl_print_spectrum("ifim", ifim);
-			}
+			//}
 		}
 	
 		res->error = best_error;
