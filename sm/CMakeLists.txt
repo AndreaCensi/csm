@@ -56,7 +56,7 @@ MESSAGE(STATUS "csm_link_flags = ${csm_link_flags}")
 
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${csm_c_flags}")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb -Wall")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -ggdb -Wall")
 
 
 # for realpath
