@@ -81,7 +81,7 @@ SUBDIRS(csm)
 MACRO(new_executable exec)
 	ADD_EXECUTABLE(${exec} apps/${exec}.c)
 	TARGET_LINK_LIBRARIES(${exec} csm-static ${csm_link_flags})
-	INSTALL(PROGRAMS ${exec} DESTINATION bin)
+	INSTALL(TARGETS ${exec} DESTINATION bin)
 ENDMACRO(new_executable exec)
 
 # new_executable(sm0)
