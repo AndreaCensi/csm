@@ -8,6 +8,8 @@
 /** This sets the stage.  */
 void sm_icp(struct sm_params*params, struct sm_result*res);
 
+void sm_icp_xy(struct sm_params*params, struct sm_result*res);
+
 /** This is the meat */
 int icp_loop(struct sm_params*params, const double*q0, double*x_new, 
  	double*total_error, int*nvalid, int*iterations);

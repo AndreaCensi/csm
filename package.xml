@@ -24,5 +24,6 @@
 
   <buildtool_depend>cmake</buildtool_depend>
   <run_depend>catkin</run_depend>
+  <run_depend>libgsl</run_depend>
   <export />
 </package>

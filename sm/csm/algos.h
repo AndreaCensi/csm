@@ -159,6 +159,7 @@ struct sm_result {
 
 
 void sm_icp(struct sm_params*input, struct sm_result*output);
+void sm_icp_xy(struct sm_params*input, struct sm_result*output);
 void sm_gpm(struct sm_params*input, struct sm_result*output);
 void sm_hsm(struct sm_params*input, struct sm_result*output);
 

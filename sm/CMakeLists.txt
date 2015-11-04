@@ -56,7 +56,7 @@ MESSAGE(STATUS "csm_link_flags = ${csm_link_flags}")
 
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${csm_c_flags}")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb -Wall")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -ggdb -Wall")
 
 
 # for realpath
@@ -81,7 +81,7 @@ SUBDIRS(csm)
 MACRO(new_executable exec)
 	ADD_EXECUTABLE(${exec} apps/${exec}.c)
 	TARGET_LINK_LIBRARIES(${exec} csm-static ${csm_link_flags})
-	INSTALL(PROGRAMS ${exec} DESTINATION bin)
+	INSTALL(TARGETS ${exec} DESTINATION bin)
 ENDMACRO(new_executable exec)
 
 # new_executable(sm0)
