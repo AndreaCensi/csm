@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>csm</name>
-  <version>1.0.1</version>
+  <version>1.0.0</version>
   <description>
     This is a ROS 3rd-party wrapper <a href = "http://www.ros.org/reps/rep-0136.html">(see REP-136 for more detail)</a> of Andrea Censi's CSM package. 
 
