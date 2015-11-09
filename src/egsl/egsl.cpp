@@ -6,7 +6,6 @@
 #include <math.h>
 #include <string.h>
 #include <stdio.h>
-using namespace std;
 
 #include "egsl.h"
 #include "egsl_imp.h"
