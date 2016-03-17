@@ -97,7 +97,8 @@ void sm_icp(struct sm_params*params, struct sm_result*res) {
 		
 	} else {
 		/* It was succesfull */
-		
+
+		int restarted = 0;		
 		double best_error = error;
 		gsl_vector * best_x = gsl_vector_alloc(3);
 		gsl_vector_memcpy(best_x, x_new);
@@ -105,6 +106,7 @@ void sm_icp(struct sm_params*params, struct sm_result*res) {
 		if(params->restart && 
 			(error/nvalid)>(params->restart_threshold_mean_error) ) {
 			sm_debug("Restarting: %f > %f \n",(error/nvalid),(params->restart_threshold_mean_error));
+			restarted = 1;
 			double dt  = params->restart_dt;
 			double dth = params->restart_dtheta;
 			sm_debug("icp_loop: dt = %f dtheta= %f deg\n",dt,rad2deg(dth));
@@ -145,7 +147,14 @@ void sm_icp(struct sm_params*params, struct sm_result*res) {
 		vector_to_array(best_x, res->x);
 		sm_debug("icp: final x =  %s  \n", gsl_friendly_pose(best_x));
 	
-	
+		if (restarted) { // recompute correspondences in case of restarts
+			ld_compute_world_coords(laser_sens, res->x);
+			if(params->use_corr_tricks)
+				find_correspondences_tricks(params);
+			else
+				find_correspondences(params);
+		}
+
 		if(params->do_compute_covariance)  {
 
 			val cov0_x, dx_dy1, dx_dy2;
