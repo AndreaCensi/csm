@@ -22,8 +22,7 @@
   <url type="bugtracker">https://github.com/AndreaCensi/csm/issues</url>
   <maintainer email="130s@2000.jukuin.keio.ac.jp">Isaac I.Y. Saito</maintainer>
 
-  <buildtool_depend>cmake</buildtool_depend>
-  <run_depend>catkin</run_depend>
-  <run_depend>libgsl</run_depend>
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>libgsl</build_depend>
   <export />
 </package>
