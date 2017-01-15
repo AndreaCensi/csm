@@ -26,6 +26,8 @@
   <buildtool_depend>pkg-config</buildtool_depend>
   <build_depend>libcairo2-dev</build_depend>
   <build_depend>libgsl</build_depend>
+  <run_depend>libgsl</run_depend>
+
   <export>
     <build_type>cmake</build_type>
   </export>
