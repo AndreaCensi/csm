@@ -396,7 +396,7 @@ void options_dump(struct option * options, FILE*f, int write_desc) {
 }
 
 void options_print_help(struct option * options, FILE*f) {
-	fprintf(f, options_banner_string);
+	fprintf(f, "%s", options_banner_string);
 	fprintf(f, 
 	"Generic options: \n"
 	"  -help          Displays this help.\n"
