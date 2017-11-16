@@ -76,7 +76,7 @@ int main(int argc, const char**argv) {
 	
 	
 	sm_debug("Doing scan-matching..\n"); 
-	p.hsmp.max_translation = max(b1->rho_max, b2->rho_max);
+	p.hsmp.max_translation = MAX(b1->rho_max, b2->rho_max);
 	
 	hsm_match(&(p.hsmp),b1,b2);
 

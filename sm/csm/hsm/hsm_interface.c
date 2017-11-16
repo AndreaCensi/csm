@@ -92,7 +92,7 @@ void sm_hsm(struct sm_params* params, struct sm_result* res) {
 	hsm_compute_spectrum(b1);
 	hsm_compute_spectrum(b2);
 
-	params->hsm.max_translation = max(b1->rho_max, b2->rho_max);
+	params->hsm.max_translation = MAX(b1->rho_max, b2->rho_max);
 	
 	hsm_match(&(params->hsm),b1,b2);
 
