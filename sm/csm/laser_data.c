@@ -200,12 +200,12 @@ int ld_valid_fields(LDP ld)  {
 		sm_error("Strange FOV: %f rad = %f deg \n", fov, rad2deg(fov));
 		return 0;
 	}
-	if(fabs(ld->min_theta - ld->theta[0]) > 1e-8) {
+	if(fabs(ld->min_theta - ld->theta[0]) > 1e-5) {
 		sm_error("Min_theta (%f) should be theta[0] (%f)\n",
 			ld->min_theta, ld->theta[0]);
 		return 0;
 	}
-	if(fabs(ld->max_theta - ld->theta[ld->nrays-1]) > 1e-8) {
+	if(fabs(ld->max_theta - ld->theta[ld->nrays-1]) > 1e-5) {
 		sm_error("Min_theta (%f) should be theta[0] (%f)\n",
 			ld->max_theta, ld->theta[ld->nrays-1]);
 		return 0;
