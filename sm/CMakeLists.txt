@@ -57,7 +57,10 @@ MESSAGE(STATUS "csm_link_flags = ${csm_link_flags}")
 
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${csm_c_flags}")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -ggdb -Wall")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -ggdb -Wall -Werror=implicit-function-declaration")
+# _DEFAULT_SOURCE and _GNU_SOURCE will enable some function we are checking for
+# with CHECK_FUNCTION_EXISTS (vsyslog, ...) and some we are using without checking for, like strdup.
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_DEFAULT_SOURCE -D_GNU_SOURCE")
 
 
 # for realpath
