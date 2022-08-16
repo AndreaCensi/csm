@@ -1,0 +1,9 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: csm
+Description: The C(anonical) Scan Matcher
+Version: @csm_version@
+Libs: -L${libdir} -lcsm-static 
+Cflags: @PKG_CONFIG_C_FLAGS@ -I${includedir}
