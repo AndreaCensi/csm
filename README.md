@@ -2,11 +2,12 @@ For more information about the C(anonical) Scan Matcher, see the webpage: http:/
 
 This is the "master" branch of CSM, which uses GSL.
 
-There is also another branch, called [``csm_eigen``][branch], which uses the ``eigen`` library. 
-This branch is the work of people working at U. Freiburg and Kuka, including
-Christoph Sprunk and Rainer Kuemmerle.
+# Branching
 
-[branch]: https://github.com/AndreaCensi/csm/tree/csm_eigen
+- Main, development branch: [`master`][branch]. Note this uses `GSL`, which is licensed as GPL as of 2022/08.
+- Another development branch: [`master_eigen`][branch]. This uses license permissible library `eigen`, instead of GSL.
+   - As of 2022/08/15, this branch is behind `master`. Cherry-picking effort for the newer changes that are only merged into `master` is appreciated.
+- Deprecated: [``csm_eigen``][branch], which uses the ``eigen`` library. This branch is the work of people working at U. Freiburg and Kuka, including Christoph Sprunk and Rainer Kuemmerle. See also [csm#33#issuecomment](https://github.com/AndreaCensi/csm/issues/33#issuecomment-1186263053).
 
 Binary install (via ROS)
 ------------------------------
