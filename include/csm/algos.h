@@ -152,6 +152,12 @@ struct sm_result {
 
 void sm_icp(struct sm_params*input, struct sm_result*output);
 
+/**
+ * The same icp method as above, but with the assumption that the laser_ref and laser_sens
+ * scans have already been populated with cartesian x,y points.
+ */
+void sm_icp_xy(struct sm_params*input, struct sm_result*output);
+
 void sm_journal_open(const char* file);
 
 void csm_free_unused_memory();
